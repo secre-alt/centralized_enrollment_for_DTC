@@ -8,15 +8,21 @@
         <div>
             <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">
                 @if(auth()->user()->hasRole('new_applicant'))
+                <h1 class="dashboard-title">
                     New Applicant / Enrollee Dashboard
+                </h1>
                 @elseif(auth()->user()->hasRole('alumni'))
+                <h1 class="dashboard-title">
                     Alumni Dashboard
+                </h1>
                 @else
+                <h1 class="dashboard-title">
                     Student Dashboard
+                </h1>
                 @endif
             </h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
-                Welcome to Danao Technological College! 👋
+            <p class="dashboard-subtitle mb-0" style="color:#64748B; font-size:13px;">
+                Welcome to Danao Technological College!
             </p>
         </div>
     </div>
@@ -24,10 +30,10 @@
 
 @section('content')
 
-{{-- ══ TOP STAT CARDS ══════════════════════════════════════════════════ --}}
+<!-- TOP STAT CARDS -->
 <div class="row mb-3">
     {{-- Application Status --}}
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <div class="card" style="border-radius:16px; border:none;
              box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
             <div style="display:flex; align-items:center; gap:14px;">
@@ -59,7 +65,7 @@
     </div>
 
     {{-- Enrollment Steps --}}
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <div class="card" style="border-radius:16px; border:none;
              box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
             <div style="display:flex; align-items:center; gap:14px;">
@@ -87,7 +93,7 @@
     </div>
 
     {{-- Last Updated --}}
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <div class="card" style="border-radius:16px; border:none;
              box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
             <div style="display:flex; align-items:center; gap:14px;">
@@ -113,7 +119,7 @@
     </div>
 
     {{-- Notifications --}}
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <div class="card" style="border-radius:16px; border:none;
              box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
             <div style="display:flex; align-items:center; gap:14px;">

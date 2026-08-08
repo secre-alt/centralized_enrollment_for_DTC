@@ -67,7 +67,7 @@
                         <label>Full Name</label>
                         <div style="position:relative;">
                             <i class="fas fa-user" style="position:absolute; left:14px;
-                               top:50%; transform:translateY(-50%); color:#94A3B8; font-size:13px;"></i>
+                               top:13px; color:#94A3B8; font-size:13px; pointer-events:none;"></i>
                             <input type="text" name="name" class="form-control"
                                    style="padding-left:38px;"
                                    value="{{ old('name', $user->name) }}" required>
@@ -78,7 +78,7 @@
                         <label>Email Address</label>
                         <div style="position:relative;">
                             <i class="fas fa-envelope" style="position:absolute; left:14px;
-                               top:50%; transform:translateY(-50%); color:#94A3B8; font-size:13px;"></i>
+                               top:13px; color:#94A3B8; font-size:13px; pointer-events:none;"></i>
                             <input type="email" name="email" class="form-control"
                                    style="padding-left:38px;"
                                    value="{{ old('email', $user->email) }}" required>

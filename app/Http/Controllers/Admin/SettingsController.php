@@ -1,0 +1,341 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Setting;
+
+class SettingsController extends Controller
+{
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private function systemInfo(): array
+    {
+        try {
+            $dbVersion = 'MySQL ' . DB::selectOne('SELECT VERSION() as v')->v;
+        } catch (\Exception $e) {
+            $dbVersion = 'MySQL';
+        }
+
+        return [
+            'version'      => config('app.version', 'v1.0.0'),
+            'last_updated' => now()->format('M d, Y h:i A'),
+            'database'     => $dbVersion,
+            'php'          => PHP_VERSION,
+            'server'       => $_SERVER['SERVER_SOFTWARE'] ?? 'Apache',
+        ];
+    }
+
+    private function settings(): object
+    {
+        $rows = Setting::all()->pluck('value', 'key');
+        return (object) $rows->toArray();
+    }
+
+    // ── General Settings ──────────────────────────────────────────────────────
+
+    /** GET /admin/settings */
+    public function index()
+    {
+        return view('admin.settings', [
+            'settings'   => $this->settings(),
+            'systemInfo' => $this->systemInfo(),
+            'activeTab'  => 'general',
+        ]);
+    }
+
+    /** PUT /admin/settings */
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'institution_name' => ['required', 'string', 'max:255'],
+            'system_name'      => ['required', 'string', 'max:255'],
+            'tagline'          => ['nullable', 'string', 'max:255'],
+            'address'          => ['nullable', 'string', 'max:500'],
+            'default_language' => ['required', 'in:en,fil'],
+            'default_timezone' => ['required', 'string'],
+            'date_format'      => ['required', 'in:m/d/Y,d/m/Y,Y-m-d'],
+            'time_format'      => ['required', 'in:12,24'],
+            'items_per_page'   => ['required', 'in:10,25,50,100'],
+            'maintenance_mode' => ['nullable'],
+            'logo'             => ['nullable', 'image', 'mimes:png', 'max:2048'],
+            'favicon'          => ['nullable', 'image', 'mimes:png', 'max:512'],
+        ]);
+
+        $fields = collect($validated)->except(['logo', 'favicon', 'maintenance_mode']);
+        $fields['maintenance_mode'] = $request->boolean('maintenance_mode') ? '1' : '0';
+
+        foreach ($fields as $key => $value) {
+            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        }
+
+        if ($request->hasFile('logo')) {
+            $request->file('logo')->storeAs('public/images', 'DTC-LOGO.png');
+            Setting::updateOrCreate(['key' => 'logo_url'], ['value' => asset('storage/images/DTC-LOGO.png')]);
+        }
+
+        if ($request->hasFile('favicon')) {
+            $request->file('favicon')->storeAs('public/images', 'favicon.png');
+            Setting::updateOrCreate(['key' => 'favicon_url'], ['value' => asset('storage/images/favicon.png')]);
+        }
+
+        if ($request->boolean('maintenance_mode')) {
+            Artisan::call('down');
+        } else {
+            Artisan::call('up');
+        }
+
+        return redirect()->route('admin.settings.index')
+            ->with('status', 'General settings saved successfully.');
+    }
+
+    // ── Academic Settings ─────────────────────────────────────────────────────
+
+    /** GET /admin/settings/academic */
+    public function academic()
+    {
+        return view('admin.settings-academic', [
+            'settings'  => $this->settings(),
+            'activeTab' => 'academic',
+        ]);
+    }
+
+    /** PUT /admin/settings/academic */
+    public function updateAcademic(Request $request)
+    {
+        $request->validate([
+            'current_school_year' => ['required', 'string', 'max:20'],
+            'current_semester'    => ['required', 'in:1st,2nd,Summer'],
+            'enrollment_open'     => ['nullable'],
+        ]);
+
+        Setting::updateOrCreate(['key' => 'current_school_year'], ['value' => $request->current_school_year]);
+        Setting::updateOrCreate(['key' => 'current_semester'],    ['value' => $request->current_semester]);
+        Setting::updateOrCreate(['key' => 'enrollment_open'],     ['value' => $request->boolean('enrollment_open') ? '1' : '0']);
+
+        return redirect()->route('admin.settings.academic')
+            ->with('status', 'Academic settings saved successfully.');
+    }
+
+    // ── Payment Settings ──────────────────────────────────────────────────────
+
+    /** GET /admin/settings/payment */
+    public function payment()
+    {
+        return view('admin.settings-payment', [
+            'settings'  => $this->settings(),
+            'activeTab' => 'payment',
+        ]);
+    }
+
+    /** PUT /admin/settings/payment */
+    public function updatePayment(Request $request)
+    {
+        $request->validate([
+            'enrollment_fee'   => ['required', 'numeric', 'min:0'],
+            'gcash_number'     => ['nullable', 'string', 'max:11'],
+            'gcash_name'       => ['nullable', 'string', 'max:255'],
+            'payment_deadline' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        foreach (['enrollment_fee', 'gcash_number', 'gcash_name', 'payment_deadline'] as $key) {
+            Setting::updateOrCreate(['key' => $key], ['value' => $request->input($key, '')]);
+        }
+
+        return redirect()->route('admin.settings.payment')
+            ->with('status', 'Payment settings saved successfully.');
+    }
+
+    // ── Notification Settings ─────────────────────────────────────────────────
+
+    /** GET /admin/settings/notifications */
+    public function notifications()
+    {
+        return view('admin.settings-notifications', [
+            'settings'  => $this->settings(),
+            'activeTab' => 'notifications',
+        ]);
+    }
+
+    /** PUT /admin/settings/notifications */
+    public function updateNotifications(Request $request)
+    {
+        foreach (['email_notifications', 'sms_notifications', 'app_notifications'] as $key) {
+            Setting::updateOrCreate(['key' => $key], ['value' => $request->boolean($key) ? '1' : '0']);
+        }
+
+        return redirect()->route('admin.settings.notifications')
+            ->with('status', 'Notification settings saved successfully.');
+    }
+
+    // ── System Security ───────────────────────────────────────────────────────
+
+    /** GET /admin/settings/security */
+    public function security()
+    {
+        return view('admin.settings-security', [
+            'settings'  => $this->settings(),
+            'activeTab' => 'security',
+        ]);
+    }
+
+    /** PUT /admin/settings/security */
+    public function updateSecurity(Request $request)
+    {
+        $request->validate([
+            'min_password_length'   => ['required', 'integer', 'min:6', 'max:32'],
+            'require_special_chars' => ['nullable'],
+            'session_timeout'       => ['required', 'integer', 'min:5'],
+            'max_login_attempts'    => ['required', 'integer', 'min:3'],
+        ]);
+
+        Setting::updateOrCreate(['key' => 'min_password_length'],   ['value' => $request->min_password_length]);
+        Setting::updateOrCreate(['key' => 'require_special_chars'], ['value' => $request->boolean('require_special_chars') ? '1' : '0']);
+        Setting::updateOrCreate(['key' => 'session_timeout'],       ['value' => $request->session_timeout]);
+        Setting::updateOrCreate(['key' => 'max_login_attempts'],    ['value' => $request->max_login_attempts]);
+
+        return redirect()->route('admin.settings.security')
+            ->with('status', 'Security settings saved successfully.');
+    }
+
+    // ── Backup & Restore ──────────────────────────────────────────────────────
+
+    /** GET /admin/settings/backup */
+    public function backup()
+    {
+        $backups = collect(Storage::files('backups'))
+            ->map(fn ($file) => [
+                'name' => basename($file),
+                'size' => Storage::size($file),
+                'date' => Storage::lastModified($file),
+            ])
+            ->sortByDesc('date')
+            ->values();
+
+        return view('admin.settings.backup', [
+            'settings'  => $this->settings(),
+            'activeTab' => 'backup',
+            'backups'   => $backups,
+        ]);
+    }
+
+    /** POST /admin/settings/backup/run */
+    public function runBackup()
+    {
+        try {
+            Artisan::call('backup:run');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.settings.backup')
+                ->with('error', 'Backup failed: ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.settings.backup')
+            ->with('status', 'Backup completed successfully.');
+    }
+
+    /** POST /admin/settings/restore */
+    public function restore(Request $request)
+    {
+        $request->validate(['backup_file' => ['required', 'file']]);
+        $request->file('backup_file')->storeAs('backups', 'restore_upload.sql');
+
+        return redirect()->route('admin.settings.backup')
+            ->with('status', 'Restore file uploaded. Please run the restore process manually.');
+    }
+
+    /** DELETE /admin/settings/backup/delete */
+    public function deleteBackup(Request $request)
+    {
+        $request->validate(['filename' => ['required', 'string']]);
+        $path = 'backups/' . $request->filename;
+
+        if (Storage::exists($path)) {
+            Storage::delete($path);
+            return redirect()->route('admin.settings.backup')
+                ->with('status', 'Backup deleted.');
+        }
+
+        return redirect()->route('admin.settings.backup')
+            ->with('error', 'File not found.');
+    }
+
+    /** GET /admin/settings/backup/download/{filename} */
+    public function downloadBackup(string $filename)
+    {
+        $path = 'backups/' . $filename;
+        abort_unless(Storage::exists($path), 404);
+        return Storage::download($path);
+    }
+
+    /** GET /admin/settings/backup/download-latest */
+    public function downloadLatestBackup()
+    {
+        $files = collect(Storage::files('backups'))->sortByDesc(fn ($f) => Storage::lastModified($f));
+        abort_if($files->isEmpty(), 404, 'No backups found.');
+        return Storage::download($files->first());
+    }
+
+    // ── Audit Logs ────────────────────────────────────────────────────────────
+
+    /** GET /admin/settings/audit */
+    public function auditLogs(Request $request)
+    {
+        // Uses spatie/laravel-activitylog. Swap model if you use something else.
+        $logs = \Spatie\Activitylog\Models\Activity::with('causer')
+            ->when($request->filled('search'), fn ($q) =>
+                $q->where('description', 'like', '%' . $request->search . '%')
+            )
+            ->latest()
+            ->paginate(25);
+
+        return view('admin.settings-audit', [
+            'settings'  => $this->settings(),
+            'activeTab' => 'audit',
+            'logs'      => $logs,
+        ]);
+    }
+
+    /** GET /admin/settings/audit/export */
+    public function exportAudit()
+    {
+        $logs = \Spatie\Activitylog\Models\Activity::with('causer')->latest()->get();
+
+        $csv = "ID,Description,Causer,Date\n";
+        foreach ($logs as $log) {
+            $csv .= implode(',', [
+                $log->id,
+                '"' . str_replace('"', '""', $log->description) . '"',
+                '"' . optional($log->causer)->name . '"',
+                $log->created_at->format('Y-m-d H:i:s'),
+            ]) . "\n";
+        }
+
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="audit-logs-' . now()->format('Y-m-d') . '.csv"',
+        ]);
+    }
+
+    // ── Mail Test ─────────────────────────────────────────────────────────────
+
+    /** POST /admin/settings/mail/test */
+    public function testMail(Request $request)
+    {
+        $request->validate(['email' => ['required', 'email']]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::raw(
+                'This is a test email from DTC EMS.',
+                fn ($msg) => $msg->to($request->email)->subject('DTC EMS — Mail Test')
+            );
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Test email sent successfully.']);
+    }
+}

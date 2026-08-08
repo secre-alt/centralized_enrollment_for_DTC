@@ -12,16 +12,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->latest()->get();
-        return view('admin.users.index', compact('users'));
+        $users = User::with('roles')->latest()->paginate(10);
+        $roles = Role::where('name', '!=', 'admin')->get();
+        return view('admin.users.index', compact('users', 'roles'));
     }
-
-    public function create()
-    {
-        $roles = Role::where('name', '!=', 'admin')->get(); // admin can't create another admin
-        return view('admin.users.create', compact('roles'));
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -46,8 +40,14 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $roles = Role::where('name', '!=', 'admin')->get();
-        return view('admin.users.edit', compact('user', 'roles'));
+        // Return JSON for modal
+        return response()->json([
+            'id'     => $user->id,
+            'name'   => $user->name,
+            'email'  => $user->email,
+            'status' => $user->status,
+            'role'   => $user->roles->first()?->name ?? '',
+        ]);
     }
 
     public function update(Request $request, User $user)

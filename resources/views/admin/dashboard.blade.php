@@ -11,8 +11,9 @@
             <p class="mb-0" style="color:#64748B; font-size:13px;">Overview of the system</p>
         </div>
         <div>
-            <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus mr-1"></i> Add New User
+            <a href="{{ route('admin.users.index') }}" class="btn btn-primary btn-sm add-user-btn">
+                <i class="fas fa-plus mr-1"></i> 
+                <span class="add-user-text">Add New User</span>
             </a>
         </div>
     </div>
@@ -20,11 +21,10 @@
 
 @section('content')
 
-{{-- ══ STAT CARDS ══════════════════════════════════════════════════════ --}}
+{{-- STAT CARDS --}}
 <div class="row mb-2">
-
-    <div class="col-lg-4 col-md-6 col-12 mb-3">
-        <div class="card stat-card stat-blue">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
+        <div class="card stat-card stat-white">
             <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
             <div class="stat-value">{{ number_format($totalStudents) }}</div>
             <div class="stat-label">Students</div>
@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-6 col-12 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <div class="card stat-card stat-purple">
             <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
             <div class="stat-value">{{ number_format($totalAlumni) }}</div>
@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-6 col-12 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <div class="card stat-card stat-yellow">
             <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
             <div class="stat-value">{{ number_format($pendingEnrollments) }}</div>
@@ -50,7 +50,7 @@
         </div>
     </div>
 
-    <div class="col-lg-6 col-md-6 col-12 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <div class="card stat-card stat-green">
             <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
             <div class="stat-value">{{ number_format($appointmentsToday) }}</div>
@@ -59,18 +59,17 @@
         </div>
     </div>
 
-    <div class="col-lg-6 col-md-12 col-12 mb-3">
-        <div class="card stat-card" style="background: linear-gradient(135deg, #0F4CDB, #1a5feb);">
+    <div class="col-lg-12 col-12 mb-3">
+        <div class="card stat-card stat-white">
             <div class="stat-icon"><i class="fas fa-coins"></i></div>
             <div class="stat-value">₱{{ number_format($totalRevenue, 2) }}</div>
             <div class="stat-label">Total Revenue</div>
-            <div class="stat-footer">Total Collection</div>
+            <div class="stat-footer">Total Collection from {{ $totalPaid }} transaction{{ $totalPaid !== 1 ? 's' : '' }}</div>
         </div>
     </div>
-
 </div>
 
-{{-- ══ CHARTS ROW ═══════════════════════════════════════════════════════ --}}
+{{-- CHARTS ROW --}}
 <div class="row">
 
     {{-- Enrollment Overview Chart --}}
@@ -196,7 +195,7 @@
         <div class="card h-100">
             <div class="card-header font-weight-bold" style="color:#1E293B;">Quick Actions</div>
             <div class="card-body p-3">
-                <a href="{{ route('admin.users.create') }}" class="quick-action-btn">
+                <a href="{{ route('admin.users.index') }}" class="quick-action-btn">
                     <i class="fas fa-user-plus"></i> Add New User
                 </a>
                 <a href="{{ route('registrar.enrollments.index') }}" class="quick-action-btn">

@@ -159,7 +159,7 @@ return [
     'layout_fixed_navbar' => true,
     'layout_fixed_footer' => true,
     'layout_dark_mode' => null,
-
+    
     /*
     |--------------------------------------------------------------------------
     | Authentication Views Classes
@@ -224,7 +224,7 @@ return [
     'sidebar_scrollbar_auto_hide' => 'l',
     'sidebar_nav_accordion' => true,
     'sidebar_nav_animation_speed' => 300,
-
+    
     /*
     |--------------------------------------------------------------------------
     | Control Sidebar (Right Sidebar)
@@ -414,19 +414,43 @@ return [
                 'asset'    => true,
                 'location' => 'css/dtc-theme.css',
             ],
+            [
+                'type'     => 'css',
+                'asset'    => true,
+                'location' => 'css/sidebar-logout.css',
+            ],
+            [
+                'type'=>'css',
+                'asset'=>true, 
+                'location'=>'css/dtc-search.css'
+            ],
+            [
+                'type'     => 'js',
+                'asset'    => true,
+                'location' => 'js/dtc-app.js',
+            ],
         ],
     ],
-
-        // 'CustomCSS' => [
-        //     'active' => true,
-        //     'files' => [
-        //         [
-        //             'type' => 'css',
-        //             'asset' => true,
-        //             'location' => 'css/dtc-theme.css',
-        //         ],
-        //     ],
-        // ],
+        'adminUsers' => [
+        'active' => true,
+        'files' => [
+            [
+                'type'     => 'css',
+                'asset'    => true,
+                'location' => 'css/admin-users.css',
+            ],
+        ],
+    ],
+        'welcomeCSS' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => 'css/welcome.css',
+                ],
+            ],
+        ],
      ],
 
     /*

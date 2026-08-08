@@ -1,0 +1,34 @@
+
+/* ── Make sidebar scrollable with fixed logout ── */
+.main-sidebar .sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100vh - 57px) !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+}
+
+.main-sidebar .sidebar .nav-sidebar {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 60px !important;
+}
+
+/* Pin the last nav item (logout) to the bottom */
+.main-sidebar .sidebar .nav-sidebar > .nav-item:last-child {
+    margin-top: auto;
+    bottom: 0;
+    left: 0;
+    width: 250px;   /* sidebar width */
+    border-top: 1px solid rgba(255,255,255,0.1);
+    z-index: 10;
+}
+
+.main-sidebar .sidebar .nav-sidebar > .nav-item:last-child .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.main-sidebar .sidebar .nav-sidebar > .nav-item:last-child .nav-link:hover {
+    color: #fff !important;
+}
