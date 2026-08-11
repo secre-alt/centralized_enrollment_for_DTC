@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Public\ApplicationController;
 
     Route::middleware(['auth'])->group(function () {
         // ...existing notifications routes...
@@ -31,7 +32,21 @@ use App\Http\Controllers\SearchController;
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
     Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
-
+   
+    // ── PUBLIC APPLICATION / PRE-ENROLLMENT ─────────────────────────────────────
+    Route::prefix('apply')->name('public.application.')->group(function () {
+        Route::get('/', [ApplicationController::class, 'create'])
+            ->name('create');
+        Route::post('/', [ApplicationController::class, 'store'])
+            ->name('store');
+        Route::get('/success/{application}', [ApplicationController::class, 'success'])
+            ->name('success');
+        Route::get('/status', [ApplicationController::class, 'statusForm'])
+            ->name('status.form');
+        Route::post('/status', [ApplicationController::class, 'status'])
+            ->name('status');
+    });
+    
     // ── NOTIFICATIONS (all roles) ─────────────────────────────────────────────────
     Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

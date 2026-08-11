@@ -1,0 +1,340 @@
+/* =========================================================
+   DTC EMS — PUBLIC APPLICATION
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f5f8fc;
+    color: #17233c;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ---------------------------------------------------------
+   Application Page
+   --------------------------------------------------------- */
+
+.application-page {
+    min-height: 100vh;
+    padding: 40px 20px 70px;
+}
+
+.application-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ---------------------------------------------------------
+   Header
+   --------------------------------------------------------- */
+
+.application-header {
+    margin-bottom: 30px;
+}
+
+.application-header h1 {
+    margin: 0 0 8px;
+    color: #0F4CDB;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.application-header p {
+    margin: 0;
+    color: #667085;
+    font-size: 15px;
+}
+
+.public-main {
+    background: #f4f7fb;
+    min-height: calc(100vh - 80px);
+    padding: 32px 0 60px;
+}
+
+.public-main .container {
+    max-width: 1200px;
+}
+/* ---------------------------------------------------------
+   Cards
+   --------------------------------------------------------- */
+
+.application-card {
+    background: #ffffff;
+    border: 1px solid #e5eaf2;
+    border-radius: 18px;
+    padding: 30px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 30px rgba(15, 76, 219, 0.06);
+}
+
+.application-card-header {
+    margin-bottom: 25px;
+}
+
+.application-card-header h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #17233c;
+}
+
+.application-card-header p {
+    margin: 0;
+    color: #667085;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   Section
+   --------------------------------------------------------- */
+
+.application-section {
+    margin-bottom: 30px;
+}
+
+.application-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 6px;
+
+    color: #17233c;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.application-section-title i {
+    color: #0F4CDB;
+}
+
+.application-section-description {
+    margin: 0 0 20px;
+    color: #667085;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   Grid
+   --------------------------------------------------------- */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+/* ---------------------------------------------------------
+   Labels
+   --------------------------------------------------------- */
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #344054;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-group label .required {
+    color: #d92d20;
+}
+
+/* ---------------------------------------------------------
+   Inputs
+   --------------------------------------------------------- */
+
+.form-control,
+.form-select,
+.application-card input[type="text"],
+.application-card input[type="email"],
+.application-card input[type="date"],
+.application-card input[type="tel"],
+.application-card input[type="number"],
+.application-card select,
+.application-card textarea {
+    width: 100%;
+    min-height: 46px;
+
+    padding: 11px 14px;
+
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #17233c;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.application-card textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.form-control:focus,
+.form-select:focus,
+.application-card input:focus,
+.application-card select:focus,
+.application-card textarea:focus {
+    border-color: #0F4CDB;
+    box-shadow: 0 0 0 3px rgba(15, 76, 219, 0.10);
+}
+
+/* ---------------------------------------------------------
+   Information Alert
+   --------------------------------------------------------- */
+
+.application-alert {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+
+    margin-bottom: 25px;
+    padding: 16px 18px;
+
+    border: 1px solid #d7e5ff;
+    border-radius: 12px;
+
+    background: #eef5ff;
+    color: #344054;
+
+    font-size: 14px;
+}
+
+.application-alert i {
+    margin-top: 3px;
+    color: #0F4CDB;
+}
+
+/* ---------------------------------------------------------
+   Error
+   --------------------------------------------------------- */
+
+.field-error {
+    margin-top: 6px;
+    color: #d92d20;
+    font-size: 12px;
+}
+
+/* ---------------------------------------------------------
+   Buttons
+   --------------------------------------------------------- */
+
+.application-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    margin-top: 30px;
+}
+
+.btn-application-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 46px;
+    padding: 0 22px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: #0F4CDB;
+    color: #ffffff;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.btn-application-primary:hover {
+    background: #0b3eaf;
+    transform: translateY(-1px);
+}
+
+.btn-application-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 46px;
+    padding: 0 22px;
+
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #344054;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+/* ---------------------------------------------------------
+   Responsive
+   --------------------------------------------------------- */
+
+@media (max-width: 768px) {
+
+    .application-page {
+        padding: 25px 15px 50px;
+    }
+
+    .application-card {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .form-grid,
+    .form-grid-3 {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .application-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .btn-application-primary,
+    .btn-application-secondary {
+        width: 100%;
+    }
+}
