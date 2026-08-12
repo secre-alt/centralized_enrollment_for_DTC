@@ -1,0 +1,387 @@
+/* ============================================================
+   DTC EMS — GLOBAL PUBLIC NAVBAR
+   Used by:
+   - auth/welcome.blade.php
+   - layouts/public.blade.php
+   ============================================================ */
+
+:root {
+    --dtc-blue: #0F4CDB;
+    --dtc-blue-dark: #0B3DAF;
+    --dtc-text: #17233C;
+    --dtc-muted: #64748B;
+    --dtc-border: #E5EAF1;
+    --dtc-white: #FFFFFF;
+}
+
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+
+.public-navbar {
+    width: 100%;
+    min-height: 88px;
+
+    background: var(--dtc-white);
+    border-bottom: 1px solid var(--dtc-border);
+
+    display: flex;
+    align-items: center;
+
+    position: relative;
+    z-index: 1000;
+}
+
+
+/* ============================================================
+   NAVBAR CONTAINER
+   ============================================================ */
+
+.public-navbar-container {
+    width: min(1180px, calc(100% - 40px));
+    min-height: 88px;
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+
+/* ============================================================
+   BRAND
+   ============================================================ */
+
+.public-brand {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 12px;
+
+    flex-shrink: 0;
+
+    color: var(--dtc-text);
+    text-decoration: none;
+}
+
+.public-brand:hover {
+    color: var(--dtc-text);
+    text-decoration: none;
+}
+
+
+/* ============================================================
+   LOGO
+   ============================================================ */
+
+.public-logo {
+    width: 48px;
+    height: 48px;
+
+    display: block;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+}
+
+
+/* ============================================================
+   BRAND TEXT
+   ============================================================ */
+
+.public-brand-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.public-brand-text h1 {
+    margin: 0;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 700;
+
+    color: var(--dtc-text);
+}
+
+.public-brand-text p {
+    margin: 3px 0 0;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 500;
+
+    letter-spacing: .2px;
+
+    color: var(--dtc-muted);
+}
+
+
+/* ============================================================
+   NAVIGATION GROUP
+   ============================================================ */
+
+.public-nav-links {
+    display: flex;
+    align-items: center;
+
+    gap: 32px;
+
+    margin-left: auto;
+}
+
+.public-nav-links a {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 88px;
+
+    padding: 0;
+
+    position: relative;
+
+    color: #334155;
+    text-decoration: none;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    transition:
+        color .2s ease,
+        opacity .2s ease;
+}
+
+.public-nav-links a:hover {
+    color: var(--dtc-blue);
+    text-decoration: none;
+}
+
+
+/* Active navigation */
+
+.public-nav-links a.active {
+    color: var(--dtc-blue);
+    font-weight: 600;
+}
+
+.public-nav-links a.active::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 20px;
+
+    height: 3px;
+
+    background: var(--dtc-blue);
+
+    border-radius: 10px;
+}
+
+
+/* ============================================================
+   SIGN IN BUTTON
+   ============================================================ */
+
+.public-signin {
+    height: 44px;
+
+    min-width: 112px;
+
+    padding: 0 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: var(--dtc-blue);
+    color: #ffffff !important;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    text-decoration: none;
+
+    flex-shrink: 0;
+
+    transition:
+        background .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.public-signin:hover {
+    background: var(--dtc-blue-dark);
+    color: #ffffff !important;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 6px 18px rgba(15, 76, 219, .18);
+
+    text-decoration: none;
+}
+
+.public-signin i {
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   MOBILE TOGGLE
+   ============================================================ */
+
+.public-navbar-toggle {
+    display: none;
+
+    width: 42px;
+    height: 42px;
+
+    padding: 0;
+
+    border: 1px solid var(--dtc-border);
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: var(--dtc-text);
+
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.public-navbar-toggle:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+
+/* ============================================================
+   MOBILE MENU
+   ============================================================ */
+
+.public-mobile-nav {
+    display: none;
+
+    width: 100%;
+
+    padding: 10px 20px 20px;
+
+    background: #ffffff;
+
+    border-top: 1px solid var(--dtc-border);
+}
+
+.public-mobile-nav.open {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.public-mobile-nav a {
+    display: flex;
+    align-items: center;
+
+    min-height: 44px;
+
+    padding: 0 12px;
+
+    border-radius: 8px;
+
+    color: #334155;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+
+    text-decoration: none;
+}
+
+.public-mobile-nav a:hover,
+.public-mobile-nav a.active {
+    background: #EFF5FF;
+    color: var(--dtc-blue);
+}
+
+.public-mobile-nav .public-signin {
+    width: fit-content;
+
+    margin-top: 8px;
+
+    color: #ffffff !important;
+}
+
+.public-mobile-nav .public-signin:hover {
+    color: #ffffff !important;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 991.98px) {
+
+    .public-navbar-container {
+        min-height: 76px;
+    }
+
+    .public-navbar {
+        min-height: 76px;
+    }
+
+    .public-nav-links {
+        display: none;
+    }
+
+    .public-navbar > .public-navbar-container > .public-signin {
+        display: none;
+    }
+
+    .public-navbar-toggle {
+        display: inline-flex;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .public-navbar-container {
+        width: calc(100% - 30px);
+    }
+
+    .public-logo {
+        width: 44px;
+        height: 44px;
+    }
+
+    .public-brand-text h1 {
+        font-size: 16px;
+    }
+
+    .public-brand-text p {
+        font-size: 10px;
+    }
+}

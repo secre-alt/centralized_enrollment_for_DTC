@@ -231,15 +231,15 @@
 
                     <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
 
-                        <a
-                            href="{{ url('/apply/status') }}"
+                        
+                            href="{{ route('public.application.status.form') }}"
                             class="btn btn-primary px-4">
                             <i class="fas fa-search me-2"></i>
                             Check Application Status
                         </a>
 
-                        <a
-                            href="{{ url('/apply') }}"
+                        
+                            href="{{ route('public.application.create') }}"
                             class="btn btn-outline-secondary px-4">
                             <i class="fas fa-plus me-2"></i>
                             Submit Another Application

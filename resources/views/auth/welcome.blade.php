@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/public-navbar.css') }}">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
@@ -15,42 +16,98 @@
 
     <div class="page-view {{ $errors->any() ? '' : 'active' }}" id="view-landing">
 
-     <nav class="navbar">
-            <div class="container">
-                <div class="navbar-brand" onclick="showLanding()">
-                    <img src="{{ asset('images/DTC-LOGO.png') }}" alt="DTC Logo">
-                    <div class="brand-text">
-                        <h1>DTC EMS</h1>
-                        <p>Danao Technological College</p>
-                    </div>
+    <nav class="public-navbar">
+
+        <div class="public-navbar-container">
+
+            <a href="{{ route('landing') }}" class="public-brand">
+
+                <img
+                    src="{{ asset('images/DTC-LOGO.png') }}"
+                    alt="DTC Logo"
+                    class="public-logo"
+                >
+
+                <div class="public-brand-text">
+                    <h1>DTC EMS</h1>
+                    <p>Danao Technological College</p>
                 </div>
- 
-                <div class="nav-links">
-                    <a href="#" class="active">Home</a>
-                    <a href="#process">How It Works</a>
-                    <a href="#services">Services</a>
-                    <a href="#faqs">FAQs</a>
-                </div>
- 
-                <button type="button" class="btn-nav-signin btn-nav-signin-desktop" onclick="showLogin()">
-                    Sign In <i class="fas fa-arrow-right"></i>
-                </button>
- 
-                <button type="button" class="navbar-burger" id="navbarBurger" onclick="toggleMobileNav()" aria-label="Toggle menu">
-                    <i class="fas fa-bars"></i>
-                </button>
+
+            </a>
+
+
+            <div class="public-nav-links">
+
+                <a href="{{ route('landing') }}" class="active">
+                    Home
+                </a>
+
+                <a href="{{ route('public.application.create') }}">
+                    Admissions
+                </a>
+
+                <a href="#process">
+                    How It Works
+                </a>
+
+                <a href="#services">
+                    Services
+                </a>
+
+                <a href="#faqs">
+                    FAQs
+                </a>
+
             </div>
- 
-            <div class="mobile-nav" id="mobileNav">
-                <a href="#" class="active" onclick="closeMobileNav()">Home</a>
-                <a href="#process" onclick="closeMobileNav()">How It Works</a>
-                <a href="#services" onclick="closeMobileNav()">Services</a>
-                <a href="#faqs" onclick="closeMobileNav()">FAQs</a>
-                <button type="button" class="btn-nav-signin" onclick="closeMobileNav(); showLogin()">
-                    Sign In <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </nav>
+
+
+            <a href="{{ route('login') }}" class="public-signin">
+                Sign In
+                <i class="fas fa-arrow-right"></i>
+            </a>
+
+
+            <button
+                type="button"
+                class="public-navbar-toggle"
+                id="welcomeNavbarToggle"
+            >
+                <i class="fas fa-bars"></i>
+            </button>
+
+        </div>
+
+
+        <div class="public-mobile-nav" id="welcomeMobileNav">
+
+            <a href="{{ route('landing') }}" class="active">
+                Home
+            </a>
+
+            <a href="{{ route('public.application.create') }}">
+                Admissions
+            </a>
+
+            <a href="#process">
+                How It Works
+            </a>
+
+            <a href="#services">
+                Services
+            </a>
+
+            <a href="#faqs">
+                FAQs
+            </a>
+
+            <a href="{{ route('login') }}" class="public-signin">
+                Sign In
+                <i class="fas fa-arrow-right"></i>
+            </a>
+
+        </div>
+
+    </nav>
 
         <section class="hero">
             <div class="container">
@@ -66,23 +123,28 @@
                     </p>
 
                     <div class="hero-cta-group">
-                        <button type="button" class="btn-primary-cta" onclick="showLogin()">
-                            Sign In to Portal <i class="fas fa-arrow-right"></i>
-                        </button>
-                        <a href="#services" class="btn-secondary-cta">
-                            Explore Services
+                        <a href="{{ route('public.application.create') }}" class="btn-primary-cta">
+                            Apply for Admission <i class="fas fa-arrow-right"></i>
                         </a>
+
+                        <button type="button" class="btn-secondary-cta" onclick="showLogin()">
+                            Sign In to Portal
+                        </button>
                     </div>
 
-                    <div class="hero-features">
+                    <p class="hero-explore-link">
+                        New here? <a href="#services">Explore our services</a>
+                    </p>
+
+                    <!-- <div class="hero-features">
                         <div class="feature-pill"><i class="fas fa-file-alt"></i> Online Enrollment</div>
                         <div class="feature-pill"><i class="fas fa-calendar-check"></i> Certificate Appointments</div>
                         <div class="feature-pill"><i class="fas fa-money-bill-wave"></i> Payment Processing</div>
                         <div class="feature-pill"><i class="fas fa-shield-alt"></i> Role-Based Access</div>
-                    </div>
+                    </div> -->
                 </div>
 
-                <div class="hero-right">
+                <!-- <div class="hero-right">
                     <div class="hero-visual">
                         <div class="circle c1"></div>
                         <div class="circle c2"></div>
@@ -121,7 +183,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </section>
 
@@ -370,7 +432,7 @@
             document.getElementById('mobileNav').classList.toggle('open');
             document.getElementById('navbarBurger').classList.toggle('open');
         }
- 
+
         function closeMobileNav() {
             document.getElementById('mobileNav').classList.remove('open');
             document.getElementById('navbarBurger').classList.remove('open');

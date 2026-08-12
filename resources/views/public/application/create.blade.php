@@ -2,8 +2,13 @@
 
 @section('title', 'Pre-Enrollment Application')
 
-@section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
+@section('content')
+
+    <div class="container">
+        <div class="container-fluid px-0">
+
+    {{-- Page Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="mb-1">Pre-Enrollment Application</h1>
             <p class="text-muted mb-0">
@@ -15,12 +20,6 @@
             Back
         </a>
     </div>
-@stop
-
-@section('content')
-
-    <div class="container">
-        <div class="container-fluid px-0">
 
     {{-- Validation Errors --}}
     @if ($errors->any())
@@ -1076,7 +1075,7 @@
 @stop
 
 
-@section('css')
+@section('styles')
 
 <style>
 
@@ -1126,7 +1125,7 @@
 @stop
 
 
-@section('js')
+@section('scripts')
 
 <script>
 
