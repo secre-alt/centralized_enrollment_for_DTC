@@ -195,33 +195,61 @@
                     <p>One portal for every DTC service — from enrollment to certificates, appointments, and payments.</p>
                 </div>
 
-                <div class="services-grid">
-                    <div class="service-card">
-                        <div class="icon-box"><i class="fas fa-user-graduate"></i></div>
-                        <h3>Online Enrollment</h3>
-                        <p>Enroll and manage your student records from anywhere, anytime.</p>
+                <div class="services-carousel">
+
+                    <button
+                        type="button"
+                        class="carousel-arrow carousel-arrow-prev"
+                        id="servicesPrev"
+                        aria-label="Previous services"
+                    >
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+
+                    <div class="carousel-viewport" id="servicesViewport" tabindex="0">
+                        <div class="carousel-track" id="servicesTrack">
+
+                            <div class="service-card">
+                                <div class="icon-box"><i class="fas fa-user-graduate"></i></div>
+                                <h3>Online Enrollment</h3>
+                                <p>Enroll and manage your student records from anywhere, anytime.</p>
+                            </div>
+                            <div class="service-card">
+                                <div class="icon-box"><i class="fas fa-file-alt"></i></div>
+                                <h3>Certificate Requests</h3>
+                                <p>Request official certificates and track their status in real time.</p>
+                            </div>
+                            <div class="service-card">
+                                <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
+                                <h3>Appointment Scheduling</h3>
+                                <p>Book a pickup or claiming schedule that works for you.</p>
+                            </div>
+                            <div class="service-card">
+                                <div class="icon-box"><i class="fas fa-money-bill-wave"></i></div>
+                                <h3>Payment Processing</h3>
+                                <p>Pay online via GCash, or walk in and pay directly at the Cashier.</p>
+                            </div>
+                            <div class="service-card">
+                                <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+                                <h3>Role-Based Access</h3>
+                                <p>Students, alumni, registrars, cashiers, and admins each get their own dashboard.</p>
+                            </div>
+
+                        </div>
                     </div>
-                    <div class="service-card">
-                        <div class="icon-box"><i class="fas fa-file-alt"></i></div>
-                        <h3>Certificate Requests</h3>
-                        <p>Request official certificates and track their status in real time.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
-                        <h3>Appointment Scheduling</h3>
-                        <p>Book a pickup or claiming schedule that works for you.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="icon-box"><i class="fas fa-money-bill-wave"></i></div>
-                        <h3>Payment Processing</h3>
-                        <p>Pay online via GCash, or walk in and pay directly at the Cashier.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
-                        <h3>Role-Based Access</h3>
-                        <p>Students, alumni, registrars, cashiers, and admins each get their own dashboard.</p>
-                    </div>
+
+                    <button
+                        type="button"
+                        class="carousel-arrow carousel-arrow-next"
+                        id="servicesNext"
+                        aria-label="Next services"
+                    >
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
                 </div>
+
+                <div class="carousel-dots" id="servicesDots" role="tablist" aria-label="Services slides"></div>
             </div>
         </section>
 
@@ -469,6 +497,115 @@
             this.classList.toggle('fa-eye');
             this.classList.toggle('fa-eye-slash');
         });
+
+        // ── Services carousel ──────────────────────────────────────────────
+        (function () {
+            const viewport = document.getElementById('servicesViewport');
+            const track = document.getElementById('servicesTrack');
+            const prevBtn = document.getElementById('servicesPrev');
+            const nextBtn = document.getElementById('servicesNext');
+            const dotsWrap = document.getElementById('servicesDots');
+
+            if (!viewport || !track || !prevBtn || !nextBtn || !dotsWrap) return;
+
+            const slides = Array.from(track.children);
+            if (slides.length === 0) return;
+
+            function getVisibleCount() {
+                const w = window.innerWidth;
+                if (w <= 640) return 1;
+                if (w <= 991.98) return 2;
+                return 3;
+            }
+
+            function maxIndex() {
+                return Math.max(slides.length - getVisibleCount(), 0);
+            }
+
+            function currentIndex() {
+                const scrollLeft = viewport.scrollLeft;
+                let closest = 0;
+                let closestDist = Infinity;
+
+                slides.forEach((slide, i) => {
+                    const dist = Math.abs(slide.offsetLeft - track.offsetLeft - scrollLeft);
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closest = i;
+                    }
+                });
+
+                return closest;
+            }
+
+            function scrollToSlide(i) {
+                const slide = slides[i];
+                if (!slide) return;
+                viewport.scrollTo({
+                    left: slide.offsetLeft - track.offsetLeft,
+                    behavior: 'smooth'
+                });
+            }
+
+            function buildDots() {
+                dotsWrap.innerHTML = '';
+                const total = maxIndex() + 1;
+
+                for (let i = 0; i < total; i++) {
+                    const dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'carousel-dot';
+                    dot.setAttribute('role', 'tab');
+                    dot.setAttribute('aria-label', 'Go to service ' + (i + 1));
+                    dot.addEventListener('click', () => scrollToSlide(i));
+                    dotsWrap.appendChild(dot);
+                }
+
+                updateActive();
+            }
+
+            function updateActive() {
+                const idx = Math.min(currentIndex(), maxIndex());
+                const dots = Array.from(dotsWrap.children);
+
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === idx));
+
+                prevBtn.disabled = idx <= 0;
+                nextBtn.disabled = idx >= maxIndex();
+            }
+
+            prevBtn.addEventListener('click', () => {
+                scrollToSlide(Math.max(currentIndex() - 1, 0));
+            });
+
+            nextBtn.addEventListener('click', () => {
+                scrollToSlide(Math.min(currentIndex() + 1, maxIndex()));
+            });
+
+            viewport.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevBtn.click();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    nextBtn.click();
+                }
+            });
+
+            let scrollTimer;
+            viewport.addEventListener('scroll', () => {
+                clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(updateActive, 80);
+            });
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(buildDots, 150);
+            });
+
+            buildDots();
+        })();
     </script>
 
 </body>
