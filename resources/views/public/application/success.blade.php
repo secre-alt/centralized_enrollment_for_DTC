@@ -230,19 +230,17 @@
                 <div class="border-top px-4 py-4">
 
                     <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
-
-                        
-                            href="{{ route('public.application.status.form') }}"
-                            class="btn btn-primary px-4">
-                            <i class="fas fa-search me-2"></i>
-                            Check Application Status
+                        <a
+                        href="{{ route('public.application.status.form') }}"
+                        class="btn btn-primary px-4">
+                        <i class="fas fa-search me-2"></i>
+                        Check Application Status
                         </a>
-
-                        
-                            href="{{ route('public.application.create') }}"
-                            class="btn btn-outline-secondary px-4">
-                            <i class="fas fa-plus me-2"></i>
-                            Submit Another Application
+                        <a
+                        href="{{ route('public.application.create') }}"
+                        class="btn btn-outline-secondary px-4">
+                        <i class="fas fa-plus me-2"></i>
+                        Submit Another Application
                         </a>
 
                     </div>

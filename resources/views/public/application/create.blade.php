@@ -1082,24 +1082,19 @@
     .card {
         border-radius: 12px;
     }
-
     .card-header {
         padding: 1rem 1.25rem;
     }
-
     .card-body {
         padding: 1.5rem;
     }
-
     .form-control {
         border-radius: 8px;
         min-height: 42px;
     }
-
     .form-control:focus {
         box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.12);
     }
-
     .document-input {
         border: 1px solid #dee2e6;
         border-radius: 10px;
@@ -1107,19 +1102,15 @@
         margin-bottom: 1rem;
         background: #fafafa;
     }
-
     .document-input:last-child {
         margin-bottom: 0;
     }
-
     .document-input label {
         font-weight: 600;
     }
-
     .physical-requirement-item {
         margin-bottom: 0.5rem;
     }
-
 </style>
 
 @stop

@@ -21,10 +21,12 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Public\ApplicationController;
+use App\Http\Controllers\PasswordSetupController;
+use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplicationController;
 
     Route::middleware(['auth'])->group(function () {
         // ...existing notifications routes...
-        Route::get('/search', [SearchController::class, 'search'])->name('search');
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
     });
     
     // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -32,7 +34,11 @@ use App\Http\Controllers\Public\ApplicationController;
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
     Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
-   
+    
+    Route::get('/set-password/{token}', [PasswordSetupController::class, 'showForm'])->name('password.setup.show');
+    Route::post('/set-password', [PasswordSetupController::class, 'store'])->name('password.setup.store');
+    Route::post('/resend-activation', [PasswordSetupController::class, 'resend'])->name('password.activation.resend')->middleware('throttle:5,1');
+    
     // ── PUBLIC APPLICATION / PRE-ENROLLMENT ─────────────────────────────────────
     Route::prefix('apply')->name('public.application.')->group(function () {
         Route::get('/', [ApplicationController::class, 'create'])
@@ -104,7 +110,14 @@ use App\Http\Controllers\Public\ApplicationController;
 
     Route::get('/documents', [RegistrarDocumentController::class, 'index'])->name('documents.index');
     Route::post('/documents/{documentRequest}/status', [RegistrarDocumentController::class, 'updateStatus'])->name('documents.status');
-});
+
+    Route::get('/applications', [RegistrarApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/{application}/documents/{document}', [RegistrarApplicationController::class, 'downloadDocument'])->name('applications.documents.show');
+    Route::get('/applications/{application}', [RegistrarApplicationController::class, 'show'])->name('applications.show');
+    Route::post('/applications/{application}/approve', [RegistrarApplicationController::class, 'approve'])->name('applications.approve');
+    Route::post('/applications/{application}/reject', [RegistrarApplicationController::class, 'reject'])->name('applications.reject');
+    Route::post('/applications/{application}/revision', [RegistrarApplicationController::class, 'revision'])->name('applications.revision');
+    });
 
     // ── CASHIER ───────────────────────────────────────────────────────────────────
     Route::middleware(['auth', 'role:cashier|admin'])->prefix('cashier')->name('cashier.')->group(function () {

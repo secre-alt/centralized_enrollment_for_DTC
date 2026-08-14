@@ -45,6 +45,7 @@ class ViewServiceProvider extends ServiceProvider
 
                     ['header' => 'REGISTRAR'],
                     ['text' => 'Registrar Dashboard',  'url' => route('registrar.dashboard'),          'icon' => 'fas fa-fw fa-tachometer-alt'],
+                    ['text' => 'Applications', 'url' => route('registrar.applications.index'), 'icon' => 'fas fa-fw fa-user-plus'],
                     ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'fas fa-fw fa-file-alt'],
                     ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'fas fa-fw fa-calendar-check'],
                     ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'fas fa-fw fa-clock'],
@@ -65,6 +66,7 @@ class ViewServiceProvider extends ServiceProvider
                 $sidebar = [
                     ['header' => 'REGISTRAR PANEL'],
                     ['text' => 'Dashboard',            'url' => route('registrar.dashboard'),          'icon' => 'fas fa-fw fa-tachometer-alt'],
+                    ['text' => 'Applications', 'url' => route('registrar.applications.index'), 'icon' => 'fas fa-fw fa-user-plus'],
                     ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'fas fa-fw fa-file-alt'],
                     ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'fas fa-fw fa-calendar-check'],
                     ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'fas fa-fw fa-clock'],

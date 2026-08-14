@@ -22,15 +22,13 @@
 .public-navbar {
     width: 100%;
     min-height: 88px;
-
     background: var(--dtc-white);
     border-bottom: 1px solid var(--dtc-border);
-
     display: flex;
     align-items: center;
-
-    position: relative;
+    position: sticky !important;
     z-index: 1000;
+    flex-wrap: wrap;
 }
 
 
@@ -283,13 +281,10 @@
 
 .public-mobile-nav {
     display: none;
-
     width: 100%;
-
     padding: 10px 20px 20px;
-
     background: #ffffff;
-
+    flex-basis: 100%;
     border-top: 1px solid var(--dtc-border);
 }
 
@@ -385,3 +380,10 @@
         font-size: 10px;
     }
 }
+
+/* #view-landing .public-navbar {
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+    z-index: 1000;
+} */

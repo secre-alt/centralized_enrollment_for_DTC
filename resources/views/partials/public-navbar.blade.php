@@ -1,40 +1,36 @@
     <nav class="public-navbar">
-
         <div class="public-navbar-container">
-
             <a href="{{ route('landing') }}" class="public-brand">
-
                 <img
                     src="{{ asset('images/DTC-LOGO.png') }}"
                     alt="DTC Logo"
                     class="public-logo"
                 >
-
                 <div class="public-brand-text">
                     <h1>DTC EMS</h1>
                     <p>Danao Technological College</p>
                 </div>
-
             </a>
 
 
             <div class="public-nav-links">
 
-                <a href="{{ route('landing') }}">
+                <a href="{{ route('landing') }}"
+                class="{{ request()->routeIs('landing') ? 'active' : '' }}">
                     Home
                 </a>
 
                 <a href="{{ route('public.application.create') }}"
-                class="active">
+                class="{{ request()->routeIs('public.application.create') ? 'active' : '' }}">
                     Admissions
                 </a>
 
-                <a href="{{ route('public.application.status.form') }}">
+                <a href="{{ route('public.application.status.form') }}"
+                class="{{ request()->routeIs('public.application.status.form') ? 'active' : '' }}">
                     Check Status
                 </a>
 
             </div>
-
 
             <a href="{{ route('login') }}" class="public-signin">
                 Sign In
@@ -52,19 +48,20 @@
 
         </div>
 
-
         <div class="public-mobile-nav" id="applicationMobileNav">
 
-            <a href="{{ route('landing') }}">
+            <a href="{{ route('landing') }}"
+            class="{{ request()->routeIs('landing') ? 'active' : '' }}">
                 Home
             </a>
 
             <a href="{{ route('public.application.create') }}"
-            class="active">
+            class="{{ request()->routeIs('public.application.create') ? 'active' : '' }}">
                 Admissions
             </a>
 
-            <a href="{{ route('public.application.status.form') }}">
+            <a href="{{ route('public.application.status.form') }}"
+            class="{{ request()->routeIs('public.application.status.form') ? 'active' : '' }}">
                 Check Status
             </a>
 
@@ -76,30 +73,27 @@
         </div>
 
     </nav>
+
 <script>
-    function togglePublicNavbar() {
-        const mobileNav = document.getElementById('publicMobileNav');
-        const navbarBurger = document.getElementById('publicNavbarBurger');
+    const applicationNavbarToggle =
+        document.getElementById('applicationNavbarToggle');
 
-        if (mobileNav) {
-            mobileNav.classList.toggle('open');
-        }
+    const applicationMobileNav =
+        document.getElementById('applicationMobileNav');
 
-        if (navbarBurger) {
-            navbarBurger.classList.toggle('open');
-        }
-    }
+    applicationNavbarToggle.addEventListener('click', function () {
+        applicationMobileNav.classList.toggle('open');
 
-    function closePublicNavbar() {
-        const mobileNav = document.getElementById('publicMobileNav');
-        const navbarBurger = document.getElementById('publicNavbarBurger');
+        const isOpen = applicationMobileNav.classList.contains('open');
 
-        if (mobileNav) {
-            mobileNav.classList.remove('open');
-        }
+        this.setAttribute('aria-expanded', isOpen);
+    });
 
-        if (navbarBurger) {
-            navbarBurger.classList.remove('open');
-        }
-    }
+    // Close mobile menu after clicking a link
+    applicationMobileNav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function () {
+            applicationMobileNav.classList.remove('open');
+            applicationNavbarToggle.setAttribute('aria-expanded', 'false');
+        });
+    });
 </script>

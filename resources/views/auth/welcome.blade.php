@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $errors->any() ? 'Sign In' : 'DTC EMS' }} — Danao Technological College</title>
+    <title>{{ $errors->any() || request()->routeIs('login') ? 'Sign In' : 'DTC EMS' }} — Danao Technological College</title>
 
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
 <body>
 
 
-    <div class="page-view {{ $errors->any() ? '' : 'active' }}" id="view-landing">
+  <div class="page-view {{ $errors->any() || request()->routeIs('login') ? '' : 'active' }}" id="view-landing">
 
     <nav class="public-navbar">
 
@@ -38,74 +38,78 @@
 
             <div class="public-nav-links">
 
-                <a href="{{ route('landing') }}" class="active">
+                <a href="{{ route('landing') }}"
+                class="nav-link {{ request()->routeIs('landing') ? 'active' : '' }}">
                     Home
                 </a>
 
-                <a href="{{ route('public.application.create') }}">
+                <a href="{{ route('public.application.create') }}"
+                class="nav-link {{ request()->routeIs('public.application.create') ? 'active' : '' }}">
                     Admissions
                 </a>
 
-                <a href="#process">
-                    How It Works
-                </a>
-
-                <a href="#services">
+                <a href="#services" class="nav-link">
                     Services
                 </a>
 
-                <a href="#faqs">
+                <a href="#process" class="nav-link">
+                    How It Works
+                </a>
+
+                <a href="#faqs" class="nav-link">
                     FAQs
                 </a>
 
             </div>
 
-
-            <a href="{{ route('login') }}" class="public-signin">
+            <a href="{{ route('login') }}" class="public-signin" onclick="showLogin(); return false;">
                 Sign In
                 <i class="fas fa-arrow-right"></i>
             </a>
 
 
-            <button
-                type="button"
-                class="public-navbar-toggle"
-                id="welcomeNavbarToggle"
-            >
-                <i class="fas fa-bars"></i>
-            </button>
+        <button
+            type="button"
+            class="public-navbar-toggle"
+            id="welcomeNavbarToggle"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="welcomeMobileNav"
+        >
+            <i class="fas fa-bars"></i>
+        </button>
 
         </div>
 
 
-        <div class="public-mobile-nav" id="welcomeMobileNav">
+    <div class="public-mobile-nav" id="welcomeMobileNav">
 
-            <a href="{{ route('landing') }}" class="active">
-                Home
-            </a>
+        <a href="{{ route('landing') }}" class="nav-link">
+            Home
+        </a>
 
-            <a href="{{ route('public.application.create') }}">
-                Admissions
-            </a>
+        <a href="{{ route('public.application.create') }}" class="nav-link">
+            Admissions
+        </a>
 
-            <a href="#process">
-                How It Works
-            </a>
+        <a href="#services" class="nav-link">
+            Services
+        </a>
 
-            <a href="#services">
-                Services
-            </a>
+        <a href="#process" class="nav-link">
+            How It Works
+        </a>
 
-            <a href="#faqs">
-                FAQs
-            </a>
+        <a href="#faqs" class="nav-link">
+            FAQs
+        </a>
 
-            <a href="{{ route('login') }}" class="public-signin">
-                Sign In
-                <i class="fas fa-arrow-right"></i>
-            </a>
+        <a href="{{ route('login') }}" class="public-signin">
+            Sign In
+            <i class="fas fa-arrow-right"></i>
+        </a>
 
-        </div>
+    </div>
 
     </nav>
 
@@ -189,24 +193,24 @@
 
         <section class="services" id="services">
             <div class="container">
-                <div class="section-heading">
+                <div class="section-heading reveal">
                     <div class="eyebrow">Services</div>
                     <h2>Everything, connected in one system</h2>
                     <p>One portal for every DTC service — from enrollment to certificates, appointments, and payments.</p>
                 </div>
 
-                <div class="services-carousel">
+                <div class="services-carousel reveal reveal-scale">
 
                     <button
                         type="button"
                         class="carousel-arrow carousel-arrow-prev"
                         id="servicesPrev"
-                        aria-label="Previous services"
+                        aria-label="Previous service"
                     >
                         <i class="fas fa-chevron-left"></i>
                     </button>
 
-                    <div class="carousel-viewport" id="servicesViewport" tabindex="0">
+                    <div class="carousel-viewport" id="servicesViewport" tabindex="0" aria-roledescription="carousel" aria-label="DTC EMS services">
                         <div class="carousel-track" id="servicesTrack">
 
                             <div class="service-card">
@@ -242,7 +246,7 @@
                         type="button"
                         class="carousel-arrow carousel-arrow-next"
                         id="servicesNext"
-                        aria-label="Next services"
+                        aria-label="Next service"
                     >
                         <i class="fas fa-chevron-right"></i>
                     </button>
@@ -255,12 +259,12 @@
 
         <section class="process" id="process">
             <div class="container">
-                <div class="section-heading">
+                <div class="section-heading reveal">
                     <div class="eyebrow">How It Works</div>
                     <h2>Four simple steps</h2>
                 </div>
 
-                <div class="process-steps">
+                <div class="process-steps reveal">
                     <div class="process-step">
                         <div class="num">1</div>
                         <h4>Enroll</h4>
@@ -287,13 +291,13 @@
 
         <section class="faqs" id="faqs">
             <div class="container">
-                <div class="section-heading">
+                <div class="section-heading reveal">
                     <div class="eyebrow">FAQs</div>
                     <h2>Frequently asked questions</h2>
                     <p>Quick answers about enrollment, certificates, appointments, and payments.</p>
                 </div>
 
-                <div class="faq-list">
+                <div class="faq-list reveal">
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
                             <span>How do I enroll through DTC EMS?</span>
@@ -347,13 +351,22 @@
             </div>
         </section>
 
-        <footer class="site-footer">
+        <footer class="site-footer reveal">
             © {{ date('Y') }} Danao Technological College — Enrollment Management System. All rights reserved.
         </footer>
+
+        <button
+            type="button"
+            class="back-to-top"
+            id="backToTop"
+            aria-label="Back to top"
+        >
+            <i class="fas fa-arrow-up"></i>
+        </button>
     </div>
 
    
-    <div class="page-view {{ $errors->any() ? 'active' : '' }}" id="view-login">
+    <div class="page-view {{ $errors->any() || request()->routeIs('login') ? 'active' : '' }}" id="view-login">
         <div class="login-screen">
 
             <div class="login-branding">
@@ -455,16 +468,96 @@
     </div>
 
     <script>
-        // ── Mobile nav (burger menu) ─────────────────────────────────────
-        function toggleMobileNav() {
-            document.getElementById('mobileNav').classList.toggle('open');
-            document.getElementById('navbarBurger').classList.toggle('open');
-        }
 
-        function closeMobileNav() {
-            document.getElementById('mobileNav').classList.remove('open');
-            document.getElementById('navbarBurger').classList.remove('open');
-        }
+        // ── Active navigation while scrolling ─────────────────────────────
+        (function () {
+            const navLinks = document.querySelectorAll('.public-nav-links .nav-link');
+            const sections = document.querySelectorAll('#services, #process, #faqs');
+
+            if (!navLinks.length || !sections.length) return;
+
+            function updateActiveNav() {
+                const scrollPosition = window.scrollY + 180;
+
+                let currentSection = '';
+
+                sections.forEach(section => {
+                    if (scrollPosition >= section.offsetTop) {
+                        currentSection = section.id;
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+
+                    const href = link.getAttribute('href');
+
+                    if (currentSection && href === '#' + currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // If we're above all sections, Home is active
+                if (!currentSection && window.scrollY < 300) {
+                    const homeLink = document.querySelector(
+                        '.public-nav-links .nav-link[href="{{ route("landing") }}"]'
+                    );
+
+                    if (homeLink) {
+                        homeLink.classList.add('active');
+                    }
+                }
+            }
+
+            window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+            updateActiveNav();
+        })();
+        
+        // ── Mobile nav (burger menu) ─────────────────────────────────────
+        (function () {
+            const toggle = document.getElementById('welcomeNavbarToggle');
+            const mobileNav = document.getElementById('welcomeMobileNav');
+
+            if (!toggle || !mobileNav) return;
+
+            function toggleMobileNav() {
+                mobileNav.classList.toggle('open');
+                toggle.classList.toggle('open');
+
+                const isOpen = mobileNav.classList.contains('open');
+                toggle.setAttribute('aria-expanded', isOpen);
+            }
+
+            function closeMobileNav() {
+                mobileNav.classList.remove('open');
+                toggle.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            toggle.addEventListener('click', toggleMobileNav);
+
+            // Close menu when clicking a mobile navigation link
+            mobileNav.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', closeMobileNav);
+            });
+
+            // Close menu when pressing Escape
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeMobileNav();
+                }
+            });
+
+            // Close menu if resized back to desktop
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 768) {
+                    closeMobileNav();
+                }
+            });
+
+            toggle.setAttribute('aria-expanded', 'false');
+        })();
         // ── FAQs accordion ───────────────────────────────────────────────
         function toggleFaq(button) {
             const item = button.closest('.faq-item');
@@ -498,7 +591,7 @@
             this.classList.toggle('fa-eye-slash');
         });
 
-        // ── Services carousel ──────────────────────────────────────────────
+        // ── Services 3D carousel ─────────────────────────────────────────
         (function () {
             const viewport = document.getElementById('servicesViewport');
             const track = document.getElementById('servicesTrack');
@@ -509,102 +602,147 @@
             if (!viewport || !track || !prevBtn || !nextBtn || !dotsWrap) return;
 
             const slides = Array.from(track.children);
-            if (slides.length === 0) return;
+            const total = slides.length;
+            if (total === 0) return;
 
-            function getVisibleCount() {
-                const w = window.innerWidth;
-                if (w <= 640) return 1;
-                if (w <= 991.98) return 2;
-                return 3;
+            let index = 0;
+
+            function wrap(i) {
+                return (i + total) % total;
             }
 
-            function maxIndex() {
-                return Math.max(slides.length - getVisibleCount(), 0);
-            }
-
-            function currentIndex() {
-                const scrollLeft = viewport.scrollLeft;
-                let closest = 0;
-                let closestDist = Infinity;
-
+            function render() {
                 slides.forEach((slide, i) => {
-                    const dist = Math.abs(slide.offsetLeft - track.offsetLeft - scrollLeft);
-                    if (dist < closestDist) {
-                        closestDist = dist;
-                        closest = i;
+                    slide.classList.remove('is-center', 'is-prev', 'is-next', 'is-far', 'is-far-prev', 'is-far-next');
+
+                    if (i === index) {
+                        slide.classList.add('is-center');
+                    } else if (i === wrap(index - 1)) {
+                        slide.classList.add('is-prev');
+                    } else if (i === wrap(index + 1)) {
+                        slide.classList.add('is-next');
+                    } else if (i === wrap(index - 2)) {
+                        slide.classList.add('is-far', 'is-far-prev');
+                    } else {
+                        slide.classList.add('is-far', 'is-far-next');
                     }
                 });
 
-                return closest;
+                Array.from(dotsWrap.children).forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
             }
 
-            function scrollToSlide(i) {
-                const slide = slides[i];
-                if (!slide) return;
-                viewport.scrollTo({
-                    left: slide.offsetLeft - track.offsetLeft,
-                    behavior: 'smooth'
-                });
+            function goTo(i) {
+                index = wrap(i);
+                render();
             }
 
             function buildDots() {
                 dotsWrap.innerHTML = '';
-                const total = maxIndex() + 1;
-
                 for (let i = 0; i < total; i++) {
                     const dot = document.createElement('button');
                     dot.type = 'button';
                     dot.className = 'carousel-dot';
                     dot.setAttribute('role', 'tab');
-                    dot.setAttribute('aria-label', 'Go to service ' + (i + 1));
-                    dot.addEventListener('click', () => scrollToSlide(i));
+                    dot.setAttribute('aria-label', 'Go to ' + slides[i].querySelector('h3').textContent);
+                    dot.addEventListener('click', () => goTo(i));
                     dotsWrap.appendChild(dot);
                 }
-
-                updateActive();
             }
 
-            function updateActive() {
-                const idx = Math.min(currentIndex(), maxIndex());
-                const dots = Array.from(dotsWrap.children);
-
-                dots.forEach((dot, i) => dot.classList.toggle('active', i === idx));
-
-                prevBtn.disabled = idx <= 0;
-                nextBtn.disabled = idx >= maxIndex();
-            }
-
-            prevBtn.addEventListener('click', () => {
-                scrollToSlide(Math.max(currentIndex() - 1, 0));
-            });
-
-            nextBtn.addEventListener('click', () => {
-                scrollToSlide(Math.min(currentIndex() + 1, maxIndex()));
-            });
+            prevBtn.addEventListener('click', () => goTo(index - 1));
+            nextBtn.addEventListener('click', () => goTo(index + 1));
 
             viewport.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
-                    prevBtn.click();
+                    goTo(index - 1);
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
-                    nextBtn.click();
+                    goTo(index + 1);
                 }
             });
 
-            let scrollTimer;
-            viewport.addEventListener('scroll', () => {
-                clearTimeout(scrollTimer);
-                scrollTimer = setTimeout(updateActive, 80);
-            });
+            // Drag / swipe support (mouse + touch)
+            let dragging = false;
+            let startX = 0;
 
-            let resizeTimer;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(buildDots, 150);
-            });
+            function dragStart(x) {
+                dragging = true;
+                startX = x;
+            }
+
+            function dragEnd(x) {
+                if (!dragging) return;
+                dragging = false;
+
+                const delta = x - startX;
+                if (Math.abs(delta) < 40) return;
+
+                if (delta < 0) {
+                    goTo(index + 1);
+                } else {
+                    goTo(index - 1);
+                }
+            }
+
+            track.addEventListener('mousedown', (e) => dragStart(e.clientX));
+            window.addEventListener('mouseup', (e) => dragEnd(e.clientX));
+
+            track.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX), { passive: true });
+            track.addEventListener('touchend', (e) => dragEnd(e.changedTouches[0].clientX), { passive: true });
 
             buildDots();
+            render();
+        })();
+
+        // ── Scroll reveal ────────────────────────────────────────────────
+        (function () {
+            const items = document.querySelectorAll('.reveal');
+            if (items.length === 0) return;
+
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReducedMotion) {
+                items.forEach(el => el.classList.add('revealed'));
+                return;
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+            items.forEach(el => observer.observe(el));
+        })();
+
+        // ── Back to top ──────────────────────────────────────────────────
+        (function () {
+            const btn = document.getElementById('backToTop');
+            if (!btn) return;
+
+            let ticking = false;
+
+            function onScroll() {
+                if (ticking) return;
+                ticking = true;
+
+                requestAnimationFrame(() => {
+                    btn.classList.toggle('visible', window.scrollY > 480);
+                    ticking = false;
+                });
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+
+            btn.addEventListener('click', () => {
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+            });
         })();
     </script>
 
