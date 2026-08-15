@@ -23,10 +23,11 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Public\ApplicationController;
 use App\Http\Controllers\PasswordSetupController;
 use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplicationController;
+use App\Http\Controllers\Portal\ApplicationController as PortalApplicationController;
 
     Route::middleware(['auth'])->group(function () {
         // ...existing notifications routes...
-    Route::get('/search', [SearchController::class, 'search'])->name('search');
+        Route::get('/search', [SearchController::class, 'search'])->name('search');
     });
     
     // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -34,11 +35,32 @@ use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplication
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
     Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
-    
+
+    // ── ACCOUNT ACTIVATION / PASSWORD SETUP ─────────────────────────────────────
+    // Reuses the stock Laravel password broker (password_resets table).
+    // The token is minted elsewhere (Registrar approval flow) — this only
+    // redeems it.
+    //
+    // Deliberately NOT using this project's custom 'guest' middleware here:
+    // that middleware (RedirectIfAuthenticated) redirects any already-
+    // authenticated session straight to their own role dashboard before the
+    // controller runs at all. Since an applicant may click this link from a
+    // browser that still has an unrelated Registrar/Admin session active,
+    // these routes must work independently of any auth session state.
     Route::get('/set-password/{token}', [PasswordSetupController::class, 'showForm'])->name('password.setup.show');
     Route::post('/set-password', [PasswordSetupController::class, 'store'])->name('password.setup.store');
+
+    // Resend a fresh activation link when the original has expired.
+    // Throttled per-IP via Laravel's built-in 'throttle' middleware — this
+    // is independent from config('auth.passwords.users.throttle') (the
+    // password broker's own per-email token-creation cooldown, which is
+    // NOT automatically enforced here since resend() calls
+    // Password::broker()->createToken() directly rather than
+    // sendResetLink()) and independent from config('auth.passwords.users.expire')
+    // (how long a minted token stays valid). 5 requests per minute per IP is
+    // a reasonable anti-abuse ceiling for a "resend my link" form.
     Route::post('/resend-activation', [PasswordSetupController::class, 'resend'])->name('password.activation.resend')->middleware('throttle:5,1');
-    
+
     // ── PUBLIC APPLICATION / PRE-ENROLLMENT ─────────────────────────────────────
     Route::prefix('apply')->name('public.application.')->group(function () {
         Route::get('/', [ApplicationController::class, 'create'])
@@ -57,7 +79,7 @@ use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplication
     Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
-});
+    });
 
     // ── ADMIN ─────────────────────────────────────────────────────────────────────
     Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -90,7 +112,7 @@ use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplication
     // ── REPORTS ───────────────────────────────────────────────────────────────
     Route::get('/reports/enrollment', [ReportController::class, 'enrollmentReport'])->name('reports.enrollment');
     Route::get('/reports/payment',    [ReportController::class, 'paymentReport'])->name('reports.payment');
-});
+    });
 
     // ── REGISTRAR ─────────────────────────────────────────────────────────────────
     Route::middleware(['auth', 'role:registrar|admin'])->prefix('registrar')->name('registrar.')->group(function () {
@@ -126,11 +148,12 @@ use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplication
     Route::get('/payments/{enrollment}', [CashierPaymentController::class, 'show'])->name('payments.show');
     Route::post('/payments/{enrollment}', [CashierPaymentController::class, 'store'])->name('payments.store');
     Route::get('/payments/{enrollment}/receipt', [CashierPaymentController::class, 'receipt'])->name('payments.receipt');
-});
+    });
 
     // ── PORTAL (Student / Alumni / New Applicant) ─────────────────────────────────
     Route::middleware(['auth', 'role:student|alumni|new_applicant'])->prefix('portal')->name('portal.')->group(function () {
     Route::get('/dashboard', [PortalDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/application', [PortalApplicationController::class, 'show'])->name('application.show');
 
     Route::get('/enrollment/create', [EnrollmentController::class, 'create'])->name('enrollment.create');
     Route::post('/enrollment', [EnrollmentController::class, 'store'])->name('enrollment.store');

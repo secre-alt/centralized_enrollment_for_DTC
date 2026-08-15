@@ -80,7 +80,7 @@ class ViewServiceProvider extends ServiceProvider
             elseif ($user->hasRole('cashier')) {
                 $sidebar = [
                     ['header' => 'CASHIER PANEL'],
-                    ['text' => 'Dashboard',        'url' => route('cashier.dashboard'),      'icon' => 'fas fa-fw fa-tachometer-alt'],
+                    ['text' => 'Dashboard',  'url' => route('cashier.dashboard'), 'icon' => 'fas fa-fw fa-tachometer-alt'],
                     ['text' => 'Process Payments', 'url' => route('cashier.payments.index'), 'icon' => 'fas fa-fw fa-money-bill-wave'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
@@ -110,6 +110,7 @@ class ViewServiceProvider extends ServiceProvider
                 $sidebar = [
                     ['header' => 'MY PORTAL'],
                     ['text' => 'Dashboard', 'url' => route('portal.dashboard'), 'icon' => 'fas fa-fw fa-tachometer-alt'],
+                    ['text' => 'My Application', 'url' => route('portal.application.show'), 'icon' => 'fas fa-fw fa-file-alt'],
                     ['text' => 'Enrollment', 'icon' => 'fas fa-fw fa-file-alt', 'submenu' => [
                         ['text' => 'Enroll Now',           'url' => route('portal.enrollment.create'), 'icon' => 'fas fa-fw fa-plus'],
                         ['text' => 'My Enrollment Status', 'url' => route('portal.enrollment.index'),  'icon' => 'fas fa-fw fa-list'],

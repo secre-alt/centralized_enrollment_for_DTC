@@ -27,6 +27,7 @@
     display: flex;
     align-items: center;
     position: sticky !important;
+    top: 0;
     z-index: 1000;
     flex-wrap: wrap;
 }
@@ -39,13 +40,10 @@
 .public-navbar-container {
     width: min(1180px, calc(100% - 40px));
     min-height: 88px;
-
     margin: 0 auto;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     gap: 30px;
 }
 
