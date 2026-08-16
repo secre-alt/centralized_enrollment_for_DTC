@@ -85,7 +85,12 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class)->except(['show']);
+    Route::get('/settings/payment', [SettingsController::class, 'payment'])
+    ->name('admin.settings.payment');
 
+    Route::put('/settings/payment', [SettingsController::class, 'updatePayment'])->name('admin.settings.payment.update');
+    Route::post('/settings/payment/qr', [SettingsController::class, 'uploadQr'])->name('admin.settings.payment.qr');
+    
     // ── SETTINGS ──────────────
     Route::get('/settings',     [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings',     [SettingsController::class, 'update'])->name('settings.update');
@@ -148,6 +153,11 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::get('/payments/{enrollment}', [CashierPaymentController::class, 'show'])->name('payments.show');
     Route::post('/payments/{enrollment}', [CashierPaymentController::class, 'store'])->name('payments.store');
     Route::get('/payments/{enrollment}/receipt', [CashierPaymentController::class, 'receipt'])->name('payments.receipt');
+    Route::get('/payments/{payment}/proof', [CashierPaymentController::class, 'viewProof'])
+    ->name('cashier.payments.proof');
+
+    Route::post('/payments/{payment}/verify', [CashierPaymentController::class, 'verify'])->name('cashier.payments.verify');
+    Route::post('/payments/{payment}/reject', [CashierPaymentController::class, 'reject'])->name('cashier.payments.reject');
     });
 
     // ── PORTAL (Student / Alumni / New Applicant) ─────────────────────────────────
@@ -160,6 +170,10 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::get('/enrollment', [EnrollmentController::class, 'index'])->name('enrollment.index');
     Route::get('/enrollment/{enrollment}/payment-info', [EnrollmentController::class, 'paymentInfo'])->name('enrollment.payment-info');
     Route::get('/programs/{program}/subjects', [EnrollmentController::class, 'getSubjects'])->name('enrollment.subjects');
+    
+    Route::post('/enrollment/{enrollment}/payment/gcash', [EnrollmentController::class, 'submitGcash'])->name('enrollment.payment.gcash');
+    Route::get('/payment/proof/{payment}', [EnrollmentController::class, 'viewProof'])->name('enrollment.payment.proof');
+    Route::get('/payment/gcash-qr', [EnrollmentController::class, 'showGcashQr'])->name('enrollment.gcash.qr');
 
     Route::get('/appointments/create', [StudentAppointmentController::class, 'create'])->name('appointments.create');
     Route::post('/appointments', [StudentAppointmentController::class, 'store'])->name('appointments.store');

@@ -149,7 +149,25 @@ class SettingsController extends Controller
         return redirect()->route('admin.settings.payment')
             ->with('status', 'Payment settings saved successfully.');
     }
+    public function uploadQr(Request $request)
+    {
+        $request->validate([
+            'gcash_qr' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
+        ]);
 
+        // Delete old QR if one exists
+        $existing = Setting::get('gcash_qr_path');
+        if ($existing && Storage::disk('local')->exists($existing)) {
+            Storage::disk('local')->delete($existing);
+        }
+
+        $path = $request->file('gcash_qr')->store('gcash', 'local');
+
+        Setting::set('gcash_qr_path', $path);
+
+        return redirect()->route('admin.settings.payment')
+            ->with('success', 'GCash QR code updated.');
+    }
     // ── Notification Settings ─────────────────────────────────────────────────
 
     /** GET /admin/settings/notifications */

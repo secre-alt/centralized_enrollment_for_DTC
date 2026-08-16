@@ -100,16 +100,79 @@
                     <strong>Student</strong> status and they will be officially enrolled.
                 </div>
 
-                <form method="POST" action="{{ route('cashier.payments.store', $enrollment) }}">
-                    @csrf
-                    <button type="submit" class="btn btn-success btn-block"
-                            style="font-size:15px; padding:14px;"
-                            onclick="return confirm('Confirm payment of ₱500.00 received from {{ $enrollment->user->name }}?')">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Confirm Payment Received — ₱500.00
-                    </button>
-                </form>
+                @if (! $enrollment->is_paid && $latestPayment && $latestPayment->isPending() && $latestPayment->isGcash())
+                    {{-- ── GCash Review Branch ─────────────────────────────── --}}
+                    <div class="mt-6 p-6 bg-white border border-gray-200 rounded-xl">
+                        <h2 class="text-lg font-semibold mb-4">GCash Payment Review</h2>
 
+                        <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
+                            <dt class="text-gray-500">Reference No.</dt>
+                            <dd class="font-mono text-gray-900">{{ $latestPayment->reference_number }}</dd>
+                            <dt class="text-gray-500">Amount</dt>
+                            <dd class="text-gray-900">₱{{ number_format($latestPayment->amount, 2) }}</dd>
+                            <dt class="text-gray-500">Submitted</dt>
+                            <dd class="text-gray-900">{{ $latestPayment->created_at->format('M d, Y h:i A') }}</dd>
+                        </dl>
+
+                        <a href="{{ route('cashier.payments.proof', $latestPayment) }}" target="_blank"
+                        class="inline-block mb-6 text-sm text-blue-600 underline hover:text-blue-800">
+                            View Proof of Payment ↗
+                        </a>
+
+                        {{-- Verify button --}}
+                        <form method="POST" action="{{ route('cashier.payments.verify', $latestPayment) }}" class="mb-3">
+                            @csrf
+                            <button type="submit"
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg transition"
+                                onclick="return confirm('Verify this GCash payment and promote applicant to student?')">
+                                ✓ Verify Payment
+                            </button>
+                        </form>
+
+                        {{-- Reject form --}}
+                        <details class="border border-red-200 rounded-lg p-4 bg-red-50">
+                            <summary class="cursor-pointer text-sm font-medium text-red-700">✗ Reject Payment</summary>
+                            <form method="POST" action="{{ route('cashier.payments.reject', $latestPayment) }}" class="mt-3 space-y-3">
+                                @csrf
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Rejection Reason (sent to applicant)</label>
+                                    <textarea name="remarks" rows="3" required
+                                        class="w-full border-gray-300 rounded-md text-sm shadow-sm"
+                                        placeholder="e.g. Reference number not found in our GCash records."></textarea>
+                                    @error('remarks') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <button type="submit"
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded-lg transition"
+                                    onclick="return confirm('Reject this payment? The applicant will be notified.')">
+                                    Reject & Notify Applicant
+                                </button>
+                            </form>
+                        </details>
+                    </div>
+
+                @elseif (! $enrollment->is_paid && (! $latestPayment || $latestPayment->isRejected()))
+                    {{-- ── Walk-in Branch (also shown when GCash was rejected — Cashier can still record walk-in) ── --}}
+                    <div class="mt-6 p-6 bg-white border border-gray-200 rounded-xl">
+                        <h2 class="text-lg font-semibold mb-4">Record Walk-in Payment</h2>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Enrollment Fee: <strong>₱{{ number_format(\App\Models\Setting::get('enrollment_fee', 500), 2) }}</strong>
+                        </p>
+                        <form method="POST" action="{{ route('cashier.payments.store', $enrollment) }}">
+                            @csrf
+                            <button type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition"
+                                onclick="return confirm('Confirm cash payment received?')">
+                                Confirm Payment Received
+                            </button>
+                        </form>
+                    </div>
+
+                @elseif ($enrollment->is_paid)
+                    {{-- Already paid --}}
+                    <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg text-green-800 text-sm">
+                        ✓ This enrollment has been paid. <a href="{{ route('cashier.payments.receipt', $enrollment) }}" class="underline ml-1">View Receipt</a>
+                    </div>
+                @endif
                 <a href="{{ route('cashier.payments.index') }}"
                    class="btn btn-secondary btn-block mt-2">Cancel</a>
             </div>

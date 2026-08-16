@@ -3,33 +3,35 @@
 
 @section('title', 'Enroll Now')
 
-@section('content_header')
-    <div>
-        <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Enrollment Form</h4>
-        <p class="mb-0" style="color:#64748B; font-size:13px;">
-            Select your program and subjects for this semester
-        </p>
-    </div>
-@endsection
-
-@if($activeEnrollment)
-<div style="background:#FEF9C3; border:1.5px solid #FDE68A; border-radius:14px;
-            padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; gap:14px;">
-    <i class="fas fa-exclamation-triangle" style="color:#D97706; font-size:20px; flex-shrink:0;"></i>
-    <div>
-        <div style="font-size:13px; font-weight:700; color:#92400E;">
-            You have an active enrollment submission
+@if ($lockedProgram)
+    {{-- new_applicant: locked program display --}}
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+        <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-300 rounded-lg">
+            <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <div>
+                <p class="font-semibold text-gray-900">{{ $lockedProgram->name }}</p>
+                <p class="text-xs text-green-700 mt-0.5">Based on your approved pre-enrollment application</p>
+            </div>
         </div>
-        <div style="font-size:12px; color:#B45309; margin-top:2px;">
-            Your current enrollment is <strong>{{ ucfirst($activeEnrollment->status) }}</strong>.
-            Please wait for it to be processed before submitting a new one.
-        </div>
-        <a href="{{ route('portal.enrollment.index') }}"
-           style="font-size:12px; color:#0F4CDB; font-weight:600; text-decoration:none;">
-            View my enrollment →
-        </a>
+        <input type="hidden" name="program_id" value="{{ $lockedProgram->id }}">
     </div>
-</div>
+@else
+    {{-- student / alumni: open select — unchanged --}}
+    <div class="mb-4">
+        <label for="program_id" class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+        <select name="program_id" id="program_id" class="w-full border-gray-300 rounded-md shadow-sm" required>
+            <option value="">-- Select Program --</option>
+            @foreach ($programs as $program)
+                <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>
+                    {{ $program->name }}
+                </option>
+            @endforeach
+        </select>
+        @error('program_id') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+    </div>
 @endif
 
 @section('content')
@@ -244,5 +246,16 @@ function selectAll() {
 document.getElementById('program_id').addEventListener('change', loadSubjects);
 document.getElementById('year_level').addEventListener('change', loadSubjects);
 document.getElementById('semester').addEventListener('change', loadSubjects);
+
+// Auto-trigger for locked-program case (new_applicant)
+@if ($lockedProgram)
+document.addEventListener('DOMContentLoaded', function () {
+    // Pre-populate the program_id for loadSubjects to read
+    const programSelect = document.getElementById('program_id');
+    // No select exists, but loadSubjects reads from a hidden input or param —
+    // call directly with the known ID
+    loadSubjects({{ $lockedProgram->id }});
+});
+@endif
 </script>
 @endsection

@@ -53,6 +53,20 @@
                                     text-transform:uppercase; letter-spacing:0.5px;">
                             Receipt No.
                         </div>
+                        {{-- Add after the existing "Receipt No." line: --}}
+                        <tr>
+                            <td class="py-1 text-gray-500">Payment Method</td>
+                            <td class="py-1 font-medium">
+                                @if ($payment->isWalkIn())
+                                    Walk-in (Cashier)
+                                @else
+                                    GCash
+                                    @if ($payment->reference_number)
+                                        <span class="text-gray-500 text-xs ml-1">/ Ref: {{ $payment->reference_number }}</span>
+                                    @endif
+                                @endif
+                            </td>
+                        </tr>
                         <div style="font-size:18px; font-weight:800; color:#0F4CDB;">
                             {{ $enrollment->payment->receipt_no }}
                         </div>

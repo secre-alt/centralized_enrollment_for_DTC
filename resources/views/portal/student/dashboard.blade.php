@@ -7,19 +7,9 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">
-                @if(auth()->user()->hasRole('new_applicant'))
-                <h1 class="dashboard-title">
-                    New Applicant / Enrollee Dashboard
-                </h1>
-                @elseif(auth()->user()->hasRole('alumni'))
-                <h1 class="dashboard-title">
-                    Alumni Dashboard
-                </h1>
-                @else
                 <h1 class="dashboard-title">
                     Student Dashboard
                 </h1>
-                @endif
             </h4>
             <p class="dashboard-subtitle mb-0" style="color:#64748B; font-size:13px;">
                 Welcome to Danao Technological College!

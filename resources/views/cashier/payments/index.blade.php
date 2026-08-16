@@ -29,6 +29,44 @@
         </div>
     </div>
 @else
+
+    <div class="flex gap-2 mb-4 flex-wrap">
+        @foreach ([
+            'all'           => 'All',
+            'unpaid'        => 'Unpaid',
+            'gcash_pending' => 'GCash Pending',
+            'verified'      => 'Verified',
+            'walk_in'       => 'Walk-in',
+            'rejected'      => 'Rejected',
+        ] as $key => $label)
+            <a href="{{ request()->fullUrlWithQuery(['filter' => $key]) }}"
+            class="px-3 py-1 rounded-full text-sm border
+                {{ $filter === $key ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50' }}">
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
+{{-- Add to the <thead> row — after Name/Program, before Action: --}}
+<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
+<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+
+{{-- Add to each <tbody> row — corresponding cells: --}}
+<td class="px-4 py-2 text-sm text-gray-700">
+    {{ $enrollment->payment ? ucfirst(str_replace('_', '-', $enrollment->payment->payment_method)) : '—' }}
+</td>
+<td class="px-4 py-2">
+    @if (! $enrollment->payment)
+        <span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">Unpaid</span>
+    @elseif ($enrollment->payment->status === 'pending')
+        <span class="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">Pending</span>
+    @elseif ($enrollment->payment->status === 'verified')
+        <span class="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800">Verified</span>
+    @elseif ($enrollment->payment->status === 'rejected')
+        <span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800">Rejected</span>
+    @endif
+</td>
+
     <div class="card">
         <div class="card-body p-0">
             <table class="table mb-0">

@@ -982,7 +982,7 @@ body {
 /* Pin the last nav item (logout) to the bottom */
 .main-sidebar .sidebar .nav-sidebar > .nav-item:last-child {
     margin-top: 50px !important;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     border-top: 1px solid rgba(255,255,255,0.1);
     z-index: 10;
