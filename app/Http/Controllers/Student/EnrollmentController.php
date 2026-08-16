@@ -127,8 +127,19 @@ class EnrollmentController extends Controller
             'is_paid'     => false,
         ]);
 
-        return redirect()->route('student.enrollment.index', $enrollment)
-            ->with('success', 'Enrollment submitted successfully. Await Registrar approval.');
+        // Notify all registrars of the new enrollment submission
+        $registrars = \App\Models\User::role('registrar')->get();
+        foreach ($registrars as $registrar) {
+            \App\Services\NotificationService::send(
+                $registrar,
+                'New Enrollment Submitted',
+                "{$user->name} submitted an enrollment for {$enrollment->program->name} (Year {$enrollment->year_level}) and is awaiting your review.",
+                'info',
+                route('registrar.enrollments.show', $enrollment)
+            );
+        }
+
+        return redirect()->route('portal.enrollment.index')->with('success', 'Enrollment submitted successfully. Await Registrar approval.');
     }
 
     // ── submitGcash() — NEW ────────────────────────────────────────
@@ -189,16 +200,13 @@ class EnrollmentController extends Controller
             'paid_at'          => null,        // assigned only at verification
         ]);
 
-        // Notify all cashiers
-        $cashiers = \App\Models\User::role('cashier')->get();
-        foreach ($cashiers as $cashier) {
-            \App\Services\NotificationService::send(
-                $cashier,
-                'New GCash Payment Pending Verification',
-                "A GCash payment has been submitted for Enrollment #{$enrollment->id} and is awaiting your review.",
-                route('cashier.payments.show', $enrollment)
-            );
-        }
+    \App\Services\NotificationService::send(
+        $cashier,
+        'New GCash Payment Pending Verification',
+        "A GCash payment has been submitted for Enrollment #{$enrollment->id} and is awaiting your review.",
+        'info',
+        route('cashier.payments.show', $enrollment)
+    );
 
         return back()->with('success', 'GCash payment proof submitted. The Cashier will verify your payment shortly.');
     }
