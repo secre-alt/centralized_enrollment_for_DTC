@@ -126,7 +126,7 @@ class SettingsController extends Controller
     /** GET /admin/settings/payment */
     public function payment()
     {
-        return view('admin.settings-payment', [
+        return view('admin.settings.payment', [
             'settings'  => $this->settings(),
             'activeTab' => 'payment',
         ]);
@@ -149,6 +149,8 @@ class SettingsController extends Controller
         return redirect()->route('admin.settings.payment')
             ->with('status', 'Payment settings saved successfully.');
     }
+
+    /** POST /admin/settings/payment/qr */
     public function uploadQr(Request $request)
     {
         $request->validate([
@@ -156,18 +158,19 @@ class SettingsController extends Controller
         ]);
 
         // Delete old QR if one exists
-        $existing = Setting::get('gcash_qr_path');
+        $existing = Setting::where('key', 'gcash_qr_path')->value('value');
         if ($existing && Storage::disk('local')->exists($existing)) {
             Storage::disk('local')->delete($existing);
         }
 
         $path = $request->file('gcash_qr')->store('gcash', 'local');
 
-        Setting::set('gcash_qr_path', $path);
+        Setting::updateOrCreate(['key' => 'gcash_qr_path'], ['value' => $path]);
 
         return redirect()->route('admin.settings.payment')
-            ->with('success', 'GCash QR code updated.');
+            ->with('status', 'GCash QR code updated successfully.');
     }
+
     // ── Notification Settings ─────────────────────────────────────────────────
 
     /** GET /admin/settings/notifications */
@@ -292,8 +295,11 @@ class SettingsController extends Controller
     /** GET /admin/settings/backup/download-latest */
     public function downloadLatestBackup()
     {
-        $files = collect(Storage::files('backups'))->sortByDesc(fn ($f) => Storage::lastModified($f));
+        $files = collect(Storage::files('backups'))
+            ->sortByDesc(fn ($f) => Storage::lastModified($f));
+
         abort_if($files->isEmpty(), 404, 'No backups found.');
+
         return Storage::download($files->first());
     }
 
@@ -302,7 +308,6 @@ class SettingsController extends Controller
     /** GET /admin/settings/audit */
     public function auditLogs(Request $request)
     {
-        // Uses spatie/laravel-activitylog. Swap model if you use something else.
         $logs = \Spatie\Activitylog\Models\Activity::with('causer')
             ->when($request->filled('search'), fn ($q) =>
                 $q->where('description', 'like', '%' . $request->search . '%')
@@ -355,5 +360,17 @@ class SettingsController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Test email sent successfully.']);
+    }
+
+    // ── General page alias ────────────────────────────────────────────────────
+
+    /** GET /admin/settings/general */
+    public function general()
+    {
+        return view('admin.settings', [
+            'settings'   => $this->settings(),
+            'systemInfo' => $this->systemInfo(),
+            'activeTab'  => 'general',
+        ]);
     }
 }

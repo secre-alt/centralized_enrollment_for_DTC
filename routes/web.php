@@ -85,21 +85,18 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class)->except(['show']);
-    Route::get('/settings/payment', [SettingsController::class, 'payment'])
-    ->name('admin.settings.payment');
-
-    Route::put('/settings/payment', [SettingsController::class, 'updatePayment'])->name('admin.settings.payment.update');
-    Route::post('/settings/payment/qr', [SettingsController::class, 'uploadQr'])->name('admin.settings.payment.qr');
     
     // ── SETTINGS ──────────────
-    Route::get('/settings',     [SettingsController::class, 'index'])->name('settings.index');
-    Route::put('/settings',     [SettingsController::class, 'update'])->name('settings.update');
-    Route::get('/settings/general',              [SettingsController::class, 'general'])->name('settings.general');
-    Route::get('/settings/audit-logs',           [SettingsController::class, 'auditLogs'])->name('settings.audit');
-    Route::get('/settings/academic',             [SettingsController::class, 'academic'])->name('settings.academic');
-    Route::get('/settings/payment',              [SettingsController::class, 'payment'])->name('settings.payment');
-    Route::get('/settings/notifications',        [SettingsController::class, 'notifications'])->name('settings.notifications');
-    Route::get('/settings/security',             [SettingsController::class, 'security'])->name('settings.security');
+    Route::get('/settings',              [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings',              [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings/general',      [SettingsController::class, 'general'])->name('settings.general');
+    Route::get('/settings/academic',     [SettingsController::class, 'academic'])->name('settings.academic');
+    Route::get('/settings/payment',      [SettingsController::class, 'payment'])->name('settings.payment');
+    Route::put('/settings/payment',      [SettingsController::class, 'updatePayment'])->name('settings.payment.update');
+    Route::post('/settings/payment/qr',  [SettingsController::class, 'uploadQr'])->name('settings.payment.qr');
+    Route::get('/settings/notifications',[SettingsController::class, 'notifications'])->name('settings.notifications');
+    Route::get('/settings/security',     [SettingsController::class, 'security'])->name('settings.security');
+    Route::get('/settings/audit-logs',   [SettingsController::class, 'auditLogs'])->name('settings.audit');
     Route::get('/settings/backup',               [BackupController::class, 'index'])->name('settings.backup');
     Route::post('/settings/backup/create',       [BackupController::class, 'backup'])->name('settings.backup.create');
     Route::post('/settings/backup/restore',      [BackupController::class, 'restore'])->name('settings.backup.restore');
@@ -153,8 +150,7 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::get('/payments/{enrollment}', [CashierPaymentController::class, 'show'])->name('payments.show');
     Route::post('/payments/{enrollment}', [CashierPaymentController::class, 'store'])->name('payments.store');
     Route::get('/payments/{enrollment}/receipt', [CashierPaymentController::class, 'receipt'])->name('payments.receipt');
-    Route::get('/payments/{payment}/proof', [CashierPaymentController::class, 'viewProof'])
-    ->name('cashier.payments.proof');
+    Route::get('/payments/{payment}/proof', [CashierPaymentController::class, 'viewProof'])->name('payments.proof'); 
 
     Route::post('/payments/{payment}/verify', [CashierPaymentController::class, 'verify'])->name('cashier.payments.verify');
     Route::post('/payments/{payment}/reject', [CashierPaymentController::class, 'reject'])->name('cashier.payments.reject');

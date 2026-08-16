@@ -3,37 +3,6 @@
 
 @section('title', 'Enroll Now')
 
-@if ($lockedProgram)
-    {{-- new_applicant: locked program display --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
-        <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-300 rounded-lg">
-            <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <div>
-                <p class="font-semibold text-gray-900">{{ $lockedProgram->name }}</p>
-                <p class="text-xs text-green-700 mt-0.5">Based on your approved pre-enrollment application</p>
-            </div>
-        </div>
-        <input type="hidden" name="program_id" value="{{ $lockedProgram->id }}">
-    </div>
-@else
-    {{-- student / alumni: open select — unchanged --}}
-    <div class="mb-4">
-        <label for="program_id" class="block text-sm font-medium text-gray-700 mb-1">Program</label>
-        <select name="program_id" id="program_id" class="w-full border-gray-300 rounded-md shadow-sm" required>
-            <option value="">-- Select Program --</option>
-            @foreach ($programs as $program)
-                <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>
-                    {{ $program->name }}
-                </option>
-            @endforeach
-        </select>
-        @error('program_id') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-    </div>
-@endif
-
 @section('content')
 <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -52,18 +21,38 @@
                     @csrf
 
                     {{-- Program --}}
-                    <div class="form-group">
-                        <label>Program</label>
-                        <select name="program_id" id="program_id" class="form-control" required>
-                            <option value="">— Select Program —</option>
-                            @foreach ($programs as $program)
-                                <option value="{{ $program->id }}"
-                                    {{ old('program_id') == $program->id ? 'selected' : '' }}>
-                                    {{ $program->name }} ({{ $program->code }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                    @if ($lockedProgram)
+                        <div class="form-group">
+                            <label>Program</label>
+                            <div style="background:#F0FDF4; border:1.5px solid #BBF7D0;
+                                        border-radius:8px; padding:14px 16px;
+                                        display:flex; align-items:center; gap:12px;">
+                                <i class="fas fa-check-circle" style="color:#15803D; font-size:18px;"></i>
+                                <div>
+                                    <div style="font-size:14px; font-weight:600; color:#1E293B;">
+                                        {{ $lockedProgram->name }}
+                                    </div>
+                                    <div style="font-size:11px; color:#15803D; margin-top:2px;">
+                                        Based on your approved pre-enrollment application
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="program_id" id="program_id" value="{{ $lockedProgram->id }}">
+                        </div>
+                    @else
+                        <div class="form-group">
+                            <label>Program</label>
+                            <select name="program_id" id="program_id" class="form-control" required>
+                                <option value="">— Select Program —</option>
+                                @foreach ($programs as $program)
+                                    <option value="{{ $program->id }}"
+                                        {{ old('program_id') == $program->id ? 'selected' : '' }}>
+                                        {{ $program->name }} ({{ $program->code }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
 
                     {{-- Year + Semester --}}
                     <div class="row">
@@ -84,6 +73,7 @@
                                 <select name="semester" id="semester" class="form-control" required>
                                     <option value="1" {{ old('semester') == 1 ? 'selected' : '' }}>1st Semester</option>
                                     <option value="2" {{ old('semester') == 2 ? 'selected' : '' }}>2nd Semester</option>
+                                    <option value="3" {{ old('semester') == 3 ? 'selected' : '' }}>Summer</option>
                                 </select>
                             </div>
                         </div>
@@ -119,7 +109,7 @@
                         </div>
                         <div>
                             <div style="font-size:13px; font-weight:600; color:#1D4ED8;">
-                                Enrollment Fee: ₱500.00 (fixed rate)
+                                Enrollment Fee: ₱{{ number_format($fee, 2) }} (fixed rate)
                             </div>
                             <div style="font-size:12px; color:#4338CA; margin-top:2px;">
                                 Payment is collected at the Cashier's Office after Registrar approval.
@@ -148,13 +138,13 @@
                     <i class="fas fa-info-circle mr-2"></i> Enrollment Guide
                 </h5>
                 <div style="font-size:13px; line-height:1.8; opacity:0.9;">
-                    @foreach([
-                        ['icon'=>'fa-mouse-pointer', 'text'=>'Select your program, year level, and semester.'],
-                        ['icon'=>'fa-check-square',  'text'=>'Choose the subjects you want to enroll in.'],
-                        ['icon'=>'fa-paper-plane',   'text'=>'Submit your enrollment for Registrar review.'],
-                        ['icon'=>'fa-bell',          'text'=>'Wait for approval notification.'],
-                        ['icon'=>'fa-money-bill',    'text'=>'Pay ₱500.00 at the Cashier after approval.'],
-                    ] as $step)
+                   @foreach([
+                    ['icon'=>'fa-mouse-pointer', 'text'=>'Select your program, year level, and semester.'],
+                    ['icon'=>'fa-check-square',  'text'=>'Choose the subjects you want to enroll in.'],
+                    ['icon'=>'fa-paper-plane',   'text'=>'Submit your enrollment for Registrar review.'],
+                    ['icon'=>'fa-bell',          'text'=>'Wait for approval notification.'],
+                    ['icon'=>'fa-money-bill',    'text'=>'Pay ₱' . number_format($fee, 2) . ' at the Cashier after approval.'],
+                ] as $step)
                     <div style="display:flex; gap:10px; margin-bottom:12px;">
                         <i class="fas {{ $step['icon'] }}" style="color:#FFC72C; margin-top:3px; flex-shrink:0;"></i>
                         <span>{{ $step['text'] }}</span>
@@ -247,14 +237,9 @@ document.getElementById('program_id').addEventListener('change', loadSubjects);
 document.getElementById('year_level').addEventListener('change', loadSubjects);
 document.getElementById('semester').addEventListener('change', loadSubjects);
 
-// Auto-trigger for locked-program case (new_applicant)
 @if ($lockedProgram)
 document.addEventListener('DOMContentLoaded', function () {
-    // Pre-populate the program_id for loadSubjects to read
-    const programSelect = document.getElementById('program_id');
-    // No select exists, but loadSubjects reads from a hidden input or param —
-    // call directly with the known ID
-    loadSubjects({{ $lockedProgram->id }});
+    loadSubjects();
 });
 @endif
 </script>

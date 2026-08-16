@@ -27,7 +27,13 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
+    /**
+    * Get all applications submitted by this user.
+    */
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'user_id');
+    }
     /**
      * Get custom in-app notifications.
      * Named differently to avoid conflict with Notifiable trait.

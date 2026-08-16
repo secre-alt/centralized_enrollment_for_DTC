@@ -20,6 +20,7 @@ class EnrollmentController extends Controller
     public function create()
     {
         $user = Auth::user();
+        $fee = Setting::get('enrollment_fee', 500);
 
         if ($user->hasRole('new_applicant')) {
             // Fetch the single approved application for this user
@@ -48,6 +49,7 @@ class EnrollmentController extends Controller
                 'lockedProgram' => $application->program,
                 'application'   => $application,
                 'programs'      => null,   // signals the Blade to render locked UI
+                'fee'           => $fee,
             ]);
         }
 
@@ -58,9 +60,27 @@ class EnrollmentController extends Controller
             'programs'      => $programs,
             'lockedProgram' => null,
             'application'   => null,
+            'fee'           => $fee,
         ]);
     }
+    // ── index() — NEW ────────────────────────────────────────────
+    public function index()
+    {
+        $user = Auth::user();
 
+        $enrollments = Enrollment::where('user_id', $user->id)
+            ->with(['program', 'payment'])
+            ->latest()
+            ->get();
+
+        // Resolve subject names for each enrollment's subject_ids
+        $enrollments->each(function ($enrollment) {
+            $enrollment->subjects = \App\Models\CourseSubject::whereIn('id', $enrollment->subject_ids ?? [])
+                ->get(['id', 'subject_code', 'subject_name']);
+        });
+
+        return view('student.enrollment.index', compact('enrollments'));
+    }
     // ── store() ───────────────────────────────────────────────────
 
     public function store(Request $request)
@@ -70,7 +90,7 @@ class EnrollmentController extends Controller
         $validated = $request->validate([
             'program_id'  => ['required', 'exists:programs,id'],
             'year_level'  => ['required', 'integer', 'min:1', 'max:5'],
-            'semester'    => ['required', 'in:1st,2nd,Summer'],
+            'semester' => ['required', 'integer', 'in:1,2,3'],
             'subject_ids' => ['required', 'array', 'min:1'],
             'subject_ids.*' => ['exists:course_subjects,id'],
         ]);
@@ -107,7 +127,7 @@ class EnrollmentController extends Controller
             'is_paid'     => false,
         ]);
 
-        return redirect()->route('student.enrollment.show', $enrollment)
+        return redirect()->route('student.enrollment.index', $enrollment)
             ->with('success', 'Enrollment submitted successfully. Await Registrar approval.');
     }
 
@@ -219,7 +239,18 @@ class EnrollmentController extends Controller
 
     public function getSubjects(Request $request, Program $program)
     {
-        // ... existing implementation unchanged
+        $validated = $request->validate([
+            'year_level' => ['required', 'integer', 'min:1', 'max:5'],
+            'semester'   => ['required'],
+        ]);
+
+        $subjects = \App\Models\CourseSubject::where('program_id', $program->id)
+            ->where('year_level', $validated['year_level'])
+            ->where('semester', $validated['semester'])
+            ->orderBy('subject_code')
+            ->get(['id', 'subject_code', 'subject_name']);
+
+        return response()->json($subjects);
     }
 
     // ── paymentInfo() — unchanged signature, view gains new data ──
