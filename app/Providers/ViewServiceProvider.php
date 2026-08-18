@@ -57,7 +57,7 @@ class ViewServiceProvider extends ServiceProvider
 
                     ['header' => 'SYSTEM'],
                     $notifItem,
-                    ['text' => 'Settings', 'url' => route('admin.settings.index'), 'icon' => 'fas fa-fw fa-cog'],
+                    // ['text' => 'Settings', 'url' => route('admin.settings.index'), 'icon' => 'fas fa-fw fa-cog'],
                 ];
             }
 
@@ -133,12 +133,12 @@ class ViewServiceProvider extends ServiceProvider
                     $notifItem,
                 ];
             }
-               $sidebar[] = [
-                    'text'    => 'Logout',
-                    'url'     => '#logout-form',
-                    'icon'    => 'fas fa-fw fa-sign-out-alt',
-                    'classes' => 'sidebar-logout-link',
-                ];
+            //    $sidebar[] = [
+            //         'text'    => 'Logout',
+            //         'url'     => '#logout-form',
+            //         'icon'    => 'fas fa-fw fa-sign-out-alt',
+            //         'classes' => 'sidebar-logout-link',
+            //     ];
             config(['adminlte.menu' => $sidebar]);
         });
     }

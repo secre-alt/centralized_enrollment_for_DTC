@@ -6,7 +6,7 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Appointment Requests</h4>
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Appointment Requests</h4>
             <p class="mb-0" style="color:#64748B; font-size:13px;">Review and confirm student appointment bookings</p>
         </div>
         <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary btn-sm">

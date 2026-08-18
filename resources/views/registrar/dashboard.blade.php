@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Registrar Dashboard</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">Manage enrollments and appointments</p>
+            <h4 class="mb-0 font-weight-bold">Registrar Dashboard</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Manage enrollments and appointments</p>
         </div>
         <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-calendar-plus mr-1"></i> Manage Slots
@@ -17,39 +17,31 @@
 
 @section('content')
 
-{{-- STAT CARDS --}}
+{{-- KPI ROW --}}
 <div class="row mb-2">
     <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-yellow">
-            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
-            <div class="stat-value">{{ $pendingEnrollments }}</div>
-            <div class="stat-label">Pending Enrollments</div>
-            <div class="stat-footer">For Approval</div>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-hourglass-half" color="warning"
+            label="Pending Enrollments" value="{{ $pendingEnrollments }}"
+            href="{{ route('registrar.enrollments.index') }}" link-text="For Approval" />
     </div>
     <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-blue">
-            <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-            <div class="stat-value">{{ $pendingAppointments }}</div>
-            <div class="stat-label">Pending Appointments</div>
-            <div class="stat-footer">For Review</div>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-calendar-check" color="primary"
+            label="Pending Appointments" value="{{ $pendingAppointments }}"
+            href="{{ route('registrar.appointments.index') }}" link-text="For Review" />
     </div>
     <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-green">
-            <div class="stat-icon"><i class="fas fa-check-double"></i></div>
-            <div class="stat-value">{{ $approvedToday }}</div>
-            <div class="stat-label">Approved Today</div>
-            <div class="stat-footer">Total</div>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-check-double" color="success"
+            label="Approved Today" value="{{ $approvedToday }}"
+            note="Total" />
     </div>
     <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-red">
-            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
-            <div class="stat-value">{{ $rejectedRequests }}</div>
-            <div class="stat-label">Rejected Requests</div>
-            <div class="stat-footer">Total</div>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-times-circle" color="danger"
+            label="Rejected Requests" value="{{ $rejectedRequests }}"
+            href="{{ route('notifications.index') }}" link-text="Review notices" />
     </div>
 </div>
 
@@ -60,7 +52,7 @@
     <div class="col-lg-7 mb-3">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold" style="color:#1E293B;">Pending Enrollments</span>
+                <span class="font-weight-bold">Pending Enrollments</span>
                 <a href="{{ route('registrar.enrollments.index') }}"
                    style="font-size:12px; color:#0F4CDB; text-decoration:none;">View All</a>
             </div>
@@ -102,10 +94,10 @@
                             </td>
                             <td>
                                 @if($enrollment->status === 'pending')
-                                    <a href="{{ route('registrar.enrollments.show', $enrollment) }}"
-                                       style="background:#EEF2FF; color:#0F4CDB; padding:4px 10px;
-                                              border-radius:6px; font-size:11px; font-weight:600;
-                                              text-decoration:none;">Review</a>
+                                    <button type="button" class="dtc-review-btn"
+                                            data-url="{{ route('registrar.enrollments.show', $enrollment) }}">
+                                        Review
+                                    </button>
                                 @else
                                     <span style="color:#94A3B8; font-size:12px;">—</span>
                                 @endif
@@ -121,6 +113,17 @@
                     </tbody>
                 </table>
             </div>
+            <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
+                <small style="color:var(--dtc-text-secondary);">
+                    Showing
+                    <strong>{{ $recentEnrollments->firstItem() ?? 0 }}</strong>
+                    to
+                    <strong>{{ $recentEnrollments->lastItem() ?? 0 }}</strong>
+                    of
+                    <strong>{{ $recentEnrollments->total() }}</strong>
+                    enrollments
+                </small>
+            </div>
         </div>
     </div>
 
@@ -130,7 +133,7 @@
         {{-- Notifications --}}
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold" style="color:#1E293B;">Notifications</span>
+                <span class="font-weight-bold">Notifications</span>
                 <a href="{{ route('notifications.index') }}" style="font-size:12px; color:#0F4CDB; text-decoration:none;">View All</a>
             </div>
             <div class="card-body p-3">
@@ -154,7 +157,7 @@
 
         {{-- Quick Actions --}}
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">Quick Actions</div>
+            <div class="card-header font-weight-bold">Quick Actions</div>
             <div class="card-body p-3">
                 <a href="{{ route('registrar.enrollments.index') }}" class="quick-action-btn">
                     <i class="fas fa-file-alt"></i> Review Enrollments
@@ -170,5 +173,7 @@
 
     </div>
 </div>
+
+@include('registrar.enrollments._review-modal')
 
 @endsection

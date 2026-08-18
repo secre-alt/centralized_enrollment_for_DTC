@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Manage Users</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Manage Users</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Create and manage system user accounts
             </p>
         </div>
@@ -29,18 +29,23 @@
 @endif
 
 {{-- Stats Row --}}
-<div class="row mb-3">
-    @foreach(['admin','registrar','cashier','student','alumni','new_applicant'] as $role)
-    <div class="col-lg-2 col-4 mb-2">
-        <div class="card" style="border-radius:14px; padding:14px; text-align:center;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); border:none;">
-            <div style="font-size:22px; font-weight:800; color:#1E293B;">
-                {{ \App\Models\User::role($role)->count() }}
-            </div>
-            <div style="font-size:11px; color:#64748B; font-weight:600; margin-top:2px; text-transform:capitalize;">
-                {{ str_replace('_',' ', $role) }}
-            </div>
-        </div>
+<div class="row mb-2">
+    @php
+        $roleStatConfig = [
+            'admin'         => ['icon' => 'fa-user-shield',    'color' => 'primary'],
+            'registrar'     => ['icon' => 'fa-id-card',        'color' => 'success'],
+            'cashier'       => ['icon' => 'fa-cash-register',  'color' => 'warning'],
+            'student'       => ['icon' => 'fa-user-graduate',  'color' => 'info'],
+            'alumni'        => ['icon' => 'fa-user-tie',       'color' => 'danger'],
+            'new_applicant' => ['icon' => 'fa-user-clock',     'color' => 'neutral'],
+        ];
+    @endphp
+    @foreach($roleStatConfig as $role => $cfg)
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+        <x-dtc.stat-card
+            icon="{{ $cfg['icon'] }}" color="{{ $cfg['color'] }}"
+            label="{{ str_replace('_',' ', $role) }}"
+            value="{{ \App\Models\User::role($role)->count() }}" />
     </div>
     @endforeach
 </div>
@@ -48,13 +53,13 @@
 {{-- Users Table --}}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:#1E293B;">All Users</span>
-        <span style="font-size:13px; color:#64748B;">{{ $users->total() }} total</span>
+        <span class="font-weight-bold" style="color:var(--dtc-text);">All Users</span>
+        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $users->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
         <div class="table-responsive">
-        <table class="table mb-0">
+        <table class="table table-bordered mb-0">
             <thead>
                 <tr>
                     <th>User</th>
@@ -72,19 +77,19 @@
                     <td>
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div style="width:38px; height:38px; border-radius:50%;
-                                        background:linear-gradient(135deg,#0F4CDB,#1a5feb);
+                                        background:linear-gradient(135deg,var(--dtc-primary),#1a5feb);
                                         display:flex; align-items:center; justify-content:center;
                                         color:#fff; font-weight:700; font-size:14px; flex-shrink:0;">
                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                             </div>
 
-                            <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                 {{ $user->name }}
                             </div>
                         </div>
                     </td>
 
-                    <td style="font-size:13px; color:#64748B;">
+                    <td style="font-size:13px; color:var(--dtc-text-secondary);">
                         {{ $user->email }}
                     </td>
 
@@ -92,13 +97,13 @@
                         @foreach($user->roles as $role)
                             @php
                                 $rc = [
-                                    'admin'         => ['bg'=>'#EEF2FF','color'=>'#0F4CDB'],
+                                    'admin'         => ['bg'=>'var(--dtc-primary-soft)','color'=>'var(--dtc-primary)'],
                                     'registrar'     => ['bg'=>'#DCFCE7','color'=>'#15803D'],
                                     'cashier'       => ['bg'=>'#FEF9C3','color'=>'#A16207'],
                                     'student'       => ['bg'=>'#EDE9FE','color'=>'#7C3AED'],
                                     'alumni'        => ['bg'=>'#FEE2E2','color'=>'#DC2626'],
                                     'new_applicant' => ['bg'=>'#DBEAFE','color'=>'#1D4ED8'],
-                                ][$role->name] ?? ['bg'=>'#F1F5F9','color'=>'#64748B'];
+                                ][$role->name] ?? ['bg'=>'var(--dtc-border-soft)','color'=>'var(--dtc-text-secondary)'];
                             @endphp
 
                             <span style="background:{{ $rc['bg'] }};
@@ -115,25 +120,12 @@
 
                     <td>
                         @php
-                            $sc = [
-                                'active'  => ['bg'=>'#DCFCE7','color'=>'#15803D'],
-                                'locked'  => ['bg'=>'#FEE2E2','color'=>'#DC2626'],
-                                'pending' => ['bg'=>'#FEF9C3','color'=>'#A16207']
-                            ][$user->status] ?? ['bg'=>'#F1F5F9','color'=>'#64748B'];
+                            $statusVariant = ['active' => 'success', 'locked' => 'danger', 'pending' => 'warning'][$user->status] ?? 'neutral';
                         @endphp
-
-                        <span style="background:{{ $sc['bg'] }};
-                                     color:{{ $sc['color'] }};
-                                     font-size:11px;
-                                     font-weight:700;
-                                     padding:3px 10px;
-                                     border-radius:20px;
-                                     text-transform:capitalize;">
-                            {{ $user->status }}
-                        </span>
+                        <x-dtc.status-badge :status="$user->status" :variant="$statusVariant" />
                     </td>
 
-                    <td style="font-size:12px; color:#94A3B8;">
+                    <td style="font-size:12px; color:var(--dtc-text-muted);">
                         {{ $user->created_at->format('M d, Y') }}
                     </td>
 
@@ -143,8 +135,8 @@
                                     class="btn-edit-user"
                                     data-id="{{ $user->id }}"
                                     data-url="{{ route('admin.users.edit', $user) }}"
-                                    style="background:#EEF2FF;
-                                           color:#0F4CDB;
+                                    style="background:var(--dtc-primary-soft);
+                                           color:var(--dtc-primary);
                                            border:none;
                                            padding:5px 12px;
                                            border-radius:8px;
@@ -182,7 +174,7 @@
                 <tr>
                     <td colspan="6"
                         class="text-center py-5"
-                        style="color:#94A3B8;">
+                        style="color:var(--dtc-text-muted);">
                         No users found.
                     </td>
                 </tr>
@@ -194,12 +186,12 @@
 
     {{-- Pagination --}}
         <div class="card-footer"
-            style="background:#fff; border-top:1px solid #E2E8F0;">
+            style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
 
             <div class="d-flex justify-content-between align-items-center flex-wrap"
                 style="gap:15px;">
 
-                <small style="color:#64748B;">
+                <small style="color:var(--dtc-text-secondary);">
                     Showing
                     <strong>{{ $users->firstItem() }}</strong>
                     to
@@ -465,6 +457,335 @@
     </div>
 </div>
 
+@endsection
+@section('css')
+<style>
+/* =========================================================
+   MANAGE USERS — DARK MODE
+   ========================================================= */
+
+body.dtc-dark {
+    --users-bg: #0f172a;
+    --users-surface: #111827;
+    --users-surface-2: #172033;
+    --users-border: #334155;
+    --users-border-soft: #263449;
+    --users-text: #f1f5f9;
+    --users-text-muted: #94a3b8;
+}
+
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+body.dtc-dark .content-wrapper {
+    background: var(--users-bg) !important;
+}
+
+body.dtc-dark .content-header h4 {
+    color: var(--users-text) !important;
+}
+
+body.dtc-dark .content-header p {
+    color: var(--users-text-muted) !important;
+}
+
+
+/* =========================================================
+   ALL CARDS
+   ========================================================= */
+
+body.dtc-dark .card {
+    background: var(--users-surface) !important;
+    color: var(--users-text) !important;
+
+    border: 1px solid var(--users-border) !important;
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   STAT CARDS
+   ========================================================= */
+
+body.dtc-dark .row .card {
+    background: var(--users-surface) !important;
+    border: 1px solid var(--users-border) !important;
+}
+
+body.dtc-dark .row .card div {
+    color: var(--users-text) !important;
+}
+
+body.dtc-dark .row .card div:last-child {
+    color: var(--users-text-muted) !important;
+}
+
+
+/* =========================================================
+   USERS TABLE CARD
+   ========================================================= */
+
+body.dtc-dark .card-header {
+    background: var(--users-surface) !important;
+    border-bottom: 1px solid var(--users-border) !important;
+    color: var(--users-text) !important;
+}
+
+body.dtc-dark .card-header span {
+    color: var(--users-text) !important;
+}
+
+body.dtc-dark .card-header span:last-child {
+    color: var(--users-text-muted) !important;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+body.dtc-dark .table {
+    color: var(--users-text) !important;
+    background: var(--users-surface) !important;
+}
+
+body.dtc-dark .table thead {
+    background: var(--users-surface-2) !important;
+}
+
+body.dtc-dark .table thead th {
+    color: var(--users-text-muted) !important;
+    background: var(--users-surface-2) !important;
+    border-color: var(--users-border) !important;
+}
+
+body.dtc-dark .table tbody {
+    background: var(--users-surface) !important;
+}
+
+body.dtc-dark .table tbody tr {
+    background: var(--users-surface) !important;
+}
+
+body.dtc-dark .table tbody tr:hover {
+    background: #1a2638 !important;
+}
+
+body.dtc-dark .table td {
+    color: var(--users-text) !important;
+    border-color: var(--users-border-soft) !important;
+}
+
+
+/* User name */
+body.dtc-dark .table td div[style*="font-weight:600"] {
+    color: var(--users-text) !important;
+}
+
+
+/* Email */
+body.dtc-dark .table td[style*="color:var(--dtc-text-secondary)"] {
+    color: var(--users-text-muted) !important;
+}
+
+
+/* Joined date */
+body.dtc-dark .table td[style*="color:var(--dtc-text-muted)"] {
+    color: var(--users-text-muted) !important;
+}
+
+
+/* =========================================================
+   CARD FOOTER / PAGINATION
+   ========================================================= */
+
+body.dtc-dark .card-footer {
+    background: var(--users-surface) !important;
+    border-top: 1px solid var(--users-border) !important;
+    color: var(--users-text-muted) !important;
+}
+
+body.dtc-dark .card-footer small {
+    color: var(--users-text-muted) !important;
+}
+
+body.dtc-dark .card-footer strong {
+    color: var(--users-text) !important;
+}
+
+
+/* Bootstrap pagination */
+body.dtc-dark .user-pagination .page-link {
+    background: var(--users-surface-2) !important;
+    color: var(--users-text-muted) !important;
+    border-color: var(--users-border) !important;
+}
+
+body.dtc-dark .user-pagination .page-item.active .page-link {
+    background: #0F4CDB !important;
+    color: #fff !important;
+    border-color: #0F4CDB !important;
+}
+
+body.dtc-dark .user-pagination .page-item.disabled .page-link {
+    background: #0b1220 !important;
+    color: #475569 !important;
+    border-color: var(--users-border) !important;
+}
+
+
+/* =========================================================
+   EDIT / DELETE BUTTONS
+   ========================================================= */
+
+body.dtc-dark .btn-edit-user {
+    background: #172554 !important;
+    color: #60a5fa !important;
+    border: 1px solid #1e40af !important;
+}
+
+body.dtc-dark .btn-edit-user:hover {
+    background: #1e3a8a !important;
+    color: #bfdbfe !important;
+}
+
+body.dtc-dark td form button {
+    background: #3f1d25 !important;
+    color: #f87171 !important;
+    border: 1px solid #7f1d1d !important;
+}
+
+body.dtc-dark td form button:hover {
+    background: #581c24 !important;
+}
+
+
+/* =========================================================
+   CREATE / EDIT MODALS
+   ========================================================= */
+
+body.dtc-dark .modal-content {
+    background: var(--users-surface) !important;
+    color: var(--users-text) !important;
+    border: 1px solid var(--users-border) !important;
+}
+
+body.dtc-dark .modal-body {
+    background: var(--users-surface) !important;
+}
+
+body.dtc-dark .modal-footer {
+    background: var(--users-surface) !important;
+    border-top: 1px solid var(--users-border) !important;
+}
+
+
+/* Modal labels */
+body.dtc-dark .modal label {
+    color: var(--users-text) !important;
+}
+
+
+/* Modal inputs */
+body.dtc-dark .modal .form-control,
+body.dtc-dark .modal select,
+body.dtc-dark .modal input {
+    background: #0f172a !important;
+    color: var(--users-text) !important;
+    border: 1px solid var(--users-border) !important;
+}
+
+body.dtc-dark .modal .form-control::placeholder {
+    color: #64748b !important;
+}
+
+body.dtc-dark .modal .form-control:focus,
+body.dtc-dark .modal select:focus {
+    background: #111827 !important;
+    color: #fff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59,130,246,.15) !important;
+}
+
+
+/* =========================================================
+   CREATE ROLE OPTIONS
+   ========================================================= */
+
+body.dtc-dark .create-role-option {
+    background: #111827 !important;
+    border-color: var(--users-border) !important;
+}
+
+body.dtc-dark .create-role-option span {
+    color: var(--users-text) !important;
+}
+
+body.dtc-dark .create-role-option:hover {
+    background: #172033 !important;
+    border-color: #475569 !important;
+}
+
+
+/* =========================================================
+   EDIT STATUS OPTIONS
+   ========================================================= */
+
+body.dtc-dark .edit-status-option {
+    background: #111827 !important;
+    border-color: var(--users-border) !important;
+}
+
+body.dtc-dark .edit-status-option div {
+    color: var(--users-text) !important;
+}
+
+body.dtc-dark .edit-status-option:hover {
+    background: #172033 !important;
+    border-color: #475569 !important;
+}
+
+
+/* =========================================================
+   ALERTS
+   ========================================================= */
+
+body.dtc-dark .alert-success {
+    background: #052e1b !important;
+    color: #86efac !important;
+    border: 1px solid #166534 !important;
+}
+
+body.dtc-dark .alert-danger {
+    background: #3f0d16 !important;
+    color: #fca5a5 !important;
+    border: 1px solid #991b1b !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 767.98px) {
+
+    body.dtc-dark .table-responsive {
+        border: 1px solid var(--users-border);
+        border-radius: 10px;
+    }
+
+    body.dtc-dark .card {
+        border-radius: 14px !important;
+    }
+
+    body.dtc-dark .card-header {
+        padding: 14px !important;
+    }
+
+}
+</style>
 @endsection
 
 @section('js')

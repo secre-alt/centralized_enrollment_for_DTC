@@ -96,6 +96,18 @@
         <meta name="msapplication-TileImage" content="{{ asset('favicons/ms-icon-144x144.png') }}">
     @endif
 
+    {{-- DTC EMS theme preload: prevents light-mode flash on saved dark theme --}}
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('dtc-ems-theme') === 'dark') {
+                    document.documentElement.classList.add('dtc-dark-preload');
+                    document.documentElement.classList.add('dtc-dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
 </head>
 
 <body class="@yield('classes_body')" @yield('body_data')>

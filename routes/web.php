@@ -152,8 +152,8 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::get('/payments/{enrollment}/receipt', [CashierPaymentController::class, 'receipt'])->name('payments.receipt');
     Route::get('/payments/{payment}/proof', [CashierPaymentController::class, 'viewProof'])->name('payments.proof'); 
 
-    Route::post('/payments/{payment}/verify', [CashierPaymentController::class, 'verify'])->name('cashier.payments.verify');
-    Route::post('/payments/{payment}/reject', [CashierPaymentController::class, 'reject'])->name('cashier.payments.reject');
+    Route::post('/payments/{payment}/verify', [CashierPaymentController::class, 'verify'])->name('payments.verify');
+    Route::post('/payments/{payment}/reject', [CashierPaymentController::class, 'reject'])->name('payments.reject');
     });
 
     // ── PORTAL (Student / Alumni / New Applicant) ─────────────────────────────────

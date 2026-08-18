@@ -6,7 +6,7 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Manage Appointment Slots</h4>
+            <h4 class="mb-0 font-w<h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Manage Appointment Slots</h4>
             <p class="mb-0" style="color:#64748B; font-size:13px;">Set available dates and times for student appointments</p>
         </div>
         <a href="{{ route('registrar.appointments.index') }}" class="btn btn-primary btn-sm">

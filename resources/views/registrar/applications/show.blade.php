@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-
+@extends('partials.navbar')
 @section('title', 'Review Application')
 
 @section('content_header')
@@ -25,7 +25,7 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">
+           <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">
                 Pre-Enrollment Application
             </h4>
             <p class="mb-0" style="color:#64748B; font-size:13px;">

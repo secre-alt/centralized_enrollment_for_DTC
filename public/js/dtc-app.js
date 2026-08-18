@@ -1,3 +1,145 @@
+// ── DTC EMS — Dark Mode ───────────────────────────────────────────────────
+const DTC_THEME_KEY = 'dtc-ems-theme';
+
+function getDtcTheme() {
+    return localStorage.getItem(DTC_THEME_KEY) || 'light';
+}
+
+function applyDtcTheme(theme) {
+    const enabled = theme === 'dark';
+    document.documentElement.classList.toggle('dtc-dark', enabled);
+    document.body.classList.toggle('dtc-dark', enabled);
+    document.documentElement.classList.remove('dtc-dark-preload');
+
+    const toggle = document.getElementById('darkModeToggle');
+    const icon = document.getElementById('darkModeIcon');
+
+    if (toggle) {
+        toggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        toggle.setAttribute('aria-label', enabled ? 'Enable light mode' : 'Enable dark mode');
+        toggle.setAttribute('title', enabled ? 'Enable light mode' : 'Enable dark mode');
+    }
+
+    if (icon) {
+        icon.classList.toggle('fa-moon', !enabled);
+        icon.classList.toggle('fa-sun', enabled);
+    }
+
+    // Let any page-specific code (e.g. Chart.js graphs) know the theme
+    // changed so it can re-render with the right colors.
+    document.dispatchEvent(new CustomEvent('dtc:themechange', { detail: { theme: theme, dark: enabled } }));
+}
+
+function toggleDtcTheme() {
+    const nextTheme = getDtcTheme() === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(DTC_THEME_KEY, nextTheme);
+    applyDtcTheme(nextTheme);
+}
+
+// ── Chart.js theming helper ─────────────────────────────────────────────
+// Returns the current dark/light colors a Chart.js config should use so
+// graphs match the rest of the UI (same palette as the CSS variables in
+// dtc-theme.css). Call this when building chart options, and again inside
+// a 'dtc:themechange' listener to restyle + update() existing charts.
+function getDtcChartTheme() {
+    const dark = document.body.classList.contains('dtc-dark');
+    return {
+        dark: dark,
+        text: dark ? '#94A3B8' : '#94A3B8',
+        grid: dark ? 'rgba(148, 163, 184, 0.15)' : '#F1F5F9',
+        tooltipBg: dark ? '#1E293B' : '#1E293B',
+        tooltipText: dark ? '#F8FAFC' : '#F8FAFC',
+        pointBorder: dark ? '#111827' : '#ffffff',
+    };
+}
+
+// Registry so multiple charts on one page can all be restyled together.
+window.dtcCharts = window.dtcCharts || [];
+
+function registerDtcChart(chart) {
+    window.dtcCharts.push(chart);
+    return chart;
+}
+
+document.addEventListener('dtc:themechange', function () {
+    const theme = getDtcChartTheme();
+    window.dtcCharts.forEach(function (chart) {
+        if (!chart || !chart.options) return;
+        if (chart.options.scales) {
+            ['x', 'y'].forEach(function (axis) {
+                if (chart.options.scales[axis]) {
+                    if (chart.options.scales[axis].ticks) chart.options.scales[axis].ticks.color = theme.text;
+                    if (chart.options.scales[axis].grid) chart.options.scales[axis].grid.color = theme.grid;
+                }
+            });
+        }
+        if (chart.data && chart.data.datasets) {
+            chart.data.datasets.forEach(function (ds) {
+                if (Object.prototype.hasOwnProperty.call(ds, 'pointBorderColor')) {
+                    ds.pointBorderColor = theme.pointBorder;
+                }
+            });
+        }
+        chart.update();
+    });
+});
+
+// Apply the saved theme as early as possible.
+applyDtcTheme(getDtcTheme());
+
+document.addEventListener('click', function (event) {
+    const toggle = event.target.closest('#darkModeToggle');
+    if (!toggle) return;
+    toggleDtcTheme();
+});
+
+// ── Progressive UX helpers ─────────────────────────────────────────────────
+document.addEventListener('submit', function (event) {
+    const form = event.target;
+    const submit = form.querySelector('[data-loading-text], .dtc-loading-button');
+    if (!submit || form.dataset.submitting === 'true') return;
+    form.dataset.submitting = 'true';
+    submit.dataset.originalText = submit.innerHTML;
+    submit.disabled = true;
+    submit.classList.add('is-loading');
+    submit.innerHTML = submit.getAttribute('data-loading-text') || 'Processing…';
+}, true);
+
+// Delete confirmation fallback
+document.addEventListener('submit', function (event) {
+    // Delete forms get a safe confirmation even when a Blade view does not
+    // explicitly provide data-confirm.
+    const form = event.target;
+    const method = form.querySelector('input[name="_method"]');
+    if (method && method.value.toUpperCase() === 'DELETE' && form.dataset.confirmed !== 'true') {
+        if (!window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        form.dataset.confirmed = 'true';
+    }
+}, true);
+
+document.addEventListener('click', function (event) {
+    const trigger = event.target.closest('[data-confirm]');
+    if (!trigger) return;
+    const message = trigger.getAttribute('data-confirm') || 'Are you sure?';
+    if (!window.confirm(message)) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+}, true);
+
+document.addEventListener('change', function (event) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'file') return;
+    const label = input.closest('.dtc-file-upload');
+    if (!label) return;
+    const title = label.querySelector('.dtc-file-upload-title');
+    if (title && input.files && input.files[0]) title.textContent = input.files[0].name;
+}, true);
+
 // ── Global Search ─────────────────────────────────────────────────────────
 
 const SUGGESTIONS  = ['Dashboard', 'Enrollment', 'Appointments', 'Payments', 'Settings', 'Users', 'Notifications'];

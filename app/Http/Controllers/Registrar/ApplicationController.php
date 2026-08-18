@@ -27,7 +27,7 @@ class ApplicationController extends Controller
                 $query->where('status', $request->query('status'));
             })
             ->latest()
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
         return view('registrar.applications.index', compact('applications'));

@@ -1,15 +1,16 @@
-<aside class="main-sidebar {{ config('adminlte.classes_sidebar', 'sidebar-dark-primary elevation-4') }}">
+<aside class="main-sidebar {{ config('adminlte.classes_sidebar', 'sidebar-light-primary elevation-4') }}">
 
-    {{-- Sidebar brand logo --}}
+    {{-- Brand --}}
     @if(config('adminlte.logo_img_xl'))
         @include('adminlte::partials.common.brand-logo-xl')
     @else
         @include('adminlte::partials.common.brand-logo-xs')
     @endif
 
-    {{-- Sidebar menu --}}
+    {{-- Sidebar menu (AdminLTE manages this region's own scrolling via
+         OverlayScrollbars at runtime — see notes in dtc-theme.css) --}}
     <div class="sidebar">
-        <nav class="pt-2">
+        <nav class="pt-1">
             <ul class="nav nav-pills nav-sidebar flex-column {{ config('adminlte.classes_sidebar_nav', '') }}"
                 data-widget="treeview" role="menu"
                 @if(config('adminlte.sidebar_nav_animation_speed') != 300)
@@ -18,10 +19,65 @@
                 @if(!config('adminlte.sidebar_nav_accordion'))
                     data-accordion="false"
                 @endif>
-                {{-- Configured sidebar links --}}
                 @each('adminlte::partials.sidebar.menu-item', $adminlte->menu('sidebar'), 'item')
             </ul>
         </nav>
     </div>
 
+    {{-- Signed-in user panel: pinned to the bottom of the sidebar.
+         Deliberately NOT nested inside .sidebar above — AdminLTE's JS
+         applies its own scrollbar plugin to that element and would
+         sweep this panel into the scrolling nav region with it. --}}
+    @auth
+        @php
+            $sidebarRole = auth()->user()->getRoleNames()->first() ?? '';
+            $sidebarRoleLabel = ucfirst(str_replace('_', ' ', $sidebarRole));
+            $sidebarInitials = collect(preg_split('/\s+/', trim(auth()->user()->name)))
+                ->filter()
+                ->take(2)
+                ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
+                ->implode('');
+        @endphp
+        <div class="dtc-sidebar-user-panel">
+            <div class="dtc-sidebar-user-main">
+                <div class="dtc-sidebar-avatar" aria-hidden="true">{{ $sidebarInitials ?: 'U' }}</div>
+                <div class="dtc-sidebar-user-copy">
+                    <div class="dtc-sidebar-user-name" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
+                    <div class="dtc-sidebar-user-role">{{ $sidebarRoleLabel }}</div>
+                </div>
+                <button class="dtc-sidebar-profile-toggle"
+                        type="button"
+                        data-toggle="collapse"
+                        data-target="#dtcSidebarProfileMenu"
+                        aria-expanded="false"
+                        aria-controls="dtcSidebarProfileMenu"
+                        aria-label="Open account menu">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+            <div class="collapse dtc-sidebar-profile-menu" id="dtcSidebarProfileMenu">
+                <a href="{{ route('notifications.index') }}" class="dtc-sidebar-profile-link">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    @if(auth()->user()->unreadNotificationsCount() > 0)
+                        <span class="dtc-sidebar-profile-badge">{{ auth()->user()->unreadNotificationsCount() }}</span>
+                    @endif
+                </a>
+                @if(auth()->user()->hasRole('admin'))
+                    <a href="{{ route('admin.settings.index') }}" class="dtc-sidebar-profile-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                @endif
+                <div class="dtc-sidebar-profile-divider"></div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="dtc-sidebar-profile-link is-danger">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endauth
 </aside>

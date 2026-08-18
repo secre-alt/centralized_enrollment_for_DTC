@@ -6,14 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">
-                <h1 class="dashboard-title">
-                    New Applicant Dashboard
-                </h1>
-            </h4>
-            <p class="dashboard-subtitle mb-0" style="color:#64748B; font-size:13px;">
-                Welcome to Danao Technological College!
-            </p>
+            <h4 class="mb-0 font-weight-bold">New Applicant Dashboard</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Welcome to Danao Technological College!</p>
         </div>
     </div>
 @endsection
@@ -41,128 +35,39 @@
             $enrollmentLabel = ucfirst($enrollment->status);
         }
     }
+
+    $appStatusLabel = $application
+        ? ($applicationBadges[$application->status]['label'] ?? ucwords(str_replace('_',' ',$application->status)))
+        : 'Not Found';
 @endphp
 
 <!-- TOP STAT CARDS -->
 <div class="row mb-3">
-    {{-- Application Status --}}
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#EEF2FF; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0;">
-                    <i class="fas fa-file-alt" style="font-size:20px; color:#0F4CDB;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Pre-Enrollment Application
-                    </div>
-                    <div style="font-size:15px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        @if($application)
-                            {{ $applicationBadges[$application->status]['label'] ?? ucwords(str_replace('_',' ',$application->status)) }}
-                        @else
-                            Not Found
-                        @endif
-                    </div>
-                </div>
-            </div>
-            <a href="{{ route('portal.application.show') }}"
-               style="font-size:12px; color:#0F4CDB; text-decoration:none;
-                      display:block; margin-top:12px; font-weight:600;">
-                View Application →
-            </a>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-file-alt" color="primary"
+            label="Pre-Enrollment Application" value="{{ $appStatusLabel }}"
+            href="{{ route('portal.application.show') }}" link-text="View Application" />
     </div>
 
-    {{-- Official Enrollment Status --}}
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#FEF9C3; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0;">
-                    <i class="fas fa-graduation-cap" style="font-size:20px; color:#D97706;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Official Enrollment
-                    </div>
-                    <div style="font-size:15px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        {{ $enrollmentLabel }}
-                    </div>
-                </div>
-            </div>
-            <a href="{{ route('portal.enrollment.index') }}"
-               style="font-size:12px; color:#D97706; text-decoration:none;
-                      display:block; margin-top:12px; font-weight:600;">
-                View Details →
-            </a>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-graduation-cap" color="warning"
+            label="Official Enrollment" value="{{ $enrollmentLabel }}"
+            href="{{ route('portal.enrollment.index') }}" link-text="View Details" />
     </div>
 
-    {{-- Program --}}
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#DCFCE7; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0;">
-                    <i class="fas fa-book" style="font-size:20px; color:#15803D;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Approved Program
-                    </div>
-                    <div style="font-size:13px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        {{ $application->program->name ?? 'Not provided' }}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-book" color="success"
+            label="Approved Program" value="{{ $application->program->name ?? 'Not provided' }}" />
     </div>
 
-    {{-- Notifications --}}
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#EDE9FE; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0; position:relative;">
-                    <i class="fas fa-bell" style="font-size:20px; color:#7C3AED;"></i>
-                    @if($unreadCount > 0)
-                        <span style="position:absolute; top:-4px; right:-4px;
-                                     background:#EF4444; color:#fff; font-size:9px;
-                                     font-weight:700; border-radius:50%; width:18px;
-                                     height:18px; display:flex; align-items:center;
-                                     justify-content:center;">
-                            {{ $unreadCount }}
-                        </span>
-                    @endif
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Notifications
-                    </div>
-                    <div style="font-size:15px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        {{ $unreadCount }} New
-                    </div>
-                </div>
-            </div>
-            <a href="{{ route('notifications.index') }}"
-               style="font-size:12px; color:#7C3AED; text-decoration:none;
-                      display:block; margin-top:12px; font-weight:600;">
-                View All →
-            </a>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-bell" color="info" :badge="$unreadCount"
+            label="Notifications" value="{{ $unreadCount }} New"
+            href="{{ route('notifications.index') }}" />
     </div>
 </div>
 
@@ -179,10 +84,10 @@
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
             <div>
-                <h4 style="font-weight:800; color:#1E293B; margin:0 0 4px;">
+                <h4 style="font-weight:800; margin:0 0 4px;">
                     Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
                 </h4>
-                <p style="font-size:13px; color:#4338CA; margin:0;">
+                <p style="font-size:13px; color:var(--dtc-text); margin:0;">
                     @if($application && $application->status === 'approved')
                         Your pre-enrollment application has been approved.
                         @if(!$enrollment)
@@ -206,7 +111,7 @@
         {{-- Application Summary --}}
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold" style="color:#1E293B;">Pre-Enrollment Application</span>
+                <span class="font-weight-bold">Pre-Enrollment Application</span>
                 @if($application)
                     <span style="background:{{ $applicationBadges[$application->status]['bg'] ?? '#F1F5F9' }};
                                  color:{{ $applicationBadges[$application->status]['color'] ?? '#475569' }};
@@ -222,7 +127,7 @@
                             <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
                                 Reference Number
                             </div>
-                            <div style="font-size:14px; font-weight:700; color:#1E293B;">
+                            <div style="font-size:14px; font-weight:700;">
                                 {{ $application->reference_no }}
                             </div>
                         </div>
@@ -230,7 +135,7 @@
                             <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
                                 Program
                             </div>
-                            <div style="font-size:14px; font-weight:700; color:#1E293B;">
+                            <div style="font-size:14px; font-weight:700;">
                                 {{ $application->program->name ?? 'Not provided' }}
                             </div>
                         </div>
@@ -238,7 +143,7 @@
                             <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
                                 Submitted
                             </div>
-                            <div style="font-size:13px; color:#334155;">
+                            <div style="font-size:13px; color:var(--dtc-text);">
                                 {{ $application->created_at ? $application->created_at->format('M d, Y') : 'Not provided' }}
                             </div>
                         </div>
@@ -246,7 +151,7 @@
                             <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
                                 Approved
                             </div>
-                            <div style="font-size:13px; color:#334155;">
+                            <div style="font-size:13px; color:var(--dtc-text);">
                                 {{ $application->reviewed_at ? $application->reviewed_at->format('M d, Y') : 'Not yet reviewed' }}
                             </div>
                         </div>
@@ -254,7 +159,7 @@
                             <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
                                 Documents Submitted
                             </div>
-                            <div style="font-size:13px; color:#334155;">
+                            <div style="font-size:13px; color:var(--dtc-text);">
                                 {{ $application->documents_count }} document{{ $application->documents_count == 1 ? '' : 's' }}
                             </div>
                         </div>
@@ -263,7 +168,7 @@
                             <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
                                 Registrar Remarks
                             </div>
-                            <div style="font-size:13px; color:#334155;">
+                            <div style="font-size:13px; color:var(--dtc-text);">
                                 {{ $application->remarks }}
                             </div>
                         </div>
@@ -288,7 +193,7 @@
 
         {{-- Next Step --}}
         <div class="card mb-3">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">Next Step</div>
+            <div class="card-header font-weight-bold">Next Step</div>
             <div class="card-body p-0">
                 @if($nextStep['url'])
                     <a href="{{ $nextStep['url'] }}"
@@ -302,7 +207,7 @@
                             <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
                                 {{ $nextStep['label'] }}
                             </div>
-                            <div style="font-size:12px; color:#64748B; margin-top:2px;">
+                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
                                 {{ $nextStep['desc'] }}
                             </div>
                         </div>
@@ -315,10 +220,10 @@
                             <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#94A3B8;"></i>
                         </div>
                         <div>
-                            <div style="font-size:14px; font-weight:700; color:#1E293B;">
+                            <div style="font-size:14px; font-weight:700;">
                                 {{ $nextStep['label'] }}
                             </div>
-                            <div style="font-size:12px; color:#64748B; margin-top:2px;">
+                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
                                 {{ $nextStep['desc'] }}
                             </div>
                         </div>
@@ -335,7 +240,7 @@
         {{-- Announcements --}}
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold" style="color:#1E293B;">Announcements</span>
+                <span class="font-weight-bold">Announcements</span>
                 <a href="{{ route('notifications.index') }}"
                    style="font-size:12px; color:#0F4CDB; text-decoration:none; font-weight:600;">
                     View All
@@ -353,7 +258,7 @@
                                       color:{{ $notif->type === 'success' ? '#15803D' : ($notif->type === 'danger' ? '#DC2626' : '#1D4ED8') }};"></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <div style="font-size:13px; font-weight:600;">
                                 {{ $notif->title }}
                             </div>
                             <div style="font-size:11px; color:#94A3B8; margin-top:2px;">
@@ -372,7 +277,7 @@
 
         {{-- Quick Actions --}}
         <div class="card mb-3">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">Quick Actions</div>
+            <div class="card-header font-weight-bold">Quick Actions</div>
             <div class="card-body p-0">
                 @php
                     $actions = [
@@ -397,10 +302,10 @@
                                style="font-size:14px; color:#0F4CDB;"></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <div style="font-size:13px; font-weight:600;">
                                 {{ $action['label'] }}
                             </div>
-                            <div style="font-size:11px; color:#64748B;">
+                            <div style="font-size:11px; color:var(--dtc-text-secondary);">
                                 {{ $action['sub'] }}
                             </div>
                         </div>

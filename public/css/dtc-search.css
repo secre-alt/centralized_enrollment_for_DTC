@@ -385,3 +385,148 @@
         transform: translateX(-50%);
     }
 }
+
+/* ============================================================
+   Dark mode
+   ============================================================ */
+
+body.dtc-dark .navbar-search-input {
+    background: var(--dtc-surface-soft);
+    border-color: var(--dtc-border);
+    color: var(--dtc-text);
+}
+
+body.dtc-dark .navbar-search-input::placeholder {
+    color: var(--dtc-text-muted);
+}
+
+body.dtc-dark .navbar-search-input:focus {
+    background: var(--dtc-surface);
+    border-color: var(--dtc-primary);
+    box-shadow: 0 0 0 3px rgba(15, 76, 219, 0.18);
+}
+
+body.dtc-dark .navbar-search-icon {
+    color: var(--dtc-text-muted);
+}
+
+body.dtc-dark .navbar-search-input:focus + .navbar-search-icon,
+body.dtc-dark .navbar-search-wrapper:focus-within .navbar-search-icon {
+    color: var(--dtc-primary);
+}
+
+/* ── Keyboard shortcut badge ─────────────────────────────── */
+body.dtc-dark .search-kbd-key {
+    background: var(--dtc-surface);
+    border-color: var(--dtc-border);
+    color: var(--dtc-text-muted);
+}
+
+/* ── Clear button ────────────────────────────────────────── */
+body.dtc-dark .search-clear-btn {
+    background: var(--dtc-border);
+    color: var(--dtc-text-secondary);
+}
+
+body.dtc-dark .search-clear-btn:hover {
+    background: #475569;
+    color: var(--dtc-text);
+}
+
+/* ── Dropdown ────────────────────────────────────────────── */
+body.dtc-dark .search-dropdown {
+    background: var(--dtc-surface);
+    border-color: var(--dtc-border);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
+}
+
+body.dtc-dark .search-section-label {
+    color: var(--dtc-text-muted);
+}
+
+body.dtc-dark .search-section + .search-section {
+    border-top-color: var(--dtc-border);
+}
+
+body.dtc-dark .search-section-footer {
+    border-top-color: var(--dtc-border);
+}
+
+/* ── Suggestion item ─────────────────────────────────────── */
+body.dtc-dark .search-suggestion-item:hover {
+    background: var(--dtc-surface-soft);
+}
+
+body.dtc-dark .search-suggestion-item span {
+    color: var(--dtc-text);
+}
+
+/* ── Recent chip ─────────────────────────────────────────── */
+body.dtc-dark .search-recent-chip {
+    background: var(--dtc-surface-soft);
+    border-color: var(--dtc-border);
+    color: var(--dtc-text-secondary);
+}
+
+body.dtc-dark .search-recent-chip:hover {
+    background: var(--dtc-border);
+    color: var(--dtc-text);
+}
+
+body.dtc-dark .search-recent-chip.highlighted {
+    background: #1E3A8A;
+    border-color: #2563EB;
+    color: #BFDBFE;
+}
+
+body.dtc-dark .search-clear-recent {
+    color: var(--dtc-primary);
+}
+
+body.dtc-dark .search-clear-recent:hover {
+    color: #5B8DEF;
+}
+
+body.dtc-dark .search-no-recent {
+    color: var(--dtc-text-muted);
+}
+
+/* ── Result item ─────────────────────────────────────────── */
+body.dtc-dark .search-result-item:hover {
+    background: var(--dtc-surface-soft);
+}
+
+body.dtc-dark .search-result-title {
+    color: var(--dtc-text);
+}
+
+body.dtc-dark .search-result-desc {
+    color: var(--dtc-text-secondary);
+}
+
+body.dtc-dark .search-result-icon.page        { background: #1E3A8A; color: #93C5FD; }
+body.dtc-dark .search-result-icon.user        { background: #14532D; color: #86EFAC; }
+body.dtc-dark .search-result-icon.enrollment  { background: #713F12; color: #FDE68A; }
+body.dtc-dark .search-result-icon.appointment { background: #4C1D95; color: #C4B5FD; }
+
+body.dtc-dark .search-result-badge.page        { background: #1E3A8A; color: #93C5FD; }
+body.dtc-dark .search-result-badge.user        { background: #14532D; color: #86EFAC; }
+body.dtc-dark .search-result-badge.enrollment  { background: #713F12; color: #FDE68A; }
+body.dtc-dark .search-result-badge.appointment { background: #4C1D95; color: #C4B5FD; }
+
+/* ── States ──────────────────────────────────────────────── */
+body.dtc-dark .search-loading i {
+    color: var(--dtc-primary);
+}
+
+body.dtc-dark .search-empty i {
+    color: var(--dtc-border);
+}
+
+body.dtc-dark .search-empty-title {
+    color: var(--dtc-text);
+}
+
+body.dtc-dark .search-empty-sub {
+    color: var(--dtc-text-muted);
+}

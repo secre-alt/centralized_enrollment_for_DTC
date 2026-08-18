@@ -14,7 +14,7 @@ class DocumentRequestController extends Controller
     {
         $requests = DocumentRequest::with('user')
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('registrar.documents.index', compact('requests'));
     }

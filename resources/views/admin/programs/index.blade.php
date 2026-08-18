@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Programs & Subjects</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">Manage academic programs and their subjects</p>
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Programs & Subjects</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Manage academic programs and their subjects</p>
         </div>
     </div>
 @endsection

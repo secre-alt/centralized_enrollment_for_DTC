@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $rejectedRequests    = Enrollment::where('status', 'rejected')->count();
 
         $recentEnrollments = Enrollment::with('user', 'program')
-            ->latest()->take(5)->get();
+            ->latest()->take(5)->paginate(5);
 
         $recentNotifications = UserNotification::latest()->take(4)->get();
 

@@ -17,7 +17,7 @@ class AppointmentController extends Controller
         $slots = AppointmentSlot::withCount('appointments')
             ->orderBy('date')
             ->orderBy('start_time')
-            ->get();
+            ->paginate(10);
 
         return view('registrar.appointments.slots', compact('slots'));
     }

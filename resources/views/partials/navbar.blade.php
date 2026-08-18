@@ -71,17 +71,6 @@
 </li>
 @endsection
 
-<!-- {{-- Pinned sidebar logout --}}
-@push('sidebar_custom')
-    <div class="sidebar-logout-wrapper">
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="sidebar-logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </form>
-    </div>
-@endpush -->
 
 @section('content_top_nav_right')
 @php
@@ -91,41 +80,42 @@
         ->latest()->take(5)->get();
 @endphp
 
+{{-- Dark Mode Toggle --}}
+<li class="nav-item navbar-theme-toggle">
+    <button
+        type="button"
+        id="darkModeToggle"
+        class="theme-toggle-btn"
+        aria-label="Enable dark mode"
+        aria-pressed="false"
+        title="Enable dark mode">
+        <i class="fas fa-moon" id="darkModeIcon" aria-hidden="true"></i>
+    </button>
+</li>
+
 <!-- Notification Bell Dropdown -->
 <li class="nav-item dropdown mr-2 navbar-notification-item" id="notif-dropdown">
-    <a href="#" class="nav-link dropdown-toggle"
-       data-toggle="dropdown" id="notifBell"
-       style="position:relative; padding:8px 10px; display:flex; align-items:center;">
-        <i class="fas fa-bell" style="font-size:18px; color:#64748B;"></i>
+    <a href="#" class="nav-link dropdown-toggle navbar-icon-link"
+       data-toggle="dropdown" id="notifBell" aria-label="Open notifications"
+       aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-bell navbar-icon" aria-hidden="true"></i>
         @if($unread > 0)
-            <span id="notif-badge"
-                  style="position:absolute; top:2px; right:2px;
-                         background:#EF4444; color:#fff; font-size:9px;
-                         font-weight:700; border-radius:50%;
-                         min-width:16px; height:16px; padding:0 4px;
-                         display:inline-flex; align-items:center;
-                         justify-content:center; line-height:1;
-                         font-family:'Poppins',sans-serif;
-                         z-index:10; border:2px solid #fff;">
+            <span id="notif-badge" class="navbar-notification-badge">
                 {{ $unread }}
             </span>
         @endif
     </a>
 
     {{-- Dropdown Panel --}}
-    <div class="dropdown-menu dropdown-menu-right p-0 notify-dropdown"
-         style="width:360px; border:none; border-radius:16px;
-                box-shadow:0 8px 40px rgba(0,0,0,0.15); overflow:hidden;
-                margin-top:8px;">
+    <div class="dropdown-menu dropdown-menu-right p-0 notify-dropdown">
 
         {{-- Header --}}
-        <div style="padding:16px 20px; background:linear-gradient(135deg,#0F4CDB,#1a5feb);
-                    display:flex; justify-content:space-between; align-items:center;">
+        <div class="notify-header">
             <div>
-                <div style="font-size:14px; font-weight:700; color:#fff;">
+                <div class="notify-header-title">
                     Notifications
                 </div>
-                <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:2px;">
+                <div class="notify-header-subtitle">
                     @if($unread > 0)
                         {{ $unread }} unread notification{{ $unread > 1 ? 's' : '' }}
                     @else
@@ -134,69 +124,51 @@
                 </div>
             </div>
             @if($unread > 0)
-            <a href="{{ route('notifications.index') }}"
-               style="font-size:11px; color:#FFC72C; font-weight:600;
-                      text-decoration:none; background:rgba(255,255,255,0.15);
-                      padding:4px 10px; border-radius:20px;">
+            <a href="{{ route('notifications.index') }}" class="notify-mark-read">
                 Mark all read
             </a>
             @endif
         </div>
 
         {{-- Notification List --}}
-        <div style="max-height:320px; overflow-y:auto;">
+        <div class="notify-list">
             @forelse($recentNotifs as $notif)
             <a href="{{ route('notifications.read', $notif) }}"
-               class="notif-item"
-               style="display:flex; align-items:flex-start; gap:12px;
-                      padding:14px 20px; border-bottom:1px solid #F1F5F9;
-                      text-decoration:none; transition:background 0.2s;
-                      background:{{ $notif->isRead() ? '#ffffff' : '#F8FAFF' }};">
+               class="notif-item {{ $notif->isRead() ? 'is-read' : 'is-unread' }}">
 
                 {{-- Icon --}}
-                <div style="width:36px; height:36px; border-radius:10px; flex-shrink:0;
-                            display:flex; align-items:center; justify-content:center;
-                            background:{{ $notif->type === 'success' ? '#DCFCE7' :
-                                          ($notif->type === 'danger'  ? '#FEE2E2' :
-                                          ($notif->type === 'warning' ? '#FEF9C3' : '#DBEAFE')) }};
-                            font-size:14px;
-                            color:{{ $notif->type === 'success' ? '#15803D' :
-                                     ($notif->type === 'danger'  ? '#DC2626' :
-                                     ($notif->type === 'warning' ? '#A16207' : '#1D4ED8')) }};">
+                <div class="notif-icon notif-icon-{{ $notif->type }}">
                     <i class="fas {{ $notif->type === 'success' ? 'fa-check-circle' :
                                     ($notif->type === 'danger'   ? 'fa-times-circle' :
                                     ($notif->type === 'warning'  ? 'fa-exclamation-circle' : 'fa-info-circle')) }}"></i>
                 </div>
 
                 {{-- Content --}}
-                <div style="flex:1; min-width:0;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                        <div style="font-size:13px; font-weight:{{ $notif->isRead() ? '500' : '700' }};
-                                    color:#1E293B; line-height:1.4;">
+                <div class="notif-body">
+                    <div class="notif-row">
+                        <div class="notif-title {{ $notif->isRead() ? 'is-read' : 'is-unread' }}">
                             {{ $notif->title }}
                         </div>
                         @if(!$notif->isRead())
-                            <div style="width:8px; height:8px; border-radius:50%;
-                                        background:#0F4CDB; flex-shrink:0; margin-top:4px;"></div>
+                            <div class="notif-dot" aria-label="Unread notification"></div>
                         @endif
                     </div>
-                    <div style="font-size:12px; color:#64748B; margin-top:3px;
-                                white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    <div class="notif-message">
                         {{ Str::limit($notif->message, 60) }}
                     </div>
-                    <div style="font-size:11px; color:#94A3B8; margin-top:4px;">
-                        <i class="fas fa-clock" style="font-size:10px; margin-right:3px;"></i>
+                    <div class="notif-time">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
                         {{ $notif->created_at->diffForHumans() }}
                     </div>
                 </div>
             </a>
             @empty
-            <div style="padding:32px 20px; text-align:center;">
-                <i class="fas fa-bell-slash" style="font-size:32px; color:#E2E8F0; display:block; margin-bottom:12px;"></i>
-                <div style="font-size:13px; font-weight:600; color:#1E293B; margin-bottom:4px;">
+            <div class="notify-empty">
+                <i class="fas fa-bell-slash notify-empty-icon" aria-hidden="true"></i>
+                <div class="notify-empty-title">
                     No notifications yet
                 </div>
-                <div style="font-size:12px; color:#94A3B8;">
+                <div class="notify-empty-subtitle">
                     You're all caught up!
                 </div>
             </div>
@@ -205,10 +177,8 @@
 
         {{-- Footer --}}
         @if($recentNotifs->isNotEmpty())
-        <div style="padding:12px 20px; text-align:center;
-                    border-top:1px solid #F1F5F9; background:#F8FAFC;">
-            <a href="{{ route('notifications.index') }}"
-               style="font-size:13px; font-weight:600; color:#0F4CDB; text-decoration:none;">
+        <div class="notify-footer">
+            <a href="{{ route('notifications.index') }}" class="notify-view-all">
                 View all notifications →
             </a>
         </div>
@@ -216,84 +186,124 @@
     </div>
 </li>
 
-{{-- User Profile Dropdown --}}
-<li class="nav-item dropdown mr-2 navbar-profile-item">
-    <a href="#" class="nav-link dropdown-toggle d-flex align-items-center"
-       data-toggle="dropdown" style="gap:10px; padding:4px 8px;">
-        <div style="width:36px; height:36px; border-radius:50%;
-                    background:linear-gradient(135deg,#0F4CDB,#1a5feb);
-                    display:flex; align-items:center; justify-content:center;
-                    color:#fff; font-weight:700; font-size:14px;
-                    font-family:'Poppins',sans-serif; flex-shrink:0;">
-            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-        </div>
-        <div style="line-height:1.2;">
-            <div style="font-size:13px; font-weight:600; color:#1E293B;">
-                {{ auth()->user()->name }}
-            </div>
-            <div style="font-size:11px; color:#64748B;">
-                {{ ucfirst(str_replace('_', ' ', auth()->user()->getRoleNames()->first() ?? '')) }}
-            </div>
-        </div>
-    </a>
-    <div class="dropdown-menu dropdown-menu-right"
-         style="border:none; border-radius:14px;
-                box-shadow:0 8px 30px rgba(0,0,0,0.12);
-                padding:8px; min-width:200px; margin-top:8px;">
-
-        <div class="navbar-user-info" style="line-height:1.2;">
-            <div style="font-size:13px; font-weight:600; color:#1E293B;">
-                {{ auth()->user()->name }}
-            </div>
-            <div style="font-size:11px; color:#64748B;">
-                {{ auth()->user()->email }}
-            </div>
-        </div>
-
-        <a class="dropdown-item" href="{{ route('notifications.index') }}"
-           style="border-radius:8px; font-size:13px; padding:10px 14px;
-                  font-family:'Poppins',sans-serif; color:#1E293B;">
-            <i class="fas fa-bell mr-2" style="color:#0F4CDB; width:16px;"></i>
-            Notifications
-            @if($unread > 0)
-                <span style="float:right; background:#EF4444; color:#fff; font-size:9px;
-                             font-weight:700; border-radius:50%; width:18px; height:18px;
-                             display:inline-flex; align-items:center; justify-content:center;">
-                    {{ $unread }}
-                </span>
-            @endif
-        </a>
-
-        <div style="border-top:1px solid #F1F5F9; margin:6px 0;"></div>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="dropdown-item"
-                    style="border-radius:8px; font-size:13px; padding:10px 14px;
-                           font-family:'Poppins',sans-serif; color:#EF4444;
-                           background:none; border:none; width:100%;
-                           text-align:left; cursor:pointer;">
-                <i class="fas fa-sign-out-alt mr-2" style="width:16px;"></i>
-                Logout
-            </button>
-        </form>
-    </div>
-</li>
 @endsection
 
 @section('css')
+@section('css')
 <style>
-.notif-item:hover {
-    background: #F0F4FF !important;
-    text-decoration: none !important;
+/* =========================================================
+   NAVBAR — THEME TOGGLE + NOTIFICATION
+   ========================================================= */
+
+/* Remove Bootstrap dropdown arrow */
+#notifBell::after {
+    display: none !important;
 }
 
-/* Scrollbar inside notification dropdown */
-.dropdown-menu div::-webkit-scrollbar { width: 4px; }
-.dropdown-menu div::-webkit-scrollbar-track { background: #F1F5F9; }
-.dropdown-menu div::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+/* Consistent spacing between right-side navbar controls */
+.navbar-theme-toggle,
+.navbar-notification-item {
+    margin-left: 6px !important;
+    margin-right: 6px !important;
+}
 
-/* Hide Bootstrap's dropdown arrow on bell */
-#notifBell::after { display: none !important; }
+/* Dark mode + notification button containers */
+.navbar-theme-toggle,
+.navbar-notification-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Dark mode button */
+.theme-toggle-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #e5e7eb !important;
+    border-radius: 10px;
+
+    background: transparent;
+    color: inherit;
+
+    padding: 0;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+/* Notification button */
+.navbar-notification-item .navbar-icon-link {
+    width: 40px;
+    height: 40px;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #e5e7eb !important;
+    border-radius: 10px;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    background: transparent;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+/* Hover */
+.theme-toggle-btn:hover,
+.navbar-notification-item .navbar-icon-link:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: #d1d5db !important;
+}
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+body.dtc-dark .theme-toggle-btn,
+body.dtc-dark .navbar-notification-item .navbar-icon-link {
+    border-color: #374151 !important;
+}
+
+/* Dark mode hover */
+body.dtc-dark .theme-toggle-btn:hover,
+body.dtc-dark .navbar-notification-item .navbar-icon-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #4b5563 !important;
+}
+
+/* =========================================================
+   NOTIFICATION BADGE
+   ========================================================= */
+
+.navbar-notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+
+    min-width: 17px;
+    height: 17px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 4px;
+
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+
+    line-height: 1;
+}
 </style>
+@endsection
 @endsection

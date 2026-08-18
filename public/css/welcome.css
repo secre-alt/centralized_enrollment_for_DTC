@@ -9,23 +9,27 @@
    VARIABLES
    ========================================================================== */
 
+/* These now alias the centralized tokens in dtc-tokens.css
+   (loaded before this file) instead of redeclaring raw hex,
+   so a color only ever needs to change in one place. Local
+   names are kept as-is to avoid touching every usage below. */
 :root {
-    --blue-900: #0A3399;
-    --blue-800: #0F4CDB;
-    --blue-700: #1a5feb;
+    --blue-900: var(--dtc-blue-900, #0A3399);
+    --blue-800: var(--dtc-primary, #0F4CDB);
+    --blue-700: var(--dtc-blue-700, #1A5FEB);
 
-    --yellow: #FFC72C;
-    --yellow-dark: #f0b800;
+    --yellow: var(--dtc-accent, #FFC72C);
+    --yellow-dark: var(--dtc-accent-dark, #F0B800);
 
-    --bg: #F4F8FC;
-    --white: #FFFFFF;
+    --bg: var(--dtc-bg, #F4F8FC);
+    --white: var(--dtc-surface, #FFFFFF);
 
-    --border: #E2E8F0;
+    --border: var(--dtc-border, #E2E8F0);
 
-    --text-900: #1E293B;
-    --text-700: #334155;
-    --text-500: #64748B;
-    --text-400: #94A3B8;
+    --text-900: var(--dtc-text, #1E293B);
+    --text-700: var(--dtc-text-700, #334155);
+    --text-500: var(--dtc-text-secondary, #64748B);
+    --text-400: var(--dtc-text-muted, #94A3B8);
 }
 
 html,

@@ -15,7 +15,7 @@ class EnrollmentController extends Controller
         $enrollments = Enrollment::with('user', 'program')
             ->where('status', 'pending')
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('registrar.enrollments.index', compact('enrollments'));
     }

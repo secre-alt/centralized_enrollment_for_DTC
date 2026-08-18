@@ -1,11 +1,11 @@
 @extends('adminlte::page')
-
+@extends('partials.navbar')
 @section('title', 'Applications')
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Applications</h4>
-        <p class="mb-0" style="color:#64748B; font-size:13px;">
+        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Applications</h4>
+        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
             Pre-enrollment applications for Registrar review.
         </p>
     </div>
@@ -25,7 +25,7 @@
 <div class="card mb-3">
     <div class="card-body py-2">
         <form method="GET" action="{{ route('registrar.applications.index') }}" class="form-inline">
-            <label for="status" class="mr-2 mb-0" style="font-size:13px; font-weight:600; color:#374151;">
+            <label for="status" class="mr-2 mb-0" style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                 Status
             </label>
 
@@ -66,8 +66,8 @@
 {{-- Applications Table --}}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:#1E293B;">All Applications</span>
-        <span style="font-size:13px; color:#64748B;">{{ $applications->total() }} total</span>
+        <span class="font-weight-bold" style="color:var(--dtc-text);">All Applications</span>
+        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $applications->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
@@ -97,12 +97,12 @@
                         'cross_enrollee' => 'Cross-Enrollee',
                     ];
 
-                    $statusBadges = [
-                        'submitted'         => 'badge-secondary',
-                        'under_review'      => 'badge-primary',
-                        'revision_required' => 'badge-warning',
-                        'approved'          => 'badge-success',
-                        'rejected'          => 'badge-danger',
+                    $statusVariants = [
+                        'submitted'         => 'neutral',
+                        'under_review'      => 'warning',
+                        'revision_required' => 'warning',
+                        'approved'          => 'success',
+                        'rejected'          => 'danger',
                     ];
                 @endphp
                 <tr>
@@ -116,9 +116,7 @@
                     <td>{{ $application->program->name ?? '—' }}</td>
                     <td>{{ $application->email }}</td>
                     <td>
-                        <span class="badge {{ $statusBadges[$application->status] ?? 'badge-secondary' }}">
-                            {{ ucwords(str_replace('_', ' ', $application->status)) }}
-                        </span>
+                        <x-dtc.status-badge :status="$application->status" :variant="$statusVariants[$application->status] ?? 'neutral'" />
                     </td>
                     <td>{{ $application->created_at->format('M d, Y h:i A') }}</td>
                     <td>
@@ -144,8 +142,22 @@
     </div>
 
     @if($applications->hasPages())
-    <div class="card-footer">
-        {{ $applications->links() }}
+    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
+            <small style="color:var(--dtc-text-secondary);">
+                Showing
+                <strong>{{ $applications->firstItem() }}</strong>
+                to
+                <strong>{{ $applications->lastItem() }}</strong>
+                of
+                <strong>{{ $applications->total() }}</strong>
+                applications
+            </small>
+
+            <div>
+                {{ $applications->onEachSide(1)->links('pagination::bootstrap-4') }}
+            </div>
+        </div>
     </div>
     @endif
 </div>

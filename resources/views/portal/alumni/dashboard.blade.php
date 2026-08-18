@@ -6,14 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">
-                <h1 class="dashboard-title">
-                    Alumni Dashboard
-                </h1>
-            </h4>
-            <p class="dashboard-subtitle mb-0" style="color:#64748B; font-size:13px;">
-                Welcome to Danao Technological College!
-            </p>
+            <h4 class="mb-0 font-weight-bold">Alumni Dashboard</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Welcome to Danao Technological College!</p>
         </div>
     </div>
 @endsection
@@ -32,110 +26,29 @@
 <!-- TOP STAT CARDS -->
 <div class="row mb-3">
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#EEF2FF; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0;">
-                    <i class="fas fa-folder-open" style="font-size:20px; color:#0F4CDB;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Total Requests
-                    </div>
-                    <div style="font-size:15px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        {{ $totalRequests }}
-                    </div>
-                </div>
-            </div>
-            <a href="{{ route('portal.documents.index') }}"
-               style="font-size:12px; color:#0F4CDB; text-decoration:none;
-                      display:block; margin-top:12px; font-weight:600;">
-                View All →
-            </a>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-folder-open" color="primary"
+            label="Total Requests" value="{{ $totalRequests }}"
+            href="{{ route('portal.documents.index') }}" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#EDE9FE; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0;">
-                    <i class="fas fa-box-open" style="font-size:20px; color:#7C3AED;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Ready for Pickup
-                    </div>
-                    <div style="font-size:15px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        {{ $readyRequests }}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-box-open" color="info"
+            label="Ready for Pickup" value="{{ $readyRequests }}" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#DCFCE7; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0;">
-                    <i class="fas fa-check-circle" style="font-size:20px; color:#15803D;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Released
-                    </div>
-                    <div style="font-size:15px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        {{ $releasedDocs }}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-check-circle" color="success"
+            label="Released" value="{{ $releasedDocs }}" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <div class="card" style="border-radius:16px; border:none;
-             box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:20px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <div style="width:48px; height:48px; border-radius:14px;
-                            background:#EDE9FE; display:flex; align-items:center;
-                            justify-content:center; flex-shrink:0; position:relative;">
-                    <i class="fas fa-bell" style="font-size:20px; color:#7C3AED;"></i>
-                    @if($unreadCount > 0)
-                        <span style="position:absolute; top:-4px; right:-4px;
-                                     background:#EF4444; color:#fff; font-size:9px;
-                                     font-weight:700; border-radius:50%; width:18px;
-                                     height:18px; display:flex; align-items:center;
-                                     justify-content:center;">
-                            {{ $unreadCount }}
-                        </span>
-                    @endif
-                </div>
-                <div>
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
-                                text-transform:uppercase; letter-spacing:0.5px;">
-                        Notifications
-                    </div>
-                    <div style="font-size:15px; font-weight:700; color:#1E293B; margin-top:2px;">
-                        {{ $unreadCount }} New
-                    </div>
-                </div>
-            </div>
-            <a href="{{ route('notifications.index') }}"
-               style="font-size:12px; color:#7C3AED; text-decoration:none;
-                      display:block; margin-top:12px; font-weight:600;">
-                View All →
-            </a>
-        </div>
+        <x-dtc.stat-card
+            icon="fa-bell" color="info" :badge="$unreadCount"
+            label="Notifications" value="{{ $unreadCount }} New"
+            href="{{ route('notifications.index') }}" />
     </div>
 </div>
 
@@ -152,10 +65,10 @@
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
             <div>
-                <h4 style="font-weight:800; color:#1E293B; margin:0 0 4px;">
+                <h4 style="font-weight:800; margin:0 0 4px;">
                     Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
                 </h4>
-                <p style="font-size:13px; color:#4338CA; margin:0;">
+                <p style="font-size:13px; color:var(--dtc-text); margin:0;">
                     Welcome back! Request transcripts, diplomas, and other documents anytime.
                 </p>
             </div>
@@ -170,7 +83,7 @@
     <div class="col-lg-8">
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold" style="color:#1E293B;">Recent Document Requests</span>
+                <span class="font-weight-bold">Recent Document Requests</span>
                 <a href="{{ route('portal.documents.index') }}"
                    style="font-size:12px; color:#0F4CDB; text-decoration:none; font-weight:600;">
                     View All
@@ -187,11 +100,11 @@
                             <i class="fas fa-file-alt" style="font-size:14px; color:#0F4CDB;"></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <div style="font-size:13px; font-weight:600;">
                                 {{ $req->document_label }}
                             </div>
-                            <div style="font-size:11px; color:#64748B;">
-                                {{ $req->copies }} cop{{ $req->copies > 1 ? 'ies' : 'y' }} ·
+                            <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                                {{ $req->copies }} cop{{ $req->copies> 1 ? 'ies' : 'y' }} ·
                                 {{ $req->created_at->format('M d, Y') }}
                             </div>
                         </div>
@@ -218,7 +131,7 @@
     <div class="col-lg-4">
 
         <div class="card mb-3">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">Quick Actions</div>
+            <div class="card-header font-weight-bold">Quick Actions</div>
             <div class="card-body p-0">
                 @php
                     $actions = [
@@ -243,10 +156,10 @@
                                style="font-size:14px; color:#0F4CDB;"></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <div style="font-size:13px; font-weight:600;">
                                 {{ $action['label'] }}
                             </div>
-                            <div style="font-size:11px; color:#64748B;">
+                            <div style="font-size:11px; color:var(--dtc-text-secondary);">
                                 {{ $action['sub'] }}
                             </div>
                         </div>
