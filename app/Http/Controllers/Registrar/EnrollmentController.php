@@ -31,11 +31,13 @@ class EnrollmentController extends Controller
     {
         $enrollment->update(['status' => 'approved']);
 
+        $fee = number_format(\App\Models\Setting::get('enrollment_fee', 500), 2);
+
         // ── Notify Student ────────────────────────────────────────────
         NotificationService::send(
             $enrollment->user,
             'Enrollment Approved',
-            'Your enrollment has been approved by the Registrar. Please proceed to the Cashier to pay the ₱500.00 enrollment fee.',
+            "Your enrollment has been approved by the Registrar. Please proceed to the Cashier to pay the ₱{$fee} enrollment fee.",
             'success',
             route('portal.enrollment.payment-info', $enrollment)
         );
@@ -46,7 +48,7 @@ class EnrollmentController extends Controller
             NotificationService::send(
                 $cashier,
                 'Enrollment Ready for Payment',
-                $enrollment->user->name . '\'s enrollment has been approved. They are ready to pay the ₱500.00 enrollment fee.',
+                $enrollment->user->name . "'s enrollment has been approved. They are ready to pay the ₱{$fee} enrollment fee.",
                 'info',
                 route('cashier.payments.index')
             );

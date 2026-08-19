@@ -3246,3 +3246,65 @@ body.dtc-dark .dtc-review-btn:hover {
     background: #0F4CDB;
     color: #fff;
 }
+/* ============================================================
+   12. PORTAL DASHBOARD — "NEXT STEP" CARDS
+   ------------------------------------------------------------
+   Shared between the new-applicant dashboard's single "Next Step"
+   feature block and the student dashboard's "Next Steps" list, so
+   both stay theme-aware in dark mode instead of using hardcoded
+   near-white backgrounds.
+   ============================================================ */
+
+.dtc-next-step-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 20px;
+    border: 0;
+    text-decoration: none !important;
+    background: var(--dtc-surface-soft);
+    transition: background var(--dtc-transition);
+    cursor: pointer;
+}
+
+a.dtc-next-step-btn:hover,
+button.dtc-next-step-btn:hover {
+    background: var(--dtc-primary-soft);
+}
+
+.dtc-next-step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dtc-next-step-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--dtc-border-soft);
+    text-decoration: none !important;
+    background: var(--dtc-surface);
+    transition: background var(--dtc-transition);
+}
+
+.dtc-next-step-row:last-child { border-bottom: 0; }
+
+.dtc-next-step-row:hover {
+    background: var(--dtc-surface-soft);
+}
+
+.dtc-next-step-row.is-active {
+    background: var(--dtc-primary-soft);
+}
+
+.dtc-next-step-row.is-active:hover {
+    background: var(--dtc-primary-soft);
+    filter: brightness(0.97);
+}

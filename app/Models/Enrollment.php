@@ -27,6 +27,12 @@ class Enrollment extends Model
 
     public function payment()
     {
-        return $this->hasOne(Payment::class);
+        // latestOfMany() so "the enrollment's payment" always resolves to
+        // its most recent attempt (walk-in, GCash re-submission after a
+        // rejection, etc.) instead of an arbitrary row — a plain hasOne()
+        // returns whichever row the DB hands back first, which caused the
+        // payments table to show stale status/fee data for enrollments
+        // with more than one payment record.
+        return $this->hasOne(Payment::class)->latestOfMany();
     }
 }

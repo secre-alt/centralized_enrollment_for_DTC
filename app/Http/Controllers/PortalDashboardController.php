@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\CourseSubject;
 use App\Models\DocumentRequest;
 use App\Models\Enrollment;
+use App\Models\Setting;
 use App\Models\UserNotification;
 use Illuminate\Support\Facades\Auth;
 
@@ -57,14 +58,15 @@ class PortalDashboardController extends Controller
             ->latest()->take(3)->get();
 
         // Determine the single "next step" message/action for this applicant.
-        $nextStep = $this->getNewApplicantNextStep($application, $enrollment);
+        $fee = Setting::get('enrollment_fee', 500);
+        $nextStep = $this->getNewApplicantNextStep($application, $enrollment, $fee);
 
         return view('portal.new-applicant.dashboard', compact(
             'application', 'enrollment', 'unreadCount', 'announcements', 'nextStep'
         ));
     }
 
-    private function getNewApplicantNextStep($application, $enrollment): array
+    private function getNewApplicantNextStep($application, $enrollment, $fee): array
     {
         if (! $application) {
             return [
@@ -95,10 +97,11 @@ class PortalDashboardController extends Controller
 
         if ($enrollment->status === 'approved' && ! $enrollment->is_paid) {
             return [
-                'label' => 'Proceed to Payment',
-                'desc'  => 'Your official enrollment is approved. Pay the ₱500.00 fee at the Cashier\'s Office.',
-                'url'   => route('portal.enrollment.payment-info', $enrollment),
-                'icon'  => 'fa-money-bill-wave',
+                'label'     => 'Proceed to Payment',
+                'desc'      => 'Your official enrollment is approved. Pay the ₱' . number_format($fee, 2) . ' fee at the Cashier\'s Office.',
+                'url'       => route('portal.enrollment.payment-info', $enrollment),
+                'icon'      => 'fa-money-bill-wave',
+                'isPayment' => true,
             ];
         }
 
@@ -184,6 +187,7 @@ class PortalDashboardController extends Controller
             ->latest()->first();
 
         // Enrollment timeline steps
+        $fee = Setting::get('enrollment_fee', 500);
         $timeline = [];
         $completedSteps = 0;
         if ($latestEnrollment) {
@@ -208,7 +212,7 @@ class PortalDashboardController extends Controller
                 ],
                 [
                     'label'    => 'Pay Fee',
-                    'sublabel' => '₱500.00',
+                    'sublabel' => '₱' . number_format($fee, 2),
                     'done'     => $latestEnrollment->is_paid,
                     'active'   => $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid,
                 ],
@@ -227,7 +231,7 @@ class PortalDashboardController extends Controller
             ->latest()->take(3)->get();
 
         // Next steps based on status
-        $nextSteps = $this->getNextSteps($latestEnrollment);
+        $nextSteps = $this->getNextSteps($latestEnrollment, $fee);
 
         return view('portal.student.dashboard', compact(
             'latestEnrollment', 'totalEnrollments', 'approvedCount',
@@ -236,7 +240,7 @@ class PortalDashboardController extends Controller
         ));
     }
 
-    private function getNextSteps($enrollment): array
+    private function getNextSteps($enrollment, $fee): array
     {
         if (!$enrollment) {
             return [
@@ -254,7 +258,7 @@ class PortalDashboardController extends Controller
 
         if ($enrollment->status === 'approved' && !$enrollment->is_paid) {
             return [
-                ['icon' => 'fa-money-bill-wave', 'label' => 'Pay Enrollment Fee', 'desc' => 'Proceed to Cashier and pay ₱500.00.',              'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true],
+                ['icon' => 'fa-money-bill-wave', 'label' => 'Pay Enrollment Fee', 'desc' => 'Proceed to Cashier and pay ₱' . number_format($fee, 2) . '.',              'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true, 'isPayment' => true],
                 ['icon' => 'fa-receipt',         'label' => 'Get Your Receipt',    'desc' => 'Official receipt will be issued after payment.',  'url' => route('portal.enrollment.index'), 'active' => false],
             ];
         }

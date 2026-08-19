@@ -71,7 +71,7 @@ class EnrollmentController extends Controller
         $enrollments = Enrollment::where('user_id', $user->id)
             ->with(['program', 'payment'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
         // Resolve subject names for each enrollment's subject_ids
         $enrollments->each(function ($enrollment) {
@@ -200,13 +200,15 @@ class EnrollmentController extends Controller
             'paid_at'          => null,        // assigned only at verification
         ]);
 
-    \App\Services\NotificationService::send(
-        $cashier,
-        'New GCash Payment Pending Verification',
-        "A GCash payment has been submitted for Enrollment #{$enrollment->id} and is awaiting your review.",
-        'info',
-        route('cashier.payments.show', $enrollment)
-    );
+    foreach (\App\Models\User::role('cashier')->get() as $cashier) {
+        \App\Services\NotificationService::send(
+            $cashier,
+            'New GCash Payment Pending Verification',
+            "A GCash payment has been submitted for Enrollment #{$enrollment->id} and is awaiting your review.",
+            'info',
+            route('cashier.payments.show', $enrollment)
+        );
+    }
 
         return back()->with('success', 'GCash payment proof submitted. The Cashier will verify your payment shortly.');
     }

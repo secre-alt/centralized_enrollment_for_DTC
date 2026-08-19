@@ -236,31 +236,53 @@
             <div class="card-header font-weight-bold">Next Steps</div>
             <div class="card-body p-0">
                 @foreach ($nextSteps as $step)
-                <a href="{{ $step['url'] }}"
-                   style="display:flex; align-items:center; gap:16px; padding:16px 20px;
-                          border-bottom:1px solid #F1F5F9; text-decoration:none;
-                          background:{{ $step['active'] ? '#F8FAFF' : '#ffffff' }};
-                          transition:background 0.2s;">
-                    <div style="width:44px; height:44px; border-radius:12px; flex-shrink:0;
-                                background:{{ $step['active'] ? '#0F4CDB' : '#F1F5F9' }};
-                                display:flex; align-items:center; justify-content:center;">
-                        <i class="fas {{ $step['icon'] }}"
-                           style="font-size:18px;
-                                  color:{{ $step['active'] ? '#fff' : '#94A3B8' }};"></i>
-                    </div>
-                    <div style="flex:1;">
-                        <div style="font-size:13px; font-weight:600;
-                                    color:{{ $step['active'] ? '#0F4CDB' : '#1E293B' }};">
-                            {{ $step['label'] }}
+                @if($step['isPayment'] ?? false)
+                    <button type="button"
+                       class="dtc-payment-btn dtc-next-step-row {{ $step['active'] ? 'is-active' : '' }}"
+                       data-url="{{ $step['url'] }}" style="width:100%; border:0; text-align:left;">
+                        <div style="width:44px; height:44px; border-radius:12px; flex-shrink:0;
+                                    background:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-surface-soft)' }};
+                                    display:flex; align-items:center; justify-content:center;">
+                            <i class="fas {{ $step['icon'] }}"
+                               style="font-size:18px;
+                                      color:{{ $step['active'] ? '#fff' : 'var(--dtc-text-muted)' }};"></i>
                         </div>
-                        <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
-                            {{ $step['desc'] }}
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:600;
+                                        color:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-text)' }};">
+                                {{ $step['label'] }}
+                            </div>
+                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                {{ $step['desc'] }}
+                            </div>
                         </div>
-                    </div>
-                    <i class="fas fa-chevron-right"
-                       style="color:{{ $step['active'] ? '#0F4CDB' : '#CBD5E1' }};
-                              font-size:12px;"></i>
-                </a>
+                        <i class="fas fa-chevron-right"
+                           style="color:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-text-muted)' }};
+                                  font-size:12px;"></i>
+                    </button>
+                @else
+                    <a href="{{ $step['url'] }}" class="dtc-next-step-row {{ $step['active'] ? 'is-active' : '' }}">
+                        <div style="width:44px; height:44px; border-radius:12px; flex-shrink:0;
+                                    background:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-surface-soft)' }};
+                                    display:flex; align-items:center; justify-content:center;">
+                            <i class="fas {{ $step['icon'] }}"
+                               style="font-size:18px;
+                                      color:{{ $step['active'] ? '#fff' : 'var(--dtc-text-muted)' }};"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:600;
+                                        color:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-text)' }};">
+                                {{ $step['label'] }}
+                            </div>
+                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                {{ $step['desc'] }}
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right"
+                           style="color:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-text-muted)' }};
+                                  font-size:12px;"></i>
+                    </a>
+                @endif
                 @endforeach
             </div>
         </div>
@@ -288,11 +310,11 @@
                 <p style="font-size:12px; color:#B45309; margin:0 0 12px; line-height:1.6;">
                     Please complete your enrollment process by paying the ₱500.00 fee at the Cashier's Office.
                 </p>
-                <a href="{{ route('portal.enrollment.payment-info', $latestEnrollment) }}"
-                   class="btn btn-warning btn-sm btn-block"
-                   style="font-size:12px;">
+                <button type="button" class="btn btn-warning btn-sm btn-block dtc-payment-btn"
+                        data-url="{{ route('portal.enrollment.payment-info', $latestEnrollment) }}"
+                        style="font-size:12px;">
                     Proceed to Payment →
-                </a>
+                </button>
             </div>
         </div>
         @endif
@@ -416,5 +438,7 @@
 
     </div>
 </div>
+
+@include('student.enrollment._payment-modal')
 
 @endsection

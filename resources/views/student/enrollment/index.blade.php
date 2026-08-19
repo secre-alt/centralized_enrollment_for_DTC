@@ -103,10 +103,10 @@
                 {{-- Action --}}
                 <div class="col-auto">
                     @if($enrollment->status === 'approved' && !$enrollment->is_paid)
-                        <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}"
-                           class="btn btn-warning btn-sm">
+                        <button type="button" class="btn btn-warning btn-sm dtc-payment-btn"
+                                data-url="{{ route('portal.enrollment.payment-info', $enrollment) }}">
                             Pay Now →
-                        </a>
+                        </button>
                     @endif
                 </div>
             </div>
@@ -132,5 +132,7 @@
     </div>
     @endforeach
 @endif
+
+@include('student.enrollment._payment-modal')
 
 @endsection

@@ -194,7 +194,7 @@ class PaymentController extends Controller
 
     // ── receipt() — gains GCash method line, otherwise unchanged ──
 
-    public function receipt(Enrollment $enrollment)
+    public function receipt(Request $request, Enrollment $enrollment)
     {
         $enrollment->load(['user', 'program']);
 
@@ -204,8 +204,18 @@ class PaymentController extends Controller
             ->first();
 
         if (! $payment) {
+            $message = 'No verified payment found for this enrollment.';
+
+            // AJAX (modal) callers get a real error status + message instead
+            // of silently following a redirect to a page with no receipt
+            // markup on it, which used to surface as a generic, unhelpful
+            // "couldn't load" with no indication of the actual cause.
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => $message], 404);
+            }
+
             return redirect()->route('cashier.payments.show', $enrollment)
-                ->with('error', 'No verified payment found for this enrollment.');
+                ->with('error', $message);
         }
 
         return view('cashier.payments.receipt', compact('enrollment', 'payment'));

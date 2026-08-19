@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Official Receipt</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">Enrollment payment confirmation</p>
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Official Receipt</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Enrollment payment confirmation</p>
         </div>
         <button onclick="window.print()" class="btn btn-primary btn-sm">
             <i class="fas fa-print mr-1"></i> Print Receipt
@@ -47,69 +47,55 @@
                 {{-- Receipt No + Date --}}
                 <div style="display:flex; justify-content:space-between;
                             align-items:center; margin-bottom:24px;
-                            padding-bottom:16px; border-bottom:2px dashed #E2E8F0;">
+                            padding-bottom:16px; border-bottom:2px dashed var(--dtc-border);">
                     <div>
-                        <div style="font-size:11px; color:#94A3B8; font-weight:600;
+                        <div style="font-size:11px; color:var(--dtc-text-muted); font-weight:600;
                                     text-transform:uppercase; letter-spacing:0.5px;">
                             Receipt No.
                         </div>
-                        {{-- Add after the existing "Receipt No." line: --}}
-                        <tr>
-                            <td class="py-1 text-gray-500">Payment Method</td>
-                            <td class="py-1 font-medium">
-                                @if ($payment->isWalkIn())
-                                    Walk-in (Cashier)
-                                @else
-                                    GCash
-                                    @if ($payment->reference_number)
-                                        <span class="text-gray-500 text-xs ml-1">/ Ref: {{ $payment->reference_number }}</span>
-                                    @endif
-                                @endif
-                            </td>
-                        </tr>
                         <div style="font-size:18px; font-weight:800; color:#0F4CDB;">
-                            {{ $enrollment->payment->receipt_no }}
+                            {{ $payment->receipt_no }}
                         </div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="font-size:11px; color:#94A3B8; font-weight:600;
+                        <div style="font-size:11px; color:var(--dtc-text-muted); font-weight:600;
                                     text-transform:uppercase; letter-spacing:0.5px;">
                             Date Issued
                         </div>
-                        <div style="font-size:14px; font-weight:600; color:#1E293B;">
-                            {{ $enrollment->payment->paid_at->format('M d, Y h:i A') }}
+                        <div style="font-size:14px; font-weight:600; color:var(--dtc-text);">
+                            {{ $payment->paid_at->format('M d, Y h:i A') }}
                         </div>
                     </div>
                 </div>
 
                 {{-- Student Info --}}
                 <div style="margin-bottom:20px;">
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
+                    <div style="font-size:11px; color:var(--dtc-text-muted); font-weight:600;
                                 text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
                         Student Information
                     </div>
-                    <div style="background:#F8FAFC; border-radius:12px; padding:16px;">
+                    <div style="background:var(--dtc-surface-soft); border-radius:12px; padding:16px;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="font-size:13px; color:#64748B;">Name</span>
-                            <span style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <span style="font-size:13px; color:var(--dtc-text-secondary);">Name</span>
+                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                 {{ $enrollment->user->name }}
                             </span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="font-size:13px; color:#64748B;">Email</span>
-                            <span style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <span style="font-size:13px; color:var(--dtc-text-secondary);">Email</span>
+                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                 {{ $enrollment->user->email }}
                             </span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="font-size:13px; color:#64748B;">Program</span>
-                            <span style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <span style="font-size:13px; color:var(--dtc-text-secondary);">Program</span>
+                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                 {{ $enrollment->program->name }}
                             </span>
                         </div>
                         <div style="display:flex; justify-content:space-between;">
-                            <span style="font-size:13px; color:#64748B;">Year / Semester</span>
-                            <span style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <span style="font-size:13px; color:var(--dtc-text-secondary);">Year / Semester</span>
+                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                 Year {{ $enrollment->year_level }} — Semester {{ $enrollment->semester }}
                             </span>
                         </div>
@@ -118,27 +104,34 @@
 
                 {{-- Payment Details --}}
                 <div style="margin-bottom:20px;">
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600;
+                    <div style="font-size:11px; color:var(--dtc-text-muted); font-weight:600;
                                 text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
                         Payment Details
                     </div>
-                    <div style="background:#F8FAFC; border-radius:12px; padding:16px;">
+                    <div style="background:var(--dtc-surface-soft); border-radius:12px; padding:16px;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="font-size:13px; color:#64748B;">Description</span>
-                            <span style="font-size:13px; font-weight:600; color:#1E293B;">
+                            <span style="font-size:13px; color:var(--dtc-text-secondary);">Description</span>
+                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                 Enrollment Fee
                             </span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="font-size:13px; color:#64748B;">Payment Method</span>
-                            <span style="font-size:13px; font-weight:600; color:#1E293B;">
-                                Walk-in / Cash
+                            <span style="font-size:13px; color:var(--dtc-text-secondary);">Payment Method</span>
+                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                                @if ($payment->isWalkIn())
+                                    Walk-in / Cash
+                                @else
+                                    GCash
+                                    @if ($payment->reference_number)
+                                        <span style="color:var(--dtc-text-secondary); font-size:11px;">/ Ref: {{ $payment->reference_number }}</span>
+                                    @endif
+                                @endif
                             </span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="font-size:13px; color:#64748B;">Processed by</span>
-                            <span style="font-size:13px; font-weight:600; color:#1E293B;">
-                                {{ $enrollment->payment->cashier->name }}
+                            <span style="font-size:13px; color:var(--dtc-text-secondary);">Processed by</span>
+                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                                {{ $payment->cashier->name ?? '—' }}
                             </span>
                         </div>
                     </div>
@@ -153,7 +146,7 @@
                         Total Amount Paid
                     </span>
                     <span style="font-size:24px; font-weight:800; color:#FFC72C;">
-                        ₱{{ number_format($enrollment->payment->amount, 2) }}
+                        ₱{{ number_format($payment->amount, 2) }}
                     </span>
                 </div>
 
@@ -164,7 +157,7 @@
                     <div style="font-size:15px; font-weight:700; color:#15803D;">
                         Payment Confirmed — Officially Enrolled
                     </div>
-                    <div style="font-size:12px; color:#64748B; margin-top:4px;">
+                    <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:4px;">
                         This serves as your official receipt. Please keep this for your records.
                     </div>
                 </div>
@@ -191,6 +184,23 @@
     .btn, .main-footer, .breadcrumb { display: none !important; }
     .content-wrapper { margin: 0 !important; }
     #printable-receipt { box-shadow: none !important; }
+
+    /* Force light colors on paper regardless of the on-screen theme —
+       a dark background wastes ink and looks wrong on a printed receipt. */
+    #printable-receipt, #printable-receipt .card-body {
+        background: #fff !important;
+    }
+    #printable-receipt [style*="--dtc-surface-soft"],
+    #printable-receipt [style*="background:var(--dtc-surface-soft)"] {
+        background: #F8FAFC !important;
+    }
+    #printable-receipt * {
+        color: #1E293B !important;
+    }
+    #printable-receipt .card-body:first-child,
+    #printable-receipt .card-body:first-child * {
+        color: #fff !important;
+    }
 }
 </style>
 @endsection

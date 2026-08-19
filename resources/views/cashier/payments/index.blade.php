@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Process Payments</h4>
-        <p class="mb-0" style="color:#64748B; font-size:13px;">
+        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Process Payments</h4>
+        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
             Approved enrollments awaiting payment collection
         </p>
     </div>
@@ -29,128 +29,133 @@
         'rejected'      => 'Rejected',
     ] as $key => $label)
         <a href="{{ request()->fullUrlWithQuery(['filter' => $key]) }}"
-           style="padding:4px 14px; border-radius:20px; font-size:12px; font-weight:600;
-                  text-decoration:none; border:1.5px solid;
-                  {{ $filter === $key
-                      ? 'background:#0F4CDB; color:#fff; border-color:#0F4CDB;'
-                      : 'background:#fff; color:#64748B; border-color:#E2E8F0;' }}">
+           class="dtc-filter-pill {{ $filter === $key ? 'is-active' : '' }}">
             {{ $label }}
         </a>
     @endforeach
 </div>
 
-@if ($enrollments->isEmpty())
-    <div class="card">
-        <div class="card-body text-center py-5">
-            <i class="fas fa-check-circle fa-4x mb-3" style="color:#E2E8F0;"></i>
-            <h5 style="color:#1E293B; font-weight:700;">No Results</h5>
-            <p style="color:#64748B; font-size:13px;">
-                No enrollments match the selected filter.
-            </p>
-        </div>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="font-weight-bold" style="color:var(--dtc-text);">Approved Enrollments</span>
+        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $enrollments->total() }} total</span>
     </div>
-@else
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table mb-0">
-                <thead>
-                    <tr>
-                        <th>Applicant</th>
-                        <th>Program</th>
-                        <th>Year / Semester</th>
-                        <th>Subjects</th>
-                        <th>Method</th>
-                        <th>Status</th>
-                        <th>Fee</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($enrollments as $enrollment)
-                    <tr>
-                        <td>
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <div style="width:38px; height:38px; border-radius:50%;
-                                            background:linear-gradient(135deg,#22C55E,#059669);
-                                            display:flex; align-items:center; justify-content:center;
-                                            color:#fff; font-weight:700; font-size:14px; flex-shrink:0;">
-                                    {{ strtoupper(substr($enrollment->user->name, 0, 1)) }}
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+        <table class="table dtc-table mb-0">
+            <thead>
+                <tr>
+                    <th>Applicant</th>
+                    <th>Program</th>
+                    <th>Year / Semester</th>
+                    <th>Subjects</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Fee</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($enrollments as $enrollment)
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:32px; height:32px; border-radius:50%;
+                                        background:linear-gradient(135deg,#22C55E,#059669);
+                                        display:flex; align-items:center; justify-content:center;
+                                        color:#fff; font-weight:700; font-size:12px; flex-shrink:0;">
+                                {{ strtoupper(substr($enrollment->user->name, 0, 1)) }}
+                            </div>
+                            <div>
+                                <div style="font-size:13px; font-weight:500; color:var(--dtc-text);">
+                                    {{ $enrollment->user->name }}
                                 </div>
-                                <div>
-                                    <div style="font-size:13px; font-weight:600; color:#1E293B;">
-                                        {{ $enrollment->user->name }}
-                                    </div>
-                                    <div style="font-size:11px; color:#64748B;">
-                                        {{ $enrollment->user->email }}
-                                    </div>
+                                <div style="font-size:11px; color:var(--dtc-text-muted);">
+                                    {{ $enrollment->user->email }}
                                 </div>
                             </div>
-                        </td>
-                        <td style="font-size:13px; color:#1E293B; font-weight:500;">
-                            {{ $enrollment->program->name }}
-                        </td>
-                        <td style="font-size:13px; color:#64748B;">
-                            Year {{ $enrollment->year_level }} — Sem {{ $enrollment->semester }}
-                        </td>
-                        <td>
-                            <span style="background:#EEF2FF; color:#0F4CDB; font-size:12px;
-                                         font-weight:600; padding:3px 10px; border-radius:20px;">
-                                {{ count($enrollment->subject_ids) }} subjects
-                            </span>
-                        </td>
-                        <td style="font-size:13px; color:#1E293B;">
-                            @if ($enrollment->payment)
-                                {{ $enrollment->payment->isWalkIn() ? 'Walk-in' : 'GCash' }}
-                            @else
-                                <span style="color:#94A3B8;">—</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if (! $enrollment->payment)
-                                <span style="background:#F1F5F9; color:#64748B; font-size:11px;
-                                             font-weight:600; padding:3px 10px; border-radius:20px;">
-                                    Unpaid
-                                </span>
-                            @elseif ($enrollment->payment->isPending())
-                                <span style="background:#FEF9C3; color:#92400E; font-size:11px;
-                                             font-weight:600; padding:3px 10px; border-radius:20px;">
-                                    Pending
-                                </span>
-                            @elseif ($enrollment->payment->isVerified())
-                                <span style="background:#DCFCE7; color:#15803D; font-size:11px;
-                                             font-weight:600; padding:3px 10px; border-radius:20px;">
-                                    Verified
-                                </span>
-                            @elseif ($enrollment->payment->isRejected())
-                                <span style="background:#FEE2E2; color:#B91C1C; font-size:11px;
-                                             font-weight:600; padding:3px 10px; border-radius:20px;">
-                                    Rejected
-                                </span>
-                            @endif
-                        </td>
-                        <td>
-                            <span style="font-size:14px; font-weight:800; color:#15803D;">
-                                ₱{{ number_format(\App\Models\Setting::get('enrollment_fee', 500), 2) }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('cashier.payments.show', $enrollment) }}"
-                               style="background:#DCFCE7; color:#15803D; padding:6px 14px;
-                                      border-radius:8px; font-size:12px; font-weight:600;
-                                      text-decoration:none;">
-                                <i class="fas fa-money-bill-wave mr-1"></i> Process
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                        </div>
+                    </td>
+                    <td style="color:var(--dtc-text); font-weight:500;">
+                        {{ $enrollment->program->name }}
+                    </td>
+                    <td style="color:var(--dtc-text-secondary);">
+                        Year {{ $enrollment->year_level }} &middot; Sem {{ $enrollment->semester }}
+                    </td>
+                    <td>
+                        <span class="badge badge-secondary">
+                            {{ count($enrollment->subject_ids) }} subjects
+                        </span>
+                    </td>
+                    <td style="color:var(--dtc-text-secondary);">
+                        @if ($enrollment->payment)
+                            {{ $enrollment->payment->isWalkIn() ? 'Walk-in' : 'GCash' }}
+                        @else
+                            <span style="color:var(--dtc-text-muted);">&mdash;</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if (! $enrollment->payment)
+                            <span class="badge badge-secondary">Unpaid</span>
+                        @elseif ($enrollment->payment->isPending())
+                            <span class="badge badge-warning">Pending</span>
+                        @elseif ($enrollment->payment->isVerified())
+                            <span class="badge badge-success">Verified</span>
+                        @elseif ($enrollment->payment->isRejected())
+                            <span class="badge badge-danger">Rejected</span>
+                        @endif
+                    </td>
+                    <td style="font-weight:700; color:#15803D;">
+                        ₱{{ number_format($enrollment->payment->amount ?? \App\Models\Setting::get('enrollment_fee', 500), 2) }}
+                    </td>
+                    <td>
+                        <button type="button" class="dtc-review-btn dtc-payment-btn"
+                                data-url="{{ route('cashier.payments.show', $enrollment) }}">
+                            <i class="fas fa-money-bill-wave"></i> Process
+                        </button>
+                        @if ($enrollment->is_paid)
+                            <button type="button" class="dtc-review-btn dtc-receipt-btn"
+                                    data-url="{{ route('cashier.payments.receipt', $enrollment) }}">
+                                <i class="fas fa-receipt"></i> Receipt
+                            </button>
+                        @endif
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center py-4" style="color:var(--dtc-text-muted);">
+                        No enrollments match the selected filter.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
         </div>
     </div>
 
-    <div class="mt-3">
-        {{ $enrollments->links() }}
+    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
+            <small style="color:var(--dtc-text-secondary);">
+                Showing
+                <strong>{{ $enrollments->firstItem() ?? 0 }}</strong>
+                to
+                <strong>{{ $enrollments->lastItem() ?? 0 }}</strong>
+                of
+                <strong>{{ $enrollments->total() }}</strong>
+                results
+            </small>
+
+            @if ($enrollments->hasPages())
+            <div>
+                {{ $enrollments->onEachSide(1)->links('pagination::bootstrap-4') }}
+            </div>
+            @endif
+        </div>
     </div>
-@endif
+</div>
+
+@include('cashier.payments._payment-modal')
+@include('cashier.payments._receipt-modal')
 
 @endsection

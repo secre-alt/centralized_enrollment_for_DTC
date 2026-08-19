@@ -102,6 +102,27 @@
                     </tbody>
                 </table>
             </div>
+            @if ($recentPayments->hasPages() || $recentPayments->total() > 0)
+                <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
+                        <small style="color:var(--dtc-text-secondary);">
+                            Showing
+                            <strong>{{ $recentPayments->firstItem() ?? 0 }}</strong>
+                            to
+                            <strong>{{ $recentPayments->lastItem() ?? 0 }}</strong>
+                            of
+                            <strong>{{ $recentPayments->total() }}</strong>
+                            results
+                        </small>
+
+                        @if ($recentPayments->hasPages())
+                        <div>
+                            {{ $recentPayments->onEachSide(1)->links('pagination::bootstrap-4') }}
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 

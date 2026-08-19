@@ -196,31 +196,44 @@
             <div class="card-header font-weight-bold">Next Step</div>
             <div class="card-body p-0">
                 @if($nextStep['url'])
-                    <a href="{{ $nextStep['url'] }}"
-                       style="display:flex; align-items:center; gap:16px; padding:20px;
-                              text-decoration:none; background:#F8FAFF;">
-                        <div style="width:48px; height:48px; border-radius:12px; flex-shrink:0;
-                                    background:#0F4CDB; display:flex; align-items:center; justify-content:center;">
-                            <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
-                        </div>
-                        <div style="flex:1;">
-                            <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
-                                {{ $nextStep['label'] }}
+                    @if($nextStep['isPayment'] ?? false)
+                        <button type="button" class="dtc-payment-btn dtc-next-step-btn" data-url="{{ $nextStep['url'] }}">
+                            <div class="dtc-next-step-icon" style="background:#0F4CDB;">
+                                <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
                             </div>
-                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
-                                {{ $nextStep['desc'] }}
+                            <div style="flex:1; text-align:left;">
+                                <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
+                                    {{ $nextStep['label'] }}
+                                </div>
+                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                    {{ $nextStep['desc'] }}
+                                </div>
                             </div>
-                        </div>
-                        <i class="fas fa-chevron-right" style="color:#0F4CDB; font-size:14px;"></i>
-                    </a>
+                            <i class="fas fa-chevron-right" style="color:#0F4CDB; font-size:14px;"></i>
+                        </button>
+                    @else
+                        <a href="{{ $nextStep['url'] }}" class="dtc-next-step-btn">
+                            <div class="dtc-next-step-icon" style="background:#0F4CDB;">
+                                <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
+                                    {{ $nextStep['label'] }}
+                                </div>
+                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                    {{ $nextStep['desc'] }}
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right" style="color:#0F4CDB; font-size:14px;"></i>
+                        </a>
+                    @endif
                 @else
-                    <div style="display:flex; align-items:center; gap:16px; padding:20px;">
-                        <div style="width:48px; height:48px; border-radius:12px; flex-shrink:0;
-                                    background:#F1F5F9; display:flex; align-items:center; justify-content:center;">
-                            <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#94A3B8;"></i>
+                    <div class="dtc-next-step-btn" style="cursor:default;">
+                        <div class="dtc-next-step-icon" style="background:var(--dtc-surface-soft);">
+                            <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:var(--dtc-text-muted);"></i>
                         </div>
                         <div>
-                            <div style="font-size:14px; font-weight:700;">
+                            <div style="font-size:14px; font-weight:700; color:var(--dtc-text);">
                                 {{ $nextStep['label'] }}
                             </div>
                             <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
@@ -318,5 +331,7 @@
 
     </div>
 </div>
+
+@include('student.enrollment._payment-modal')
 
 @endsection
