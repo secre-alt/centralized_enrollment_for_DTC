@@ -191,7 +191,7 @@ return [
     |
     */
 
-    'classes_body' => '',
+    'classes_body' => 'layout-footer-fixed',
     'classes_brand' => '',
     'classes_brand_text' => '',
     'classes_content_wrapper' => '',

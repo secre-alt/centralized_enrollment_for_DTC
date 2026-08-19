@@ -236,7 +236,7 @@ class PortalDashboardController extends Controller
         return view('portal.student.dashboard', compact(
             'latestEnrollment', 'totalEnrollments', 'approvedCount',
             'paidCount', 'unreadCount', 'subjects', 'nextAppointment',
-            'timeline', 'completedSteps', 'announcements', 'nextSteps'
+            'timeline', 'completedSteps', 'announcements', 'nextSteps', 'fee'
         ));
     }
 

@@ -28,7 +28,7 @@
            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">
                 Pre-Enrollment Application
             </h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Reference No: <strong>{{ $application->reference_no }}</strong>
                 &nbsp;·&nbsp;
                 <span class="badge {{ $statusBadges[$application->status] ?? 'badge-secondary' }}">

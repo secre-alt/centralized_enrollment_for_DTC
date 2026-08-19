@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-w<h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Manage Appointment Slots</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">Set available dates and times for student appointments</p>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Set available dates and times for student appointments</p>
         </div>
         <a href="{{ route('registrar.appointments.index') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-calendar-check mr-1"></i> View Requests
@@ -21,7 +21,7 @@
     {{-- Add Slot Form --}}
     <div class="col-lg-4 mb-3">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-plus-circle mr-2" style="color:#0F4CDB;"></i> Add New Slot
             </div>
             <div class="card-body">
@@ -65,7 +65,7 @@
                         <label>Max Bookings</label>
                         <input type="number" name="max_bookings" class="form-control"
                                value="{{ old('max_bookings', 5) }}" min="1" max="50" required>
-                        <small style="color:#94A3B8; font-size:11px;">
+                        <small style="color:var(--dtc-text-muted); font-size:11px;">
                             Maximum students per slot
                         </small>
                     </div>
@@ -81,7 +81,7 @@
     {{-- Slots List --}}
     <div class="col-lg-8 mb-3">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-clock mr-2" style="color:#0F4CDB;"></i> Available Slots
             </div>
             <div class="card-body p-0">
@@ -108,18 +108,18 @@
                                         {{ \Carbon\Carbon::parse($slot->date)->format('M') }}<br>
                                         <span style="font-size:16px;">{{ \Carbon\Carbon::parse($slot->date)->format('d') }}</span>
                                     </div>
-                                    <div style="font-size:12px; color:#64748B;">
+                                    <div style="font-size:12px; color:var(--dtc-text-secondary);">
                                         {{ \Carbon\Carbon::parse($slot->date)->format('D, Y') }}
                                     </div>
                                 </div>
                             </td>
-                            <td style="font-size:13px; font-weight:500; color:#1E293B;">
+                            <td style="font-size:13px; font-weight:500; color:var(--dtc-text);">
                                 {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
-                                <span style="color:#94A3B8;">—</span>
+                                <span style="color:var(--dtc-text-muted);">—</span>
                                 {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
                             </td>
                             <td>
-                                <span style="font-size:13px; font-weight:600; color:#1E293B;">
+                                <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                     {{ $slot->max_bookings }}
                                 </span>
                             </td>
@@ -162,8 +162,8 @@
                         @empty
                         <tr>
                             <td colspan="7" class="text-center py-5">
-                                <i class="fas fa-calendar-times fa-3x mb-3" style="color:#E2E8F0;"></i>
-                                <p style="color:#94A3B8; font-size:13px;">No slots added yet.</p>
+                                <i class="fas fa-calendar-times fa-3x mb-3" style="color:var(--dtc-border);"></i>
+                                <p style="color:var(--dtc-text-muted); font-size:13px;">No slots added yet.</p>
                             </td>
                         </tr>
                         @endforelse

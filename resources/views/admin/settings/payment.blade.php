@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Payment Settings</h4>
-        <p class="mb-0" style="color:#64748B; font-size:13px;">
+        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Payment Settings</h4>
+        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
             Configure enrollment fee and GCash payment details
         </p>
     </div>
@@ -28,7 +28,7 @@
 
     {{-- ── Text Settings Form ─────────────────────────────────── --}}
     <div class="card mb-4">
-        <div class="card-header font-weight-bold" style="color:#1E293B;">
+        <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
             <i class="fas fa-money-bill mr-2" style="color:#0F4CDB;"></i>
             Fee & GCash Details
         </div>
@@ -98,7 +98,7 @@
 
     {{-- ── QR Upload Form ──────────────────────────────────────── --}}
     <div class="card">
-        <div class="card-header font-weight-bold" style="color:#1E293B;">
+        <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
             <i class="fas fa-qrcode mr-2" style="color:#0F4CDB;"></i>
             GCash QR Code
         </div>
@@ -112,11 +112,11 @@
 
             @if ($qrExists)
                 <div class="mb-3">
-                    <p style="font-size:12px; color:#64748B; margin-bottom:8px;">Current QR Code:</p>
+                    <p style="font-size:12px; color:var(--dtc-text-secondary); margin-bottom:8px;">Current QR Code:</p>
                     <img src="{{ route('portal.enrollment.gcash.qr') }}"
                          alt="GCash QR Code"
                          style="width:160px; height:160px; object-fit:contain;
-                                border:1.5px solid #E2E8F0; border-radius:12px; padding:8px;">
+                                border:1.5px solid var(--dtc-border); border-radius:12px; padding:8px;">
                 </div>
             @else
                 <div style="background:#FEF9C3; border:1.5px solid #FDE68A; border-radius:8px;
@@ -134,7 +134,7 @@
                 <div class="form-group">
                     <label style="font-size:13px; font-weight:600; color:#374151;">
                         Upload New QR Image
-                        <span style="font-size:11px; font-weight:400; color:#94A3B8;">
+                        <span style="font-size:11px; font-weight:400; color:var(--dtc-text-muted);">
                             (PNG or JPG, max 2 MB)
                         </span>
                     </label>

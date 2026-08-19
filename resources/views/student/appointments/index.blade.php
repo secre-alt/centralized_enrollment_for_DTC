@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">My Appointments</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">Track your document requests and appointment bookings</p>
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">My Appointments</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Track your document requests and appointment bookings</p>
         </div>
         <a href="{{ route('portal.appointments.create') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus mr-1"></i> Book Appointment
@@ -25,9 +25,9 @@
     {{-- Empty State --}}
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-calendar-times fa-4x mb-3" style="color:#E2E8F0;"></i>
-            <h5 style="color:#1E293B; font-weight:700;">No Appointments Yet</h5>
-            <p style="color:#64748B; font-size:13px; max-width:360px; margin:0 auto 20px;">
+            <i class="fas fa-calendar-times fa-4x mb-3" style="color:var(--dtc-border);"></i>
+            <h5 style="color:var(--dtc-text); font-weight:700;">No Appointments Yet</h5>
+            <p style="color:var(--dtc-text-secondary); font-size:13px; max-width:360px; margin:0 auto 20px;">
                 You haven't booked any appointments yet. Book one now to request your documents from the Registrar's Office.
             </p>
             <a href="{{ route('portal.appointments.create') }}" class="btn btn-primary">
@@ -56,16 +56,16 @@
                                 </span>
                             </div>
                             <div>
-                                <div style="font-size:14px; font-weight:700; color:#1E293B;">
+                                <div style="font-size:14px; font-weight:700; color:var(--dtc-text);">
                                     {{ ucfirst($appointment->document_type) }}
                                 </div>
-                                <div style="font-size:12px; color:#64748B; margin-top:2px;">
+                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
                                     <i class="fas fa-clock mr-1"></i>
                                     {{ \Carbon\Carbon::parse($appointment->slot->start_time)->format('h:i A') }}
                                     —
                                     {{ \Carbon\Carbon::parse($appointment->slot->end_time)->format('h:i A') }}
                                 </div>
-                                <div style="font-size:12px; color:#64748B; margin-top:2px;">
+                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
                                     <i class="fas fa-calendar mr-1"></i>
                                     {{ \Carbon\Carbon::parse($appointment->slot->date)->format('l, F d, Y') }}
                                 </div>
@@ -85,8 +85,8 @@
                     </div>
 
                     @if($appointment->purpose)
-                    <div style="background:#F8FAFC; border-radius:8px; padding:10px 12px;
-                                font-size:12px; color:#64748B; margin-bottom:12px;">
+                    <div style="background:var(--dtc-surface-soft); border-radius:8px; padding:10px 12px;
+                                font-size:12px; color:var(--dtc-text-secondary); margin-bottom:12px;">
                         <i class="fas fa-info-circle mr-1" style="color:#0F4CDB;"></i>
                         {{ $appointment->purpose }}
                     </div>
@@ -110,7 +110,7 @@
                     @endif
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <span style="font-size:11px; color:#94A3B8;">
+                        <span style="font-size:11px; color:var(--dtc-text-muted);">
                             Booked {{ $appointment->created_at->diffForHumans() }}
                         </span>
                         @if($appointment->status === 'pending')

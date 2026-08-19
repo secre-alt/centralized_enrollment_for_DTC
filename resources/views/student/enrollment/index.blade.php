@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">My Enrollment Status</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">My Enrollment Status</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Track your enrollment submissions and payment status
             </p>
         </div>
@@ -26,9 +26,9 @@
 @if ($enrollments->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-file-alt fa-4x mb-3" style="color:#E2E8F0;"></i>
-            <h5 style="color:#1E293B; font-weight:700;">No Enrollments Yet</h5>
-            <p style="color:#64748B; font-size:13px; max-width:360px; margin:0 auto 20px;">
+            <i class="fas fa-file-alt fa-4x mb-3" style="color:var(--dtc-border);"></i>
+            <h5 style="color:var(--dtc-text); font-weight:700;">No Enrollments Yet</h5>
+            <p style="color:var(--dtc-text-secondary); font-size:13px; max-width:360px; margin:0 auto 20px;">
                 You haven't submitted any enrollment yet.
             </p>
             <a href="{{ route('portal.enrollment.create') }}" class="btn btn-primary">
@@ -65,10 +65,10 @@
 
                 {{-- Details --}}
                 <div class="col">
-                    <div style="font-size:15px; font-weight:700; color:#1E293B;">
+                    <div style="font-size:15px; font-weight:700; color:var(--dtc-text);">
                         {{ $enrollment->program->name }}
                     </div>
-                    <div style="font-size:13px; color:#64748B; margin-top:2px;">
+                    <div style="font-size:13px; color:var(--dtc-text-secondary); margin-top:2px;">
                         Year {{ $enrollment->year_level }} — Semester {{ $enrollment->semester }} •
                         {{ count($enrollment->subject_ids) }} subjects •
                         Submitted {{ $enrollment->created_at->format('M d, Y') }}
@@ -131,6 +131,23 @@
         </div>
     </div>
     @endforeach
+
+    @if ($enrollments->hasPages())
+    <div class="d-flex justify-content-between align-items-center flex-wrap mt-3" style="gap:15px;">
+        <small style="color:var(--dtc-text-secondary);">
+            Showing
+            <strong>{{ $enrollments->firstItem() }}</strong>
+            to
+            <strong>{{ $enrollments->lastItem() }}</strong>
+            of
+            <strong>{{ $enrollments->total() }}</strong>
+            results
+        </small>
+        <div>
+            {{ $enrollments->onEachSide(1)->links('pagination::bootstrap-4') }}
+        </div>
+    </div>
+    @endif
 @endif
 
 @include('student.enrollment._payment-modal')

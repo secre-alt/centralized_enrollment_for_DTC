@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Book an Appointment</h4>
-        <p class="mb-0" style="color:#64748B; font-size:13px;">
+        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Book an Appointment</h4>
+        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
             Request a certificate or document from the Registrar's Office
         </p>
     </div>
@@ -16,7 +16,7 @@
 <div class="row justify-content-center">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-calendar-plus mr-2" style="color:#0F4CDB;"></i>
                 Appointment Details
             </div>
@@ -47,12 +47,12 @@
                                            class="doc-radio"
                                            {{ old('document_type') === $doc['value'] ? 'checked' : '' }}>
                                     <div class="doc-option"
-                                         style="border:2px solid #E2E8F0; border-radius:12px;
+                                         style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:14px; text-align:center; transition:all 0.2s;
-                                                background:#F8FAFC;">
+                                                background:var(--dtc-surface-soft);">
                                         <i class="fas {{ $doc['icon'] }}"
-                                           style="font-size:20px; color:#94A3B8; margin-bottom:6px; display:block;"></i>
-                                        <div style="font-size:12px; font-weight:600; color:#64748B;">
+                                           style="font-size:20px; color:var(--dtc-text-muted); margin-bottom:6px; display:block;"></i>
+                                        <div style="font-size:12px; font-weight:600; color:var(--dtc-text-secondary);">
                                             {{ $doc['label'] }}
                                         </div>
                                     </div>
@@ -73,9 +73,9 @@
                                    class="slot-radio"
                                    {{ old('appointment_slot_id') == $slot->id ? 'checked' : '' }}>
                             <div class="slot-option"
-                                 style="border:2px solid #E2E8F0; border-radius:12px; padding:14px 16px;
+                                 style="border:2px solid var(--dtc-border); border-radius:12px; padding:14px 16px;
                                         display:flex; align-items:center; gap:14px; transition:all 0.2s;
-                                        background:#F8FAFC;">
+                                        background:var(--dtc-surface-soft);">
                                 <div style="background:#EEF2FF; color:#0F4CDB; border-radius:10px;
                                             padding:8px 12px; font-size:11px; font-weight:700;
                                             text-align:center; line-height:1.3; flex-shrink:0; min-width:48px;">
@@ -85,10 +85,10 @@
                                     </span>
                                 </div>
                                 <div style="flex:1;">
-                                    <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                                    <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                         {{ \Carbon\Carbon::parse($slot->date)->format('l, F d, Y') }}
                                     </div>
-                                    <div style="font-size:12px; color:#64748B; margin-top:2px;">
+                                    <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
                                         <i class="fas fa-clock mr-1"></i>
                                         {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
                                         —
@@ -105,10 +105,10 @@
                             </div>
                         </label>
                         @empty
-                        <div style="background:#F8FAFC; border:2px dashed #E2E8F0; border-radius:12px;
+                        <div style="background:var(--dtc-surface-soft); border:2px dashed var(--dtc-border); border-radius:12px;
                                     padding:24px; text-align:center;">
-                            <i class="fas fa-calendar-times fa-2x mb-2" style="color:#E2E8F0;"></i>
-                            <p style="color:#94A3B8; font-size:13px; margin:0;">
+                            <i class="fas fa-calendar-times fa-2x mb-2" style="color:var(--dtc-border);"></i>
+                            <p style="color:var(--dtc-text-muted); font-size:13px; margin:0;">
                                 No available slots at the moment. Please check back later.
                             </p>
                         </div>
@@ -117,7 +117,7 @@
 
                     {{-- Purpose --}}
                     <div class="form-group">
-                        <label>Purpose <span style="color:#94A3B8; font-weight:400;">(optional)</span></label>
+                        <label>Purpose <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span></label>
                         <textarea name="purpose" class="form-control" rows="3"
                                   placeholder="e.g. For employment application, scholarship, board exam...">{{ old('purpose') }}</textarea>
                     </div>
@@ -159,10 +159,10 @@
         </div>
 
         <div class="card mt-3">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 Office Information
             </div>
-            <div class="card-body" style="font-size:13px; color:#64748B; line-height:2;">
+            <div class="card-body" style="font-size:13px; color:var(--dtc-text-secondary); line-height:2;">
                 <p class="mb-1"><i class="fas fa-map-marker-alt mr-2" style="color:#0F4CDB; width:16px;"></i>
                     Registrar's Office, DTC Main Building</p>
                 <p class="mb-1"><i class="fas fa-clock mr-2" style="color:#0F4CDB; width:16px;"></i>
@@ -181,10 +181,10 @@
 document.querySelectorAll('.doc-radio').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('.doc-option').forEach(opt => {
-            opt.style.borderColor = '#E2E8F0';
-            opt.style.background = '#F8FAFC';
-            opt.querySelector('i').style.color = '#94A3B8';
-            opt.querySelector('div').style.color = '#64748B';
+            opt.style.borderColor = 'var(--dtc-border)';
+            opt.style.background = 'var(--dtc-surface-soft)';
+            opt.querySelector('i').style.color = 'var(--dtc-text-muted)';
+            opt.querySelector('div').style.color = 'var(--dtc-text-secondary)';
         });
         const selected = this.nextElementSibling;
         selected.style.borderColor = '#0F4CDB';
@@ -201,8 +201,8 @@ document.querySelectorAll('.doc-radio').forEach(radio => {
 document.querySelectorAll('.slot-radio').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('.slot-option').forEach(opt => {
-            opt.style.borderColor = '#E2E8F0';
-            opt.style.background = '#F8FAFC';
+            opt.style.borderColor = 'var(--dtc-border)';
+            opt.style.background = 'var(--dtc-surface-soft)';
         });
         this.nextElementSibling.style.borderColor = '#0F4CDB';
         this.nextElementSibling.style.background = '#EEF2FF';

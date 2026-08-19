@@ -44,8 +44,16 @@
                 var content = $('<div>').html(html).find('#payment-content').html();
                 $modalContent.html(content || errorMarkup);
             })
-            .fail(function () {
-                $modalContent.html(errorMarkup);
+            .fail(function (xhr) {
+                var message = (xhr.responseJSON && xhr.responseJSON.message)
+                    ? xhr.responseJSON.message
+                    : "Couldn't load payment details. Please try again.";
+                $modalContent.html(
+                    '<div class="dtc-review-loading">' +
+                        '<i class="fas fa-triangle-exclamation" style="font-size:22px; color:var(--dtc-danger);"></i>' +
+                        '<p class="text-danger mb-0">' + message + '</p>' +
+                    '</div>'
+                );
             });
     });
 

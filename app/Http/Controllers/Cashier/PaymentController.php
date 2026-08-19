@@ -90,13 +90,14 @@ class PaymentController extends Controller
             $enrollment->user,
             'Payment Confirmed',
             "Your enrollment payment of ₱{$amount} has been recorded. Receipt: {$receiptNo}.",
-            route('student.enrollment.payment-info', $enrollment)
+            'success',
+            route('portal.enrollment.payment-info', $enrollment)
         );
         foreach (\App\Models\User::role('admin')->get() as $admin) {
-            NotificationService::send($admin, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", route('cashier.payments.receipt', $enrollment));
+            NotificationService::send($admin, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", 'info', route('cashier.payments.receipt', $enrollment));
         }
         foreach (\App\Models\User::role('registrar')->get() as $reg) {
-            NotificationService::send($reg, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", route('cashier.payments.receipt', $enrollment));
+            NotificationService::send($reg, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", 'info', route('cashier.payments.receipt', $enrollment));
         }
 
         return redirect()->route('cashier.payments.receipt', $enrollment)
@@ -136,7 +137,8 @@ class PaymentController extends Controller
             $enrollment->user,
             'GCash Payment Verified',
             "Your GCash payment of ₱{$amount} has been verified. Receipt: {$receiptNo}.",
-            route('student.enrollment.payment-info', $enrollment)
+            'success',
+            route('portal.enrollment.payment-info', $enrollment)
         );
 
         return redirect()->route('cashier.payments.receipt', $enrollment)
@@ -172,7 +174,8 @@ class PaymentController extends Controller
             $enrollment->user,
             'GCash Payment Rejected',
             "Your GCash payment proof was rejected. Reason: {$request->remarks}. Please resubmit with a valid proof.",
-            route('student.enrollment.payment-info', $enrollment)
+            'danger',
+            route('portal.enrollment.payment-info', $enrollment)
         );
 
         return redirect()->route('cashier.payments.show', $enrollment)

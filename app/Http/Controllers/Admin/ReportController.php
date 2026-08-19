@@ -25,10 +25,9 @@ class ReportController extends Controller
         ->latest()
         ->get();
         $totalRevenue = $payments->where('status', 'verified')->sum('amount');
-        $pdf = Pdf::loadView('admin.reports.payment', compact('payments', 'totalRevenue'))
+        $verifiedCount = $payments->where('status', 'verified')->count();
+        $pdf = Pdf::loadView('admin.reports.payment', compact('payments', 'totalRevenue', 'verifiedCount'))
             ->setPaper('a4', 'landscape');
-        $methodBreakdown = $payments->where('status', 'verified')->groupBy('payment_method')
-        ->map->sum('amount');
         return $pdf->download('DTC_Payment_Report_' . date('Ymd') . '.pdf');
     }
 }

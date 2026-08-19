@@ -6,10 +6,10 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">
                 Subjects — {{ $program->name }}
             </h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Manage subjects for {{ $program->code }}
             </p>
         </div>
@@ -29,7 +29,7 @@
     {{-- Add Subject Form --}}
     <div class="col-lg-4 mb-3">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-plus-circle mr-2" style="color:#0F4CDB;"></i> Add Subject
             </div>
             <div class="card-body">
@@ -88,8 +88,8 @@
                 @if($filtered->isNotEmpty())
                 <div class="card mb-3">
                     <div class="card-header"
-                         style="background:#F8FAFC; font-size:12px; font-weight:700;
-                                color:#64748B; text-transform:uppercase; letter-spacing:0.5px;">
+                         style="background:var(--dtc-surface-soft); font-size:12px; font-weight:700;
+                                color:var(--dtc-text-secondary); text-transform:uppercase; letter-spacing:0.5px;">
                         Year {{ $year }} — Semester {{ $sem }}
                         <span style="float:right; color:#0F4CDB;">
                             {{ $filtered->count() }} subjects
@@ -114,7 +114,7 @@
                                             {{ $subject->subject_code }}
                                         </span>
                                     </td>
-                                    <td style="font-size:13px; color:#1E293B;">
+                                    <td style="font-size:13px; color:var(--dtc-text);">
                                         {{ $subject->subject_name }}
                                     </td>
                                     <td>
@@ -143,7 +143,7 @@
 
         @if($subjects->isEmpty())
         <div class="card">
-            <div class="card-body text-center py-5" style="color:#94A3B8;">
+            <div class="card-body text-center py-5" style="color:var(--dtc-text-muted);">
                 <i class="fas fa-book fa-3x mb-3"></i>
                 <p>No subjects added yet. Add subjects using the form.</p>
             </div>

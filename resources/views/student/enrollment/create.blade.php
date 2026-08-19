@@ -7,7 +7,7 @@
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-file-alt mr-2" style="color:#0F4CDB;"></i>
                 Enrollment Details
             </div>
@@ -29,7 +29,7 @@
                                         display:flex; align-items:center; gap:12px;">
                                 <i class="fas fa-check-circle" style="color:#15803D; font-size:18px;"></i>
                                 <div>
-                                    <div style="font-size:14px; font-weight:600; color:#1E293B;">
+                                    <div style="font-size:14px; font-weight:600; color:var(--dtc-text);">
                                         {{ $lockedProgram->name }}
                                     </div>
                                     <div style="font-size:11px; color:#15803D; margin-top:2px;">
@@ -83,15 +83,15 @@
                     <div class="form-group">
                         <label>
                             Select Subjects
-                            <span style="font-size:11px; color:#94A3B8; font-weight:400;">
+                            <span style="font-size:11px; color:var(--dtc-text-muted); font-weight:400;">
                                 (Select program, year and semester first)
                             </span>
                         </label>
                         <div id="subjects-container">
-                            <div style="background:#F8FAFC; border:2px dashed #E2E8F0;
+                            <div style="background:var(--dtc-surface-soft); border:2px dashed var(--dtc-border);
                                         border-radius:12px; padding:24px; text-align:center;">
-                                <i class="fas fa-book fa-2x mb-2" style="color:#E2E8F0;"></i>
-                                <p style="color:#94A3B8; font-size:13px; margin:0;">
+                                <i class="fas fa-book fa-2x mb-2" style="color:var(--dtc-border);"></i>
+                                <p style="color:var(--dtc-text-muted); font-size:13px; margin:0;">
                                     Select program, year level, and semester to load subjects.
                                 </p>
                             </div>
@@ -168,7 +168,7 @@ function loadSubjects() {
     if (!programId) return;
 
     container.innerHTML = `
-        <div style="text-align:center; padding:20px; color:#94A3B8;">
+        <div style="text-align:center; padding:20px; color:var(--dtc-text-muted);">
             <i class="fas fa-spinner fa-spin fa-2x"></i>
             <p style="margin-top:8px; font-size:13px;">Loading subjects...</p>
         </div>`;
@@ -189,32 +189,32 @@ function loadSubjects() {
             }
 
             container.innerHTML = `
-                <div style="border:1.5px solid #E2E8F0; border-radius:12px; overflow:hidden;">
-                    <div style="background:#F8FAFC; padding:10px 16px; font-size:11px;
-                                font-weight:700; color:#64748B; text-transform:uppercase;
-                                letter-spacing:0.5px; border-bottom:1px solid #E2E8F0;">
+                <div style="border:1.5px solid var(--dtc-border); border-radius:12px; overflow:hidden;">
+                    <div style="background:var(--dtc-surface-soft); padding:10px 16px; font-size:11px;
+                                font-weight:700; color:var(--dtc-text-secondary); text-transform:uppercase;
+                                letter-spacing:0.5px; border-bottom:1px solid var(--dtc-border);">
                         ${subjects.length} Subject${subjects.length > 1 ? 's' : ''} Available
                     </div>
                     ${subjects.map(s => `
                         <label style="display:flex; align-items:center; gap:14px;
                                       padding:14px 16px; border-bottom:1px solid #F1F5F9;
                                       cursor:pointer; transition:background 0.2s; margin:0;"
-                               onmouseover="this.style.background='#F8FAFC'"
+                               onmouseover="this.style.background='var(--dtc-surface-soft)'"
                                onmouseout="this.style.background='transparent'">
                             <input type="checkbox" name="subject_ids[]" value="${s.id}"
                                    style="width:18px; height:18px; accent-color:#0F4CDB;
                                           cursor:pointer; flex-shrink:0;">
                             <div style="flex:1;">
-                                <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                                <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                     ${s.subject_code}
                                 </div>
-                                <div style="font-size:12px; color:#64748B;">
+                                <div style="font-size:12px; color:var(--dtc-text-secondary);">
                                     ${s.subject_name}
                                 </div>
                             </div>
                         </label>
                     `).join('')}
-                    <div style="padding:10px 16px; background:#F8FAFC; border-top:1px solid #E2E8F0;
+                    <div style="padding:10px 16px; background:var(--dtc-surface-soft); border-top:1px solid var(--dtc-border);
                                 text-align:right;">
                         <button type="button" onclick="selectAll()" style="font-size:12px;
                                 color:#0F4CDB; background:none; border:none; cursor:pointer;

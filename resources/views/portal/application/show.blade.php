@@ -24,10 +24,10 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">
                 My Application
             </h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 View your submitted pre-enrollment application and its current status.
             </p>
         </div>

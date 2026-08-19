@@ -83,7 +83,7 @@
                     @elseif($latestEnrollment->is_paid)
                         Congratulations! You are officially enrolled.
                     @elseif($latestEnrollment->status === 'approved')
-                        Your enrollment is approved! Please proceed to the Cashier to pay ₱500.00.
+                        Your enrollment is approved! Please proceed to the Cashier to pay ₱{{ number_format($fee, 2) }}.
                     @elseif($latestEnrollment->status === 'pending')
                         Your enrollment is under review. Please wait for the Registrar's approval.
                     @else
@@ -308,7 +308,7 @@
                     </span>
                 </div>
                 <p style="font-size:12px; color:#B45309; margin:0 0 12px; line-height:1.6;">
-                    Please complete your enrollment process by paying the ₱500.00 fee at the Cashier's Office.
+                    Please complete your enrollment process by paying the ₱{{ number_format($fee, 2) }} fee at the Cashier's Office.
                 </p>
                 <button type="button" class="btn btn-warning btn-sm btn-block dtc-payment-btn"
                         data-url="{{ route('portal.enrollment.payment-info', $latestEnrollment) }}"

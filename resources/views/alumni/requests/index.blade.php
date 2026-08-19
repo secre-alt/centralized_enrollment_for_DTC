@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">My Document Requests</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">My Document Requests</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Track your document requests and pickup status
             </p>
         </div>
@@ -62,9 +62,9 @@
 @if ($requests->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-folder-open fa-4x mb-3" style="color:#E2E8F0;"></i>
-            <h5 style="color:#1E293B; font-weight:700;">No Document Requests Yet</h5>
-            <p style="color:#64748B; font-size:13px; max-width:360px; margin:0 auto 20px;">
+            <i class="fas fa-folder-open fa-4x mb-3" style="color:var(--dtc-border);"></i>
+            <h5 style="color:var(--dtc-text); font-weight:700;">No Document Requests Yet</h5>
+            <p style="color:var(--dtc-text-secondary); font-size:13px; max-width:360px; margin:0 auto 20px;">
                 Submit a document request to get your TOR, Diploma, Certification, or other records.
             </p>
             <a href="{{ route('portal.documents.create') }}" class="btn btn-primary">
@@ -77,7 +77,7 @@
     <div class="row">
         <div class="col-lg-8 mb-3">
             <div class="card">
-                <div class="card-header font-weight-bold" style="color:#1E293B;">
+                <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                     Request History
                 </div>
                 <div class="card-body p-0">
@@ -100,7 +100,7 @@
 
                         <div style="flex:1;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-size:14px; font-weight:600; color:#1E293B;">
+                                <div style="font-size:14px; font-weight:600; color:var(--dtc-text);">
                                     {{ $req->document_label }}
                                 </div>
                                 <span style="font-size:11px; font-weight:700; padding:3px 10px;
@@ -112,13 +112,13 @@
                                     {{ ucfirst($req->status) }}
                                 </span>
                             </div>
-                            <div style="font-size:12px; color:#64748B; margin-top:4px;">
+                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:4px;">
                                 {{ $req->copies }} cop{{ $req->copies > 1 ? 'ies' : 'y' }} •
                                 Fee: ₱{{ number_format($req->fee, 2) }} •
                                 {{ $req->created_at->format('M d, Y') }}
                             </div>
                             @if($req->purpose)
-                            <div style="font-size:12px; color:#94A3B8; margin-top:2px;">
+                            <div style="font-size:12px; color:var(--dtc-text-muted); margin-top:2px;">
                                 {{ $req->purpose }}
                             </div>
                             @endif
@@ -138,7 +138,7 @@
         {{-- Quick Actions --}}
         <div class="col-lg-4 mb-3">
             <div class="card">
-                <div class="card-header font-weight-bold" style="color:#1E293B;">Quick Actions</div>
+                <div class="card-header font-weight-bold" style="color:var(--dtc-text);">Quick Actions</div>
                 <div class="card-body p-3">
                     <a href="{{ route('portal.documents.create') }}" class="quick-action-btn">
                         <i class="fas fa-plus"></i> Request Document

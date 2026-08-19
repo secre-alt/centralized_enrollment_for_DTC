@@ -11,7 +11,7 @@ $settingsItems = [
     ],
     [
         'icon'   => 'fa-file-alt',
-        'color'  => '#64748B',
+        'color'  => 'var(--dtc-text-secondary)',
         'bg'     => '#F1F5F9',
         'title'  => 'Audit Logs',
         'desc'   => 'View system activities',
@@ -20,7 +20,7 @@ $settingsItems = [
     ],
     [
         'icon'   => 'fa-graduation-cap',
-        'color'  => '#64748B',
+        'color'  => 'var(--dtc-text-secondary)',
         'bg'     => '#F1F5F9',
         'title'  => 'Academic Settings',
         'desc'   => 'Programs, courses, subjects',
@@ -29,7 +29,7 @@ $settingsItems = [
     ],
     [
         'icon'   => 'fa-credit-card',
-        'color'  => '#64748B',
+        'color'  => 'var(--dtc-text-secondary)',
         'bg'     => '#F1F5F9',
         'title'  => 'Payment Settings',
         'desc'   => 'Payment methods and fees',
@@ -38,7 +38,7 @@ $settingsItems = [
     ],
     [
         'icon'   => 'fa-bell',
-        'color'  => '#64748B',
+        'color'  => 'var(--dtc-text-secondary)',
         'bg'     => '#F1F5F9',
         'title'  => 'Notification Settings',
         'desc'   => 'Email, SMS and in-app alerts',
@@ -47,7 +47,7 @@ $settingsItems = [
     ],
     [
         'icon'   => 'fa-shield-alt',
-        'color'  => '#64748B',
+        'color'  => 'var(--dtc-text-secondary)',
         'bg'     => '#F1F5F9',
         'title'  => 'System Security',
         'desc'   => 'Password policy and access',
@@ -56,7 +56,7 @@ $settingsItems = [
     ],
     [
         'icon'   => 'fa-database',
-        'color'  => '#64748B',
+        'color'  => 'var(--dtc-text-secondary)',
         'bg'     => '#F1F5F9',
         'title'  => 'Backup & Restore',
         'desc'   => 'Backup your system data',
@@ -86,10 +86,10 @@ $settingsItems = [
 
         <div>
             <div style="font-size:14px; font-weight:{{ $item['active'] ? '700' : '600' }};
-                        color:{{ $item['active'] ? '#0F4CDB' : '#1E293B' }};">
+                        color:{{ $item['active'] ? '#0F4CDB' : 'var(--dtc-text)' }};">
                 {{ $item['title'] }}
             </div>
-            <div style="font-size:12px; color:#64748B; margin-top:2px;">
+            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
                 {{ $item['desc'] }}
             </div>
         </div>

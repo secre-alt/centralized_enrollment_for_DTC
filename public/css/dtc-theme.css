@@ -3308,3 +3308,30 @@ button.dtc-next-step-btn:hover {
     background: var(--dtc-primary-soft);
     filter: brightness(0.97);
 }
+
+/* ── Filter pill tabs (payments index, etc.) ────────────────────── */
+.dtc-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none !important;
+    border: 1.5px solid var(--dtc-border);
+    color: var(--dtc-text-secondary);
+    background: var(--dtc-surface);
+    transition: background var(--dtc-transition), color var(--dtc-transition), border-color var(--dtc-transition);
+}
+
+.dtc-filter-pill:hover {
+    color: var(--dtc-primary);
+    border-color: #BFDBFE;
+    background: var(--dtc-primary-soft);
+}
+
+.dtc-filter-pill.is-active {
+    background: var(--dtc-primary);
+    color: #fff;
+    border-color: var(--dtc-primary);
+}

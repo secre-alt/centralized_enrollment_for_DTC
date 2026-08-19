@@ -243,7 +243,7 @@
                                 </label>
                                 <div style="position:relative; height:40px;">
                                     <i class="fas fa-user" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:#94A3B8; font-size:13px; line-height:1; z-index:2; pointer-events:none;"></i>
+                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px; line-height:1; z-index:2; pointer-events:none;"></i>
                                     <input type="text" name="name" class="form-control"
                                            style="padding-left:38px; height:40px;"
                                            value="{{ old('name') }}"
@@ -258,7 +258,7 @@
                                 </label>
                                 <div style="position:relative;">
                                     <i class="fas fa-envelope" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:#94A3B8; font-size:13px; line-height:1; pointer-events:none;"></i>
+                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px; line-height:1; pointer-events:none;"></i>
                                     <input type="email" name="email" class="form-control"
                                            style="padding-left:38px;"
                                            value="{{ old('email') }}"
@@ -274,12 +274,12 @@
                         </label>
                         <div style="position:relative;">
                             <i class="fas fa-lock" style="position:absolute; left:14px;
-                               top:50%; transform:translateY(-50%); color:#94A3B8; font-size:13px; line-height:1; pointer-events:none;"></i>
+                               top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px; line-height:1; pointer-events:none;"></i>
                             <input type="text" name="password" class="form-control"
                                    style="padding-left:38px;"
                                    placeholder="Min. 6 characters" required>
                         </div>
-                        <small style="color:#94A3B8; font-size:11px; margin-top:4px; display:block;">
+                        <small style="color:var(--dtc-text-muted); font-size:11px; margin-top:4px; display:block;">
                             The user should change this after first login.
                         </small>
                     </div>
@@ -304,16 +304,16 @@
                                     <input type="radio" name="role" value="{{ $role->name }}"
                                            style="display:none;" class="create-role-radio">
                                     <div class="create-role-option"
-                                         style="border:2px solid #E2E8F0; border-radius:12px;
+                                         style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:12px; display:flex; align-items:center;
-                                                gap:10px; transition:all 0.2s; background:#F8FAFC;">
+                                                gap:10px; transition:all 0.2s; background:var(--dtc-surface-soft);">
                                         <div style="width:32px; height:32px; border-radius:8px;
                                                     background:{{ $roleConfig['bg'] }}; display:flex;
                                                     align-items:center; justify-content:center; flex-shrink:0;">
                                             <i class="fas {{ $roleConfig['icon'] }}"
                                                style="font-size:13px; color:{{ $roleConfig['color'] }};"></i>
                                         </div>
-                                        <span style="font-size:12px; font-weight:600; color:#1E293B;
+                                        <span style="font-size:12px; font-weight:600; color:var(--dtc-text);
                                                      text-transform:capitalize;">
                                             {{ str_replace('_',' ', $role->name) }}
                                         </span>
@@ -380,7 +380,7 @@
                                 </label>
                                 <div style="position:relative;">
                                     <i class="fas fa-user" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:#94A3B8; font-size:13px;"></i>
+                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px;"></i>
                                     <input type="text" name="name" id="edit-name"
                                            class="form-control" style="padding-left:38px;" required>
                                 </div>
@@ -393,7 +393,7 @@
                                 </label>
                                 <div style="position:relative;">
                                     <i class="fas fa-envelope" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:#94A3B8; font-size:13px;"></i>
+                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px;"></i>
                                     <input type="email" name="email" id="edit-email"
                                            class="form-control" style="padding-left:38px;" required>
                                 </div>
@@ -427,13 +427,13 @@
                                         <input type="radio" name="status" value="{{ $status }}"
                                                class="edit-status-radio" style="display:none;">
                                         <div class="edit-status-option"
-                                             style="border:2px solid #E2E8F0; border-radius:10px;
+                                             style="border:2px solid var(--dtc-border); border-radius:10px;
                                                     padding:10px 8px; text-align:center;
-                                                    transition:all 0.2s; background:#F8FAFC; cursor:pointer;">
+                                                    transition:all 0.2s; background:var(--dtc-surface-soft); cursor:pointer;">
                                             <i class="fas {{ $status === 'active' ? 'fa-check-circle' : ($status === 'locked' ? 'fa-lock' : 'fa-clock') }}"
                                                style="font-size:16px; display:block; margin-bottom:4px;
                                                       color:{{ $status === 'active' ? '#22C55E' : ($status === 'locked' ? '#EF4444' : '#F59E0B') }};"></i>
-                                            <div style="font-size:11px; font-weight:600; color:#1E293B;">
+                                            <div style="font-size:11px; font-weight:600; color:var(--dtc-text);">
                                                 {{ ucfirst($status) }}
                                             </div>
                                         </div>
@@ -471,7 +471,7 @@ body.dtc-dark {
     --users-border: #334155;
     --users-border-soft: #263449;
     --users-text: #f1f5f9;
-    --users-text-muted: #94a3b8;
+    --users-text-muted: var(--dtc-text-muted);
 }
 
 
@@ -698,7 +698,7 @@ body.dtc-dark .modal input {
 }
 
 body.dtc-dark .modal .form-control::placeholder {
-    color: #64748b !important;
+    color: var(--dtc-text-secondary) !important;
 }
 
 body.dtc-dark .modal .form-control:focus,
@@ -794,8 +794,8 @@ body.dtc-dark .alert-danger {
 document.querySelectorAll('.create-role-radio').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('.create-role-option').forEach(opt => {
-            opt.style.borderColor = '#E2E8F0';
-            opt.style.background  = '#F8FAFC';
+            opt.style.borderColor = 'var(--dtc-border)';
+            opt.style.background  = 'var(--dtc-surface-soft)';
         });
         this.nextElementSibling.style.borderColor = '#0F4CDB';
         this.nextElementSibling.style.background  = '#EEF2FF';
@@ -843,8 +843,8 @@ document.querySelectorAll('.btn-edit-user').forEach(btn => {
                     opt.style.borderColor = '#0F4CDB';
                     opt.style.background  = '#EEF2FF';
                 } else {
-                    opt.style.borderColor = '#E2E8F0';
-                    opt.style.background  = '#F8FAFC';
+                    opt.style.borderColor = 'var(--dtc-border)';
+                    opt.style.background  = 'var(--dtc-surface-soft)';
                 }
             });
         })
@@ -858,8 +858,8 @@ document.querySelectorAll('.btn-edit-user').forEach(btn => {
 document.querySelectorAll('.edit-status-radio').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('.edit-status-option').forEach(opt => {
-            opt.style.borderColor = '#E2E8F0';
-            opt.style.background  = '#F8FAFC';
+            opt.style.borderColor = 'var(--dtc-border)';
+            opt.style.background  = 'var(--dtc-surface-soft)';
         });
         this.nextElementSibling.style.borderColor = '#0F4CDB';
         this.nextElementSibling.style.background  = '#EEF2FF';

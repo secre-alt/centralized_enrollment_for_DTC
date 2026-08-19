@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Edit User</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Edit User</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Update account details and role
             </p>
         </div>
@@ -50,7 +50,7 @@
         </div>
 
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-edit mr-2" style="color:#0F4CDB;"></i>
                 Edit Account
             </div>
@@ -67,7 +67,7 @@
                         <label>Full Name</label>
                         <div style="position:relative;">
                             <i class="fas fa-user" style="position:absolute; left:14px;
-                               top:13px; color:#94A3B8; font-size:13px; pointer-events:none;"></i>
+                               top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="text" name="name" class="form-control"
                                    style="padding-left:38px;"
                                    value="{{ old('name', $user->name) }}" required>
@@ -78,7 +78,7 @@
                         <label>Email Address</label>
                         <div style="position:relative;">
                             <i class="fas fa-envelope" style="position:absolute; left:14px;
-                               top:13px; color:#94A3B8; font-size:13px; pointer-events:none;"></i>
+                               top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="email" name="email" class="form-control"
                                    style="padding-left:38px;"
                                    value="{{ old('email', $user->email) }}" required>
@@ -107,13 +107,13 @@
                                            style="display:none;" class="status-radio"
                                            {{ old('status', $user->status) === $status ? 'checked' : '' }}>
                                     <div class="status-option"
-                                         style="border:2px solid #E2E8F0; border-radius:12px;
+                                         style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:12px; text-align:center; transition:all 0.2s;
-                                                background:#F8FAFC;">
+                                                background:var(--dtc-surface-soft);">
                                         <i class="fas {{ $status === 'active' ? 'fa-check-circle' : ($status === 'locked' ? 'fa-lock' : 'fa-clock') }}"
                                            style="font-size:18px; display:block; margin-bottom:6px;
                                                   color:{{ $status === 'active' ? '#22C55E' : ($status === 'locked' ? '#EF4444' : '#F59E0B') }};"></i>
-                                        <div style="font-size:12px; font-weight:600; color:#1E293B;">
+                                        <div style="font-size:12px; font-weight:600; color:var(--dtc-text);">
                                             {{ ucfirst($status) }}
                                         </div>
                                     </div>
@@ -142,8 +142,8 @@
 document.querySelectorAll('.status-radio').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('.status-option').forEach(opt => {
-            opt.style.borderColor = '#E2E8F0';
-            opt.style.background = '#F8FAFC';
+            opt.style.borderColor = 'var(--dtc-border)';
+            opt.style.background = 'var(--dtc-surface-soft)';
         });
         this.nextElementSibling.style.borderColor = '#0F4CDB';
         this.nextElementSibling.style.background = '#EEF2FF';

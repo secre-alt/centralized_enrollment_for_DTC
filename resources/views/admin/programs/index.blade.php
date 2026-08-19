@@ -22,7 +22,7 @@
     {{-- Add Program Form --}}
     <div class="col-lg-4 mb-3">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-plus-circle mr-2" style="color:#0F4CDB;"></i> Add Program
             </div>
             <div class="card-body">
@@ -51,7 +51,7 @@
     {{-- Programs List --}}
     <div class="col-lg-8 mb-3">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 All Programs
             </div>
             <div class="card-body p-0">
@@ -68,7 +68,7 @@
                         @forelse ($programs as $program)
                         <tr>
                             <td>
-                                <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                                <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                     {{ $program->name }}
                                 </div>
                             </td>
@@ -79,10 +79,10 @@
                                 </span>
                             </td>
                             <td>
-                                <span style="font-size:13px; font-weight:600; color:#1E293B;">
+                                <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                     {{ $program->subjects_count }}
                                 </span>
-                                <span style="font-size:12px; color:#94A3B8;"> subjects</span>
+                                <span style="font-size:12px; color:var(--dtc-text-muted);"> subjects</span>
                             </td>
                             <td>
                                 <div style="display:flex; gap:6px;">
@@ -108,7 +108,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center py-4" style="color:#94A3B8;">
+                            <td colspan="4" class="text-center py-4" style="color:var(--dtc-text-muted);">
                                 No programs yet.
                             </td>
                         </tr>

@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Backup & Restore</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Backup & Restore</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Manage your database backups and restore points
             </p>
         </div>
@@ -41,10 +41,10 @@
                             margin:0 auto 16px; font-size:28px; color:#FFC72C;">
                     <i class="fas fa-database"></i>
                 </div>
-                <h5 style="font-weight:700; color:#1E293B; margin-bottom:8px;">
+                <h5 style="font-weight:700; color:var(--dtc-text); margin-bottom:8px;">
                     Create Backup
                 </h5>
-                <p style="font-size:13px; color:#64748B; line-height:1.6; margin-bottom:20px;">
+                <p style="font-size:13px; color:var(--dtc-text-secondary); line-height:1.6; margin-bottom:20px;">
                     Export your entire database as a <code>.sql</code> file.
                     This includes all tables, records, and data.
                 </p>
@@ -60,7 +60,7 @@
 
         {{-- ── Restore ─── --}}
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-upload mr-2" style="color:#F59E0B;"></i>
                 Restore from Backup
             </div>
@@ -80,16 +80,16 @@
                         <label style="font-size:13px; font-weight:600; color:#374151;">
                             Upload .sql File
                         </label>
-                        <div style="border:2px dashed #E2E8F0; border-radius:12px;
+                        <div style="border:2px dashed var(--dtc-border); border-radius:12px;
                                     padding:24px; text-align:center; cursor:pointer;
-                                    transition:border-color 0.2s; background:#F8FAFC;"
+                                    transition:border-color 0.2s; background:var(--dtc-surface-soft);"
                              id="drop-zone"
                              onclick="document.getElementById('sql-file').click()">
-                            <i class="fas fa-file-code" style="font-size:28px; color:#94A3B8; display:block; margin-bottom:8px;"></i>
-                            <div style="font-size:13px; font-weight:600; color:#1E293B; margin-bottom:4px;">
+                            <i class="fas fa-file-code" style="font-size:28px; color:var(--dtc-text-muted); display:block; margin-bottom:8px;"></i>
+                            <div style="font-size:13px; font-weight:600; color:var(--dtc-text); margin-bottom:4px;">
                                 Click to select file
                             </div>
-                            <div style="font-size:12px; color:#94A3B8;" id="file-name">
+                            <div style="font-size:12px; color:var(--dtc-text-muted);" id="file-name">
                                 .sql files only, max 50MB
                             </div>
                         </div>
@@ -118,11 +118,11 @@
     <div class="col-lg-8 mb-3">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold" style="color:#1E293B;">
+                <span class="font-weight-bold" style="color:var(--dtc-text);">
                     <i class="fas fa-history mr-2" style="color:#0F4CDB;"></i>
                     Backup History
                 </span>
-                <span style="font-size:13px; color:#64748B;">
+                <span style="font-size:13px; color:var(--dtc-text-secondary);">
                     {{ $backups->count() }} backup{{ $backups->count() !== 1 ? 's' : '' }}
                 </span>
             </div>
@@ -142,11 +142,11 @@
 
                     {{-- Info --}}
                     <div style="flex:1; min-width:0;">
-                        <div style="font-size:13px; font-weight:600; color:#1E293B;
+                        <div style="font-size:13px; font-weight:600; color:var(--dtc-text);
                                     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                             {{ $backup->filename }}
                         </div>
-                        <div style="font-size:12px; color:#64748B; margin-top:3px;">
+                        <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:3px;">
                             {{ $backup->formatted_size }} •
                             {{ $backup->created_at->format('M d, Y h:i A') }} •
                             by {{ $backup->creator->name ?? 'System' }}
@@ -188,11 +188,11 @@
                 </div>
                 @empty
                 <div style="padding:48px 20px; text-align:center;">
-                    <i class="fas fa-database" style="font-size:40px; color:#E2E8F0; display:block; margin-bottom:14px;"></i>
-                    <div style="font-size:14px; font-weight:600; color:#1E293B; margin-bottom:6px;">
+                    <i class="fas fa-database" style="font-size:40px; color:var(--dtc-border); display:block; margin-bottom:14px;"></i>
+                    <div style="font-size:14px; font-weight:600; color:var(--dtc-text); margin-bottom:6px;">
                         No backups yet
                     </div>
-                    <div style="font-size:13px; color:#94A3B8;">
+                    <div style="font-size:13px; color:var(--dtc-text-muted);">
                         Click "Backup Now" to create your first database backup.
                     </div>
                 </div>
@@ -254,8 +254,8 @@ if (zone) {
         this.style.background  = '#EEF2FF';
     });
     zone.addEventListener('dragleave', function() {
-        this.style.borderColor = '#E2E8F0';
-        this.style.background  = '#F8FAFC';
+        this.style.borderColor = 'var(--dtc-border)';
+        this.style.background  = 'var(--dtc-surface-soft)';
     });
     zone.addEventListener('drop', function(e) {
         e.preventDefault();

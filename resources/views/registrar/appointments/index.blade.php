@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Appointment Requests</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">Review and confirm student appointment bookings</p>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Review and confirm student appointment bookings</p>
         </div>
         <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-clock mr-1"></i> Manage Slots
@@ -47,10 +47,10 @@
                                 {{ strtoupper(substr($appointment->user->name, 0, 1)) }}
                             </div>
                             <div>
-                                <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                                <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                     {{ $appointment->user->name }}
                                 </div>
-                                <div style="font-size:11px; color:#64748B;">
+                                <div style="font-size:11px; color:var(--dtc-text-secondary);">
                                     {{ $appointment->user->email }}
                                 </div>
                             </div>
@@ -62,13 +62,13 @@
                             {{ ucfirst($appointment->document_type) }}
                         </span>
                     </td>
-                    <td style="font-size:13px; font-weight:500; color:#1E293B;">
+                    <td style="font-size:13px; font-weight:500; color:var(--dtc-text);">
                         {{ \Carbon\Carbon::parse($appointment->slot->date)->format('M d, Y') }}
                     </td>
-                    <td style="font-size:13px; color:#64748B;">
+                    <td style="font-size:13px; color:var(--dtc-text-secondary);">
                         {{ \Carbon\Carbon::parse($appointment->slot->start_time)->format('h:i A') }}
                     </td>
-                    <td style="font-size:12px; color:#64748B; max-width:150px;">
+                    <td style="font-size:12px; color:var(--dtc-text-secondary); max-width:150px;">
                         {{ $appointment->purpose ?? '—' }}
                     </td>
                     <td>
@@ -114,7 +114,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <p style="font-size:13px; color:#64748B; margin-bottom:12px;">
+                                            <p style="font-size:13px; color:var(--dtc-text-secondary); margin-bottom:12px;">
                                                 Please provide a reason for cancelling
                                                 <strong>{{ $appointment->user->name }}</strong>'s appointment.
                                             </p>
@@ -141,8 +141,8 @@
                 @empty
                 <tr>
                     <td colspan="7" class="text-center py-5">
-                        <i class="fas fa-calendar-check fa-3x mb-3" style="color:#E2E8F0;"></i>
-                        <p style="color:#94A3B8; font-size:13px;">No pending appointment requests.</p>
+                        <i class="fas fa-calendar-check fa-3x mb-3" style="color:var(--dtc-border);"></i>
+                        <p style="color:var(--dtc-text-muted); font-size:13px;">No pending appointment requests.</p>
                     </td>
                 </tr>
                 @endforelse

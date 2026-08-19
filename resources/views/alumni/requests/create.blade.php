@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Request a Document</h4>
-        <p class="mb-0" style="color:#64748B; font-size:13px;">
+        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Request a Document</h4>
+        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
             Submit a document request to the Registrar's Office
         </p>
     </div>
@@ -16,7 +16,7 @@
 <div class="row justify-content-center">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-folder-plus mr-2" style="color:#0F4CDB;"></i>
                 Document Request Form
             </div>
@@ -47,15 +47,15 @@
                                            class="doc-radio"
                                            {{ old('document_type') === $doc['value'] ? 'checked' : '' }}>
                                     <div class="doc-option"
-                                         style="border:2px solid #E2E8F0; border-radius:12px;
+                                         style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:14px; text-align:center; transition:all 0.2s;
-                                                background:#F8FAFC;">
+                                                background:var(--dtc-surface-soft);">
                                         <i class="fas {{ $doc['icon'] }}"
-                                           style="font-size:22px; color:#94A3B8; margin-bottom:8px; display:block;"></i>
-                                        <div style="font-size:12px; font-weight:600; color:#64748B;">
+                                           style="font-size:22px; color:var(--dtc-text-muted); margin-bottom:8px; display:block;"></i>
+                                        <div style="font-size:12px; font-weight:600; color:var(--dtc-text-secondary);">
                                             {{ $doc['label'] }}
                                         </div>
-                                        <div style="font-size:11px; color:#94A3B8; margin-top:4px;">
+                                        <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:4px;">
                                             {{ $doc['fee'] }}
                                         </div>
                                     </div>
@@ -71,7 +71,7 @@
                         <div style="display:flex; align-items:center; gap:12px;">
                             <button type="button" onclick="adjustCopies(-1)"
                                     style="width:36px; height:36px; border-radius:10px;
-                                           background:#F1F5F9; border:1.5px solid #E2E8F0;
+                                           background:#F1F5F9; border:1.5px solid var(--dtc-border);
                                            font-size:18px; cursor:pointer; display:flex;
                                            align-items:center; justify-content:center;">−</button>
                             <input type="number" name="copies" id="copies"
@@ -80,7 +80,7 @@
                                    style="width:80px; text-align:center;">
                             <button type="button" onclick="adjustCopies(1)"
                                     style="width:36px; height:36px; border-radius:10px;
-                                           background:#F1F5F9; border:1.5px solid #E2E8F0;
+                                           background:#F1F5F9; border:1.5px solid var(--dtc-border);
                                            font-size:18px; cursor:pointer; display:flex;
                                            align-items:center; justify-content:center;">+</button>
                         </div>
@@ -88,7 +88,7 @@
 
                     {{-- Purpose --}}
                     <div class="form-group">
-                        <label>Purpose <span style="color:#94A3B8; font-weight:400;">(optional)</span></label>
+                        <label>Purpose <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span></label>
                         <textarea name="purpose" class="form-control" rows="3"
                                   placeholder="e.g. For employment, board exam, scholarship...">{{ old('purpose') }}</textarea>
                     </div>
@@ -97,7 +97,7 @@
                     <div class="form-group">
                         <label>
                             Schedule Pickup Appointment
-                            <span style="color:#94A3B8; font-weight:400;">(optional)</span>
+                            <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span>
                         </label>
                         <select name="appointment_slot_id" class="form-control">
                             <option value="">— I will schedule later —</option>
@@ -120,21 +120,21 @@
                                     text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
                             Fee Summary
                         </div>
-                        <div style="font-size:13px; color:#64748B;">
+                        <div style="font-size:13px; color:var(--dtc-text-secondary);">
                             Select a document type to see the estimated fee.
                         </div>
                         <div id="fee-summary" style="display:none; margin-top:8px;">
                             <div style="display:flex; justify-content:space-between; font-size:13px;">
-                                <span style="color:#64748B;">Document Type:</span>
-                                <span id="fee-doc-label" style="font-weight:600; color:#1E293B;"></span>
+                                <span style="color:var(--dtc-text-secondary);">Document Type:</span>
+                                <span id="fee-doc-label" style="font-weight:600; color:var(--dtc-text);"></span>
                             </div>
                             <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:4px;">
-                                <span style="color:#64748B;">Copies:</span>
-                                <span id="fee-copies-label" style="font-weight:600; color:#1E293B;"></span>
+                                <span style="color:var(--dtc-text-secondary);">Copies:</span>
+                                <span id="fee-copies-label" style="font-weight:600; color:var(--dtc-text);"></span>
                             </div>
                             <div style="border-top:1px solid #C7D2FE; margin:8px 0;"></div>
                             <div style="display:flex; justify-content:space-between;">
-                                <span style="font-size:13px; color:#64748B;">Estimated Total:</span>
+                                <span style="font-size:13px; color:var(--dtc-text-secondary);">Estimated Total:</span>
                                 <span id="fee-total" style="font-size:16px; font-weight:800; color:#0F4CDB;"></span>
                             </div>
                         </div>
@@ -190,7 +190,7 @@
 
         {{-- Fee Reference --}}
         <div class="card mt-3">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 Fee Reference
             </div>
             <div class="card-body p-0">
@@ -202,7 +202,7 @@
                 ] as $item)
                 <div style="padding:12px 20px; border-bottom:1px solid #F1F5F9;
                             display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:13px; color:#1E293B;">{{ $item['label'] }}</span>
+                    <span style="font-size:13px; color:var(--dtc-text);">{{ $item['label'] }}</span>
                     <span style="font-size:13px; font-weight:700; color:#0F4CDB;">{{ $item['fee'] }}</span>
                 </div>
                 @endforeach
@@ -240,9 +240,9 @@ function updateFee() {
 document.querySelectorAll('.doc-radio').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('.doc-option').forEach(opt => {
-            opt.style.borderColor = '#E2E8F0';
-            opt.style.background = '#F8FAFC';
-            opt.querySelector('i').style.color = '#94A3B8';
+            opt.style.borderColor = 'var(--dtc-border)';
+            opt.style.background = 'var(--dtc-surface-soft)';
+            opt.querySelector('i').style.color = 'var(--dtc-text-muted)';
         });
         const selected = this.nextElementSibling;
         selected.style.borderColor = '#0F4CDB';

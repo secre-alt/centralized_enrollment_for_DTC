@@ -6,10 +6,10 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:12px;">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Settings</h4>
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Settings</h4>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 p-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" style="color:#64748B;">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" style="color:var(--dtc-text-secondary);">Dashboard</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Settings</li>
                 </ol>
             </nav>
@@ -156,7 +156,7 @@
                                     <img src="{{ $settings->logo_url ?? asset('images/DTC-LOGO.png') }}" alt="System Logo">
                                 </div>
                                 <div>
-                                    <div style="font-size:11px; color:#94A3B8; margin-bottom:8px;">
+                                    <div style="font-size:11px; color:var(--dtc-text-muted); margin-bottom:8px;">
                                         Recommended size:<br>512 x 512px (PNG)
                                     </div>
                                     <label class="btn btn-sm btn-secondary mb-1" style="cursor:pointer;">
@@ -176,7 +176,7 @@
                                     <img src="{{ $settings->favicon_url ?? asset('images/DTC-LOGO.png') }}" alt="Favicon">
                                 </div>
                                 <div>
-                                    <div style="font-size:11px; color:#94A3B8; margin-bottom:8px;">
+                                    <div style="font-size:11px; color:var(--dtc-text-muted); margin-bottom:8px;">
                                         Recommended size:<br>32 x 32px (PNG)
                                     </div>
                                     <label class="btn btn-sm btn-secondary mb-1" style="cursor:pointer;">
@@ -206,7 +206,7 @@
 
                             <div class="form-group">
                                 <label>Default Language</label>
-                                <div style="font-size:11px; color:#94A3B8; margin:-4px 0 6px;">Select the default system language.</div>
+                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Select the default system language.</div>
                                 <select name="default_language" class="form-control">
                                     <option value="en" {{ ($settings->default_language ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
                                     <option value="fil" {{ ($settings->default_language ?? '') === 'fil' ? 'selected' : '' }}>Filipino</option>
@@ -215,7 +215,7 @@
 
                             <div class="form-group">
                                 <label>Default Timezone</label>
-                                <div style="font-size:11px; color:#94A3B8; margin:-4px 0 6px;">Select the default timezone.</div>
+                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Select the default timezone.</div>
                                 <select name="default_timezone" class="form-control">
                                     <option value="Asia/Manila" {{ ($settings->default_timezone ?? 'Asia/Manila') === 'Asia/Manila' ? 'selected' : '' }}>(GMT+08:00) Asia/Manila</option>
                                 </select>
@@ -223,7 +223,7 @@
 
                             <div class="form-group">
                                 <label>Date Format</label>
-                                <div style="font-size:11px; color:#94A3B8; margin:-4px 0 6px;">Choose the default date format.</div>
+                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Choose the default date format.</div>
                                 <select name="date_format" class="form-control">
                                     <option value="m/d/Y"  {{ ($settings->date_format ?? 'm/d/Y')  === 'm/d/Y'  ? 'selected' : '' }}>MM/DD/YYYY</option>
                                     <option value="d/m/Y"  {{ ($settings->date_format ?? '')        === 'd/m/Y'  ? 'selected' : '' }}>DD/MM/YYYY</option>
@@ -233,7 +233,7 @@
 
                             <div class="form-group">
                                 <label>Time Format</label>
-                                <div style="font-size:11px; color:#94A3B8; margin:-4px 0 6px;">Choose the default time format.</div>
+                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Choose the default time format.</div>
                                 <select name="time_format" class="form-control">
                                     <option value="12" {{ ($settings->time_format ?? '12') === '12' ? 'selected' : '' }}>12-hour (AM/PM)</option>
                                     <option value="24" {{ ($settings->time_format ?? '')   === '24' ? 'selected' : '' }}>24-hour</option>
@@ -242,7 +242,7 @@
 
                             <div class="form-group mb-0">
                                 <label>Items Per Page</label>
-                                <div style="font-size:11px; color:#94A3B8; margin:-4px 0 6px;">Set default number of items in tables.</div>
+                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Set default number of items in tables.</div>
                                 <select name="items_per_page" class="form-control">
                                     @foreach (['10', '25', '50', '100'] as $n)
                                         <option value="{{ $n }}" {{ ($settings->items_per_page ?? '10') === $n ? 'selected' : '' }}>{{ $n }}</option>
@@ -301,8 +301,8 @@
                                     <i class="fas fa-tools"></i>
                                 </div>
                                 <div>
-                                    <h3 style="font-size:15px; font-weight:700; color:#1E293B; margin:0;">Maintenance Mode</h3>
-                                    <p style="font-size:12px; color:#64748B; margin:2px 0 0; max-width:520px;">
+                                    <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">Maintenance Mode</h3>
+                                    <p style="font-size:12px; color:var(--dtc-text-secondary); margin:2px 0 0; max-width:520px;">
                                         Enable maintenance mode to restrict access to the system while performing updates.
                                         Only administrators will be able to access the system.
                                     </p>

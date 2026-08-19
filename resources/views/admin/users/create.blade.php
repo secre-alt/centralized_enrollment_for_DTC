@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Create New User</h4>
-            <p class="mb-0" style="color:#64748B; font-size:13px;">
+            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Create New User</h4>
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
                 Add a new account and assign a role
             </p>
         </div>
@@ -21,7 +21,7 @@
 <div class="row justify-content-center">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:#1E293B;">
+            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
                 <i class="fas fa-user-plus mr-2" style="color:#0F4CDB;"></i>
                 Account Information
             </div>
@@ -38,7 +38,7 @@
                         <label>Full Name</label>
                         <div style="position:relative;">
                             <i class="fas fa-user" style="position:absolute; left:14px;
-                               top:13px; color:#94A3B8; font-size:13px; pointer-events:none;"></i>
+                               top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="text" name="name" class="form-control"
                                    style="padding-left:38px;"
                                    value="{{ old('name') }}"
@@ -50,7 +50,7 @@
                         <label>Email Address</label>
                         <div style="position:relative;">
                             <i class="fas fa-envelope" style="position:absolute; left:14px;
-                               top:13px; color:#94A3B8; font-size:13px; pointer-events:none;"></i>
+                               top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="email" name="email" class="form-control"
                                    style="padding-left:38px;"
                                    value="{{ old('email') }}"
@@ -62,12 +62,12 @@
                         <label>Temporary Password</label>
                         <div style="position:relative;">
                             <i class="fas fa-lock" style="position:absolute; left:14px;
-                               top:13px; color:#94A3B8; font-size:13px; pointer-events:none;"></i>
+                               top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="text" name="password" class="form-control"
                                    style="padding-left:38px;"
                                    placeholder="Set a temporary password" required>
                         </div>
-                        <small style="color:#94A3B8; font-size:11px;">
+                        <small style="color:var(--dtc-text-muted); font-size:11px;">
                             Minimum 6 characters. User should change this after first login.
                         </small>
                     </div>
@@ -92,9 +92,9 @@
                                            style="display:none;" class="role-radio"
                                            {{ old('role') === $role->name ? 'checked' : '' }}>
                                     <div class="role-option"
-                                         style="border:2px solid #E2E8F0; border-radius:12px;
+                                         style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:14px; display:flex; align-items:center;
-                                                gap:12px; transition:all 0.2s; background:#F8FAFC;">
+                                                gap:12px; transition:all 0.2s; background:var(--dtc-surface-soft);">
                                         <div style="width:36px; height:36px; border-radius:10px;
                                                     background:{{ $rc['bg'] }}; display:flex;
                                                     align-items:center; justify-content:center;
@@ -103,7 +103,7 @@
                                                style="font-size:14px; color:{{ $rc['color'] }};"></i>
                                         </div>
                                         <div>
-                                            <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                                            <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                                 {{ ucfirst(str_replace('_',' ', $role->name)) }}
                                             </div>
                                         </div>
@@ -133,8 +133,8 @@
 document.querySelectorAll('.role-radio').forEach(radio => {
     radio.addEventListener('change', function () {
         document.querySelectorAll('.role-option').forEach(opt => {
-            opt.style.borderColor = '#E2E8F0';
-            opt.style.background = '#F8FAFC';
+            opt.style.borderColor = 'var(--dtc-border)';
+            opt.style.background = 'var(--dtc-surface-soft)';
         });
         this.nextElementSibling.style.borderColor = '#0F4CDB';
         this.nextElementSibling.style.background = '#EEF2FF';

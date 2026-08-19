@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:#1E293B;">Document Requests</h4>
-        <p class="mb-0" style="color:#64748B; font-size:13px;">
+        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Document Requests</h4>
+        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
             Manage alumni document requests
         </p>
     </div>
@@ -45,10 +45,10 @@
                                 {{ strtoupper(substr($req->user->name, 0, 1)) }}
                             </div>
                             <div>
-                                <div style="font-size:13px; font-weight:600; color:#1E293B;">
+                                <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                                     {{ $req->user->name }}
                                 </div>
-                                <div style="font-size:11px; color:#64748B;">
+                                <div style="font-size:11px; color:var(--dtc-text-secondary);">
                                     {{ $req->user->email }}
                                 </div>
                             </div>
@@ -60,13 +60,13 @@
                             {{ $req->document_label }}
                         </span>
                     </td>
-                    <td style="font-size:13px; font-weight:600; color:#1E293B;">
+                    <td style="font-size:13px; font-weight:600; color:var(--dtc-text);">
                         {{ $req->copies }}
                     </td>
                     <td style="font-size:13px; font-weight:600; color:#15803D;">
                         ₱{{ number_format($req->fee, 2) }}
                     </td>
-                    <td style="font-size:12px; color:#64748B; max-width:150px;">
+                    <td style="font-size:12px; color:var(--dtc-text-secondary); max-width:150px;">
                         {{ $req->purpose ?? '—' }}
                     </td>
                     <td>
@@ -79,7 +79,7 @@
                             {{ ucfirst($req->status) }}
                         </span>
                     </td>
-                    <td style="font-size:12px; color:#64748B;">
+                    <td style="font-size:12px; color:var(--dtc-text-secondary);">
                         {{ $req->created_at->format('M d, Y') }}
                     </td>
                     <td>
@@ -102,7 +102,7 @@
                                                     data-dismiss="modal">&times;</button>
                                         </div>
                                         <div class="modal-body">
-                                            <p style="font-size:13px; color:#64748B; margin-bottom:16px;">
+                                            <p style="font-size:13px; color:var(--dtc-text-secondary); margin-bottom:16px;">
                                                 <strong>{{ $req->user->name }}</strong> —
                                                 {{ $req->document_label }}
                                                 ({{ $req->copies }} cop{{ $req->copies > 1 ? 'ies' : 'y' }})
@@ -119,7 +119,7 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label>Remarks <span style="color:#94A3B8; font-weight:400;">(optional)</span></label>
+                                                <label>Remarks <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span></label>
                                                 <textarea name="remarks" class="form-control" rows="3"
                                                           placeholder="Any notes for the alumni...">{{ $req->remarks }}</textarea>
                                             </div>
@@ -139,7 +139,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="text-center py-5" style="color:#94A3B8; font-size:13px;">
+                    <td colspan="8" class="text-center py-5" style="color:var(--dtc-text-muted); font-size:13px;">
                         No document requests yet.
                     </td>
                 </tr>
