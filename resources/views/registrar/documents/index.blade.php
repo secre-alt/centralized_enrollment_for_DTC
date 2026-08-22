@@ -19,133 +19,159 @@
 @endif
 
 <div class="card">
-    <div class="card-body p-0">
-        <table class="table mb-0">
-            <thead>
-                <tr>
-                    <th>Alumni</th>
-                    <th>Document</th>
-                    <th>Copies</th>
-                    <th>Fee</th>
-                    <th>Purpose</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($requests as $req)
-                <tr>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:32px; height:32px; border-radius:50%;
-                                        background:linear-gradient(135deg,#7C3AED,#A78BFA);
-                                        display:flex; align-items:center; justify-content:center;
-                                        color:#fff; font-weight:700; font-size:12px; flex-shrink:0;">
-                                {{ strtoupper(substr($req->user->name, 0, 1)) }}
-                            </div>
-                            <div>
-                                <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
-                                    {{ $req->user->name }}
-                                </div>
-                                <div style="font-size:11px; color:var(--dtc-text-secondary);">
-                                    {{ $req->user->email }}
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span style="background:#EEF2FF; color:#0F4CDB; padding:4px 10px;
-                                     border-radius:20px; font-size:12px; font-weight:600;">
-                            {{ $req->document_label }}
-                        </span>
-                    </td>
-                    <td style="font-size:13px; font-weight:600; color:var(--dtc-text);">
-                        {{ $req->copies }}
-                    </td>
-                    <td style="font-size:13px; font-weight:600; color:#15803D;">
-                        ₱{{ number_format($req->fee, 2) }}
-                    </td>
-                    <td style="font-size:12px; color:var(--dtc-text-secondary); max-width:150px;">
-                        {{ $req->purpose ?? '—' }}
-                    </td>
-                    <td>
-                        <span style="font-size:11px; font-weight:700; padding:4px 10px;
-                                     border-radius:20px;
-                                     background:{{ $req->status === 'released'   ? '#DCFCE7' :
-                                                   ($req->status === 'ready'      ? '#EDE9FE' :
-                                                   ($req->status === 'processing' ? '#DBEAFE' : '#FEF9C3')) }};
-                                     color:{{ $req->status_color }};">
-                            {{ ucfirst($req->status) }}
-                        </span>
-                    </td>
-                    <td style="font-size:12px; color:var(--dtc-text-secondary);">
-                        {{ $req->created_at->format('M d, Y') }}
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-primary"
-                                data-toggle="modal"
-                                data-target="#statusModal{{ $req->id }}">
-                            Update
-                        </button>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="font-weight-bold" style="color:var(--dtc-text);">All Document Requests</span>
+        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $requests->total() }} total</span>
+    </div>
 
-                        {{-- Status Modal --}}
-                        <div class="modal fade" id="statusModal{{ $req->id }}" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form method="POST"
-                                          action="{{ route('registrar.documents.status', $req) }}">
-                                        @csrf
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Update Request Status</h5>
-                                            <button type="button" class="close"
-                                                    data-dismiss="modal">&times;</button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p style="font-size:13px; color:var(--dtc-text-secondary); margin-bottom:16px;">
-                                                <strong>{{ $req->user->name }}</strong> —
-                                                {{ $req->document_label }}
-                                                ({{ $req->copies }} cop{{ $req->copies > 1 ? 'ies' : 'y' }})
-                                            </p>
-                                            <div class="form-group">
-                                                <label>Status</label>
-                                                <select name="status" class="form-control" required>
-                                                    @foreach(['submitted','processing','ready','released'] as $s)
-                                                        <option value="{{ $s }}"
-                                                            {{ $req->status === $s ? 'selected' : '' }}>
-                                                            {{ ucfirst($s) }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Remarks <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span></label>
-                                                <textarea name="remarks" class="form-control" rows="3"
-                                                          placeholder="Any notes for the alumni...">{{ $req->remarks }}</textarea>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                    data-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-primary">
-                                                Update Status
-                                            </button>
-                                        </div>
-                                    </form>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Alumni</th>
+                        <th>Document</th>
+                        <th>Copies</th>
+                        <th>Fee</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($requests as $req)
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:32px; height:32px; border-radius:50%;
+                                            background:linear-gradient(135deg,#7C3AED,#A78BFA);
+                                            display:flex; align-items:center; justify-content:center;
+                                            color:#fff; font-weight:700; font-size:12px; flex-shrink:0;">
+                                    {{ strtoupper(substr($req->user->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                                        {{ $req->user->name }}
+                                    </div>
+                                    <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                                        {{ $req->user->email }}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="8" class="text-center py-5" style="color:var(--dtc-text-muted); font-size:13px;">
-                        No document requests yet.
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+                        </td>
+                        <td>
+                            <span style="background:#EEF2FF; color:#0F4CDB; padding:4px 10px;
+                                         border-radius:20px; font-size:12px; font-weight:600;
+                                         white-space:nowrap; display:inline-block;">
+                                {{ $req->document_label }}
+                            </span>
+                        </td>
+                        <td style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                            {{ $req->copies }}
+                        </td>
+                        <td style="font-size:13px; font-weight:600; color:#15803D;">
+                            ₱{{ number_format($req->fee, 2) }}
+                        </td>
+                        <td style="font-size:12px; color:var(--dtc-text-secondary); max-width:150px;">
+                            {{ $req->purpose ?? '—' }}
+                        </td>
+                        <td>
+                            <span style="font-size:11px; font-weight:700; padding:4px 10px;
+                                         border-radius:20px;
+                                         background:{{ $req->status === 'released'   ? '#DCFCE7' :
+                                                       ($req->status === 'ready'      ? '#EDE9FE' :
+                                                       ($req->status === 'processing' ? '#DBEAFE' : '#FEF9C3')) }};
+                                         color:{{ $req->status_color }};">
+                                {{ ucfirst($req->status) }}
+                            </span>
+                        </td>
+                        <td style="font-size:12px; color:var(--dtc-text-secondary);">
+                            {{ $req->created_at->format('M d, Y') }}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary"
+                                    data-toggle="modal"
+                                    data-target="#statusModal{{ $req->id }}">
+                                Update
+                            </button>
+
+                            {{-- Status Modal --}}
+                            <div class="modal fade" id="statusModal{{ $req->id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <form method="POST"
+                                              action="{{ route('registrar.documents.status', $req) }}">
+                                            @csrf
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Update Request Status</h5>
+                                                <button type="button" class="close"
+                                                        data-dismiss="modal">&times;</button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p style="font-size:13px; color:var(--dtc-text-secondary); margin-bottom:16px;">
+                                                    <strong>{{ $req->user->name }}</strong> —
+                                                    {{ $req->document_label }}
+                                                    ({{ $req->copies }} cop{{ $req->copies > 1 ? 'ies' : 'y' }})
+                                                </p>
+                                                <div class="form-group">
+                                                    <label>Status</label>
+                                                    <select name="status" class="form-control" required>
+                                                        @foreach(['submitted','processing','ready','released'] as $s)
+                                                            <option value="{{ $s }}"
+                                                                {{ $req->status === $s ? 'selected' : '' }}>
+                                                                {{ ucfirst($s) }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Remarks <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span></label>
+                                                    <textarea name="remarks" class="form-control" rows="3"
+                                                              placeholder="Any notes for the alumni...">{{ $req->remarks }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    Update Status
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-5" style="color:var(--dtc-text-muted); font-size:13px;">
+                            No document requests yet.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
+        <small style="color:var(--dtc-text-secondary);">
+            Showing
+            <strong>{{ $requests->firstItem() ?? 0 }}</strong>
+            to
+            <strong>{{ $requests->lastItem() ?? 0 }}</strong>
+            of
+            <strong>{{ $requests->total() }}</strong>
+            requests
+        </small>
+
+        @if($requests->hasPages())
+        <div>
+            {{ $requests->onEachSide(1)->links('pagination::bootstrap-4') }}
+        </div>
+        @endif
     </div>
 </div>
 

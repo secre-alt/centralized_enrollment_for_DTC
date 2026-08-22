@@ -110,16 +110,20 @@
                         ₱{{ number_format($enrollment->payment->amount ?? \App\Models\Setting::get('enrollment_fee', 500), 2) }}
                     </td>
                     <td>
-                        <button type="button" class="dtc-review-btn dtc-payment-btn"
-                                data-url="{{ route('cashier.payments.show', $enrollment) }}">
-                            <i class="fas fa-money-bill-wave"></i> Process
-                        </button>
-                        @if ($enrollment->is_paid)
-                            <button type="button" class="dtc-review-btn dtc-receipt-btn"
-                                    data-url="{{ route('cashier.payments.receipt', $enrollment) }}">
-                                <i class="fas fa-receipt"></i> Receipt
+                        <div class="d-flex flex-row align-items-center justify-content-center" style="gap:6px;">
+                            <button type="button" class="dtc-review-btn dtc-payment-btn dtc-header-btn"
+                                    data-url="{{ route('cashier.payments.show', $enrollment) }}">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span class="dtc-header-btn-label">Process</span>
                             </button>
-                        @endif
+                            @if ($enrollment->is_paid)
+                                <button type="button" class="dtc-review-btn dtc-receipt-btn dtc-header-btn"
+                                        data-url="{{ route('cashier.payments.receipt', $enrollment) }}">
+                                    <i class="fas fa-receipt"></i>
+                                    <span class="dtc-header-btn-label">Receipt</span>
+                                </button>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty

@@ -110,7 +110,9 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::get('/programs/{program}/subjects', [ProgramController::class, 'subjects'])->name('programs.subjects');
     Route::post('/programs/{program}/subjects', [ProgramController::class, 'storeSubject'])->name('programs.subjects.store');
     Route::delete('/subjects/{subject}', [ProgramController::class, 'destroySubject'])->name('programs.subjects.destroy');
-
+    Route::put('/programs/{program}', [ProgramController::class, 'update'])->name('programs.update');
+    Route::put('/subjects/{subject}', [ProgramController::class, 'updateSubject'])->name('programs.subjects.update');
+    
     // ── REPORTS ───────────────────────────────────────────────────────────────
     Route::get('/reports/enrollment', [ReportController::class, 'enrollmentReport'])->name('reports.enrollment');
     Route::get('/reports/payment',    [ReportController::class, 'paymentReport'])->name('reports.payment');

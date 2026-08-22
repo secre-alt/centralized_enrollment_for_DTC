@@ -11,9 +11,9 @@
             <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Overview of the system</p>
         </div>
         <div>
-            <a href="{{ route('admin.users.index') }}" class="btn btn-primary btn-sm add-user-btn">
-                <i class="fas fa-plus mr-1"></i> 
-                <span class="add-user-text">Add New User</span>
+            <a href="{{ route('admin.users.index') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
+                <i class="fas fa-plus"></i>
+                <span class="dtc-header-btn-label">Add New User</span>
             </a>
         </div>
     </div>

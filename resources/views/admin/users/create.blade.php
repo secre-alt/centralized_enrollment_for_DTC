@@ -18,6 +18,42 @@
 @endsection
 
 @section('content')
+<div class="d-flex flex-column mb-3" style="gap:10px;">
+    <div>
+        <h4 class="mb-0 font-weight-bold dtc-subjects-title" style="color:var(--dtc-text);">
+            Subjects
+            @if($selectedProgram)
+                — {{ $selectedProgram->name }} ({{ $selectedProgram->code }})
+            @endif
+        </h4>
+        @if(!$selectedProgram)
+            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+                Select a program above to manage its subjects.
+            </p>
+        @endif
+    </div>
+    @if($selectedProgram)
+    <div>
+        <button type="button" class="dtc-btn dtc-btn-primary" data-toggle="modal" data-target="#addSubjectModal">
+            <i class="fas fa-plus"></i> Add Subject
+        </button>
+    </div>
+    @endif
+</div>
+ 
+<style>
+/* Shrinks with the viewport instead of wrapping to 2 lines and pushing
+   the Add Subject button around — heading always stays on one line,
+   button always stays put on the left below it. */
+.dtc-subjects-title {
+    font-size: clamp(15px, 4.2vw, 22px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
+@endsection
+
 <div class="row justify-content-center">
     <div class="col-lg-7">
         <div class="card">

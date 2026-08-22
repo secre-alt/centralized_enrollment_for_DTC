@@ -9,8 +9,9 @@
             <h4 class="mb-0 font-weight-bold">Registrar Dashboard</h4>
             <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Manage enrollments and appointments</p>
         </div>
-        <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-calendar-plus mr-1"></i> Manage Slots
+        <a href="{{ route('registrar.appointments.slots') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
+            <i class="fas fa-calendar-plus"></i>
+            <span class="dtc-header-btn-label">Manage Slots</span>
         </a>
     </div>
 @endsection
@@ -19,25 +20,25 @@
 
 {{-- KPI ROW --}}
 <div class="row mb-2">
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-hourglass-half" color="warning"
             label="Pending Enrollments" value="{{ $pendingEnrollments }}"
             href="{{ route('registrar.enrollments.index') }}" link-text="For Approval" />
     </div>
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-calendar-check" color="primary"
             label="Pending Appointments" value="{{ $pendingAppointments }}"
             href="{{ route('registrar.appointments.index') }}" link-text="For Review" />
     </div>
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-check-double" color="success"
             label="Approved Today" value="{{ $approvedToday }}"
             note="Total" />
     </div>
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-times-circle" color="danger"
             label="Rejected Requests" value="{{ $rejectedRequests }}"
@@ -57,6 +58,7 @@
                    style="font-size:12px; color:#0F4CDB; text-decoration:none;">View All</a>
             </div>
             <div class="card-body p-0">
+                <div class="table-responsive">
                 <table class="table mb-0">
                     <thead>
                         <tr>
@@ -112,6 +114,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
             <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
                 <small style="color:var(--dtc-text-secondary);">

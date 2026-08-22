@@ -9,8 +9,9 @@
             <h4 class="mb-0 font-weight-bold">Cashier Dashboard</h4>
             <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Manage payments and receipts</p>
         </div>
-        <a href="{{ route('cashier.payments.index') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-money-bill-wave mr-1"></i> Process Payments
+        <a href="{{ route('cashier.payments.index') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
+            <i class="fas fa-money-bill-wave"></i>
+            <span class="dtc-header-btn-label">Process Payments</span>
         </a>
     </div>
 @endsection
@@ -19,25 +20,25 @@
 
 {{-- KPI ROW --}}
 <div class="row mb-2">
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-coins" color="primary"
             label="Today's Collection" value="₱{{ number_format($todayCollection, 2) }}"
             note="Total Amount" />
     </div>
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-clock" color="warning"
             label="Pending Payments" value="{{ $pendingPayments }}"
             href="{{ route('cashier.payments.index') }}" link-text="For Processing" />
     </div>
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-check-circle" color="success"
             label="Paid This Month" value="{{ $paidThisMonth }}"
             note="Transactions" />
     </div>
-    <div class="col-lg-3 col-6 mb-3">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="fa-walking" color="info"
             label="Walk-in Payments" value="{{ $walkinPayments }}"
@@ -57,6 +58,7 @@
                    style="font-size:12px; color:#0F4CDB; text-decoration:none;">View All</a>
             </div>
             <div class="card-body p-0">
+                <div class="table-responsive">
                 <table class="table mb-0">
                     <thead>
                         <tr>
@@ -101,6 +103,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
             @if ($recentPayments->hasPages() || $recentPayments->total() > 0)
                 <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
@@ -179,19 +182,19 @@
             <div class="card-header font-weight-bold">Today's Summary</div>
             <div class="card-body">
                 <div class="row text-center">
-                    <div class="col-3">
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
                         <div style="font-size:22px; font-weight:700; color:#0F4CDB;">{{ $totalTransactions }}</div>
                         <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Total Transactions</div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
                         <div style="font-size:22px; font-weight:700; color:#22C55E;">{{ $totalPaid }}</div>
                         <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Paid</div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-6 col-md-3">
                         <div style="font-size:22px; font-weight:700; color:#F59E0B;">{{ $pendingPayments }}</div>
                         <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Pending</div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-6 col-md-3">
                         <div style="font-size:22px; font-weight:700;">₱{{ number_format($totalRevenue, 2) }}</div>
                         <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Total Amount</div>
                     </div>

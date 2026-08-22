@@ -100,7 +100,6 @@ textarea {
     bottom: 0 !important;
     left: 0 !important;
     height: 100vh !important;
-
     z-index: 1038 !important;
     box-sizing: border-box !important;
 }
@@ -109,14 +108,12 @@ textarea {
 /* ── SIDEBAR BRAND ───────────────────────────────────────── */
 .main-sidebar .brand-link {
     background: var(--dtc-surface) !important;
-
     border: 0 !important;
     border-bottom: 1px solid var(--dtc-border) !important;
-
+    border-right: 1px solid var(--dtc-border) !important;
     padding: 0 16px !important;
     min-height: 60px !important;
     height: 60px !important;
-
     display: flex !important;
     align-items: center !important;
     box-sizing: border-box !important;
@@ -216,17 +213,14 @@ textarea {
 /* ── TOP NAVBAR ──────────────────────────────────────────── */
 .main-header.navbar {
     background: var(--dtc-surface) !important;
-
     border: 0 !important;
     border-bottom: 1px solid var(--dtc-border) !important;
-
     box-shadow: none !important;
-
     padding: 0 24px !important;
     min-height: 60px !important;
     height: 60px !important;
-
     box-sizing: border-box !important;
+    z-index: 1030 !important;
 }
 
 .main-header .navbar-nav .nav-link {
@@ -237,7 +231,558 @@ textarea {
     background: #EF4444 !important;
     font-size: 9px !important;
 }
+/* ============================================================
+   TOP NAVBAR — RIGHT CONTROL GROUP
+   ============================================================ */
 
+.main-header.navbar {
+    background: var(--dtc-surface) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--dtc-border) !important;
+    box-shadow: none !important;
+    padding: 0 24px !important;
+    min-height: 60px !important;
+    height: 60px !important;
+    box-sizing: border-box !important;
+}
+
+.main-header .navbar-nav .nav-link {
+    color: var(--dtc-text-secondary) !important;
+}
+
+
+/* ============================================================
+   RIGHT CONTROL GROUP
+   Search → Theme → Notifications
+   ============================================================ */
+
+.main-header .navbar-nav.ml-auto {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    height: 60px !important;
+    margin-left: auto !important;
+}
+
+
+/* ============================================================
+   SEARCH ITEM
+   ============================================================ */
+
+.main-header .navbar-search-item {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 60px !important;
+    margin-right: 20px !important;
+    padding: 0 !important;
+}
+
+
+/* ============================================================
+   SEARCH WRAPPER
+   ============================================================ */
+
+.main-header .navbar-search-wrapper {
+    position: relative !important;
+
+    width: 375px !important;
+    height: 44px !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: var(--dtc-surface-soft) !important;
+
+    border: 1px solid var(--dtc-border) !important;
+    border-radius: 11px !important;
+
+    overflow: hidden !important;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease !important;
+}
+
+
+/* Search focus */
+
+.main-header .navbar-search-wrapper:focus-within {
+    border-color: var(--dtc-primary) !important;
+
+    box-shadow:
+        0 0 0 3px var(--dtc-primary-soft) !important;
+}
+
+
+/* ============================================================
+   SEARCH ICON
+   ============================================================ */
+
+.main-header .navbar-search-icon {
+    position: absolute !important;
+
+    left: 15px !important;
+    top: 50% !important;
+
+    transform: translateY(-50%) !important;
+
+    color: var(--dtc-text-muted) !important;
+
+    font-size: 14px !important;
+
+    pointer-events: none !important;
+
+    z-index: 2 !important;
+}
+
+
+/* ============================================================
+   SEARCH INPUT
+   ============================================================ */
+
+.main-header .navbar-search-input {
+    width: 100% !important;
+    height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 0 88px 0 44px !important;
+
+    border: 0 !important;
+    outline: 0 !important;
+
+    background: transparent !important;
+
+    color: var(--dtc-text) !important;
+
+    font-family: inherit !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+}
+
+
+.main-header .navbar-search-input::placeholder {
+    color: var(--dtc-text-muted) !important;
+}
+
+
+.main-header .navbar-search-input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   CTRL + K BADGE
+   ============================================================ */
+
+.main-header .navbar-search-wrapper .search-kbd {
+    position: absolute !important;
+
+    top: 50% !important;
+    right: 10px !important;
+
+    transform: translateY(-50%) !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 4px !important;
+
+    height: 25px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    z-index: 5 !important;
+
+    pointer-events: none !important;
+}
+
+
+.main-header .navbar-search-wrapper .search-kbd-key {
+    min-width: 27px !important;
+    height: 24px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+
+    padding: 0 6px !important;
+
+    background: var(--dtc-surface) !important;
+
+    border: 1px solid var(--dtc-border) !important;
+    border-radius: 6px !important;
+
+    color: var(--dtc-text-muted) !important;
+
+    font-family: inherit !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+
+    line-height: 1 !important;
+    white-space: nowrap !important;
+
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+
+/* ============================================================
+   CLEAR BUTTON
+   ============================================================ */
+
+.main-header .navbar-search-wrapper .search-clear-btn {
+    position: absolute !important;
+
+    right: 10px !important;
+    top: 50% !important;
+
+    transform: translateY(-50%) !important;
+
+    width: 25px !important;
+    height: 25px !important;
+
+    display: none;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    background: transparent !important;
+
+    color: var(--dtc-text-muted) !important;
+
+    z-index: 6 !important;
+}
+
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+
+.main-header .navbar-theme-toggle {
+    display: flex !important;
+    align-items: center !important;
+    height: 60px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+.main-header .theme-toggle-btn {
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 1px solid var(--dtc-border) !important;
+    border-radius: 11px !important;
+
+    background: var(--dtc-surface) !important;
+    color: var(--dtc-text-secondary) !important;
+
+    box-sizing: border-box !important;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease !important;
+}
+
+
+/* ============================================================
+   NOTIFICATION
+   ============================================================ */
+
+.main-header .navbar-notification-item {
+    position: relative !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    height: 60px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+.main-header .navbar-icon-link {
+    width: 44px !important;
+    height: 44px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 1px solid var(--dtc-border) !important;
+    border-radius: 11px !important;
+
+    background: var(--dtc-surface) !important;
+    color: var(--dtc-text-secondary) !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* Remove Bootstrap dropdown arrow */
+
+#notifBell::after {
+    display: none !important;
+}
+
+
+/* ============================================================
+   HOVER
+   ============================================================ */
+
+.main-header .theme-toggle-btn:hover,
+.main-header .navbar-icon-link:hover {
+
+    background: var(--dtc-primary-soft) !important;
+
+    border-color: var(--dtc-primary) !important;
+
+    color: var(--dtc-primary) !important;
+}
+
+
+/* ============================================================
+   NOTIFICATION BADGE
+   ============================================================ */
+
+.main-header .navbar-notification-badge {
+    position: absolute !important;
+    top: 2px !important;
+    right: 2px !important;
+    min-width: 17px !important;
+    height: 17px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 4px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+
+/* ============================================================
+   SEARCH DROPDOWN
+   ============================================================ */
+
+.main-header .navbar-search-item .search-dropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    left: auto !important;
+    z-index: 1050 !important;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1100px) {
+
+    .main-header .navbar-search-wrapper {
+        width: 300px !important;
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .main-header .navbar-search-wrapper {
+        width: 240px !important;
+    }
+
+}
+
+
+@media (max-width: 768px) {
+
+    .main-header.navbar {
+        padding: 0 16px !important;
+    }
+
+    .main-header .navbar-nav.ml-auto {
+        gap: 8px !important;
+    }
+
+    .main-header .navbar-search-wrapper {
+        width: 210px !important;
+    }
+
+}
+
+
+@media (max-width: 576px) {
+
+    /* Show item — overrides the old display:none */
+    .main-header .navbar-search-item {
+        display: flex !important;
+        align-items: center !important;
+        height: 60px !important;
+        margin-right: 0 !important;
+        position: static !important;
+    }
+
+    /* Collapsed: 44×44 icon button matching theme/bell */
+    .main-header .navbar-search-wrapper {
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 11px !important;
+        overflow: visible !important;
+        cursor: pointer !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        position: relative !important;
+    }
+
+    /* Icon: visible and centered in collapsed state */
+    .main-header .navbar-search-icon {
+        position: static !important;
+        transform: none !important;
+        font-size: 16px !important;
+        color: var(--dtc-text-secondary) !important;
+        pointer-events: none !important;
+        z-index: auto !important;
+    }
+
+    /* Hide input, kbd badge, clear button when collapsed */
+    .main-header .navbar-search-input,
+    .main-header .navbar-search-wrapper .search-kbd,
+    .main-header .navbar-search-wrapper .search-clear-btn {
+        display: none !important;
+    }
+
+    /* ── Expanded state (JS adds .is-expanded) ── */
+    .main-header .navbar-search-wrapper.is-expanded {
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important;
+        height: 44px !important;
+        border-radius: 11px !important;
+        z-index: 2050 !important;
+        justify-content: flex-start !important;
+        overflow: hidden !important;
+    }
+
+    /* Restore icon absolute position inside expanded wrapper */
+    .main-header .navbar-search-wrapper.is-expanded .navbar-search-icon {
+        position: absolute !important;
+        left: 14px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 14px !important;
+    }
+
+    /* Show input inside expanded wrapper */
+    .main-header .navbar-search-wrapper.is-expanded .navbar-search-input {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        padding-left: 42px !important;
+        padding-right: 44px !important;
+    }
+
+    /* Show clear button in expanded state */
+    .main-header .navbar-search-wrapper.is-expanded .search-clear-btn {
+        display: flex !important;
+        position: absolute !important;
+        right: 10px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+
+    /* Search dropdown follows the expanded bar */
+    .main-header .navbar-search-item .search-dropdown.open {
+        position: fixed !important;
+        top: 62px !important;
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important;
+        z-index: 2040 !important;
+    }
+
+}
+}
+/* ============================================================
+   FIX 1 — MOBILE NAVBAR: ensure proper left edge alignment
+   The navbar icons should sit flush within the viewport,
+   not offset by any residual sidebar margin.
+   ============================================================ */
+@media (max-width: 767.98px) {
+    .main-header.navbar {
+        left: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}
+
+/* ============================================================
+   FIX 2 — MOBILE SEARCH: show icon-only search button
+   instead of hiding the entire search item on small screens.
+   ============================================================ */
+@media (max-width: 576px) {
+    /* Override the existing display:none on the whole item */
+    .main-header .navbar-search-item {
+        display: flex !important;
+        align-items: center !important;
+        height: 60px !important;
+        margin-right: 0 !important;
+    }
+
+    /* Collapse the wrapper to a 44×44 icon button */
+    .main-header .navbar-search-wrapper {
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 11px !important;
+        overflow: hidden !important;
+        cursor: pointer !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+
+    /* Keep the magnifier icon visible and centered */
+    .main-header .navbar-search-icon {
+        position: static !important;
+        transform: none !important;
+        font-size: 16px !important;
+        color: var(--dtc-text-secondary) !important;
+        pointer-events: none !important;
+    }
+
+    /* Hide input, kbd hint, clear button in collapsed state */
+    .main-header .navbar-search-input,
+    .main-header .navbar-search-wrapper .search-kbd,
+    .main-header .navbar-search-wrapper .search-clear-btn {
+        display: none !important;
+    }
+}
 /* ── CONTENT WRAPPER ─────────────────────────────────────── */
 .content-wrapper {
     background: var(--dtc-bg) !important;
@@ -1426,33 +1971,8 @@ body.dtc-dark .page-item .page-link {
 }
 
 
+
 @media (max-width: 575.98px) {
-
-    /* Search becomes icon only */
-    .navbar-search-item {
-        margin-left: 0;
-    }
-
-    .navbar-search-wrapper {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-
-    .navbar-search-icon {
-        position: static;
-        transform: none;
-        font-size: 16px;
-        color: #64748B;
-    }
-
-    .navbar-search-input {
-        display: none;
-    }
-
 
     /* Notification dropdown fits mobile screen */
     .notification-dropdown {
@@ -1460,13 +1980,26 @@ body.dtc-dark .page-item .page-link {
         top: 56px !important;
         left: 10px !important;
         right: 10px !important;
-
         width: auto !important;
         max-width: none !important;
-
         margin: 0 !important;
     }
 
+    /* Profile icon only */
+    .navbar-user-info {
+        display: none !important;
+    }
+
+    /* Navbar spacing */
+    .navbar-nav {
+        gap: 2px;
+    }
+
+    .navbar-notification-item {
+        margin-right: 0 !important;
+    }
+
+}
 
     /* Profile icon only */
     .navbar-user-info {
@@ -1485,6 +2018,7 @@ body.dtc-dark .page-item .page-link {
     }
 
 }
+
 
 /* ============================================================
    09. SIDEBAR BEHAVIOR
@@ -2619,7 +3153,7 @@ body.dtc-dark .dtc-status-warning { background: #713F12; }
 body.dtc-dark .dtc-status-danger { background: #7F1D1D; }
 body.dtc-dark .dtc-status-secondary { background: #334155; }
 
-body.dtc-dark .notify-dropdown, {
+body.dtc-dark .notify-dropdown {
     background: var(--dtc-surface) !important;
     border-color: var(--dtc-border) !important;
 }
@@ -3334,4 +3868,45 @@ button.dtc-next-step-btn:hover {
     background: var(--dtc-primary);
     color: #fff;
     border-color: var(--dtc-primary);
+}
+
+.content-wrapper {
+    padding: 0 0 30px 0 !important; /* was: padding: 0 !important; */
+}
+@media (max-width: 576px) {
+    .content-wrapper {
+        padding-bottom: 60px !important; /* extra room for the wrapped 2-line footer */
+    }
+
+    .main-footer .d-flex {
+        text-align: center;
+        gap: 2px !important;
+    }
+}
+/* ══════════════════════════════════════════════════════════════════════
+   GLOBAL: content_header action button — icon-only on mobile
+   Wrap any content_header primary button's label text in
+   <span class="dtc-header-btn-label">...</span> and add the class
+   dtc-header-btn to the button/link itself. Below 576px the label
+   collapses so only the icon shows, saving horizontal space next to
+   page titles that are already tight on phones.
+   Usage:
+     <a href="..." class="dtc-btn dtc-btn-primary dtc-header-btn">
+         <i class="fas fa-plus"></i>
+         <span class="dtc-header-btn-label">Add Program</span>
+     </a>
+   ══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+    .dtc-header-btn .dtc-header-btn-label {
+        display: none;
+    }
+    .dtc-header-btn {
+        padding: 8px 12px !important;
+        justify-content: center;
+        min-width: 34px;
+    }
+    .dtc-header-btn i {
+        margin: 0 !important;
+        font-size: 14px;
+    }
 }

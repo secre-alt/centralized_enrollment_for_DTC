@@ -52,7 +52,7 @@ class AppointmentController extends Controller
         $appointments = Appointment::with('user', 'slot')
             ->where('status', 'pending')
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('registrar.appointments.index', compact('appointments'));
     }

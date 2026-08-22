@@ -22,7 +22,14 @@
 @endif
 
 <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap:8px;">
+        <span class="font-weight-bold" style="color:var(--dtc-text);">
+            <i class="fas fa-hourglass-half mr-2" style="color:#0F4CDB;"></i> Pending Requests
+        </span>
+        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $appointments->total() }} total</span>
+    </div>
     <div class="card-body p-0">
+        <div class="table-responsive">
         <table class="table mb-0">
             <thead>
                 <tr>
@@ -148,6 +155,28 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
+    </div>
+
+    {{-- Pagination --}}
+    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
+            <small style="color:var(--dtc-text-secondary);">
+                Showing
+                <strong>{{ $appointments->firstItem() ?? 0 }}</strong>
+                to
+                <strong>{{ $appointments->lastItem() ?? 0 }}</strong>
+                of
+                <strong>{{ $appointments->total() }}</strong>
+                requests
+            </small>
+
+            @if($appointments->hasPages())
+            <div>
+                {{ $appointments->onEachSide(1)->links('pagination::bootstrap-4') }}
+            </div>
+            @endif
+        </div>
     </div>
 </div>
 

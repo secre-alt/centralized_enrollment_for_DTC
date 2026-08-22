@@ -112,7 +112,8 @@
                                          font-weight:700;
                                          padding:3px 10px;
                                          border-radius:20px;
-                                         text-transform:capitalize;">
+                                         text-transform:capitalize;
+                                         white-space:nowrap; display:inline-block;">
                                 {{ str_replace('_',' ', $role->name) }}
                             </span>
                         @endforeach
@@ -143,7 +144,7 @@
                                            font-size:11px;
                                            font-weight:600;
                                            cursor:pointer;">
-                                <i class="fas fa-edit mr-1"></i> Edit
+                                <i class="fas fa-edit mr-1"></i>
                             </button>
 
                             @if($user->id !== auth()->id())
@@ -210,42 +211,35 @@
 </div>
 
 <!-- CREATE USER MODAL -->
-<div class="modal fade" id="createUserModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border:none; border-radius:20px; overflow:hidden;">
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content dtc-modal-content">
 
             {{-- Header --}}
-            <div style="background:linear-gradient(135deg,#0F4CDB,#1a5feb);
-                        padding:24px 28px; display:flex; justify-content:space-between;
-                        align-items:center;">
-                <div>
-                    <h5 style="color:#fff; font-weight:700; margin:0 0 4px;">
-                        <i class="fas fa-user-plus mr-2" style="color:#FFC72C;"></i>
-                        Add New User
-                    </h5>
-                    <p style="color:rgba(255,255,255,0.7); font-size:12px; margin:0;">
-                        Create an account and assign a role
-                    </p>
+            <div class="dtc-modal-header">
+                <div class="dtc-modal-header-icon">
+                    <i class="fas fa-user-plus"></i>
                 </div>
-                <button type="button" class="close" data-dismiss="modal"
-                        style="color:#fff; opacity:1; font-size:22px;">&times;</button>
+                <div class="dtc-modal-header-text">
+                    <h5>Add New User</h5>
+                    <p>Create an account and assign a role</p>
+                </div>
+                <button type="button" class="dtc-modal-close" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
 
             <form method="POST" action="{{ route('admin.users.store') }}">
                 @csrf
-                <div class="modal-body" style="padding:28px;">
+                <div class="modal-body dtc-modal-body">
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label style="font-size:13px; font-weight:600; color:#374151;">
-                                    Full Name
-                                </label>
-                                <div style="position:relative; height:40px;">
-                                    <i class="fas fa-user" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px; line-height:1; z-index:2; pointer-events:none;"></i>
-                                    <input type="text" name="name" class="form-control"
-                                           style="padding-left:38px; height:40px;"
+                                <label class="dtc-form-label">Full Name</label>
+                                <div class="dtc-input-icon-group">
+                                    <i class="fas fa-user dtc-input-icon"></i>
+                                    <input type="text" name="name" class="form-control dtc-input-with-icon"
                                            value="{{ old('name') }}"
                                            placeholder="Enter full name" required>
                                 </div>
@@ -253,14 +247,10 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label style="font-size:13px; font-weight:600; color:#374151;">
-                                    Email Address
-                                </label>
-                                <div style="position:relative;">
-                                    <i class="fas fa-envelope" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px; line-height:1; pointer-events:none;"></i>
-                                    <input type="email" name="email" class="form-control"
-                                           style="padding-left:38px;"
+                                <label class="dtc-form-label">Email Address</label>
+                                <div class="dtc-input-icon-group">
+                                    <i class="fas fa-envelope dtc-input-icon"></i>
+                                    <input type="email" name="email" class="form-control dtc-input-with-icon"
                                            value="{{ old('email') }}"
                                            placeholder="Enter email address" required>
                                 </div>
@@ -269,25 +259,19 @@
                     </div>
 
                     <div class="form-group">
-                        <label style="font-size:13px; font-weight:600; color:#374151;">
-                            Temporary Password
-                        </label>
-                        <div style="position:relative;">
-                            <i class="fas fa-lock" style="position:absolute; left:14px;
-                               top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px; line-height:1; pointer-events:none;"></i>
-                            <input type="text" name="password" class="form-control"
-                                   style="padding-left:38px;"
+                        <label class="dtc-form-label">Temporary Password</label>
+                        <div class="dtc-input-icon-group">
+                            <i class="fas fa-lock dtc-input-icon"></i>
+                            <input type="text" name="password" class="form-control dtc-input-with-icon"
                                    placeholder="Min. 6 characters" required>
                         </div>
-                        <small style="color:var(--dtc-text-muted); font-size:11px; margin-top:4px; display:block;">
+                        <small class="dtc-form-hint">
                             The user should change this after first login.
                         </small>
                     </div>
 
                     <div class="form-group mb-0">
-                        <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:10px; display:block;">
-                            Assign Role
-                        </label>
+                        <label class="dtc-form-label dtc-form-label-block">Assign Role</label>
                         <div class="row">
                             @foreach($roles as $role)
                             @php
@@ -300,21 +284,15 @@
                                 ][$role->name] ?? ['bg'=>'#EEF2FF','color'=>'#0F4CDB','icon'=>'fa-user'];
                             @endphp
                             <div class="col-6 col-md-4 mb-2">
-                                <label style="cursor:pointer; width:100%; margin:0;">
+                                <label class="dtc-role-option-label">
                                     <input type="radio" name="role" value="{{ $role->name }}"
-                                           style="display:none;" class="create-role-radio">
-                                    <div class="create-role-option"
-                                         style="border:2px solid var(--dtc-border); border-radius:12px;
-                                                padding:12px; display:flex; align-items:center;
-                                                gap:10px; transition:all 0.2s; background:var(--dtc-surface-soft);">
-                                        <div style="width:32px; height:32px; border-radius:8px;
-                                                    background:{{ $roleConfig['bg'] }}; display:flex;
-                                                    align-items:center; justify-content:center; flex-shrink:0;">
+                                           class="create-role-radio dtc-sr-only">
+                                    <div class="create-role-option">
+                                        <div class="dtc-role-icon" style="background:{{ $roleConfig['bg'] }};">
                                             <i class="fas {{ $roleConfig['icon'] }}"
-                                               style="font-size:13px; color:{{ $roleConfig['color'] }};"></i>
+                                               style="color:{{ $roleConfig['color'] }};"></i>
                                         </div>
-                                        <span style="font-size:12px; font-weight:600; color:var(--dtc-text);
-                                                     text-transform:capitalize;">
+                                        <span class="dtc-role-name">
                                             {{ str_replace('_',' ', $role->name) }}
                                         </span>
                                     </div>
@@ -326,7 +304,7 @@
 
                 </div>
 
-                <div class="modal-footer" style="padding:16px 28px; border-top:1px solid #F1F5F9;">
+                <div class="modal-footer dtc-modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-user-plus mr-1"></i> Create Account
@@ -338,64 +316,44 @@
 </div>
 
 <!-- EDIT USER MODAL -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border:none; border-radius:20px; overflow:hidden;">
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content dtc-modal-content">
 
             {{-- Header --}}
-            <div style="background:linear-gradient(135deg,#0F4CDB,#1a5feb);
-                        padding:24px 28px; display:flex; justify-content:space-between;
-                        align-items:center;">
-                <div style="display:flex; align-items:center; gap:14px;">
-                    <div id="edit-avatar"
-                         style="width:44px; height:44px; border-radius:50%;
-                                background:rgba(255,255,255,0.2); display:flex;
-                                align-items:center; justify-content:center;
-                                color:#fff; font-weight:800; font-size:18px;
-                                border:2px solid rgba(255,255,255,0.3); flex-shrink:0;">
-                        U
-                    </div>
-                    <div>
-                        <h5 style="color:#fff; font-weight:700; margin:0 0 2px;" id="edit-modal-name">
-                            Edit User
-                        </h5>
-                        <p style="color:rgba(255,255,255,0.7); font-size:12px; margin:0;" id="edit-modal-email">
-                            user@dtc.edu.ph
-                        </p>
-                    </div>
+            <div class="dtc-modal-header">
+                <div class="dtc-modal-header-avatar" id="edit-avatar">U</div>
+                <div class="dtc-modal-header-text">
+                    <h5 id="edit-modal-name">Edit User</h5>
+                    <p id="edit-modal-email">user@dtc.edu.ph</p>
                 </div>
-                <button type="button" class="close" data-dismiss="modal"
-                        style="color:#fff; opacity:1; font-size:22px;">&times;</button>
+                <button type="button" class="dtc-modal-close" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
 
             <form method="POST" id="edit-user-form" action="">
                 @csrf @method('PUT')
-                <div class="modal-body" style="padding:28px;">
+                <div class="modal-body dtc-modal-body">
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label style="font-size:13px; font-weight:600; color:#374151;">
-                                    Full Name
-                                </label>
-                                <div style="position:relative;">
-                                    <i class="fas fa-user" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px;"></i>
+                                <label class="dtc-form-label">Full Name</label>
+                                <div class="dtc-input-icon-group">
+                                    <i class="fas fa-user dtc-input-icon"></i>
                                     <input type="text" name="name" id="edit-name"
-                                           class="form-control" style="padding-left:38px;" required>
+                                           class="form-control dtc-input-with-icon" required>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label style="font-size:13px; font-weight:600; color:#374151;">
-                                    Email Address
-                                </label>
-                                <div style="position:relative;">
-                                    <i class="fas fa-envelope" style="position:absolute; left:14px;
-                                       top:50%; transform:translateY(-50%); color:var(--dtc-text-muted); font-size:13px;"></i>
+                                <label class="dtc-form-label">Email Address</label>
+                                <div class="dtc-input-icon-group">
+                                    <i class="fas fa-envelope dtc-input-icon"></i>
                                     <input type="email" name="email" id="edit-email"
-                                           class="form-control" style="padding-left:38px;" required>
+                                           class="form-control dtc-input-with-icon" required>
                                 </div>
                             </div>
                         </div>
@@ -404,38 +362,32 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label style="font-size:13px; font-weight:600; color:#374151;">
-                                    Role
-                                </label>
-                                <select name="role" id="edit-role" class="form-control" required>
-                                    @foreach($roles as $role)
-                                        <option value="{{ $role->name }}">
-                                            {{ ucfirst(str_replace('_',' ', $role->name)) }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <label class="dtc-form-label">Role</label>
+                                <div class="dtc-input-icon-group">
+                                    <i class="fas fa-user-shield dtc-input-icon"></i>
+                                    <select name="role" id="edit-role"
+                                            class="form-control dtc-input-with-icon" required>
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role->name }}">
+                                                {{ ucfirst(str_replace('_',' ', $role->name)) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-0">
-                                <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:10px; display:block;">
-                                    Account Status
-                                </label>
+                                <label class="dtc-form-label dtc-form-label-block">Account Status</label>
                                 <div style="display:flex; gap:8px;">
                                     @foreach(['active','pending','locked'] as $status)
-                                    <label style="cursor:pointer; flex:1; margin:0;">
+                                    <label class="dtc-status-option-label">
                                         <input type="radio" name="status" value="{{ $status }}"
-                                               class="edit-status-radio" style="display:none;">
-                                        <div class="edit-status-option"
-                                             style="border:2px solid var(--dtc-border); border-radius:10px;
-                                                    padding:10px 8px; text-align:center;
-                                                    transition:all 0.2s; background:var(--dtc-surface-soft); cursor:pointer;">
+                                               class="edit-status-radio dtc-sr-only">
+                                        <div class="edit-status-option">
                                             <i class="fas {{ $status === 'active' ? 'fa-check-circle' : ($status === 'locked' ? 'fa-lock' : 'fa-clock') }}"
-                                               style="font-size:16px; display:block; margin-bottom:4px;
-                                                      color:{{ $status === 'active' ? '#22C55E' : ($status === 'locked' ? '#EF4444' : '#F59E0B') }};"></i>
-                                            <div style="font-size:11px; font-weight:600; color:var(--dtc-text);">
-                                                {{ ucfirst($status) }}
-                                            </div>
+                                               style="color:{{ $status === 'active' ? '#22C55E' : ($status === 'locked' ? '#EF4444' : '#F59E0B') }};"></i>
+                                            <div class="dtc-status-label">{{ ucfirst($status) }}</div>
                                         </div>
                                     </label>
                                     @endforeach
@@ -446,7 +398,7 @@
 
                 </div>
 
-                <div class="modal-footer" style="padding:16px 28px; border-top:1px solid #F1F5F9;">
+                <div class="modal-footer dtc-modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save mr-1"></i> Save Changes
@@ -460,6 +412,247 @@
 @endsection
 @section('css')
 <style>
+/* =========================================================
+   CREATE / EDIT USER MODALS — BASE STRUCTURE
+   =========================================================
+   NOTE: dtc-theme.css defines a global rule:
+       .form-control { padding: 10px 14px !important; ... }
+   Because it uses !important, any inline padding-left set on
+   an icon-prefixed input was being silently overridden, which
+   pushed input text/placeholders underneath the icon. The
+   `.dtc-input-icon-group` + `.dtc-input-with-icon` pair below
+   uses a more specific selector so the icon offset always wins.
+   ========================================================= */
+
+.dtc-modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.dtc-modal-header {
+    background: linear-gradient(135deg, #0F4CDB, #1a5feb);
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dtc-modal-header-icon,
+.dtc-modal-header-avatar {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.dtc-modal-header-icon {
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #FFC72C;
+}
+
+.dtc-modal-header-avatar {
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: #fff;
+    font-weight: 800;
+}
+
+.dtc-modal-header-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.dtc-modal-header-text h5 {
+    color: #fff;
+    font-weight: 700;
+    margin: 0 0 2px;
+    font-size: 16.5px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dtc-modal-header-text p {
+    color: rgba(255,255,255,0.72);
+    font-size: 12px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dtc-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    padding: 0;
+}
+
+.dtc-modal-close:hover,
+.dtc-modal-close:focus {
+    background: rgba(255,255,255,0.28);
+    color: #fff;
+}
+
+.dtc-modal-body {
+    padding: 26px 28px;
+}
+
+.dtc-modal-footer {
+    padding: 16px 28px;
+    border-top: 1px solid #F1F5F9;
+    gap: 10px;
+}
+
+.dtc-form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.dtc-form-label-block {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.dtc-form-hint {
+    color: var(--dtc-text-muted);
+    font-size: 11px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* ---- Icon-prefixed inputs ---- */
+.dtc-input-icon-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dtc-input-icon-group .dtc-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    text-align: center;
+    color: var(--dtc-text-muted);
+    font-size: 13px;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.dtc-input-icon-group .form-control.dtc-input-with-icon {
+    padding-left: 42px !important;
+}
+
+/* ---- Role selection cards (create modal) ---- */
+.dtc-role-option-label {
+    cursor: pointer;
+    width: 100%;
+    margin: 0;
+    display: block;
+}
+
+.create-role-option {
+    border: 2px solid var(--dtc-border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    background: var(--dtc-surface-soft);
+}
+
+.dtc-role-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.dtc-role-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dtc-text);
+    text-transform: capitalize;
+    line-height: 1.3;
+}
+
+/* ---- Status selection cards (edit modal) ---- */
+.dtc-status-option-label {
+    cursor: pointer;
+    flex: 1;
+    margin: 0;
+}
+
+.edit-status-option {
+    border: 2px solid var(--dtc-border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    transition: all 0.2s ease;
+    background: var(--dtc-surface-soft);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.edit-status-option i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.dtc-status-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dtc-text);
+    line-height: 1.2;
+}
+
+.dtc-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
 /* =========================================================
    MANAGE USERS — DARK MODE
    ========================================================= */

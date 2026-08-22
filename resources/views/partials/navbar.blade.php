@@ -1,4 +1,14 @@
 @section('content_top_nav_left')
+@endsection
+
+
+@section('content_top_nav_right')
+@php
+    $unread = \App\Models\UserNotification::where('user_id', auth()->id())
+        ->whereNull('read_at')->count();
+    $recentNotifs = \App\Models\UserNotification::where('user_id', auth()->id())
+        ->latest()->take(5)->get();
+@endphp
 <li class="nav-item navbar-search-item">
     <div class="navbar-search-wrapper">
 
@@ -69,16 +79,6 @@
 
     </div>
 </li>
-@endsection
-
-
-@section('content_top_nav_right')
-@php
-    $unread = \App\Models\UserNotification::where('user_id', auth()->id())
-        ->whereNull('read_at')->count();
-    $recentNotifs = \App\Models\UserNotification::where('user_id', auth()->id())
-        ->latest()->take(5)->get();
-@endphp
 
 {{-- Dark Mode Toggle --}}
 <li class="nav-item navbar-theme-toggle">
@@ -94,7 +94,7 @@
 </li>
 
 <!-- Notification Bell Dropdown -->
-<li class="nav-item dropdown mr-2 navbar-notification-item" id="notif-dropdown">
+<li class="nav-item dropdown navbar-notification-item" id="notif-dropdown">
     <a href="#" class="nav-link dropdown-toggle navbar-icon-link"
        data-toggle="dropdown" id="notifBell" aria-label="Open notifications"
        aria-haspopup="true" aria-expanded="false">
@@ -186,124 +186,4 @@
     </div>
 </li>
 
-@endsection
-
-@section('css')
-@section('css')
-<style>
-/* =========================================================
-   NAVBAR — THEME TOGGLE + NOTIFICATION
-   ========================================================= */
-
-/* Remove Bootstrap dropdown arrow */
-#notifBell::after {
-    display: none !important;
-}
-
-/* Consistent spacing between right-side navbar controls */
-.navbar-theme-toggle,
-.navbar-notification-item {
-    margin-left: 6px !important;
-    margin-right: 6px !important;
-}
-
-/* Dark mode + notification button containers */
-.navbar-theme-toggle,
-.navbar-notification-item {
-    display: flex;
-    align-items: center;
-}
-
-/* Dark mode button */
-.theme-toggle-btn {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid #e5e7eb !important;
-    border-radius: 10px;
-
-    background: transparent;
-    color: inherit;
-
-    padding: 0;
-    transition:
-        background-color 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease;
-}
-
-/* Notification button */
-.navbar-notification-item .navbar-icon-link {
-    width: 40px;
-    height: 40px;
-
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid #e5e7eb !important;
-    border-radius: 10px;
-
-    padding: 0 !important;
-    margin: 0 !important;
-
-    background: transparent;
-    transition:
-        background-color 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease;
-}
-
-/* Hover */
-.theme-toggle-btn:hover,
-.navbar-notification-item .navbar-icon-link:hover {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: #d1d5db !important;
-}
-
-/* =========================================================
-   DARK MODE
-   ========================================================= */
-
-body.dtc-dark .theme-toggle-btn,
-body.dtc-dark .navbar-notification-item .navbar-icon-link {
-    border-color: #374151 !important;
-}
-
-/* Dark mode hover */
-body.dtc-dark .theme-toggle-btn:hover,
-body.dtc-dark .navbar-notification-item .navbar-icon-link:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: #4b5563 !important;
-}
-
-/* =========================================================
-   NOTIFICATION BADGE
-   ========================================================= */
-
-.navbar-notification-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-
-    min-width: 17px;
-    height: 17px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0 4px;
-
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 700;
-
-    line-height: 1;
-}
-</style>
-@endsection
 @endsection
