@@ -103,6 +103,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::get('/settings',              [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings',              [SettingsController::class, 'update'])->name('settings.update');
     Route::get('/settings/general',      [SettingsController::class, 'general'])->name('settings.general');
+    Route::delete('/settings/logo',      [SettingsController::class, 'removeLogo'])->name('settings.logo.remove');
+    Route::delete('/settings/favicon',   [SettingsController::class, 'removeFavicon'])->name('settings.favicon.remove');
     Route::get('/settings/academic',     [SettingsController::class, 'academic'])->name('settings.academic');
     Route::get('/settings/payment',      [SettingsController::class, 'payment'])->name('settings.payment');
     Route::put('/settings/payment',      [SettingsController::class, 'updatePayment'])->name('settings.payment.update');

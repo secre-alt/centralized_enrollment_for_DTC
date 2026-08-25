@@ -24,69 +24,7 @@
 @section('content')
 <div class="row">
 
-    {{-- ══ LEFT: Settings tab list ═══════════════════════════════════ --}}
-    <div class="col-lg-3 mb-3">
-        <div class="card settings-tabs">
-
-            <a href="{{ route('admin.settings.index') }}" class="settings-tab-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
-                <div class="settings-tab-icon"><i class="fas fa-cog"></i></div>
-                <div>
-                    <div class="settings-tab-title">General Settings</div>
-                    <div class="settings-tab-desc">System name, logo, and basic info</div>
-                </div>
-            </a>
-
-            <a href="{{ route('admin.settings.academic') }}" class="settings-tab-item {{ request()->routeIs('admin.settings.academic') ? 'active' : '' }}">
-                <div class="settings-tab-icon"><i class="fas fa-graduation-cap"></i></div>
-                <div>
-                    <div class="settings-tab-title">Academic Settings</div>
-                    <div class="settings-tab-desc">Programs, courses, subjects</div>
-                </div>
-            </a>
-
-            <a href="{{ route('admin.settings.payment') }}" class="settings-tab-item {{ request()->routeIs('admin.settings.payment') ? 'active' : '' }}">
-                <div class="settings-tab-icon"><i class="fas fa-credit-card"></i></div>
-                <div>
-                    <div class="settings-tab-title">Payment Settings</div>
-                    <div class="settings-tab-desc">Payment methods and fees</div>
-                </div>
-            </a>
-
-            <a href="{{ route('admin.settings.notifications') }}" class="settings-tab-item {{ request()->routeIs('admin.settings.notifications') ? 'active' : '' }}">
-                <div class="settings-tab-icon"><i class="fas fa-bell"></i></div>
-                <div>
-                    <div class="settings-tab-title">Notification Settings</div>
-                    <div class="settings-tab-desc">Email, SMS and in-app alerts</div>
-                </div>
-            </a>
-
-            <a href="{{ route('admin.settings.security') }}" class="settings-tab-item {{ request()->routeIs('admin.settings.security') ? 'active' : '' }}">
-                <div class="settings-tab-icon"><i class="fas fa-shield-alt"></i></div>
-                <div>
-                    <div class="settings-tab-title">System Security</div>
-                    <div class="settings-tab-desc">Password policy and access</div>
-                </div>
-            </a>
-
-            <a href="{{ route('admin.settings.backup') }}" class="settings-tab-item {{ request()->routeIs('admin.settings.backup') ? 'active' : '' }}">
-                <div class="settings-tab-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                <div>
-                    <div class="settings-tab-title">Backup &amp; Restore</div>
-                    <div class="settings-tab-desc">Backup your system data</div>
-                </div>
-            </a>
-
-            <a href="{{ route('admin.settings.audit') }}" class="settings-tab-item {{ request()->routeIs('admin.settings.audit') ? 'active' : '' }}">
-                <div class="settings-tab-icon"><i class="fas fa-file-alt"></i></div>
-                <div>
-                    <div class="settings-tab-title">Audit Logs</div>
-                    <div class="settings-tab-desc">View system activities</div>
-                </div>
-            </a>
-
-        </div>
-    </div>
-
+    @include('admin.settings._sidebar')
     {{-- ══ RIGHT: General Settings panels ═════════════════════════════ --}}
     <div class="col-lg-9">
 
@@ -164,7 +102,7 @@
                                         <input type="file" name="logo" accept="image/png" hidden>
                                     </label>
                                     <br>
-                                    <button type="button" class="btn btn-link btn-sm p-0" style="color:#DC2626; font-size:12px;">
+                                    <button type="button" class="btn btn-link btn-sm p-0 dtc-remove-logo" style="color:#DC2626; font-size:12px;">
                                         <i class="fas fa-trash-alt mr-1"></i> Remove
                                     </button>
                                 </div>
@@ -184,7 +122,7 @@
                                         <input type="file" name="favicon" accept="image/png" hidden>
                                     </label>
                                     <br>
-                                    <button type="button" class="btn btn-link btn-sm p-0" style="color:#DC2626; font-size:12px;">
+                                    <button type="button" class="btn btn-link btn-sm p-0 dtc-remove-favicon" style="color:#DC2626; font-size:12px;">
                                         <i class="fas fa-trash-alt mr-1"></i> Remove
                                     </button>
                                 </div>
@@ -320,6 +258,16 @@
 
             </div>
         </form>
+
+        {{-- Standalone removal forms (kept outside #general-settings-form to avoid nested <form> tags) --}}
+        <form id="remove-logo-form" method="POST" action="{{ route('admin.settings.logo.remove') }}" style="display:none;">
+            @csrf
+            @method('DELETE')
+        </form>
+        <form id="remove-favicon-form" method="POST" action="{{ route('admin.settings.favicon.remove') }}" style="display:none;">
+            @csrf
+            @method('DELETE')
+        </form>
     </div>
 </div>
 
@@ -337,5 +285,29 @@
     margin-bottom: 4px;
 }
 </style>
+@endpush
+
+@push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var logoBtn = document.querySelector('.dtc-remove-logo');
+    if (logoBtn) {
+        logoBtn.addEventListener('click', function () {
+            if (confirm('Remove the current system logo and revert to the default?')) {
+                document.getElementById('remove-logo-form').submit();
+            }
+        });
+    }
+
+    var faviconBtn = document.querySelector('.dtc-remove-favicon');
+    if (faviconBtn) {
+        faviconBtn.addEventListener('click', function () {
+            if (confirm('Remove the current favicon and revert to the default?')) {
+                document.getElementById('remove-favicon-form').submit();
+            }
+        });
+    }
+});
+</script>
 @endpush
 @endsection

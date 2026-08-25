@@ -93,6 +93,32 @@ class SettingsController extends Controller
             ->with('status', 'General settings saved successfully.');
     }
 
+    /** DELETE /admin/settings/logo */
+    public function removeLogo()
+    {
+        if (Storage::disk('public')->exists('images/DTC-LOGO.webp')) {
+            Storage::disk('public')->delete('images/DTC-LOGO.webp');
+        }
+
+        Setting::where('key', 'logo_url')->delete();
+
+        return redirect()->route('admin.settings.index')
+            ->with('status', 'Logo removed. Reverted to the default logo.');
+    }
+
+    /** DELETE /admin/settings/favicon */
+    public function removeFavicon()
+    {
+        if (Storage::disk('public')->exists('images/favicon.png')) {
+            Storage::disk('public')->delete('images/favicon.png');
+        }
+
+        Setting::where('key', 'favicon_url')->delete();
+
+        return redirect()->route('admin.settings.index')
+            ->with('status', 'Favicon removed. Reverted to the default favicon.');
+    }
+
     // ── Academic Settings ─────────────────────────────────────────────────────
 
     /** GET /admin/settings/academic */
