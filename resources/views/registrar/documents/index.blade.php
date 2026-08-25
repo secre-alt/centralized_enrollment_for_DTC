@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Document Requests</h4>
-        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+        <h4 class="mb-0 font-weight-bold u-text" >Document Requests</h4>
+        <p class="mb-0 u-text-secondary-sm" >
             Manage alumni document requests
         </p>
     </div>
@@ -20,8 +20,8 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">All Document Requests</span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $requests->total() }} total</span>
+        <span class="font-weight-bold u-text" >All Document Requests</span>
+        <span  class="u-text-secondary-sm">{{ $requests->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
@@ -43,7 +43,7 @@
                     @forelse ($requests as $req)
                     <tr>
                         <td>
-                            <div style="display:flex; align-items:center; gap:10px;">
+                            <div  class="u-flex-center-gap-10">
                                 <div style="width:32px; height:32px; border-radius:50%;
                                             background:linear-gradient(135deg,#7C3AED,#A78BFA);
                                             display:flex; align-items:center; justify-content:center;
@@ -51,10 +51,10 @@
                                     {{ strtoupper(substr($req->user->name, 0, 1)) }}
                                 </div>
                                 <div>
-                                    <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                                    <div  class="u-text-sm-bold-primary">
                                         {{ $req->user->name }}
                                     </div>
-                                    <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                                    <div  class="u-text-xs-secondary">
                                         {{ $req->user->email }}
                                     </div>
                                 </div>
@@ -67,7 +67,7 @@
                                 {{ $req->document_label }}
                             </span>
                         </td>
-                        <td style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                        <td  class="u-text-sm-bold-primary">
                             {{ $req->copies }}
                         </td>
                         <td style="font-size:13px; font-weight:600; color:#15803D;">
@@ -86,7 +86,7 @@
                                 {{ ucfirst($req->status) }}
                             </span>
                         </td>
-                        <td style="font-size:12px; color:var(--dtc-text-secondary);">
+                        <td  class="u-text-xxs-secondary">
                             {{ $req->created_at->format('M d, Y') }}
                         </td>
                         <td>
@@ -156,8 +156,8 @@
         </div>
     </div>
 
-    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-        <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+        <small  class="u-text-secondary">
             Showing
             <strong>{{ $requests->firstItem() ?? 0 }}</strong>
             to

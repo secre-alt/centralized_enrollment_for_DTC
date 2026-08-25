@@ -4,10 +4,10 @@
 @section('title', 'Programs & Subjects')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:10px;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-10" >
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Programs & Subjects</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >Programs & Subjects</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Manage academic programs and their subjects
             </p>
         </div>
@@ -27,8 +27,8 @@
 {{-- ============ PROGRAMS ============ --}}
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">All Programs</span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $programs->total() }} total</span>
+        <span class="font-weight-bold u-text" >All Programs</span>
+        <span  class="u-text-secondary-sm">{{ $programs->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
@@ -47,7 +47,7 @@
                     @php $isSelected = $selectedProgram && $selectedProgram->id === $program->id; @endphp
                     <tr class="js-program-row {{ $isSelected ? 'is-selected' : '' }}" data-program-id="{{ $program->id }}">
                         <td>
-                            <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                            <div  class="u-text-sm-bold-primary">
                                 {{ $program->name }}
                             </div>
                         </td>
@@ -55,13 +55,13 @@
                             <span class="dtc-status-badge is-neutral">{{ $program->code }}</span>
                         </td>
                         <td>
-                            <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                            <span  class="u-text-sm-bold-primary">
                                 {{ $program->subjects_count }}
                             </span>
                             <span style="font-size:12px; color:var(--dtc-text-muted);"> subjects</span>
                         </td>
                         <td>
-                            <div style="display:flex; gap:6px;">
+                            <div  class="u-actions-gap">
                                 <a href="{{ route('admin.programs.index', ['program' => $program->id]) }}"
                                    class="dtc-btn js-select-program {{ $isSelected ? 'dtc-btn-primary' : 'dtc-btn-secondary' }}"
                                    data-id="{{ $program->id }}">
@@ -90,7 +90,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center py-4" style="color:var(--dtc-text-muted);">
+                        <td colspan="4" class="text-center py-4 u-text-muted" >
                             No programs yet.
                         </td>
                     </tr>
@@ -100,8 +100,8 @@
         </div>
     </div>
 
-    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-        <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+        <small  class="u-text-secondary">
             Showing
             <strong>{{ $programs->firstItem() ?? 0 }}</strong>
             to
@@ -133,7 +133,7 @@
             <form method="POST" action="{{ route('admin.programs.store') }}">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" style="color:var(--dtc-text);">
+                    <h5 class="modal-title u-text" >
                         <i class="fas fa-plus-circle mr-2" style="color:var(--dtc-primary);"></i> Add New Program
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -172,7 +172,7 @@
             <form method="POST" id="edit-program-form" action="">
                 @csrf @method('PUT')
                 <div class="modal-header">
-                    <h5 class="modal-title" style="color:var(--dtc-text);">
+                    <h5 class="modal-title u-text" >
                         <i class="fas fa-edit mr-2" style="color:var(--dtc-primary);"></i> Edit Program
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>

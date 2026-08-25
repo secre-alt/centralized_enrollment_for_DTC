@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">My Document Requests</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >My Document Requests</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Track your document requests and pickup status
             </p>
         </div>
@@ -62,7 +62,7 @@
 @if ($requests->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-folder-open fa-4x mb-3" style="color:var(--dtc-border);"></i>
+            <i class="fas fa-folder-open fa-4x mb-3 u-border-color" ></i>
             <h5 style="color:var(--dtc-text); font-weight:700;">No Document Requests Yet</h5>
             <p style="color:var(--dtc-text-secondary); font-size:13px; max-width:360px; margin:0 auto 20px;">
                 Submit a document request to get your TOR, Diploma, Certification, or other records.
@@ -77,12 +77,12 @@
     <div class="row">
         <div class="col-lg-8 mb-3">
             <div class="card">
-                <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
+                <div class="card-header font-weight-bold u-text" >
                     Request History
                 </div>
                 <div class="card-body p-0">
                     @foreach ($requests as $req)
-                    <div style="padding:18px 20px; border-bottom:1px solid #F1F5F9;
+                    <div style="padding:18px 20px; border-bottom:1px solid var(--dtc-border-soft);
                                 display:flex; align-items:center; gap:16px;">
 
                         {{-- Status dot --}}
@@ -98,7 +98,7 @@
                                       color:{{ $req->status_color }};"></i>
                         </div>
 
-                        <div style="flex:1;">
+                        <div  class="u-flex-1">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="font-size:14px; font-weight:600; color:var(--dtc-text);">
                                     {{ $req->document_label }}
@@ -138,7 +138,7 @@
         {{-- Quick Actions --}}
         <div class="col-lg-4 mb-3">
             <div class="card">
-                <div class="card-header font-weight-bold" style="color:var(--dtc-text);">Quick Actions</div>
+                <div class="card-header font-weight-bold u-text" >Quick Actions</div>
                 <div class="card-body p-3">
                     <a href="{{ route('portal.documents.create') }}" class="quick-action-btn">
                         <i class="fas fa-plus"></i> Request Document

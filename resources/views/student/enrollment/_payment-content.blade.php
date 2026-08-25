@@ -57,7 +57,7 @@
                         <div>
                             <div style="font-weight:700; font-size:14px; color:{{ $s['color'] }};">{{ $s['label'] }}</div>
                             @if ($latestPayment->isVerified())
-                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                <div  class="u-text-xxs-secondary">
                                     Receipt No: {{ $latestPayment->receipt_no }} &mdash; ₱{{ number_format($latestPayment->amount, 2) }}
                                 </div>
                             @endif
@@ -84,7 +84,7 @@
                             <i class="fas fa-building mr-1"></i> Walk-in (Cashier)
                         </div>
                         <div class="card-body">
-                            <p style="font-size:13px; color:var(--dtc-text);">
+                            <p  class="u-text-sm-secondary-primary">
                                 Pay in person at the Cashier's Office. Bring this confirmation and a valid ID.
                             </p>
                             <p style="font-size:12px; color:var(--dtc-text-muted); margin:0;">
@@ -117,7 +117,7 @@
                             <p class="text-center mb-1" style="font-size:14px; font-weight:700; color:var(--dtc-text);">
                                 {{ $gcashName ?? '—' }}
                             </p>
-                            <p class="text-center mb-3" style="font-size:13px; color:var(--dtc-text-secondary);">
+                            <p class="text-center mb-3 u-text-secondary-sm" >
                                 {{ $gcashNumber ?? '—' }}
                             </p>
 

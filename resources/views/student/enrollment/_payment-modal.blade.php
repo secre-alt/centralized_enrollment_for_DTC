@@ -7,7 +7,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content dtc-review-modal-content" id="paymentModalContent">
             <div class="dtc-review-loading">
-                <div class="dtc-spinner" style="width:26px; height:26px; border-width:3px;"></div>
+                <div class="dtc-spinner u-spinner-sm" ></div>
                 <p>Loading payment details…</p>
             </div>
         </div>
@@ -22,13 +22,13 @@
 
     var loadingMarkup = '\
         <div class="dtc-review-loading">\
-            <div class="dtc-spinner" style="width:26px; height:26px; border-width:3px;"></div>\
+            <div class="dtc-spinner u-spinner-sm" ></div>\
             <p>Loading payment details…</p>\
         </div>';
 
     var errorMarkup = '\
         <div class="dtc-review-loading">\
-            <i class="fas fa-triangle-exclamation" style="font-size:22px; color:var(--dtc-danger);"></i>\
+            <i class="fas fa-triangle-exclamation u-danger-lg" ></i>\
             <p class="text-danger mb-0">Couldn\'t load payment details. Please try again.</p>\
         </div>';
 
@@ -50,7 +50,7 @@
                     : "Couldn't load payment details. Please try again.";
                 $modalContent.html(
                     '<div class="dtc-review-loading">' +
-                        '<i class="fas fa-triangle-exclamation" style="font-size:22px; color:var(--dtc-danger);"></i>' +
+                        '<i class="fas fa-triangle-exclamation u-danger-lg" ></i>' +
                         '<p class="text-danger mb-0">' + message + '</p>' +
                     '</div>'
                 );

@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Official Receipt</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Enrollment payment confirmation</p>
+            <h4 class="mb-0 font-weight-bold u-text" >Official Receipt</h4>
+            <p class="mb-0 u-text-secondary-sm" >Enrollment payment confirmation</p>
         </div>
         <a href="{{ route('cashier.payments.index') }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left mr-1"></i> Back to Payments

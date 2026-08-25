@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Payment Settings</h4>
-        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+        <h4 class="mb-0 font-weight-bold u-text" >Payment Settings</h4>
+        <p class="mb-0 u-text-secondary-sm" >
             Configure enrollment fee and GCash payment details
         </p>
     </div>
@@ -28,8 +28,8 @@
 
     {{-- ── Text Settings Form ─────────────────────────────────── --}}
     <div class="card mb-4">
-        <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
-            <i class="fas fa-money-bill mr-2" style="color:#0F4CDB;"></i>
+        <div class="card-header font-weight-bold u-text" >
+            <i class="fas fa-money-bill mr-2 u-link" ></i>
             Fee & GCash Details
         </div>
         <div class="card-body">
@@ -39,7 +39,7 @@
 
                 {{-- Enrollment Fee --}}
                 <div class="form-group">
-                    <label style="font-size:13px; font-weight:600; color:#374151;">
+                    <label  class="u-gray-bold-sm">
                         Enrollment Fee (₱)
                     </label>
                     <input type="number"
@@ -53,7 +53,7 @@
 
                 {{-- GCash Account Name --}}
                 <div class="form-group">
-                    <label style="font-size:13px; font-weight:600; color:#374151;">
+                    <label  class="u-gray-bold-sm">
                         GCash Account Name
                     </label>
                     <input type="text"
@@ -65,7 +65,7 @@
 
                 {{-- GCash Number --}}
                 <div class="form-group">
-                    <label style="font-size:13px; font-weight:600; color:#374151;">
+                    <label  class="u-gray-bold-sm">
                         GCash Number
                     </label>
                     <input type="text"
@@ -78,7 +78,7 @@
 
                 {{-- Payment Deadline (days) --}}
                 <div class="form-group">
-                    <label style="font-size:13px; font-weight:600; color:#374151;">
+                    <label  class="u-gray-bold-sm">
                         Payment Deadline (days after approval)
                     </label>
                     <input type="number"
@@ -98,8 +98,8 @@
 
     {{-- ── QR Upload Form ──────────────────────────────────────── --}}
     <div class="card">
-        <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
-            <i class="fas fa-qrcode mr-2" style="color:#0F4CDB;"></i>
+        <div class="card-header font-weight-bold u-text" >
+            <i class="fas fa-qrcode mr-2 u-link" ></i>
             GCash QR Code
         </div>
         <div class="card-body">
@@ -132,7 +132,7 @@
                 @csrf
 
                 <div class="form-group">
-                    <label style="font-size:13px; font-weight:600; color:#374151;">
+                    <label  class="u-gray-bold-sm">
                         Upload New QR Image
                         <span style="font-size:11px; font-weight:400; color:var(--dtc-text-muted);">
                             (PNG or JPG, max 2 MB)

@@ -24,6 +24,8 @@ use App\Http\Controllers\Public\ApplicationController;
 use App\Http\Controllers\PasswordSetupController;
 use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplicationController;
 use App\Http\Controllers\Portal\ApplicationController as PortalApplicationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
     Route::middleware(['auth'])->group(function () {
         // ...existing notifications routes...
@@ -35,6 +37,17 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
     Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+    Route::middleware('guest')->group(function () {
+
+        // ── Forgot password (request form + send email) ──────────
+        Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+        Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+        // ── Reset password (form + handle reset) ─────────────────
+        Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+    });
 
     // ── ACCOUNT ACTIVATION / PASSWORD SETUP ─────────────────────────────────────
     // Reuses the stock Laravel password broker (password_resets table).

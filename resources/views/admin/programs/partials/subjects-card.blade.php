@@ -7,16 +7,16 @@
 {{-- Header sits outside the card — same pattern as the page-level
      "Programs & Subjects" / "Add Program" header above the All Programs
      card. --}}
-<div class="d-flex justify-content-between align-items-center flex-wrap dtc-subjects-header mb-3" style="gap:10px;">
+<div class="d-flex justify-content-between align-items-center flex-wrap dtc-subjects-header mb-3 u-gap-10" >
     <div>
-        <h4 class="mb-0 font-weight-bold dtc-subjects-title" style="color:var(--dtc-text);">
+        <h4 class="mb-0 font-weight-bold dtc-subjects-title u-text" >
             Subjects
             @if($selectedProgram)
                 — {{ $selectedProgram->name }} ({{ $selectedProgram->code }})
             @endif
         </h4>
         @if(!$selectedProgram)
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <p class="mb-0 u-text-secondary-sm" >
                 Select a program above to manage its subjects.
             </p>
         @endif
@@ -75,17 +75,17 @@
                         <td>
                             <span class="dtc-status-badge is-neutral">{{ $subject->subject_code }}</span>
                         </td>
-                        <td style="font-size:13px; color:var(--dtc-text);">
+                        <td  class="u-text-sm-secondary-primary">
                             {{ $subject->subject_name }}
                         </td>
-                        <td style="font-size:12px; color:var(--dtc-text-secondary);">
+                        <td  class="u-text-xxs-secondary">
                             {{ $subject->year_level }}{{ ['','st','nd','rd','th'][$subject->year_level] ?? 'th' }} Year
                         </td>
-                        <td style="font-size:12px; color:var(--dtc-text-secondary);">
+                        <td  class="u-text-xxs-secondary">
                             {{ $subject->semester }}{{ $subject->semester == 1 ? 'st' : 'nd' }} Sem
                         </td>
                         <td>
-                            <div style="display:flex; gap:6px;">
+                            <div  class="u-actions-gap">
                                 <button type="button"
                                         class="dtc-icon-btn js-edit-subject"
                                         title="Edit subject"
@@ -111,7 +111,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-4" style="color:var(--dtc-text-muted);">
+                        <td colspan="5" class="text-center py-4 u-text-muted" >
                             No subjects added yet for this program.
                         </td>
                     </tr>
@@ -121,8 +121,8 @@
         </div>
     </div>
 
-    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-        <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+        <small  class="u-text-secondary">
             Showing
             <strong>{{ $subjects->firstItem() ?? 0 }}</strong>
             to
@@ -139,9 +139,9 @@
         @endif
     </div>
     @else
-    <div class="text-center py-5" style="color:var(--dtc-text-muted);">
+    <div class="text-center py-5 u-text-muted" >
         <i class="fas fa-book" style="font-size:22px; opacity:.5;"></i>
-        <p class="mb-0 mt-2" style="font-size:13px;">No program selected yet.</p>
+        <p class="mb-0 mt-2 u-text-sm" >No program selected yet.</p>
     </div>
     @endif
 </div>
@@ -155,7 +155,7 @@
                   action="{{ route('admin.programs.subjects.store', $selectedProgram) }}">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" style="color:var(--dtc-text);">
+                    <h5 class="modal-title u-text" >
                         <i class="fas fa-plus-circle mr-2" style="color:var(--dtc-primary);"></i>
                         Add Subject — {{ $selectedProgram->code }}
                     </h5>
@@ -216,7 +216,7 @@
             <form method="POST" id="edit-subject-form" action="">
                 @csrf @method('PUT')
                 <div class="modal-header">
-                    <h5 class="modal-title" style="color:var(--dtc-text);">
+                    <h5 class="modal-title u-text" >
                         <i class="fas fa-edit mr-2" style="color:var(--dtc-primary);"></i>
                         Edit Subject
                     </h5>

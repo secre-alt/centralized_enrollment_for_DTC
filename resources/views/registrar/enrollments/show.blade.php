@@ -3,10 +3,10 @@
 @section('title', 'Review Enrollment')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:10px;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-10" >
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Review Enrollment</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >Review Enrollment</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Review the applicant's details and selected subjects before making a decision.
             </p>
         </div>

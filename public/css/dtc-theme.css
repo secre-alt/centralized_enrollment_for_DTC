@@ -2080,6 +2080,43 @@ body.dtc-dark .page-item .page-link {
     box-shadow: var(--dtc-shadow-md);
 }
 
+/* ── Mobile sidebar profile panel fix ────────────────────────
+   On mobile AdminLTE renders the sidebar as a slide-in overlay
+   whose height is constrained to the viewport. The upward-
+   opening profile menu (bottom: calc(100% + 8px)) can be
+   clipped by the sidebar's overflow boundary, making Logout
+   unreachable. On narrow screens:
+     • Move the panel from absolute-bottom to static flow
+       (sits at the bottom of the nav naturally).
+     • Switch the menu to open DOWNWARD (top: calc(100% + 8px))
+       so it stays inside the sidebar bounds.
+   ─────────────────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+
+    /* Keep the profile panel pinned to the bottom of the sidebar
+       but raised enough to clear the mobile browser chrome
+       (address bar + Android nav buttons = ~90-100px).
+       Use env(safe-area-inset-bottom) for notch/gesture phones,
+       with a fixed fallback for older browsers. */
+    .main-sidebar .dtc-sidebar-user-panel {
+        bottom: max(env(safe-area-inset-bottom, 0px) + 16px, 60px) !important;
+    }
+
+    /* Nav bottom padding must match so last item isn't hidden
+       behind the raised panel. Panel height ~70px + bottom offset. */
+    .main-sidebar .sidebar .nav-sidebar {
+        padding-bottom: 170px !important;
+    }
+
+    /* Popup opens UPWARD above the panel (panel is raised 90px
+       from bottom, so there's viewport room above it) */
+    .dtc-sidebar-profile-menu {
+        top: auto !important;
+        bottom: calc(100% + 8px) !important;
+        z-index: 1040 !important;
+    }
+}
+
 
 /* ============================================================
    10. DTC EMS UI COMPONENT LIBRARY
@@ -3909,4 +3946,321 @@ button.dtc-next-step-btn:hover {
         margin: 0 !important;
         font-size: 14px;
     }
+}
+
+/* ============================================================
+   10. SKELETON PRELOADER
+   ------------------------------------------------------------
+   Replaces the AdminLTE shaking-logo preloader with a full
+   skeleton that mirrors the actual page layout.
+   ============================================================ */
+
+/* ── Override AdminLTE preloader background ──────────────── */
+.dtc-skeleton-preloader {
+    background: var(--dtc-bg) !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+/* ── Shimmer animation ───────────────────────────────────── */
+@keyframes dtc-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+}
+
+/* ── Skeleton base bone ──────────────────────────────────── */
+.dtc-sk-box {
+    border-radius: 6px;
+    background: linear-gradient(
+        90deg,
+        var(--dtc-border)      25%,
+        var(--dtc-border-soft) 50%,
+        var(--dtc-border)      75%
+    );
+    background-size: 600px 100%;
+    animation: dtc-shimmer 1.4s infinite linear;
+    flex-shrink: 0;
+}
+
+/* ── Outer layout ────────────────────────────────────────── */
+.dtc-skeleton-wrap {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ── Sidebar skeleton ────────────────────────────────────── */
+.dtc-sk-sidebar {
+    width: 250px;
+    min-width: 250px;
+    height: 100vh;
+    background: var(--dtc-surface);
+    border-right: 1px solid var(--dtc-border);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    position: relative;
+}
+
+.dtc-sk-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--dtc-border);
+    min-height: 60px;
+}
+
+.dtc-sk-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0;
+}
+
+.dtc-sk-brand-text {
+    height: 16px;
+    width: 110px;
+    border-radius: 6px;
+}
+
+.dtc-sk-nav {
+    flex: 1;
+    padding: 16px 12px 8px;
+    overflow: hidden;
+}
+
+.dtc-sk-label {
+    height: 10px;
+    width: 60px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+}
+
+.dtc-sk-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+}
+
+.dtc-sk-icon {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 4px !important;
+    flex-shrink: 0;
+}
+
+.dtc-sk-nav-text {
+    height: 13px;
+    border-radius: 5px;
+    width: 120px;
+}
+
+.dtc-sk-user-panel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--dtc-border);
+    background: var(--dtc-surface);
+    position: absolute;
+    bottom: 12px;
+    left: 10px;
+    right: 10px;
+    border-radius: 10px;
+    box-shadow: var(--dtc-shadow-sm);
+}
+
+.dtc-sk-user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dtc-sk-user-name {
+    height: 12px;
+    width: 100px;
+    border-radius: 5px;
+}
+
+.dtc-sk-user-role {
+    height: 10px;
+    width: 60px;
+    border-radius: 4px;
+    opacity: 0.6;
+}
+
+/* ── Main area skeleton ──────────────────────────────────── */
+.dtc-sk-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--dtc-bg);
+}
+
+/* Navbar */
+.dtc-sk-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    min-height: 60px;
+    background: var(--dtc-surface);
+    border-bottom: 1px solid var(--dtc-border);
+    gap: 12px;
+}
+
+.dtc-sk-page-title {
+    height: 16px;
+    width: 160px;
+    border-radius: 6px;
+}
+
+.dtc-sk-navbar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dtc-sk-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+/* Stat cards */
+.dtc-sk-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 20px 20px 0;
+}
+
+.dtc-sk-card {
+    background: var(--dtc-surface);
+    border-radius: var(--dtc-radius-lg);
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--dtc-border);
+}
+
+.dtc-sk-card-label {
+    height: 11px;
+    width: 70%;
+    border-radius: 4px;
+    opacity: 0.7;
+}
+
+.dtc-sk-card-value {
+    height: 26px;
+    width: 50%;
+    border-radius: 6px;
+}
+
+.dtc-sk-card-sub {
+    height: 10px;
+    width: 80%;
+    border-radius: 4px;
+    opacity: 0.5;
+}
+
+/* Content row */
+.dtc-sk-content {
+    display: flex;
+    gap: 16px;
+    padding: 16px 20px 20px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.dtc-sk-panel {
+    background: var(--dtc-surface);
+    border-radius: var(--dtc-radius-lg);
+    border: 1px solid var(--dtc-border);
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.dtc-sk-panel-side {
+    flex: 0 0 280px;
+}
+
+.dtc-sk-panel-header {
+    height: 16px;
+    width: 40%;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.dtc-sk-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--dtc-border-soft);
+}
+
+.dtc-sk-row:last-child { border-bottom: none; }
+
+.dtc-sk-row-cell {
+    height: 12px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.dtc-sk-cell-sm  { width: 80px; }
+.dtc-sk-cell-md  { width: 120px; }
+.dtc-sk-cell-lg  { flex: 1; }
+
+/* Side panel items */
+.dtc-sk-side-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--dtc-border-soft);
+}
+
+.dtc-sk-side-item:last-child { border-bottom: none; }
+
+.dtc-sk-side-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dtc-sk-side-title {
+    height: 12px;
+    width: 75%;
+    border-radius: 4px;
+}
+
+.dtc-sk-side-sub {
+    height: 10px;
+    width: 50%;
+    border-radius: 4px;
+    opacity: 0.6;
+}
+
+/* ── Responsive: hide sidebar skeleton on mobile ─────────── */
+@media (max-width: 767.98px) {
+    .dtc-sk-sidebar  { display: none; }
+    .dtc-sk-cards    { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px 12px 0; }
+    .dtc-sk-content  { flex-direction: column; padding: 12px; }
+    .dtc-sk-panel-side { flex: none; }
+    .dtc-sk-navbar   { padding: 0 12px; }
 }

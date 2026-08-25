@@ -8,17 +8,19 @@
         <div class="container-fluid px-0">
 
     {{-- Page Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-start mb-4 gap-2">
         <div>
             <h1 class="mb-1">Pre-Enrollment Application</h1>
             <p class="text-muted mb-0">
                 Submit your application for preliminary screening.
             </p>
         </div>
-        <a href="{{ route('landing') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left mr-1"></i>
-            Back
-        </a>
+        <div class="page-header-actions">
+            <a href="{{ route('landing') }}" class="btn btn-outline-secondary back-btn" aria-label="Back">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span class="back-btn-label">Back</span>
+            </a>
+        </div>
     </div>
 
     {{-- Validation Errors --}}
@@ -211,6 +213,7 @@
                                 class="form-control @error('last_name') is-invalid @enderror"
                                 value="{{ old('last_name') }}"
                                 required
+                                placeholder="Dela Cruz"
                             >
 
                             @error('last_name')
@@ -234,6 +237,7 @@
                                 class="form-control @error('first_name') is-invalid @enderror"
                                 value="{{ old('first_name') }}"
                                 required
+                                placeholder="Juan"
                             >
 
                             @error('first_name')
@@ -256,6 +260,7 @@
                                 id="middle_name"
                                 class="form-control @error('middle_name') is-invalid @enderror"
                                 value="{{ old('middle_name') }}"
+                                placeholder="Santos"
                             >
 
                             @error('middle_name')
@@ -359,6 +364,7 @@
                                 id="religion"
                                 class="form-control"
                                 value="{{ old('religion') }}"
+                                placeholder="Roman Catholic"
                             >
                         </div>
                     </div>
@@ -377,6 +383,7 @@
                                 id="nationality"
                                 class="form-control"
                                 value="{{ old('nationality', 'Filipino') }}"
+                                placeholder="Filipino"
                             >
                         </div>
                     </div>
@@ -396,6 +403,7 @@
                                 class="form-control"
                                 value="{{ old('lrn') }}"
                                 maxlength="12"
+                                placeholder="e.g. 136041123456"
                             >
 
                             <small class="form-text text-muted">
@@ -456,6 +464,7 @@
                                 id="spouse_name"
                                 class="form-control"
                                 value="{{ old('spouse_name') }}"
+                                placeholder="Spouse's full name"
                             >
                         </div>
                     </div>
@@ -554,6 +563,7 @@
                                 id="city"
                                 class="form-control"
                                 value="{{ old('city') }}"
+                                placeholder="Danao City"
                             >
                         </div>
                     </div>
@@ -568,6 +578,7 @@
                                 id="province"
                                 class="form-control"
                                 value="{{ old('province') }}"
+                                placeholder="Cebu"
                             >
                         </div>
                     </div>
@@ -582,6 +593,7 @@
                                 id="postal_code"
                                 class="form-control"
                                 value="{{ old('postal_code') }}"
+                                placeholder="6004"
                             >
                         </div>
                     </div>
@@ -596,6 +608,7 @@
                                 id="country"
                                 class="form-control"
                                 value="{{ old('country', 'Philippines') }}"
+                                placeholder="Philippines"
                             >
                         </div>
                     </div>
@@ -635,6 +648,7 @@
                                 id="father_name"
                                 class="form-control"
                                 value="{{ old('father_name') }}"
+                                placeholder="Father's full name"
                             >
                         </div>
                     </div>
@@ -649,6 +663,7 @@
                                 id="father_occupation"
                                 class="form-control"
                                 value="{{ old('father_occupation') }}"
+                                placeholder="e.g. Driver, Farmer, OFW"
                             >
                         </div>
                     </div>
@@ -668,6 +683,7 @@
                                 id="mother_name"
                                 class="form-control"
                                 value="{{ old('mother_name') }}"
+                                placeholder="Mother's full name"
                             >
                         </div>
                     </div>
@@ -682,6 +698,7 @@
                                 id="mother_occupation"
                                 class="form-control"
                                 value="{{ old('mother_occupation') }}"
+                                placeholder="e.g. Housewife, Teacher, OFW"
                             >
                         </div>
                     </div>
@@ -701,6 +718,7 @@
                                 id="parent_address"
                                 class="form-control"
                                 value="{{ old('parent_address') }}"
+                                placeholder="Same as current address, if applicable"
                             >
                         </div>
                     </div>
@@ -715,6 +733,7 @@
                                 id="parent_contact"
                                 class="form-control"
                                 value="{{ old('parent_contact') }}"
+                                placeholder="09XXXXXXXXX"
                             >
                         </div>
                     </div>
@@ -754,6 +773,7 @@
                                 id="occupation"
                                 class="form-control"
                                 value="{{ old('occupation') }}"
+                                placeholder="e.g. Student, Employed, Self-employed"
                             >
                         </div>
                     </div>
@@ -794,6 +814,7 @@
                         id="pwd_id"
                         class="form-control"
                         value="{{ old('pwd_id') }}"
+                        placeholder="PWD ID number, if applicable"
                     >
                 </div>
 
@@ -1095,6 +1116,19 @@
     .form-control:focus {
         box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.12);
     }
+    .physical-requirement-item {
+        margin-bottom: 0.5rem;
+    }
+
+    /* ── Page header ───────────────────────────────────────── */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+    }
+
+    /* ── Document upload ─────────────────────────────────── */
     .document-input {
         border: 1px solid #dee2e6;
         border-radius: 10px;
@@ -1108,8 +1142,132 @@
     .document-input label {
         font-weight: 600;
     }
-    .physical-requirement-item {
-        margin-bottom: 0.5rem;
+
+    .document-input-control {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 0.6rem 0.75rem;
+        background: #ffffff;
+        position: relative;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .document-input-control:focus-within {
+        border-color: #0F4CDB;
+        border-style: solid;
+        box-shadow: 0 0 0 0.15rem rgba(15, 76, 219, 0.12);
+    }
+    .document-input-control.is-invalid {
+        border-color: #dc3545;
+        border-style: solid;
+    }
+    .document-input-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0;
+        padding: 0.45rem 0.9rem;
+        background: #eef2f7;
+        border: 1px solid #d7dee7;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #334155;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .document-input-control:focus-within .document-input-btn {
+        background: #dbe6ff;
+        color: #0F4CDB;
+    }
+    .document-input-filename {
+        flex: 1 1 160px;
+        min-width: 0;
+        font-size: 0.85rem;
+        color: #94A3B8;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .document-input-control.has-file .document-input-filename {
+        color: #1E293B;
+        font-weight: 500;
+    }
+    .document-input-file {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    /* ── Dark mode ────────────────────────────────────────── */
+    body.dtc-dark .document-input {
+        background: var(--dtc-surface-soft, #1E293B);
+        border-color: var(--dtc-border, #334155);
+    }
+    body.dtc-dark .document-input-control {
+        background: var(--dtc-surface, #111827);
+        border-color: #475569;
+    }
+    body.dtc-dark .document-input-control:focus-within {
+        border-color: #6C9BFF;
+        box-shadow: 0 0 0 0.15rem rgba(108, 155, 255, 0.18);
+    }
+    body.dtc-dark .document-input-btn {
+        background: #334155;
+        border-color: #475569;
+        color: #E2E8F0;
+    }
+    body.dtc-dark .document-input-control:focus-within .document-input-btn {
+        background: #3B4F72;
+        color: #BFD3FF;
+    }
+    body.dtc-dark .document-input-filename {
+        color: #64748B;
+    }
+    body.dtc-dark .document-input-control.has-file .document-input-filename {
+        color: #F8FAFC;
+    }
+
+    /* ── Mobile / responsive polish ───────────────────────── */
+    @media (max-width: 575.98px) {
+        .card-body {
+            padding: 1.1rem;
+        }
+        .card-header {
+            padding: 0.85rem 1.1rem;
+        }
+        .document-input {
+            padding: 0.85rem;
+        }
+        .document-input-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .document-input-filename {
+            flex-basis: 100%;
+            text-align: center;
+        }
+        .page-header-actions {
+            flex-shrink: 0;
+        }
+        .back-btn {
+            padding: 0.5rem 0.65rem;
+            gap: 0;
+        }
+        .back-btn-label {
+            display: none;
+        }
+        .back-btn i {
+            margin: 0;
+        }
     }
 </style>
 
@@ -1121,6 +1279,25 @@
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Custom "Choose File" control: reflect the selected filename and
+    // forward clicks on the styled button to the (visually hidden)
+    // native file input so it still opens the OS file picker.
+    document.querySelectorAll('.document-input-file').forEach(function (input) {
+        const wrap = input.closest('.document-input-control');
+        const filenameEl = wrap ? wrap.querySelector('.document-input-filename') : null;
+
+        input.addEventListener('change', function () {
+            if (!filenameEl) return;
+            if (input.files && input.files.length > 0) {
+                filenameEl.textContent = input.files[0].name;
+                wrap.classList.add('has-file');
+            } else {
+                filenameEl.textContent = filenameEl.dataset.placeholder || 'No file chosen';
+                wrap.classList.remove('has-file');
+            }
+        });
+    });
 
     const applicantType = document.getElementById('academic_status');
     const maritalStatus = document.getElementById('marital_status');

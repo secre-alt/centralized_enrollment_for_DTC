@@ -2,7 +2,7 @@
         <div class="public-navbar-container">
             <a href="{{ route('landing') }}" class="public-brand">
                 <img
-                    src="{{ asset('images/DTC-LOGO.png') }}"
+                    src="{{ asset('images/DTC-LOGO.webp') }}"
                     alt="DTC Logo"
                     class="public-logo"
                 >
@@ -32,12 +32,23 @@
 
             </div>
 
-            <a href="{{ route('login') }}" class="public-signin">
-                Sign In
-                <i class="fas fa-arrow-right"></i>
-            </a>
+            {{-- Dark Mode Toggle --}}
+            <div class="public-navbar-theme">
+                <button
+                    type="button"
+                    id="darkModeToggle"
+                    class="theme-toggle-btn"
+                    aria-label="Enable dark mode"
+                    aria-pressed="false"
+                    title="Enable dark mode">
+                    <i class="fas fa-moon" id="darkModeIcon" aria-hidden="true"></i>
+                </button>
+            </div>
 
-
+            <button type="button" class="public-signin" data-signin-modal="trigger">
+                <i class="fas fa-arrow-right"></i> Sign in
+            </button>
+            
             <button
                 type="button"
                 class="public-navbar-toggle"
@@ -65,10 +76,9 @@
                 Check Status
             </a>
 
-            <a href="{{ route('login') }}" class="public-signin">
-                Sign In
-                <i class="fas fa-arrow-right"></i>
-            </a>
+            <button type="button" class="public-signin" data-signin-modal="trigger">
+                <i class="fas fa-arrow-right"></i> Sign in
+            </button>
 
         </div>
 

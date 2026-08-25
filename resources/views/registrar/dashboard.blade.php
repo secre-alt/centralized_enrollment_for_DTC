@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold">Registrar Dashboard</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Manage enrollments and appointments</p>
+            <p class="mb-0 u-text-secondary-sm" >Manage enrollments and appointments</p>
         </div>
         <a href="{{ route('registrar.appointments.slots') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
             <i class="fas fa-calendar-plus"></i>
@@ -73,7 +73,7 @@
                         @forelse ($recentEnrollments as $enrollment)
                         <tr>
                             <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
+                                <div  class="u-flex-center-gap-10">
                                     <div style="width:32px; height:32px; border-radius:50%;
                                                 background:linear-gradient(135deg,#0F4CDB,#1a5feb);
                                                 display:flex; align-items:center; justify-content:center;
@@ -83,16 +83,10 @@
                                     <span style="font-size:13px; font-weight:500;">{{ $enrollment->user->name }}</span>
                                 </div>
                             </td>
-                            <td style="font-size:13px;">{{ $enrollment->program->code }}</td>
-                            <td style="font-size:13px;">{{ $enrollment->year_level }}{{ ['st','nd','rd','th'][$enrollment->year_level - 1] ?? 'th' }} Year</td>
+                            <td  class="u-text-sm">{{ $enrollment->program->code }}</td>
+                            <td  class="u-text-sm">{{ $enrollment->year_level }}{{ ['st','nd','rd','th'][$enrollment->year_level - 1] ?? 'th' }} Year</td>
                             <td>
-                                @if($enrollment->status === 'pending')
-                                    <span class="badge badge-warning">Pending</span>
-                                @elseif($enrollment->status === 'approved')
-                                    <span class="badge badge-success">Approved</span>
-                                @else
-                                    <span class="badge badge-danger">Rejected</span>
-                                @endif
+                                <x-dtc.status-badge :status="$enrollment->status" />
                             </td>
                             <td>
                                 @if($enrollment->status === 'pending')
@@ -116,8 +110,8 @@
                 </table>
                 </div>
             </div>
-            <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
-                <small style="color:var(--dtc-text-secondary);">
+            <div class="card-footer u-panel-footer" >
+                <small  class="u-text-secondary">
                     Showing
                     <strong>{{ $recentEnrollments->firstItem() ?? 0 }}</strong>
                     to
@@ -153,7 +147,7 @@
                     </div>
                 </div>
                 @empty
-                <p class="text-center text-muted py-2" style="font-size:13px;">No notifications.</p>
+                <p class="text-center text-muted py-2 u-text-sm" >No notifications.</p>
                 @endforelse
             </div>
         </div>

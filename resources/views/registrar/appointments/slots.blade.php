@@ -4,12 +4,12 @@
 @section('title', 'Manage Appointment Slots')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:10px;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-10" >
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Manage Appointment Slots</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Set available dates and times for student appointments</p>
+            <h4 class="mb-0 font-weight-bold u-text" >Manage Appointment Slots</h4>
+            <p class="mb-0 u-text-secondary-sm" >Set available dates and times for student appointments</p>
         </div>
-        <div class="d-flex flex-wrap" style="gap:8px;">
+        <div class="d-flex flex-wrap u-gap-8" >
             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addSlotModal">
                 <i class="fas fa-plus mr-1"></i> Add Slot
             </button>
@@ -28,11 +28,11 @@
 
 {{-- Slots List --}}
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap:8px;">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">
-            <i class="fas fa-clock mr-2" style="color:#0F4CDB;"></i> Available Slots
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap u-gap-8" >
+        <span class="font-weight-bold u-text" >
+            <i class="fas fa-clock mr-2 u-link" ></i> Available Slots
         </span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $slots->total() }} total</span>
+        <span  class="u-text-secondary-sm">{{ $slots->total() }} total</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -52,25 +52,25 @@
                 @forelse ($slots as $slot)
                 <tr>
                     <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div  class="u-flex-center-gap-10">
                             <div style="background:#EEF2FF; color:#0F4CDB; border-radius:10px;
                                         padding:6px 10px; font-size:11px; font-weight:700;
                                         text-align:center; line-height:1.3; min-width:42px;">
                                 {{ \Carbon\Carbon::parse($slot->date)->format('M') }}<br>
                                 <span style="font-size:16px;">{{ \Carbon\Carbon::parse($slot->date)->format('d') }}</span>
                             </div>
-                            <div style="font-size:12px; color:var(--dtc-text-secondary);">
+                            <div  class="u-text-xxs-secondary">
                                 {{ \Carbon\Carbon::parse($slot->date)->format('D, Y') }}
                             </div>
                         </div>
                     </td>
                     <td style="font-size:13px; font-weight:500; color:var(--dtc-text); white-space:nowrap;">
                         {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
-                        <span style="color:var(--dtc-text-muted);">—</span>
+                        <span  class="u-text-muted">—</span>
                         {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
                     </td>
                     <td>
-                        <span style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                        <span  class="u-text-sm-bold-primary">
                             {{ $slot->max_bookings }}
                         </span>
                     </td>
@@ -88,11 +88,11 @@
                     </td>
                     <td>
                         @if($slot->availableSlots() > 0)
-                            <span class="badge badge-success">Available</span>
+                            <x-dtc.status-badge status="Available" variant="success" />
                         @elseif($slot->appointments_count >= $slot->max_bookings)
-                            <span class="badge badge-danger">Full</span>
+                            <x-dtc.status-badge status="Full" variant="danger" />
                         @else
-                            <span class="badge badge-warning">Nearly Full</span>
+                            <x-dtc.status-badge status="Nearly Full" variant="warning" />
                         @endif
                     </td>
                     <td>
@@ -113,7 +113,7 @@
                 @empty
                 <tr>
                     <td colspan="7" class="text-center py-5">
-                        <i class="fas fa-calendar-times fa-3x mb-3" style="color:var(--dtc-border);"></i>
+                        <i class="fas fa-calendar-times fa-3x mb-3 u-border-color" ></i>
                         <p style="color:var(--dtc-text-muted); font-size:13px;">No slots added yet.</p>
                     </td>
                 </tr>
@@ -124,9 +124,9 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
-        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-            <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer u-panel-footer" >
+        <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+            <small  class="u-text-secondary">
                 Showing
                 <strong>{{ $slots->firstItem() ?? 0 }}</strong>
                 to
@@ -153,7 +153,7 @@
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title" id="addSlotModalLabel">
-                        <i class="fas fa-plus-circle mr-2" style="color:#0F4CDB;"></i> Add New Slot
+                        <i class="fas fa-plus-circle mr-2 u-link" ></i> Add New Slot
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>

@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold">New Applicant Dashboard</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Welcome to Danao Technological College!</p>
+            <p class="mb-0 u-text-secondary-sm" >Welcome to Danao Technological College!</p>
         </div>
     </div>
 @endsection
@@ -124,7 +124,7 @@
                 @if($application)
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
+                            <div  class="u-eyebrow">
                                 Reference Number
                             </div>
                             <div style="font-size:14px; font-weight:700;">
@@ -132,7 +132,7 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
+                            <div  class="u-eyebrow">
                                 Program
                             </div>
                             <div style="font-size:14px; font-weight:700;">
@@ -140,35 +140,35 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
+                            <div  class="u-eyebrow">
                                 Submitted
                             </div>
-                            <div style="font-size:13px; color:var(--dtc-text);">
+                            <div  class="u-text-sm-secondary-primary">
                                 {{ $application->created_at ? $application->created_at->format('M d, Y') : 'Not provided' }}
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
+                            <div  class="u-eyebrow">
                                 Approved
                             </div>
-                            <div style="font-size:13px; color:var(--dtc-text);">
+                            <div  class="u-text-sm-secondary-primary">
                                 {{ $application->reviewed_at ? $application->reviewed_at->format('M d, Y') : 'Not yet reviewed' }}
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
+                            <div  class="u-eyebrow">
                                 Documents Submitted
                             </div>
-                            <div style="font-size:13px; color:var(--dtc-text);">
+                            <div  class="u-text-sm-secondary-primary">
                                 {{ $application->documents_count }} document{{ $application->documents_count == 1 ? '' : 's' }}
                             </div>
                         </div>
                         @if($application->remarks)
                         <div class="col-md-6 mb-3">
-                            <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase;">
+                            <div  class="u-eyebrow">
                                 Registrar Remarks
                             </div>
-                            <div style="font-size:13px; color:var(--dtc-text);">
+                            <div  class="u-text-sm-secondary-primary">
                                 {{ $application->remarks }}
                             </div>
                         </div>
@@ -180,9 +180,9 @@
                         View Full Application →
                     </a>
                 @else
-                    <div class="text-center py-4" style="color:#94A3B8;">
+                    <div class="text-center py-4 u-muted" >
                         <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                        <p style="font-size:13px;">
+                        <p  class="u-text-sm">
                             No approved application found for your account.
                             Please contact the Registrar's Office.
                         </p>
@@ -205,7 +205,7 @@
                                 <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
                                     {{ $nextStep['label'] }}
                                 </div>
-                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                <div  class="u-text-xxs-secondary">
                                     {{ $nextStep['desc'] }}
                                 </div>
                             </div>
@@ -216,11 +216,11 @@
                             <div class="dtc-next-step-icon" style="background:#0F4CDB;">
                                 <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
                             </div>
-                            <div style="flex:1;">
+                            <div  class="u-flex-1">
                                 <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
                                     {{ $nextStep['label'] }}
                                 </div>
-                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                <div  class="u-text-xxs-secondary">
                                     {{ $nextStep['desc'] }}
                                 </div>
                             </div>
@@ -236,7 +236,7 @@
                             <div style="font-size:14px; font-weight:700; color:var(--dtc-text);">
                                 {{ $nextStep['label'] }}
                             </div>
-                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                            <div  class="u-text-xxs-secondary">
                                 {{ $nextStep['desc'] }}
                             </div>
                         </div>
@@ -261,7 +261,7 @@
             </div>
             <div class="card-body p-0">
                 @forelse ($announcements as $notif)
-                <div style="padding:14px 20px; border-bottom:1px solid #F1F5F9;">
+                <div style="padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);">
                     <div style="display:flex; gap:10px; align-items:flex-start;">
                         <div style="width:32px; height:32px; border-radius:10px; flex-shrink:0;
                                     background:{{ $notif->type === 'success' ? '#DCFCE7' : ($notif->type === 'danger' ? '#FEE2E2' : '#DBEAFE') }};
@@ -271,7 +271,7 @@
                                       color:{{ $notif->type === 'success' ? '#15803D' : ($notif->type === 'danger' ? '#DC2626' : '#1D4ED8') }};"></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600;">
+                            <div  class="u-text-sm-bold">
                                 {{ $notif->title }}
                             </div>
                             <div style="font-size:11px; color:#94A3B8; margin-top:2px;">
@@ -302,23 +302,22 @@
                 @endphp
                 @foreach($actions as $action)
                 <a href="{{ $action['url'] }}"
+                   class="dtc-quick-action-row"
                    style="display:flex; align-items:center; justify-content:space-between;
-                          padding:14px 20px; border-bottom:1px solid #F1F5F9;
-                          text-decoration:none; transition:background 0.2s;"
-                   onmouseover="this.style.background='#F8FAFC'"
-                   onmouseout="this.style.background='transparent'">
-                    <div style="display:flex; align-items:center; gap:12px;">
+                          padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
+                          text-decoration:none; transition:background 0.2s;">
+                    <div  class="u-flex-center-gap-12">
                         <div style="width:36px; height:36px; border-radius:10px;
                                     background:#EEF2FF; display:flex; align-items:center;
                                     justify-content:center;">
-                            <i class="fas {{ $action['icon'] }}"
-                               style="font-size:14px; color:#0F4CDB;"></i>
+                            <i class="fas {{ $action['icon'] }} u-link-md"
+                               ></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600;">
+                            <div  class="u-text-sm-bold">
                                 {{ $action['label'] }}
                             </div>
-                            <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                            <div  class="u-text-xs-secondary">
                                 {{ $action['sub'] }}
                             </div>
                         </div>

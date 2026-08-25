@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Create New User</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >Create New User</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Add a new account and assign a role
             </p>
         </div>
@@ -18,16 +18,16 @@
 @endsection
 
 @section('content')
-<div class="d-flex flex-column mb-3" style="gap:10px;">
+<div class="d-flex flex-column mb-3 u-gap-10" >
     <div>
-        <h4 class="mb-0 font-weight-bold dtc-subjects-title" style="color:var(--dtc-text);">
+        <h4 class="mb-0 font-weight-bold dtc-subjects-title u-text" >
             Subjects
             @if($selectedProgram)
                 — {{ $selectedProgram->name }} ({{ $selectedProgram->code }})
             @endif
         </h4>
         @if(!$selectedProgram)
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <p class="mb-0 u-text-secondary-sm" >
                 Select a program above to manage its subjects.
             </p>
         @endif
@@ -57,8 +57,8 @@
 <div class="row justify-content-center">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
-                <i class="fas fa-user-plus mr-2" style="color:#0F4CDB;"></i>
+            <div class="card-header font-weight-bold u-text" >
+                <i class="fas fa-user-plus mr-2 u-link" ></i>
                 Account Information
             </div>
             <div class="card-body">
@@ -72,11 +72,11 @@
 
                     <div class="form-group">
                         <label>Full Name</label>
-                        <div style="position:relative;">
+                        <div  class="u-relative">
                             <i class="fas fa-user" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
-                            <input type="text" name="name" class="form-control"
-                                   style="padding-left:38px;"
+                            <input type="text" name="name" class="form-control u-pl-38"
+                                   
                                    value="{{ old('name') }}"
                                    placeholder="Enter full name" required>
                         </div>
@@ -84,11 +84,11 @@
 
                     <div class="form-group">
                         <label>Email Address</label>
-                        <div style="position:relative;">
+                        <div  class="u-relative">
                             <i class="fas fa-envelope" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
-                            <input type="email" name="email" class="form-control"
-                                   style="padding-left:38px;"
+                            <input type="email" name="email" class="form-control u-pl-38"
+                                   
                                    value="{{ old('email') }}"
                                    placeholder="Enter email address" required>
                         </div>
@@ -96,11 +96,11 @@
 
                     <div class="form-group">
                         <label>Temporary Password</label>
-                        <div style="position:relative;">
+                        <div  class="u-relative">
                             <i class="fas fa-lock" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
-                            <input type="text" name="password" class="form-control"
-                                   style="padding-left:38px;"
+                            <input type="text" name="password" class="form-control u-pl-38"
+                                   
                                    placeholder="Set a temporary password" required>
                         </div>
                         <small style="color:var(--dtc-text-muted); font-size:11px;">
@@ -139,7 +139,7 @@
                                                style="font-size:14px; color:{{ $rc['color'] }};"></i>
                                         </div>
                                         <div>
-                                            <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                                            <div  class="u-text-sm-bold-primary">
                                                 {{ ucfirst(str_replace('_',' ', $role->name)) }}
                                             </div>
                                         </div>
@@ -150,7 +150,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex" style="gap:10px;">
+                    <div class="d-flex u-gap-10" >
                         <button type="submit" class="btn btn-primary flex-fill">
                             <i class="fas fa-user-plus mr-1"></i> Create Account
                         </button>

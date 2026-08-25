@@ -51,19 +51,19 @@
             </div>
             <div class="search-section" style="padding-top:10px;">
                 <div class="search-recent-chips" id="recent-list"></div>
-                <div class="search-no-recent" id="no-recent" style="display:none;">
+                <div class="search-no-recent u-hidden" id="no-recent" >
                     No recent searches yet.
                 </div>
             </div>
         </div>
 
         {{-- Loading --}}
-        <div class="search-loading" id="search-loading" style="display:none;">
+        <div class="search-loading u-hidden" id="search-loading" >
             <i class="fas fa-spinner fa-spin"></i>
         </div>
 
         {{-- Results --}}
-        <div id="search-results" style="display:none;">
+        <div id="search-results"  class="u-hidden">
             <div class="search-section">
                 <div class="search-section-label">Results</div>
                 <div id="results-list"></div>
@@ -71,7 +71,7 @@
         </div>
 
         {{-- Empty --}}
-        <div class="search-empty" id="search-empty" style="display:none;">
+        <div class="search-empty u-hidden" id="search-empty" >
             <i class="fas fa-search"></i>
             <div class="search-empty-title">No results found</div>
             <div class="search-empty-sub" id="empty-query"></div>

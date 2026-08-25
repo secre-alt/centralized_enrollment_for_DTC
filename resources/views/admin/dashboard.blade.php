@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold">Admin Dashboard</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Overview of the system</p>
+            <p class="mb-0 u-text-secondary-sm" >Overview of the system</p>
         </div>
         <div>
             <a href="{{ route('admin.users.index') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
@@ -85,16 +85,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="d-flex flex-column gap-2" style="gap:8px;">
-                    <div class="d-flex justify-content-between align-items-center" style="font-size:13px;">
+                <div class="d-flex flex-column gap-2 u-gap-8" >
+                    <div class="d-flex justify-content-between align-items-center u-text-sm" >
                         <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0F4CDB;margin-right:6px;"></span>Paid</span>
                         <span class="font-weight-bold">{{ $totalPaid }}</span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center" style="font-size:13px;">
+                    <div class="d-flex justify-content-between align-items-center u-text-sm" >
                         <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFC72C;margin-right:6px;"></span>Unpaid (Approved)</span>
                         <span class="font-weight-bold">{{ $totalUnpaid }}</span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center" style="font-size:13px;">
+                    <div class="d-flex justify-content-between align-items-center u-text-sm" >
                         <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E2E8F0;margin-right:6px;"></span>Pending</span>
                         <span class="font-weight-bold">{{ $totalPending }}</span>
                     </div>
@@ -135,9 +135,9 @@
                     </div>
                 </div>
                 @empty
-                <div class="text-center py-4" style="color:#94A3B8;">
+                <div class="text-center py-4 u-muted" >
                     <i class="fas fa-bell-slash fa-2x mb-2"></i>
-                    <p style="font-size:13px;">No recent activities.</p>
+                    <p  class="u-text-sm">No recent activities.</p>
                 </div>
                 @endforelse
             </div>
@@ -153,23 +153,23 @@
             </div>
             <div class="card-body p-0">
                 @forelse ($upcomingAppointments as $appt)
-                <div style="padding:14px 20px; border-bottom:1px solid #F1F5F9; display:flex; align-items:center; gap:12px;">
+                <div style="padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft); display:flex; align-items:center; gap:12px;">
                     <div style="background:#EEF2FF; color:#0F4CDB; border-radius:10px; padding:8px 10px; font-size:11px; font-weight:700; text-align:center; min-width:50px; line-height:1.2;">
                         {{ \Carbon\Carbon::parse($appt->slot->date)->format('M') }}<br>
                         <span style="font-size:18px;">{{ \Carbon\Carbon::parse($appt->slot->date)->format('d') }}</span>
                     </div>
                     <div>
-                        <div style="font-size:13px; font-weight:600;">{{ $appt->user->name }}</div>
-                        <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                        <div  class="u-text-sm-bold">{{ $appt->user->name }}</div>
+                        <div  class="u-text-xs-secondary">
                             {{ ucfirst($appt->document_type) }} •
                             {{ \Carbon\Carbon::parse($appt->slot->start_time)->format('h:i A') }}
                         </div>
                     </div>
                 </div>
                 @empty
-                <div class="text-center py-4" style="color:#94A3B8;">
+                <div class="text-center py-4 u-muted" >
                     <i class="fas fa-calendar fa-2x mb-2"></i>
-                    <p style="font-size:13px;">No upcoming appointments.</p>
+                    <p  class="u-text-sm">No upcoming appointments.</p>
                 </div>
                 @endforelse
             </div>

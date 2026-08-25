@@ -6,10 +6,10 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:12px;">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Settings</h4>
+            <h4 class="mb-0 font-weight-bold u-text" >Settings</h4>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 p-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" style="color:var(--dtc-text-secondary);">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"  class="u-text-secondary">Dashboard</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Settings</li>
                 </ol>
             </nav>
@@ -153,7 +153,7 @@
                             <label class="mb-2">System Logo</label>
                             <div class="d-flex align-items-center" style="gap:16px; margin-bottom:20px;">
                                 <div class="settings-upload-box">
-                                    <img src="{{ $settings->logo_url ?? asset('images/DTC-LOGO.png') }}" alt="System Logo">
+                                    <img src="{{ $settings->logo_url ?? asset('images/DTC-LOGO.webp') }}" alt="System Logo">
                                 </div>
                                 <div>
                                     <div style="font-size:11px; color:var(--dtc-text-muted); margin-bottom:8px;">
@@ -173,7 +173,7 @@
                             <label class="mb-2">Favicon</label>
                             <div class="d-flex align-items-center" style="gap:16px;">
                                 <div class="settings-upload-box" style="max-width:64px;">
-                                    <img src="{{ $settings->favicon_url ?? asset('images/DTC-LOGO.png') }}" alt="Favicon">
+                                    <img src="{{ $settings->favicon_url ?? asset('images/DTC-LOGO.webp') }}" alt="Favicon">
                                 </div>
                                 <div>
                                     <div style="font-size:11px; color:var(--dtc-text-muted); margin-bottom:8px;">
@@ -206,7 +206,7 @@
 
                             <div class="form-group">
                                 <label>Default Language</label>
-                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Select the default system language.</div>
+                                <div  class="u-text-xs-hint">Select the default system language.</div>
                                 <select name="default_language" class="form-control">
                                     <option value="en" {{ ($settings->default_language ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
                                     <option value="fil" {{ ($settings->default_language ?? '') === 'fil' ? 'selected' : '' }}>Filipino</option>
@@ -215,7 +215,7 @@
 
                             <div class="form-group">
                                 <label>Default Timezone</label>
-                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Select the default timezone.</div>
+                                <div  class="u-text-xs-hint">Select the default timezone.</div>
                                 <select name="default_timezone" class="form-control">
                                     <option value="Asia/Manila" {{ ($settings->default_timezone ?? 'Asia/Manila') === 'Asia/Manila' ? 'selected' : '' }}>(GMT+08:00) Asia/Manila</option>
                                 </select>
@@ -223,7 +223,7 @@
 
                             <div class="form-group">
                                 <label>Date Format</label>
-                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Choose the default date format.</div>
+                                <div  class="u-text-xs-hint">Choose the default date format.</div>
                                 <select name="date_format" class="form-control">
                                     <option value="m/d/Y"  {{ ($settings->date_format ?? 'm/d/Y')  === 'm/d/Y'  ? 'selected' : '' }}>MM/DD/YYYY</option>
                                     <option value="d/m/Y"  {{ ($settings->date_format ?? '')        === 'd/m/Y'  ? 'selected' : '' }}>DD/MM/YYYY</option>
@@ -233,7 +233,7 @@
 
                             <div class="form-group">
                                 <label>Time Format</label>
-                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Choose the default time format.</div>
+                                <div  class="u-text-xs-hint">Choose the default time format.</div>
                                 <select name="time_format" class="form-control">
                                     <option value="12" {{ ($settings->time_format ?? '12') === '12' ? 'selected' : '' }}>12-hour (AM/PM)</option>
                                     <option value="24" {{ ($settings->time_format ?? '')   === '24' ? 'selected' : '' }}>24-hour</option>
@@ -242,7 +242,7 @@
 
                             <div class="form-group mb-0">
                                 <label>Items Per Page</label>
-                                <div style="font-size:11px; color:var(--dtc-text-muted); margin:-4px 0 6px;">Set default number of items in tables.</div>
+                                <div  class="u-text-xs-hint">Set default number of items in tables.</div>
                                 <select name="items_per_page" class="form-control">
                                     @foreach (['10', '25', '50', '100'] as $n)
                                         <option value="{{ $n }}" {{ ($settings->items_per_page ?? '10') === $n ? 'selected' : '' }}>{{ $n }}</option>

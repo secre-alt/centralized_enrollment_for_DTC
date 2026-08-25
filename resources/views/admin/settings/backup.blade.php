@@ -1,13 +1,15 @@
 @extends('adminlte::page')
 @include('partials.navbar')
 
+@section('plugins.adminUsers', true)
+
 @section('title', 'Backup & Restore')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Backup & Restore</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >Backup & Restore</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Manage your database backups and restore points
             </p>
         </div>
@@ -60,7 +62,7 @@
 
         {{-- ── Restore ─── --}}
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
+            <div class="card-header font-weight-bold u-text" >
                 <i class="fas fa-upload mr-2" style="color:#F59E0B;"></i>
                 Restore from Backup
             </div>
@@ -77,7 +79,7 @@
                     @csrf
 
                     <div class="form-group">
-                        <label style="font-size:13px; font-weight:600; color:#374151;">
+                        <label  class="u-gray-bold-sm">
                             Upload .sql File
                         </label>
                         <div style="border:2px dashed var(--dtc-border); border-radius:12px;
@@ -94,7 +96,7 @@
                             </div>
                         </div>
                         <input type="file" name="sql_file" id="sql-file"
-                               accept=".sql,.txt" style="display:none;"
+                               accept=".sql,.txt"  class="u-hidden"
                                onchange="updateFileName(this)">
                     </div>
 
@@ -118,17 +120,17 @@
     <div class="col-lg-8 mb-3">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold" style="color:var(--dtc-text);">
-                    <i class="fas fa-history mr-2" style="color:#0F4CDB;"></i>
+                <span class="font-weight-bold u-text" >
+                    <i class="fas fa-history mr-2 u-link" ></i>
                     Backup History
                 </span>
-                <span style="font-size:13px; color:var(--dtc-text-secondary);">
+                <span  class="u-text-secondary-sm">
                     {{ $backups->count() }} backup{{ $backups->count() !== 1 ? 's' : '' }}
                 </span>
             </div>
             <div class="card-body p-0">
                 @forelse ($backups as $backup)
-                <div style="padding:16px 20px; border-bottom:1px solid #F1F5F9;
+                <div style="padding:16px 20px; border-bottom:1px solid var(--dtc-border-soft);
                             display:flex; align-items:center; gap:16px;">
 
                     {{-- Icon --}}
@@ -205,7 +207,7 @@
              style="background:linear-gradient(135deg,#0F4CDB,#1a5feb); border:none;">
             <div class="card-body p-4">
                 <h6 style="font-weight:700; margin-bottom:12px;">
-                    <i class="fas fa-info-circle mr-2" style="color:#FFC72C;"></i>
+                    <i class="fas fa-info-circle mr-2 u-accent" ></i>
                     Backup Tips
                 </h6>
                 <div style="font-size:13px; line-height:1.8; opacity:0.9;">

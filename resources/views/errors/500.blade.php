@@ -92,7 +92,7 @@
 
         <div class="error-detail">
             <p>
-                <i class="fas fa-info-circle mr-2" style="color:#0F4CDB;"></i>
+                <i class="fas fa-info-circle mr-2 u-link" ></i>
                 If this problem persists, please contact your system administrator
                 or try again after a few minutes.
             </p>

@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Process Payments</h4>
-        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+        <h4 class="mb-0 font-weight-bold u-text" >Process Payments</h4>
+        <p class="mb-0 u-text-secondary-sm" >
             Approved enrollments awaiting payment collection
         </p>
     </div>
@@ -37,8 +37,8 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">Approved Enrollments</span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $enrollments->total() }} total</span>
+        <span class="font-weight-bold u-text" >Approved Enrollments</span>
+        <span  class="u-text-secondary-sm">{{ $enrollments->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
@@ -60,7 +60,7 @@
                 @forelse ($enrollments as $enrollment)
                 <tr>
                     <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div  class="u-flex-center-gap-10">
                             <div style="width:32px; height:32px; border-radius:50%;
                                         background:linear-gradient(135deg,#22C55E,#059669);
                                         display:flex; align-items:center; justify-content:center;
@@ -71,7 +71,7 @@
                                 <div style="font-size:13px; font-weight:500; color:var(--dtc-text);">
                                     {{ $enrollment->user->name }}
                                 </div>
-                                <div style="font-size:11px; color:var(--dtc-text-muted);">
+                                <div  class="u-text-xs-muted">
                                     {{ $enrollment->user->email }}
                                 </div>
                             </div>
@@ -80,7 +80,7 @@
                     <td style="color:var(--dtc-text); font-weight:500;">
                         {{ $enrollment->program->name }}
                     </td>
-                    <td style="color:var(--dtc-text-secondary);">
+                    <td  class="u-text-secondary">
                         Year {{ $enrollment->year_level }} &middot; Sem {{ $enrollment->semester }}
                     </td>
                     <td>
@@ -88,22 +88,22 @@
                             {{ count($enrollment->subject_ids) }} subjects
                         </span>
                     </td>
-                    <td style="color:var(--dtc-text-secondary);">
+                    <td  class="u-text-secondary">
                         @if ($enrollment->payment)
                             {{ $enrollment->payment->isWalkIn() ? 'Walk-in' : 'GCash' }}
                         @else
-                            <span style="color:var(--dtc-text-muted);">&mdash;</span>
+                            <span  class="u-text-muted">&mdash;</span>
                         @endif
                     </td>
                     <td>
                         @if (! $enrollment->payment)
-                            <span class="badge badge-secondary">Unpaid</span>
+                            <x-dtc.status-badge status="Unpaid" />
                         @elseif ($enrollment->payment->isPending())
-                            <span class="badge badge-warning">Pending</span>
+                            <x-dtc.status-badge status="Pending" />
                         @elseif ($enrollment->payment->isVerified())
-                            <span class="badge badge-success">Verified</span>
+                            <x-dtc.status-badge status="Verified" />
                         @elseif ($enrollment->payment->isRejected())
-                            <span class="badge badge-danger">Rejected</span>
+                            <x-dtc.status-badge status="Rejected" />
                         @endif
                     </td>
                     <td style="font-weight:700; color:#15803D;">
@@ -128,7 +128,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="text-center py-4" style="color:var(--dtc-text-muted);">
+                    <td colspan="8" class="text-center py-4 u-text-muted" >
                         No enrollments match the selected filter.
                     </td>
                 </tr>
@@ -138,9 +138,9 @@
         </div>
     </div>
 
-    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
-        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-            <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer u-panel-footer" >
+        <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+            <small  class="u-text-secondary">
                 Showing
                 <strong>{{ $enrollments->firstItem() ?? 0 }}</strong>
                 to

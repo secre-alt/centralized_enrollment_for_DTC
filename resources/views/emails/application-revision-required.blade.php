@@ -42,7 +42,7 @@
 
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#FFF7E0; border:1px solid #F5DFA0; border-radius:8px; margin:0 0 24px;">
                                 <tr>
-                                    <td style="padding:16px 20px;">
+                                    <td  style="padding:16px 20px;">
                                         <p style="margin:0 0 8px; color:#92650A; font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:0.4px;">
                                             Registrar's Remarks
                                         </p>

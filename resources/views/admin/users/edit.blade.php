@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Edit User</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >Edit User</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Update account details and role
             </p>
         </div>
@@ -50,8 +50,8 @@
         </div>
 
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
-                <i class="fas fa-edit mr-2" style="color:#0F4CDB;"></i>
+            <div class="card-header font-weight-bold u-text" >
+                <i class="fas fa-edit mr-2 u-link" ></i>
                 Edit Account
             </div>
             <div class="card-body">
@@ -65,22 +65,22 @@
 
                     <div class="form-group">
                         <label>Full Name</label>
-                        <div style="position:relative;">
+                        <div  class="u-relative">
                             <i class="fas fa-user" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
-                            <input type="text" name="name" class="form-control"
-                                   style="padding-left:38px;"
+                            <input type="text" name="name" class="form-control u-pl-38"
+                                   
                                    value="{{ old('name', $user->name) }}" required>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Email Address</label>
-                        <div style="position:relative;">
+                        <div  class="u-relative">
                             <i class="fas fa-envelope" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
-                            <input type="email" name="email" class="form-control"
-                                   style="padding-left:38px;"
+                            <input type="email" name="email" class="form-control u-pl-38"
+                                   
                                    value="{{ old('email', $user->email) }}" required>
                         </div>
                     </div>
@@ -104,7 +104,7 @@
                             <div class="col-4">
                                 <label style="cursor:pointer; width:100%;">
                                     <input type="radio" name="status" value="{{ $status }}"
-                                           style="display:none;" class="status-radio"
+                                            class="status-radio u-hidden"
                                            {{ old('status', $user->status) === $status ? 'checked' : '' }}>
                                     <div class="status-option"
                                          style="border:2px solid var(--dtc-border); border-radius:12px;
@@ -123,7 +123,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex" style="gap:10px;">
+                    <div class="d-flex u-gap-10" >
                         <button type="submit" class="btn btn-primary flex-fill">
                             <i class="fas fa-save mr-1"></i> Save Changes
                         </button>

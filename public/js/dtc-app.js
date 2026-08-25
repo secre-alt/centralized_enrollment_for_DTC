@@ -383,13 +383,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 50);
     });
 
-    searchInput.addEventListener('blur', function () {
-        if (window.innerWidth > 576) return;
-        setTimeout(function () {
-            searchWrapper.classList.remove('is-expanded');
-            closeSearch();
-        }, 200);
-    });
+    // Mobile close is handled entirely by the outside-click listener below
+    // (and the closeSearch() call in the first DOMContentLoaded block above).
+    // A blur-based timeout close used to live here, but the input blurs as
+    // soon as a suggestion/chip is tapped - well before that tap's own click
+    // handler (fillSearch) runs and before its triggered search resolves -
+    // so it was closing the dropdown out from under an in-flight search.
 
     searchInput.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;

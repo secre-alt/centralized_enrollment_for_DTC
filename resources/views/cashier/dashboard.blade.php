@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold">Cashier Dashboard</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Manage payments and receipts</p>
+            <p class="mb-0 u-text-secondary-sm" >Manage payments and receipts</p>
         </div>
         <a href="{{ route('cashier.payments.index') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
             <i class="fas fa-money-bill-wave"></i>
@@ -76,23 +76,23 @@
                                 {{ $payment->receipt_no }}
                             </td>
                             <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
+                                <div  class="u-flex-center-gap-10">
                                     <div style="width:32px; height:32px; border-radius:50%;
                                                 background:linear-gradient(135deg,#22C55E,#059669);
                                                 display:flex; align-items:center; justify-content:center;
                                                 color:#fff; font-weight:700; font-size:12px; flex-shrink:0;">
                                         {{ strtoupper(substr($payment->enrollment->user->name, 0, 1)) }}
                                     </div>
-                                    <span style="font-size:13px;">{{ $payment->enrollment->user->name }}</span>
+                                    <span  class="u-text-sm">{{ $payment->enrollment->user->name }}</span>
                                 </div>
                             </td>
                             <td style="font-size:13px; font-weight:600; color:#15803D;">
                                 ₱{{ number_format($payment->amount, 2) }}
                             </td>
-                            <td style="font-size:12px; color:var(--dtc-text-secondary);">
+                            <td  class="u-text-xxs-secondary">
                                 {{ $payment->paid_at->format('M d, Y') }}
                             </td>
-                            <td><span class="badge badge-success">Paid</span></td>
+                            <td><x-dtc.status-badge status="Paid" /></td>
                         </tr>
                         @empty
                         <tr>
@@ -106,9 +106,9 @@
                 </div>
             </div>
             @if ($recentPayments->hasPages() || $recentPayments->total() > 0)
-                <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-                        <small style="color:var(--dtc-text-secondary);">
+                <div class="card-footer u-panel-footer" >
+                    <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+                        <small  class="u-text-secondary">
                             Showing
                             <strong>{{ $recentPayments->firstItem() ?? 0 }}</strong>
                             to
@@ -146,7 +146,7 @@
                         <div style="font-size:10px; color:var(--dtc-text-secondary); font-weight:600;">TOTAL</div>
                     </div>
                 </div>
-                <div style="font-size:13px;">
+                <div  class="u-text-sm">
                     <div class="d-flex justify-content-between mb-2">
                         <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0F4CDB;margin-right:6px;"></span>Paid</span>
                         <span class="font-weight-bold">{{ $totalPaid }}</span>
@@ -184,19 +184,19 @@
                 <div class="row text-center">
                     <div class="col-6 col-md-3 mb-3 mb-md-0">
                         <div style="font-size:22px; font-weight:700; color:#0F4CDB;">{{ $totalTransactions }}</div>
-                        <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Total Transactions</div>
+                        <div  class="u-text-xxs-secondary-bold">Total Transactions</div>
                     </div>
                     <div class="col-6 col-md-3 mb-3 mb-md-0">
                         <div style="font-size:22px; font-weight:700; color:#22C55E;">{{ $totalPaid }}</div>
-                        <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Paid</div>
+                        <div  class="u-text-xxs-secondary-bold">Paid</div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div style="font-size:22px; font-weight:700; color:#F59E0B;">{{ $pendingPayments }}</div>
-                        <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Pending</div>
+                        <div  class="u-text-xxs-secondary-bold">Pending</div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div style="font-size:22px; font-weight:700;">₱{{ number_format($totalRevenue, 2) }}</div>
-                        <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:500;">Total Amount</div>
+                        <div  class="u-text-xxs-secondary-bold">Total Amount</div>
                     </div>
                 </div>
             </div>

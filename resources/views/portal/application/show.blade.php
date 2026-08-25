@@ -24,10 +24,10 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">
+            <h4 class="mb-0 font-weight-bold u-text" >
                 My Application
             </h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <p class="mb-0 u-text-secondary-sm" >
                 View your submitted pre-enrollment application and its current status.
             </p>
         </div>
@@ -259,10 +259,10 @@
                 @forelse ($application->documents as $document)
                     <div class="d-flex justify-content-between align-items-center px-3 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
                         <div>
-                            <div class="font-weight-bold" style="font-size:13px;">
+                            <div class="font-weight-bold u-text-sm" >
                                 {{ $documentLabels[$document->document_type] ?? ucwords(str_replace('_', ' ', $document->document_type)) }}
                             </div>
-                            <div class="text-muted" style="font-size:12px;">
+                            <div class="text-muted u-text-xxs" >
                                 {{ $document->original_name }}
                                 @if($document->size_bytes)
                                     &nbsp;·&nbsp;
@@ -279,7 +279,7 @@
                         </span>
                     </div>
                 @empty
-                    <div class="text-center text-muted py-4" style="font-size:13px;">
+                    <div class="text-center text-muted py-4 u-text-sm" >
                         No supporting documents found.
                     </div>
                 @endforelse
@@ -312,7 +312,7 @@
                         <div>{{ $application->remarks ?: 'No remarks provided.' }}</div>
                     </div>
                 @else
-                    <div class="text-muted" style="font-size:13px;">
+                    <div class="text-muted u-text-sm" >
                         Not yet reviewed
                     </div>
                 @endif

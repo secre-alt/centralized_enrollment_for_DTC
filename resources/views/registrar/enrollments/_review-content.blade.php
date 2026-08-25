@@ -108,7 +108,7 @@
             </div>
         </div>
 
-        <div class="dtc-review-footer-reject" style="display:none;">
+        <div class="dtc-review-footer-reject u-hidden" >
             <button type="button" class="dtc-btn dtc-btn-secondary dtc-review-reject-cancel">Cancel</button>
             <button type="submit" form="rejectForm-{{ $enrollment->id }}" class="dtc-btn dtc-btn-danger">
                 <i class="fas fa-check"></i> Confirm Rejection

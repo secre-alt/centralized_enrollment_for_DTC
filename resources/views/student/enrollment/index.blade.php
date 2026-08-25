@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">My Enrollment Status</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >My Enrollment Status</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Track your enrollment submissions and payment status
             </p>
         </div>
@@ -26,7 +26,7 @@
 @if ($enrollments->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-file-alt fa-4x mb-3" style="color:var(--dtc-border);"></i>
+            <i class="fas fa-file-alt fa-4x mb-3 u-border-color" ></i>
             <h5 style="color:var(--dtc-text); font-weight:700;">No Enrollments Yet</h5>
             <p style="color:var(--dtc-text-secondary); font-size:13px; max-width:360px; margin:0 auto 20px;">
                 You haven't submitted any enrollment yet.
@@ -133,8 +133,8 @@
     @endforeach
 
     @if ($enrollments->hasPages())
-    <div class="d-flex justify-content-between align-items-center flex-wrap mt-3" style="gap:15px;">
-        <small style="color:var(--dtc-text-secondary);">
+    <div class="d-flex justify-content-between align-items-center flex-wrap mt-3 u-gap-15" >
+        <small  class="u-text-secondary">
             Showing
             <strong>{{ $enrollments->firstItem() }}</strong>
             to

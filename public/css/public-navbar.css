@@ -164,6 +164,15 @@
   text-decoration: none;
 }
 
+body.dtc-dark .public-nav-links a {
+  color: var(--dtc-text-secondary);
+}
+
+body.dtc-dark .public-nav-links a:hover,
+body.dtc-dark .public-nav-links a.active {
+  color: var(--dtc-blue);
+}
+
 /* Active navigation */
 
 .public-nav-links a.active {
@@ -185,6 +194,23 @@
   background: var(--dtc-blue);
 
   border-radius: 10px;
+}
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+
+.public-navbar-theme {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: -16px;
+}
+
+.public-navbar-theme .theme-toggle-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
 }
 
 /* ============================================================
@@ -256,7 +282,7 @@
   border: 1px solid var(--dtc-border);
   border-radius: 9px;
 
-  background: #ffffff;
+  background: var(--dtc-surface);
   color: var(--dtc-text);
 
   align-items: center;
@@ -266,8 +292,12 @@
 }
 
 .public-navbar-toggle:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: var(--dtc-primary);
+  background: var(--dtc-primary-soft);
+}
+
+body.dtc-dark .public-navbar-toggle:hover {
+  background: var(--dtc-surface-soft);
 }
 
 /* ============================================================
@@ -278,7 +308,7 @@
   display: none;
   width: 100%;
   padding: 10px 20px 20px;
-  background: #ffffff;
+  background: var(--dtc-surface);
   flex-basis: 100%;
   border-top: 1px solid var(--dtc-border);
 }
@@ -293,19 +323,13 @@
 .public-mobile-nav a {
   display: flex;
   align-items: center;
-
   min-height: 44px;
-
   padding: 0 12px;
-
   border-radius: 8px;
-
   color: #334155;
-
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 500;
-
   text-decoration: none;
 }
 
@@ -325,6 +349,9 @@
 
 .public-mobile-nav .public-signin:hover {
   color: #ffffff !important;
+}
+body.dtc-dark .public-mobile-nav a {
+  color: var(--dtc-text-secondary) 
 }
 
 /* ============================================================
@@ -350,6 +377,15 @@
 
   .public-navbar-toggle {
     display: inline-flex;
+  }
+
+  .public-navbar-container {
+    gap: 10px;
+  }
+
+  .public-navbar-theme {
+    margin-left: auto;
+    margin-right: 0;
   }
 }
 

@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Notifications</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Your system alerts and updates</p>
+            <h4 class="mb-0 font-weight-bold u-text" >Notifications</h4>
+            <p class="mb-0 u-text-secondary-sm" >Your system alerts and updates</p>
         </div>
     </div>
 @endsection
@@ -17,9 +17,9 @@
 @if ($notifications->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-bell-slash fa-4x mb-3" style="color:var(--dtc-border);"></i>
+            <i class="fas fa-bell-slash fa-4x mb-3 u-border-color" ></i>
             <h5 style="color:var(--dtc-text); font-weight:700;">No Notifications</h5>
-            <p style="color:var(--dtc-text-secondary); font-size:13px;">You're all caught up! No notifications at the moment.</p>
+            <p  class="u-text-secondary-sm">You're all caught up! No notifications at the moment.</p>
         </div>
     </div>
 @else
@@ -32,7 +32,7 @@
                        ($notification->type === 'danger'  ? '#EF4444' :
                        ($notification->type === 'warning' ? '#FFC72C' : '#3B82F6')) }};
                     opacity: {{ $notification->isRead() ? '0.75' : '1' }};">
-                <div class="card-body" style="padding:16px 20px;">
+                <div class="card-body u-pad-card" >
                     <div class="d-flex justify-content-between align-items-start">
                         <div style="display:flex; gap:14px; align-items:flex-start; flex:1;">
 
@@ -52,7 +52,7 @@
                             </div>
 
                             {{-- Content --}}
-                            <div style="flex:1;">
+                            <div  class="u-flex-1">
                                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
                                     <span style="font-size:13px; font-weight:700; color:var(--dtc-text);">
                                         {{ $notification->title }}
@@ -67,7 +67,7 @@
                                 <p style="font-size:13px; color:var(--dtc-text-secondary); margin:0 0 8px;">
                                     {{ $notification->message }}
                                 </p>
-                                <div style="font-size:11px; color:var(--dtc-text-muted);">
+                                <div  class="u-text-xs-muted">
                                     <i class="fas fa-clock mr-1"></i>
                                     {{ $notification->created_at->diffForHumans() }}
                                 </div>

@@ -7,8 +7,8 @@
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
-                <i class="fas fa-file-alt mr-2" style="color:#0F4CDB;"></i>
+            <div class="card-header font-weight-bold u-text" >
+                <i class="fas fa-file-alt mr-2 u-link" ></i>
                 Enrollment Details
             </div>
             <div class="card-body">
@@ -90,7 +90,7 @@
                         <div id="subjects-container">
                             <div style="background:var(--dtc-surface-soft); border:2px dashed var(--dtc-border);
                                         border-radius:12px; padding:24px; text-align:center;">
-                                <i class="fas fa-book fa-2x mb-2" style="color:var(--dtc-border);"></i>
+                                <i class="fas fa-book fa-2x mb-2 u-border-color" ></i>
                                 <p style="color:var(--dtc-text-muted); font-size:13px; margin:0;">
                                     Select program, year level, and semester to load subjects.
                                 </p>
@@ -117,7 +117,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex" style="gap:10px;">
+                    <div class="d-flex u-gap-10" >
                         <button type="submit" class="btn btn-primary flex-fill">
                             <i class="fas fa-paper-plane mr-1"></i> Submit Enrollment
                         </button>
@@ -131,8 +131,8 @@
 
     {{-- Info Panel --}}
     <div class="col-lg-4">
-        <div class="card"
-             style="background:linear-gradient(135deg,#0F4CDB,#1a5feb); border:none; color:#fff;">
+        <div class="card u-primary-gradient-btn"
+             >
             <div class="card-body p-4">
                 <h5 style="font-weight:700; color:#fff; margin-bottom:16px;">
                     <i class="fas fa-info-circle mr-2"></i> Enrollment Guide
@@ -197,18 +197,18 @@ function loadSubjects() {
                     </div>
                     ${subjects.map(s => `
                         <label style="display:flex; align-items:center; gap:14px;
-                                      padding:14px 16px; border-bottom:1px solid #F1F5F9;
+                                      padding:14px 16px; border-bottom:1px solid var(--dtc-border-soft);
                                       cursor:pointer; transition:background 0.2s; margin:0;"
                                onmouseover="this.style.background='var(--dtc-surface-soft)'"
                                onmouseout="this.style.background='transparent'">
                             <input type="checkbox" name="subject_ids[]" value="${s.id}"
                                    style="width:18px; height:18px; accent-color:#0F4CDB;
                                           cursor:pointer; flex-shrink:0;">
-                            <div style="flex:1;">
-                                <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                            <div  class="u-flex-1">
+                                <div  class="u-text-sm-bold-primary">
                                     ${s.subject_code}
                                 </div>
-                                <div style="font-size:12px; color:var(--dtc-text-secondary);">
+                                <div  class="u-text-xxs-secondary">
                                     ${s.subject_name}
                                 </div>
                             </div>

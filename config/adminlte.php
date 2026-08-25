@@ -64,7 +64,7 @@ return [
     */
 
     'logo' => '<b>DTC</b> EMS',
-    'logo_img' => 'vendor/adminlte/dist/img/DTC-LOGO.png',
+    'logo_img' => 'vendor/adminlte/dist/img/DTC-LOGO.webp',
     'logo_img_class' => 'brand-image',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
@@ -86,7 +86,7 @@ return [
     'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/DTC-LOGO.png',
+            'path' => 'vendor/adminlte/dist/img/DTC-LOGO.webp',
             'alt' => 'Auth Logo',
             'class' => '',
             'width' => 50,
@@ -113,7 +113,7 @@ return [
         'enabled' => true,
         'mode' => 'fullscreen',
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/DTC-LOGO.png',
+            'path' => 'vendor/adminlte/dist/img/DTC-LOGO.webp',
             'alt' => 'AdminLTE Preloader Image',
             'effect' => 'animation__shake',
             'width' => 60,
@@ -420,14 +420,19 @@ return [
                 'location' => 'css/dtc-dark-global.css',
             ],
             [
-                'type'     => 'css',
-                'asset'    => true,
-                'location' => 'css/sidebar-logout.css',
-            ],
-            [
                 'type'=>'css',
                 'asset'=>true, 
                 'location'=>'css/dtc-search.css'
+            ],
+            [
+                'type'     => 'css',
+                'asset'    => true,
+                'location' => 'css/utilities.css',
+            ],
+            [
+                'type'     => 'css',
+                'asset'    => true,
+                'location' => 'css/responsive.css',
             ],
             [
                 'type'     => 'js',
@@ -436,8 +441,11 @@ return [
             ],
         ],
     ],
+        // Scoped to admin/users/index and admin/settings/backup only,
+        // via @section('plugins.adminUsers', true) in those views.
+        // Not needed globally — see DTC EMS Phase 1 CSS-scope audit.
         'adminUsers' => [
-        'active' => true,
+        'active' => false,
         'files' => [
             [
                 'type'     => 'css',
@@ -446,16 +454,11 @@ return [
             ],
         ],
     ],
-        'welcomeCSS' => [
-            'active' => true,
-            'files' => [
-                [
-                    'type' => 'css',
-                    'asset' => true,
-                    'location' => 'css/welcome.css',
-                ],
-            ],
-        ],
+        // welcomeCSS plugin removed (Phase 1 CSS-scope audit): welcome.css
+        // is only used by auth/welcome.blade.php, auth/set-password.blade.php,
+        // and layouts/public.blade.php, all of which already <link> it
+        // directly. Loading it globally through this plugin duplicated it
+        // on every AdminLTE dashboard page for no reason.
      ],
 
     /*

@@ -74,8 +74,8 @@ class SettingsController extends Controller
         }
 
         if ($request->hasFile('logo')) {
-            $request->file('logo')->storeAs('public/images', 'DTC-LOGO.png');
-            Setting::updateOrCreate(['key' => 'logo_url'], ['value' => asset('storage/images/DTC-LOGO.png')]);
+            $request->file('logo')->storeAs('public/images', 'DTC-LOGO.webp');
+            Setting::updateOrCreate(['key' => 'logo_url'], ['value' => asset('storage/images/DTC-LOGO.webp')]);
         }
 
         if ($request->hasFile('favicon')) {

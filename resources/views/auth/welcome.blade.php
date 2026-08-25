@@ -3,19 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $errors->any() || request()->routeIs('login') ? 'Sign In' : 'DTC EMS' }} — Danao Technological College</title>
+    <title>DTC EMS — Danao Technological College</title>
 
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/dtc-tokens.css') }}">
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
     <link rel="stylesheet" href="{{ asset('css/public-navbar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/signin-modal.css') }}">
+    {{-- DTC Theme (dark mode support) --}}
+    <link rel="stylesheet" href="{{ asset('css/dtc-theme.css') }}">
+    <script src="{{ asset('js/signin-modal.js') }}" defer></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    {{-- DTC EMS theme preload: prevents light-mode flash on saved dark theme --}}
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('dtc-ems-theme') === 'dark') {
+                    document.documentElement.classList.add('dtc-dark-preload');
+                    document.documentElement.classList.add('dtc-dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body>
 
 
-  <div class="page-view {{ $errors->any() || request()->routeIs('login') ? '' : 'active' }}" id="view-landing">
+  <div class="page-view active" id="view-landing">
 
     <nav class="public-navbar">
 
@@ -24,7 +39,7 @@
             <a href="{{ route('landing') }}" class="public-brand">
 
                 <img
-                    src="{{ asset('images/DTC-LOGO.png') }}"
+                    src="{{ asset('images/DTC-LOGO.webp') }}"
                     alt="DTC Logo"
                     class="public-logo"
                 >
@@ -63,10 +78,22 @@
 
             </div>
 
-            <a href="{{ route('login') }}" class="public-signin" onclick="showLogin(); return false;">
-                Sign In
-                <i class="fas fa-arrow-right"></i>
-            </a>
+            {{-- Dark Mode Toggle --}}
+            <div class="public-navbar-theme">
+                <button
+                    type="button"
+                    id="darkModeToggle"
+                    class="theme-toggle-btn"
+                    aria-label="Enable dark mode"
+                    aria-pressed="false"
+                    title="Enable dark mode">
+                    <i class="fas fa-moon" id="darkModeIcon" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <button type="button" class="public-signin" data-signin-modal="trigger">
+                <i class="fas fa-arrow-right"></i> Sign in
+            </button>
 
 
         <button
@@ -105,10 +132,9 @@
             FAQs
         </a>
 
-        <a href="{{ route('login') }}" class="public-signin">
-            Sign In
-            <i class="fas fa-arrow-right"></i>
-        </a>
+        <button type="button" class="public-signin" data-signin-modal="trigger">
+            <i class="fas fa-arrow-right"></i> Sign in
+        </button>
 
     </div>
 
@@ -132,8 +158,8 @@
                             Apply for Admission <i class="fas fa-arrow-right"></i>
                         </a>
 
-                        <button type="button" class="btn-secondary-cta" onclick="showLogin()">
-                            Sign In to Portal
+                        <button type="button" class="btn-secondary-cta" data-signin-modal="trigger">
+                            Sign In to Portal 
                         </button>
                     </div>
 
@@ -157,7 +183,7 @@
 
                         <div class="mockup-card">
                             <div class="mockup-header">
-                                <div class="dot"><img src="{{ asset('images/DTC-LOGO.png') }}" alt="DTC Logo"></div>
+                                <div class="dot"><img src="{{ asset('images/DTC-LOGO.webp') }}" alt="DTC Logo"></div>
                                 <span>DTC EMS &middot; Student Portal</span>
                             </div>
                             <div class="mockup-body">
@@ -366,109 +392,15 @@
         </button>
     </div>
 
-   
-    <div class="page-view {{ $errors->any() || request()->routeIs('login') ? 'active' : '' }}" id="view-login">
-        <div class="login-screen">
-
-            <div class="login-branding">
-                <div class="circle c1"></div>
-                <div class="circle c2"></div>
-
-                <div class="brand-row" onclick="showLanding()">
-                    <img src="{{ asset('images/DTC-LOGO.png') }}" alt="DTC Logo">
-                    <div>
-                        <h1>DTC EMS</h1>
-                        <p>Danao Technological College</p>
-                    </div>
-                </div>
-
-                <h2>Your DTC services, connected.</h2>
-                <p class="tagline">
-                    Sign in to manage your enrollment, certificate requests,
-                    appointments, and payments in one place.
-                </p>
-
-                <!-- <div class="role-row">
-                    <div class="role-pill"><i class="fas fa-shield-alt"></i> Admin</div>
-                    <div class="role-pill"><i class="fas fa-id-card"></i> Registrar</div>
-                    <div class="role-pill"><i class="fas fa-cash-register"></i> Cashier</div>
-                    <div class="role-pill"><i class="fas fa-user-graduate"></i> Student</div>
-                    <div class="role-pill"><i class="fas fa-user-tie"></i> Alumni</div>
-                </div> -->
-            </div>
-
-            <div class="login-panel">
-                <div class="login-card">
-
-                    <div class="card-header-logo">
-                        <h2>Sign In</h2>
-                        <p>Use your DTC EMS account</p>
-                    </div>
-
-                    @if ($errors->has('captcha'))
-                        <div class="error-box">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $errors->first('captcha') }}
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('login') }}">
-                        @csrf
-
-                        <div class="form-group">
-                            <label for="email-input">Email address</label>
-                            <div class="input-wrap">
-                                <i class="fas fa-envelope icon"></i>
-                                <input type="email" name="email" id="email-input" placeholder="Enter your email"
-                                       value="{{ old('email') }}" autocomplete="email" required autofocus>
-                            </div>
-                            @error('email')
-                                <div class="error-box" style="margin-top: 8px;">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <div class="input-wrap">
-                                <i class="fas fa-lock icon"></i>
-                                <input type="password" name="password" id="password"
-                                       placeholder="Enter your password"
-                                       autocomplete="current-password" required>
-                                <i class="fas fa-eye toggle-pwd" id="togglePwd"></i>
-                            </div>
-                        </div>
-
-                        <label class="remember">
-                            <span class="remember-left">
-                                <input type="checkbox" name="remember"> Remember me
-                            </span>
-                        </label>
-
-                        @if(config('services.recaptcha.enabled', true))
-                            <div class="recaptcha-wrap">
-                                <div class="g-recaptcha"
-                                    data-sitekey="{{ config('services.recaptcha.site_key') }}">
-                                </div>
-                            </div>
-                        @endif
-
-                        <button type="submit" class="btn-signin">
-                            <i class="fas fa-sign-in-alt"></i> Sign In
-                        </button>
-                    </form>
-
-                    <div class="card-footer-text">
-                        © {{ date('Y') }} Danao Technological College
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
+        // If we've just landed on /login (e.g. session-timeout redirect) or
+        // a sign-in attempt failed validation, open the sign-in modal
+        // automatically so the user isn't left staring at the landing page.
+        @if (request()->routeIs('login') && ! $errors->any())
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.DtcSignInModal) window.DtcSignInModal.open();
+        });
+        @endif
 
         // ── Active navigation while scrolling ─────────────────────────────
         (function () {
@@ -571,26 +503,6 @@
                 item.classList.add('active');
             }
         }
-
-        // ── View switching: landing <-> sign in (no page reload) ───────────
-        function showLogin() {
-            document.getElementById('view-landing').classList.remove('active');
-            document.getElementById('view-login').classList.add('active');
-        }
-
-        function showLanding() {
-            document.getElementById('view-login').classList.remove('active');
-            document.getElementById('view-landing').classList.add('active');
-        }
-
-        // Toggle password visibility
-        document.getElementById('togglePwd').addEventListener('click', function () {
-            const pwd = document.getElementById('password');
-            const type = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
-            pwd.setAttribute('type', type);
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
-        });
 
         // ── Services 3D carousel ─────────────────────────────────────────
         (function () {
@@ -746,6 +658,10 @@
             });
         })();
     </script>
+
+@include('partials.signin-modal')
+
+<script src="{{ asset('js/dtc-app.js') }}" defer></script>
 
 </body>
 </html>

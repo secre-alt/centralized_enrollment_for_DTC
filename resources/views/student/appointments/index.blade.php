@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">My Appointments</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Track your document requests and appointment bookings</p>
+            <h4 class="mb-0 font-weight-bold u-text" >My Appointments</h4>
+            <p class="mb-0 u-text-secondary-sm" >Track your document requests and appointment bookings</p>
         </div>
         <a href="{{ route('portal.appointments.create') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus mr-1"></i> Book Appointment
@@ -25,7 +25,7 @@
     {{-- Empty State --}}
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-calendar-times fa-4x mb-3" style="color:var(--dtc-border);"></i>
+            <i class="fas fa-calendar-times fa-4x mb-3 u-border-color" ></i>
             <h5 style="color:var(--dtc-text); font-weight:700;">No Appointments Yet</h5>
             <p style="color:var(--dtc-text-secondary); font-size:13px; max-width:360px; margin:0 auto 20px;">
                 You haven't booked any appointments yet. Book one now to request your documents from the Registrar's Office.
@@ -46,7 +46,7 @@
                        ($appointment->status === 'cancelled' ? '#EF4444' : '#3B82F6')) }};">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div style="display:flex; align-items:center; gap:12px;">
+                        <div  class="u-flex-center-gap-12">
                             <div style="background:#EEF2FF; color:#0F4CDB; border-radius:12px;
                                         padding:10px 14px; font-size:11px; font-weight:700;
                                         text-align:center; line-height:1.3; min-width:52px;">
@@ -59,27 +59,23 @@
                                 <div style="font-size:14px; font-weight:700; color:var(--dtc-text);">
                                     {{ ucfirst($appointment->document_type) }}
                                 </div>
-                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                <div  class="u-text-xxs-secondary">
                                     <i class="fas fa-clock mr-1"></i>
                                     {{ \Carbon\Carbon::parse($appointment->slot->start_time)->format('h:i A') }}
                                     —
                                     {{ \Carbon\Carbon::parse($appointment->slot->end_time)->format('h:i A') }}
                                 </div>
-                                <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:2px;">
+                                <div  class="u-text-xxs-secondary">
                                     <i class="fas fa-calendar mr-1"></i>
                                     {{ \Carbon\Carbon::parse($appointment->slot->date)->format('l, F d, Y') }}
                                 </div>
                             </div>
                         </div>
                         <div>
-                            @if($appointment->status === 'pending')
-                                <span class="badge badge-warning">Pending</span>
-                            @elseif($appointment->status === 'confirmed')
-                                <span class="badge badge-success">Confirmed</span>
-                            @elseif($appointment->status === 'cancelled')
-                                <span class="badge badge-danger">Cancelled</span>
-                            @elseif($appointment->status === 'completed')
-                                <span class="badge badge-info">Completed</span>
+                            @if($appointment->status === 'confirmed')
+                                <x-dtc.status-badge status="Confirmed" variant="success" />
+                            @else
+                                <x-dtc.status-badge :status="$appointment->status" />
                             @endif
                         </div>
                     </div>
@@ -87,7 +83,7 @@
                     @if($appointment->purpose)
                     <div style="background:var(--dtc-surface-soft); border-radius:8px; padding:10px 12px;
                                 font-size:12px; color:var(--dtc-text-secondary); margin-bottom:12px;">
-                        <i class="fas fa-info-circle mr-1" style="color:#0F4CDB;"></i>
+                        <i class="fas fa-info-circle mr-1 u-link" ></i>
                         {{ $appointment->purpose }}
                     </div>
                     @endif
@@ -110,7 +106,7 @@
                     @endif
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <span style="font-size:11px; color:var(--dtc-text-muted);">
+                        <span  class="u-text-xs-muted">
                             Booked {{ $appointment->created_at->diffForHumans() }}
                         </span>
                         @if($appointment->status === 'pending')

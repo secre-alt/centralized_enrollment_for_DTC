@@ -6,10 +6,10 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">
+            <h4 class="mb-0 font-weight-bold u-text" >
                 Subjects — {{ $program->name }}
             </h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <p class="mb-0 u-text-secondary-sm" >
                 Manage subjects for {{ $program->code }}
             </p>
         </div>
@@ -29,8 +29,8 @@
     {{-- Add Subject Form --}}
     <div class="col-lg-4 mb-3">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
-                <i class="fas fa-plus-circle mr-2" style="color:#0F4CDB;"></i> Add Subject
+            <div class="card-header font-weight-bold u-text" >
+                <i class="fas fa-plus-circle mr-2 u-link" ></i> Add Subject
             </div>
             <div class="card-body">
                 <form method="POST"
@@ -114,7 +114,7 @@
                                             {{ $subject->subject_code }}
                                         </span>
                                     </td>
-                                    <td style="font-size:13px; color:var(--dtc-text);">
+                                    <td  class="u-text-sm-secondary-primary">
                                         {{ $subject->subject_name }}
                                     </td>
                                     <td>
@@ -143,7 +143,7 @@
 
         @if($subjects->isEmpty())
         <div class="card">
-            <div class="card-body text-center py-5" style="color:var(--dtc-text-muted);">
+            <div class="card-body text-center py-5 u-text-muted" >
                 <i class="fas fa-book fa-3x mb-3"></i>
                 <p>No subjects added yet. Add subjects using the form.</p>
             </div>

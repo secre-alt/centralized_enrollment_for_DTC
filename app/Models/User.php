@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\DtcResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -48,5 +49,11 @@ class User extends Authenticatable
         return UserNotification::where('user_id', $this->id)
             ->whereNull('read_at')
             ->count();
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $expiresInMinutes = config('auth.passwords.users.expire', 60);
+        $this->notify(new DtcResetPasswordNotification($token, $expiresInMinutes));
     }
 }

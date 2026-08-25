@@ -4,8 +4,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Applications</h4>
-        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+        <h4 class="mb-0 font-weight-bold u-text" >Applications</h4>
+        <p class="mb-0 u-text-secondary-sm" >
             Pre-enrollment applications for Registrar review.
         </p>
     </div>
@@ -25,7 +25,7 @@
 <div class="card mb-3">
     <div class="card-body py-2">
         <form method="GET" action="{{ route('registrar.applications.index') }}" class="form-inline">
-            <label for="status" class="mr-2 mb-0" style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+            <label for="status" class="mr-2 mb-0 u-text-sm-bold-primary" >
                 Status
             </label>
 
@@ -66,8 +66,8 @@
 {{-- Applications Table --}}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">All Applications</span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $applications->total() }} total</span>
+        <span class="font-weight-bold u-text" >All Applications</span>
+        <span  class="u-text-secondary-sm">{{ $applications->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
@@ -142,9 +142,9 @@
     </div>
 
     @if($applications->hasPages())
-    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
-        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-            <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer u-panel-footer" >
+        <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+            <small  class="u-text-secondary">
                 Showing
                 <strong>{{ $applications->firstItem() }}</strong>
                 to

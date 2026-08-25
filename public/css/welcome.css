@@ -32,6 +32,14 @@
     --text-400: var(--dtc-text-muted, #94A3B8);
 }
 
+/* --dtc-text-700 is never defined by dtc-theme.css (only --dtc-text,
+   --dtc-text-secondary, --dtc-text-muted are), so --text-700 was
+   silently stuck on its hardcoded light-mode fallback (#334155) in
+   dark mode too — nearly invisible on the dark background. */
+body.dtc-dark {
+    --text-700: var(--dtc-text, #F8FAFC);
+}
+
 html,
 body {
     width: 100%;
@@ -133,13 +141,9 @@ textarea {
 
 .hero {
     position: relative;
-
     overflow: hidden;
-
     min-height: 680px;
-
     padding: 90px 0 100px;
-
     background:
         linear-gradient(
             90deg,
@@ -174,6 +178,34 @@ textarea {
     pointer-events: none;
 
     z-index: -1;
+}
+
+/* Dark mode: the hero gradient/overlay above are hardcoded to the
+   light surface color, so they need explicit dark equivalents
+   (var(--dtc-bg) dark value is #0F172A / rgb(15,23,42)). */
+body.dtc-dark .hero {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(15, 23, 42, 1) 0%,
+            rgba(15, 23, 42, 0.99) 22%,
+            rgba(15, 23, 42, 0.95) 38%,
+            rgba(15, 23, 42, 0.76) 55%,
+            rgba(15, 23, 42, 0.38) 72%,
+            rgba(15, 23, 42, 0.08) 88%,
+            rgba(15, 23, 42, 0) 100%
+        ),
+        url('/images/dtc-building.webp') right center / cover no-repeat;
+}
+
+body.dtc-dark .hero::after {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15, 23, 42, 0.15) 0%,
+            rgba(15, 23, 42, 0) 50%,
+            rgba(15, 76, 219, 0.08) 100%
+        );
 }
 
 .hero .container {
@@ -362,6 +394,18 @@ textarea {
     transform: translateY(-1px);
 }
 
+body.dtc-dark .btn-secondary-cta {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: var(--dtc-border);
+    color: var(--dtc-text);
+}
+
+body.dtc-dark .btn-secondary-cta:hover {
+    background: rgba(30, 41, 59, 1);
+    border-color: var(--dtc-primary);
+    color: var(--dtc-text);
+}
+
 
 /* ==========================================================================
    HERO FEATURES
@@ -404,6 +448,12 @@ textarea {
     color: var(--blue-800);
 
     font-size: 12px;
+}
+
+body.dtc-dark .feature-pill {
+    background: rgba(30, 41, 59, 0.82);
+    border-color: var(--dtc-border);
+    color: var(--dtc-text-secondary);
 }
 
 
@@ -1524,6 +1574,21 @@ textarea {
             right center / cover no-repeat;
     }
 
+    body.dtc-dark .hero {
+        background:
+            linear-gradient(
+                90deg,
+                rgba(15, 23, 42, 1) 0%,
+                rgba(15, 23, 42, 0.98) 28%,
+                rgba(15, 23, 42, 0.90) 46%,
+                rgba(15, 23, 42, 0.60) 65%,
+                rgba(15, 23, 42, 0.18) 84%,
+                rgba(15, 23, 42, 0) 100%
+            ),
+            url('/images/dtc-building.webp')
+            right center / cover no-repeat;
+    }
+
     .hero .container {
         grid-template-columns:
             minmax(0, 1fr)
@@ -1558,6 +1623,19 @@ textarea {
                 rgba(244, 248, 252, 0.94) 44%,
                 rgba(244, 248, 252, 0.70) 72%,
                 rgba(244, 248, 252, 0.30) 100%
+            ),
+            url('/images/dtc-building.webp')
+            center bottom / cover no-repeat;
+    }
+
+    body.dtc-dark .hero {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(15, 23, 42, 0.98) 0%,
+                rgba(15, 23, 42, 0.94) 44%,
+                rgba(15, 23, 42, 0.70) 72%,
+                rgba(15, 23, 42, 0.30) 100%
             ),
             url('/images/dtc-building.webp')
             center bottom / cover no-repeat;
@@ -1677,6 +1755,19 @@ textarea {
                 rgba(244, 248, 252, 0.97) 48%,
                 rgba(244, 248, 252, 0.76) 70%,
                 rgba(244, 248, 252, 0.20) 100%
+            ),
+            url('/images/dtc-building.webp')
+            center bottom / auto 55% no-repeat;
+    }
+
+    body.dtc-dark .hero {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(15, 23, 42, 1) 0%,
+                rgba(15, 23, 42, 0.97) 48%,
+                rgba(15, 23, 42, 0.76) 70%,
+                rgba(15, 23, 42, 0.20) 100%
             ),
             url('/images/dtc-building.webp')
             center bottom / auto 55% no-repeat;

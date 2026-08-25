@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold">Alumni Dashboard</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Welcome to Danao Technological College!</p>
+            <p class="mb-0 u-text-secondary-sm" >Welcome to Danao Technological College!</p>
         </div>
     </div>
 @endsection
@@ -91,19 +91,19 @@
             </div>
             <div class="card-body p-0">
                 @forelse ($recentRequests as $req)
-                <div style="padding:14px 20px; border-bottom:1px solid #F1F5F9;
+                <div style="padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
                             display:flex; align-items:center; justify-content:space-between;">
-                    <div style="display:flex; align-items:center; gap:12px;">
+                    <div  class="u-flex-center-gap-12">
                         <div style="width:36px; height:36px; border-radius:10px;
                                     background:#EEF2FF; display:flex; align-items:center;
                                     justify-content:center; flex-shrink:0;">
-                            <i class="fas fa-file-alt" style="font-size:14px; color:#0F4CDB;"></i>
+                            <i class="fas fa-file-alt u-link-md" ></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600;">
+                            <div  class="u-text-sm-bold">
                                 {{ $req->document_label }}
                             </div>
-                            <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                            <div  class="u-text-xs-secondary">
                                 {{ $req->copies }} cop{{ $req->copies> 1 ? 'ies' : 'y' }} ·
                                 {{ $req->created_at->format('M d, Y') }}
                             </div>
@@ -116,9 +116,9 @@
                     </span>
                 </div>
                 @empty
-                <div class="text-center py-4" style="color:#94A3B8;">
+                <div class="text-center py-4 u-muted" >
                     <i class="fas fa-folder-open fa-2x mb-2"></i>
-                    <p style="font-size:13px;">No document requests yet.</p>
+                    <p  class="u-text-sm">No document requests yet.</p>
                     <a href="{{ route('portal.documents.create') }}"
                        class="btn btn-primary btn-sm">Request Document</a>
                 </div>
@@ -143,23 +143,22 @@
                 @endphp
                 @foreach($actions as $action)
                 <a href="{{ $action['url'] }}"
+                   class="dtc-quick-action-row"
                    style="display:flex; align-items:center; justify-content:space-between;
-                          padding:14px 20px; border-bottom:1px solid #F1F5F9;
-                          text-decoration:none; transition:background 0.2s;"
-                   onmouseover="this.style.background='#F8FAFC'"
-                   onmouseout="this.style.background='transparent'">
-                    <div style="display:flex; align-items:center; gap:12px;">
+                          padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
+                          text-decoration:none; transition:background 0.2s;">
+                    <div  class="u-flex-center-gap-12">
                         <div style="width:36px; height:36px; border-radius:10px;
                                     background:#EEF2FF; display:flex; align-items:center;
                                     justify-content:center;">
-                            <i class="fas {{ $action['icon'] }}"
-                               style="font-size:14px; color:#0F4CDB;"></i>
+                            <i class="fas {{ $action['icon'] }} u-link-md"
+                               ></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600;">
+                            <div  class="u-text-sm-bold">
                                 {{ $action['label'] }}
                             </div>
-                            <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                            <div  class="u-text-xs-secondary">
                                 {{ $action['sub'] }}
                             </div>
                         </div>
@@ -172,8 +171,8 @@
 
         {{-- Next Appointment --}}
         @if($nextAppointment)
-        <div class="card"
-             style="background:linear-gradient(135deg,#0F4CDB,#1a5feb); border:none; color:#fff;">
+        <div class="card u-primary-gradient-btn"
+             >
             <div class="card-body p-3">
                 <div style="font-size:11px; font-weight:600; opacity:0.75; margin-bottom:8px;
                             text-transform:uppercase; letter-spacing:0.5px;">
@@ -190,7 +189,7 @@
                         </div>
                     </div>
                     <div>
-                        <div style="font-size:13px; font-weight:600;">
+                        <div  class="u-text-sm-bold">
                             {{ ucfirst($nextAppointment->document_type) }}
                         </div>
                         <div style="font-size:11px; opacity:0.75; margin-top:2px;">

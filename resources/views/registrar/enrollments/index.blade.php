@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Pending Enrollments</h4>
-        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+        <h4 class="mb-0 font-weight-bold u-text" >Pending Enrollments</h4>
+        <p class="mb-0 u-text-secondary-sm" >
             Enrollment submissions awaiting registrar approval.
         </p>
     </div>
@@ -25,8 +25,8 @@
 {{-- Enrollments Table --}}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">All Pending Enrollments</span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $enrollments->total() }} total</span>
+        <span class="font-weight-bold u-text" >All Pending Enrollments</span>
+        <span  class="u-text-secondary-sm">{{ $enrollments->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
@@ -47,7 +47,7 @@
                 @forelse ($enrollments as $enrollment)
                 <tr>
                     <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div  class="u-flex-center-gap-10">
                             <div style="width:32px; height:32px; border-radius:50%;
                                         background:linear-gradient(135deg,#0F4CDB,#1a5feb);
                                         display:flex; align-items:center; justify-content:center;
@@ -59,22 +59,17 @@
                     </td>
                     <td>
                         <div style="font-size:13px; font-weight:500; color:var(--dtc-text);">{{ $enrollment->program->name }}</div>
-                        <div style="font-size:11px; color:var(--dtc-text-muted);">{{ $enrollment->program->code }}</div>
+                        <div  class="u-text-xs-muted">{{ $enrollment->program->code }}</div>
                     </td>
-                    <td style="font-size:13px; color:var(--dtc-text-secondary);">
+                    <td  class="u-text-secondary-sm">
                         {{ $enrollment->year_level }}{{ ['st','nd','rd','th'][$enrollment->year_level - 1] ?? 'th' }} Year
-                        <span style="color:var(--dtc-text-muted);">&middot; Sem {{ $enrollment->semester }}</span>
+                        <span  class="u-text-muted">&middot; Sem {{ $enrollment->semester }}</span>
                     </td>
                     <td>
-                        @if($enrollment->status === 'approved')
-                            <span class="badge badge-success">Approved</span>
-                        @elseif($enrollment->status === 'rejected')
-                            <span class="badge badge-danger">Rejected</span>
-                        @else
-                            <span class="badge badge-warning">Pending</span>
-                        @endif
+                        <x-dtc.status-badge :status="$enrollment->status" />
                     </td>
-                    <td style="font-size:13px; color:var(--dtc-text-secondary);">
+
+                    <td  class="u-text-secondary-sm">
                         {{ $enrollment->created_at->format('M d, Y h:i A') }}
                     </td>
                     <td>
@@ -85,7 +80,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4" style="color:var(--dtc-text-muted);">
+                    <td colspan="6" class="text-center py-4 u-text-muted" >
                         No pending enrollments.
                     </td>
                 </tr>
@@ -95,9 +90,9 @@
         </div>
     </div>
 
-    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
-        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-            <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer u-panel-footer" >
+        <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+            <small  class="u-text-secondary">
                 Showing
                 <strong>{{ $enrollments->firstItem() ?? 0 }}</strong>
                 to

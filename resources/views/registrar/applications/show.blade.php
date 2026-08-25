@@ -25,10 +25,10 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
         <div>
-           <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">
+           <h4 class="mb-0 font-weight-bold u-text" >
                 Pre-Enrollment Application
             </h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <p class="mb-0 u-text-secondary-sm" >
                 Reference No: <strong>{{ $application->reference_no }}</strong>
                 &nbsp;·&nbsp;
                 <span class="badge {{ $statusBadges[$application->status] ?? 'badge-secondary' }}">
@@ -255,10 +255,10 @@
                 @forelse ($application->documents as $document)
                     <div class="d-flex justify-content-between align-items-center px-3 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
                         <div>
-                            <div class="font-weight-bold" style="font-size:13px;">
+                            <div class="font-weight-bold u-text-sm" >
                                 {{ $documentLabels[$document->document_type] ?? ucwords(str_replace('_', ' ', $document->document_type)) }}
                             </div>
-                            <div class="text-muted" style="font-size:12px;">
+                            <div class="text-muted u-text-xxs" >
                                 {{ $document->original_name }}
                                 &nbsp;·&nbsp;
                                 Uploaded {{ $document->created_at->format('M d, Y h:i A') }}
@@ -278,7 +278,7 @@
                         </a>
                     </div>
                 @empty
-                    <div class="text-center text-muted py-4" style="font-size:13px;">
+                    <div class="text-center text-muted py-4 u-text-sm" >
                         No documents were uploaded with this application.
                     </div>
                 @endforelse
@@ -337,7 +337,7 @@
 
                 @else
 
-                    <div class="text-muted" style="font-size:13px;">
+                    <div class="text-muted u-text-sm" >
                         No additional physical documents are required at this
                         pre-enrollment stage for this applicant type.
                     </div>
@@ -373,7 +373,7 @@
                         <div>{{ $application->remarks ?: '—' }}</div>
                     </div>
                 @else
-                    <div class="text-muted" style="font-size:13px;">
+                    <div class="text-muted u-text-sm" >
                         Not yet reviewed
                     </div>
                 @endif
@@ -438,7 +438,7 @@
         @else
         <div class="card">
             <div class="card-body">
-                <div class="text-muted" style="font-size:13px;">
+                <div class="text-muted u-text-sm" >
                     @if($application->status === 'approved')
                         This application has already been approved. No further action is available.
                     @else

@@ -6,8 +6,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Appointment Requests</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">Review and confirm student appointment bookings</p>
+            <h4 class="mb-0 font-weight-bold u-text" >Appointment Requests</h4>
+            <p class="mb-0 u-text-secondary-sm" >Review and confirm student appointment bookings</p>
         </div>
         <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-clock mr-1"></i> Manage Slots
@@ -22,11 +22,11 @@
 @endif
 
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap:8px;">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">
-            <i class="fas fa-hourglass-half mr-2" style="color:#0F4CDB;"></i> Pending Requests
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap u-gap-8" >
+        <span class="font-weight-bold u-text" >
+            <i class="fas fa-hourglass-half mr-2 u-link" ></i> Pending Requests
         </span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $appointments->total() }} total</span>
+        <span  class="u-text-secondary-sm">{{ $appointments->total() }} total</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -46,7 +46,7 @@
                 @forelse ($appointments as $appointment)
                 <tr>
                     <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div  class="u-flex-center-gap-10">
                             <div style="width:34px; height:34px; border-radius:50%;
                                         background:linear-gradient(135deg,#0F4CDB,#1a5feb);
                                         display:flex; align-items:center; justify-content:center;
@@ -54,10 +54,10 @@
                                 {{ strtoupper(substr($appointment->user->name, 0, 1)) }}
                             </div>
                             <div>
-                                <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                                <div  class="u-text-sm-bold-primary">
                                     {{ $appointment->user->name }}
                                 </div>
-                                <div style="font-size:11px; color:var(--dtc-text-secondary);">
+                                <div  class="u-text-xs-secondary">
                                     {{ $appointment->user->email }}
                                 </div>
                             </div>
@@ -72,17 +72,17 @@
                     <td style="font-size:13px; font-weight:500; color:var(--dtc-text);">
                         {{ \Carbon\Carbon::parse($appointment->slot->date)->format('M d, Y') }}
                     </td>
-                    <td style="font-size:13px; color:var(--dtc-text-secondary);">
+                    <td  class="u-text-secondary-sm">
                         {{ \Carbon\Carbon::parse($appointment->slot->start_time)->format('h:i A') }}
                     </td>
                     <td style="font-size:12px; color:var(--dtc-text-secondary); max-width:150px;">
                         {{ $appointment->purpose ?? '—' }}
                     </td>
                     <td>
-                        <span class="badge badge-warning">Pending</span>
+                        <x-dtc.status-badge status="Pending" />
                     </td>
                     <td>
-                        <div style="display:flex; gap:6px;">
+                        <div  class="u-actions-gap">
                             {{-- Confirm --}}
                             <form method="POST"
                                   action="{{ route('registrar.appointments.confirm', $appointment) }}">
@@ -148,7 +148,7 @@
                 @empty
                 <tr>
                     <td colspan="7" class="text-center py-5">
-                        <i class="fas fa-calendar-check fa-3x mb-3" style="color:var(--dtc-border);"></i>
+                        <i class="fas fa-calendar-check fa-3x mb-3 u-border-color" ></i>
                         <p style="color:var(--dtc-text-muted); font-size:13px;">No pending appointment requests.</p>
                     </td>
                 </tr>
@@ -159,9 +159,9 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="card-footer" style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
-        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:15px;">
-            <small style="color:var(--dtc-text-secondary);">
+    <div class="card-footer u-panel-footer" >
+        <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
+            <small  class="u-text-secondary">
                 Showing
                 <strong>{{ $appointments->firstItem() ?? 0 }}</strong>
                 to

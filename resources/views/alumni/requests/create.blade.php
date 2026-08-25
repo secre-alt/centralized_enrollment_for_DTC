@@ -5,8 +5,8 @@
 
 @section('content_header')
     <div>
-        <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Request a Document</h4>
-        <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+        <h4 class="mb-0 font-weight-bold u-text" >Request a Document</h4>
+        <p class="mb-0 u-text-secondary-sm" >
             Submit a document request to the Registrar's Office
         </p>
     </div>
@@ -16,8 +16,8 @@
 <div class="row justify-content-center">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
-                <i class="fas fa-folder-plus mr-2" style="color:#0F4CDB;"></i>
+            <div class="card-header font-weight-bold u-text" >
+                <i class="fas fa-folder-plus mr-2 u-link" ></i>
                 Document Request Form
             </div>
             <div class="card-body">
@@ -43,8 +43,8 @@
                                 <label style="cursor:pointer; width:100%;">
                                     <input type="radio" name="document_type"
                                            value="{{ $doc['value'] }}"
-                                           style="display:none;"
-                                           class="doc-radio"
+                                           
+                                           class="doc-radio u-hidden"
                                            {{ old('document_type') === $doc['value'] ? 'checked' : '' }}>
                                     <div class="doc-option"
                                          style="border:2px solid var(--dtc-border); border-radius:12px;
@@ -68,10 +68,10 @@
                     {{-- Number of Copies --}}
                     <div class="form-group">
                         <label>Number of Copies</label>
-                        <div style="display:flex; align-items:center; gap:12px;">
+                        <div  class="u-flex-center-gap-12">
                             <button type="button" onclick="adjustCopies(-1)"
                                     style="width:36px; height:36px; border-radius:10px;
-                                           background:#F1F5F9; border:1.5px solid var(--dtc-border);
+                                           background:var(--dtc-surface-soft); border:1.5px solid var(--dtc-border); color:var(--dtc-text);
                                            font-size:18px; cursor:pointer; display:flex;
                                            align-items:center; justify-content:center;">−</button>
                             <input type="number" name="copies" id="copies"
@@ -80,7 +80,7 @@
                                    style="width:80px; text-align:center;">
                             <button type="button" onclick="adjustCopies(1)"
                                     style="width:36px; height:36px; border-radius:10px;
-                                           background:#F1F5F9; border:1.5px solid var(--dtc-border);
+                                           background:var(--dtc-surface-soft); border:1.5px solid var(--dtc-border); color:var(--dtc-text);
                                            font-size:18px; cursor:pointer; display:flex;
                                            align-items:center; justify-content:center;">+</button>
                         </div>
@@ -120,21 +120,21 @@
                                     text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
                             Fee Summary
                         </div>
-                        <div style="font-size:13px; color:var(--dtc-text-secondary);">
+                        <div  class="u-text-secondary-sm">
                             Select a document type to see the estimated fee.
                         </div>
                         <div id="fee-summary" style="display:none; margin-top:8px;">
                             <div style="display:flex; justify-content:space-between; font-size:13px;">
-                                <span style="color:var(--dtc-text-secondary);">Document Type:</span>
+                                <span  class="u-text-secondary">Document Type:</span>
                                 <span id="fee-doc-label" style="font-weight:600; color:var(--dtc-text);"></span>
                             </div>
                             <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:4px;">
-                                <span style="color:var(--dtc-text-secondary);">Copies:</span>
+                                <span  class="u-text-secondary">Copies:</span>
                                 <span id="fee-copies-label" style="font-weight:600; color:var(--dtc-text);"></span>
                             </div>
                             <div style="border-top:1px solid #C7D2FE; margin:8px 0;"></div>
                             <div style="display:flex; justify-content:space-between;">
-                                <span style="font-size:13px; color:var(--dtc-text-secondary);">Estimated Total:</span>
+                                <span  class="u-text-secondary-sm">Estimated Total:</span>
                                 <span id="fee-total" style="font-size:16px; font-weight:800; color:#0F4CDB;"></span>
                             </div>
                         </div>
@@ -153,8 +153,8 @@
 
     {{-- Info Panel --}}
     <div class="col-lg-5">
-        <div class="card"
-             style="background:linear-gradient(135deg,#0F4CDB,#1a5feb); border:none; color:#fff;">
+        <div class="card u-primary-gradient-btn"
+             >
             <div class="card-body p-4">
                 <h5 style="font-weight:700; margin-bottom:16px; color:#fff;">
                     <i class="fas fa-info-circle mr-2"></i> How It Works
@@ -190,7 +190,7 @@
 
         {{-- Fee Reference --}}
         <div class="card mt-3">
-            <div class="card-header font-weight-bold" style="color:var(--dtc-text);">
+            <div class="card-header font-weight-bold u-text" >
                 Fee Reference
             </div>
             <div class="card-body p-0">
@@ -200,9 +200,9 @@
                     ['label' => 'Certification',          'fee' => '₱30.00 per copy'],
                     ['label' => 'True Copy of Records',  'fee' => '₱50.00 per copy'],
                 ] as $item)
-                <div style="padding:12px 20px; border-bottom:1px solid #F1F5F9;
+                <div style="padding:12px 20px; border-bottom:1px solid var(--dtc-border-soft);
                             display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:13px; color:var(--dtc-text);">{{ $item['label'] }}</span>
+                    <span  class="u-text-sm-secondary-primary">{{ $item['label'] }}</span>
                     <span style="font-size:13px; font-weight:700; color:#0F4CDB;">{{ $item['fee'] }}</span>
                 </div>
                 @endforeach

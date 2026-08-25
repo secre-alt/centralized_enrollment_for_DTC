@@ -1,13 +1,15 @@
 @extends('adminlte::page')
 @include('partials.navbar')
 
+@section('plugins.adminUsers', true)
+
 @section('title', 'Manage Users')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold" style="color:var(--dtc-text);">Manage Users</h4>
-            <p class="mb-0" style="color:var(--dtc-text-secondary); font-size:13px;">
+            <h4 class="mb-0 font-weight-bold u-text" >Manage Users</h4>
+            <p class="mb-0 u-text-secondary-sm" >
                 Create and manage system user accounts
             </p>
         </div>
@@ -53,8 +55,8 @@
 {{-- Users Table --}}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold" style="color:var(--dtc-text);">All Users</span>
-        <span style="font-size:13px; color:var(--dtc-text-secondary);">{{ $users->total() }} total</span>
+        <span class="font-weight-bold u-text" >All Users</span>
+        <span  class="u-text-secondary-sm">{{ $users->total() }} total</span>
     </div>
 
     <div class="card-body p-0">
@@ -75,7 +77,7 @@
                 @forelse ($users as $user)
                 <tr>
                     <td>
-                        <div style="display:flex; align-items:center; gap:12px;">
+                        <div  class="u-flex-center-gap-12">
                             <div style="width:38px; height:38px; border-radius:50%;
                                         background:linear-gradient(135deg,var(--dtc-primary),#1a5feb);
                                         display:flex; align-items:center; justify-content:center;
@@ -83,13 +85,13 @@
                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                             </div>
 
-                            <div style="font-size:13px; font-weight:600; color:var(--dtc-text);">
+                            <div  class="u-text-sm-bold-primary">
                                 {{ $user->name }}
                             </div>
                         </div>
                     </td>
 
-                    <td style="font-size:13px; color:var(--dtc-text-secondary);">
+                    <td  class="u-text-secondary-sm">
                         {{ $user->email }}
                     </td>
 
@@ -131,7 +133,7 @@
                     </td>
 
                     <td>
-                        <div style="display:flex; gap:6px;">
+                        <div  class="u-actions-gap">
                             <button type="button"
                                     class="btn-edit-user"
                                     data-id="{{ $user->id }}"
@@ -139,12 +141,17 @@
                                     style="background:var(--dtc-primary-soft);
                                            color:var(--dtc-primary);
                                            border:none;
-                                           padding:5px 12px;
+                                           width:34px;
+                                           height:34px;
+                                           display:flex;
+                                           align-items:center;
+                                           justify-content:center;
+                                           padding:0;
                                            border-radius:8px;
                                            font-size:11px;
                                            font-weight:600;
                                            cursor:pointer;">
-                                <i class="fas fa-edit mr-1"></i>
+                                <i class="fas fa-edit"></i>
                             </button>
 
                             @if($user->id !== auth()->id())
@@ -157,7 +164,12 @@
                                         style="background:#FEE2E2;
                                                color:#DC2626;
                                                border:none;
-                                               padding:5px 12px;
+                                               width:34px;
+                                               height:34px;
+                                               display:flex;
+                                               align-items:center;
+                                               justify-content:center;
+                                               padding:0;
                                                border-radius:8px;
                                                font-size:11px;
                                                font-weight:600;
@@ -174,8 +186,8 @@
                 @empty
                 <tr>
                     <td colspan="6"
-                        class="text-center py-5"
-                        style="color:var(--dtc-text-muted);">
+                        class="text-center py-5 u-text-muted"
+                        >
                         No users found.
                     </td>
                 </tr>
@@ -186,13 +198,13 @@
 </div>
 
     {{-- Pagination --}}
-        <div class="card-footer"
-            style="background:var(--dtc-surface); border-top:1px solid var(--dtc-border);">
+        <div class="card-footer u-panel-footer"
+            >
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap"
-                style="gap:15px;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15"
+                >
 
-                <small style="color:var(--dtc-text-secondary);">
+                <small  class="u-text-secondary">
                     Showing
                     <strong>{{ $users->firstItem() }}</strong>
                     to

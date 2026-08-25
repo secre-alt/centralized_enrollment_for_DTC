@@ -75,7 +75,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center;
                         margin-top:14px; padding-top:14px; border-top:1px dashed var(--dtc-border);">
-                <span class="dtc-review-info-label" style="font-size:13px;">Enrollment Fee</span>
+                <span class="dtc-review-info-label u-text-sm" >Enrollment Fee</span>
                 <span style="font-size:22px; font-weight:800; color:#15803D;">
                     ₱{{ number_format($fee, 2) }}
                 </span>
@@ -173,7 +173,7 @@
             @endif
         </div>
 
-        <div class="dtc-review-footer-reject" style="display:none;">
+        <div class="dtc-review-footer-reject u-hidden" >
             <button type="button" class="dtc-btn dtc-btn-secondary dtc-review-reject-cancel">Cancel</button>
             <button type="submit" form="rejectForm-{{ $enrollment->id }}" class="dtc-btn dtc-btn-danger">
                 <i class="fas fa-check"></i> Confirm Rejection
