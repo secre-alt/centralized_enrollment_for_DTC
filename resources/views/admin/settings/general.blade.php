@@ -24,9 +24,8 @@
 @section('content')
 <div class="row">
 
-    @include('admin.settings._sidebar')
-    {{-- ══ RIGHT: General Settings panels ═════════════════════════════ --}}
-    <div class="col-lg-9">
+    {{-- ══ General Settings panels ═════════════════════════════ --}}
+    <div class="col-12">
 
         @if (session('status'))
             <div class="alert alert-success">

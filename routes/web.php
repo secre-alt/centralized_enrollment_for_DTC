@@ -98,7 +98,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class)->except(['show']);
-    
+    Route::get('/settings/payment/qr-preview', [EnrollmentController::class, 'showGcashQr'])->name('settings.payment.qr.preview');
     // ── SETTINGS ──────────────
     Route::get('/settings',              [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings',              [SettingsController::class, 'update'])->name('settings.update');
@@ -106,11 +106,14 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::delete('/settings/logo',      [SettingsController::class, 'removeLogo'])->name('settings.logo.remove');
     Route::delete('/settings/favicon',   [SettingsController::class, 'removeFavicon'])->name('settings.favicon.remove');
     Route::get('/settings/academic',     [SettingsController::class, 'academic'])->name('settings.academic');
+    Route::put('/settings/academic',     [SettingsController::class, 'updateAcademic'])->name('settings.academic.update');
     Route::get('/settings/payment',      [SettingsController::class, 'payment'])->name('settings.payment');
     Route::put('/settings/payment',      [SettingsController::class, 'updatePayment'])->name('settings.payment.update');
     Route::post('/settings/payment/qr',  [SettingsController::class, 'uploadQr'])->name('settings.payment.qr');
     Route::get('/settings/notifications',[SettingsController::class, 'notifications'])->name('settings.notifications');
+    Route::put('/settings/notifications',[SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
     Route::get('/settings/security',     [SettingsController::class, 'security'])->name('settings.security');
+    Route::put('/settings/security',     [SettingsController::class, 'updateSecurity'])->name('settings.security.update');
     Route::get('/settings/audit-logs',   [SettingsController::class, 'auditLogs'])->name('settings.audit');
     Route::get('/settings/backup',               [BackupController::class, 'index'])->name('settings.backup');
     Route::post('/settings/backup/create',       [BackupController::class, 'backup'])->name('settings.backup.create');

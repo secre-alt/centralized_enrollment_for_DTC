@@ -25,10 +25,8 @@
 @section('content')
 <div class="row">
 
-    @include('admin.settings._sidebar')
-
-    {{-- RIGHT: Payment Settings panels --}}
-    <div class="col-lg-9">
+    {{-- Payment Settings panels --}}
+    <div class="col-12">
 
         @if (session('status'))
             <div class="alert alert-success">
@@ -121,7 +119,7 @@
                         @if ($qrExists)
                             <div class="mb-3">
                                 <p style="font-size:12px; color:var(--dtc-text-secondary); margin-bottom:8px;">Current QR Code:</p>
-                                <img src="{{ route('portal.enrollment.gcash.qr') }}"
+                                <img src="{{ route('admin.settings.payment.qr.preview') }}"
                                      alt="GCash QR Code"
                                      style="width:160px; height:160px; object-fit:contain;
                                             border:1.5px solid var(--dtc-border); border-radius:12px; padding:8px;">

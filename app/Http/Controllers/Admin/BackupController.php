@@ -47,6 +47,14 @@ class BackupController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
+            \App\Models\AuditLog::create([
+                'user_id'     => Auth::id(),
+                'action'      => 'backup.created',
+                'description' => "Created database backup \"{$filename}\".",
+                'ip_address'  => request()->ip(),
+                'user_agent'  => request()->userAgent(),
+            ]);
+
             // Stream download
             return response()->download($path, $filename, [
                 'Content-Type'        => 'application/sql',
@@ -137,6 +145,14 @@ class BackupController extends Controller
 
             DB::unprepared('SET FOREIGN_KEY_CHECKS=1;');
 
+            \App\Models\AuditLog::create([
+                'user_id'     => Auth::id(),
+                'action'      => 'backup.restored',
+                'description' => 'Restored database from uploaded file "' . $file->getClientOriginalName() . '".',
+                'ip_address'  => $request->ip(),
+                'user_agent'  => $request->userAgent(),
+            ]);
+
             return redirect()->route('admin.settings.backup')
                 ->with('success', 'Database restored successfully from ' . $file->getClientOriginalName() . '.');
 
@@ -152,6 +168,15 @@ class BackupController extends Controller
         if (file_exists($path)) {
             unlink($path);
         }
+
+        \App\Models\AuditLog::create([
+            'user_id'     => Auth::id(),
+            'action'      => 'backup.deleted',
+            'description' => "Deleted database backup \"{$backup->filename}\".",
+            'ip_address'  => request()->ip(),
+            'user_agent'  => request()->userAgent(),
+        ]);
+
         $backup->delete();
 
         return redirect()->route('admin.settings.backup')

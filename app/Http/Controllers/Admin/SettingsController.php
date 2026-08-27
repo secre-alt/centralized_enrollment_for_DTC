@@ -41,7 +41,7 @@ class SettingsController extends Controller
     /** GET /admin/settings */
     public function index()
     {
-        return view('admin.settings', [
+        return view('admin.settings.general', [
             'settings'   => $this->settings(),
             'systemInfo' => $this->systemInfo(),
             'activeTab'  => 'general',
@@ -89,6 +89,14 @@ class SettingsController extends Controller
             Artisan::call('up');
         }
 
+        \App\Models\AuditLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'settings.general.updated',
+            'description' => 'Updated general settings (institution info, logo, preferences).',
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
+
         return redirect()->route('admin.settings.index')
             ->with('status', 'General settings saved successfully.');
     }
@@ -124,9 +132,11 @@ class SettingsController extends Controller
     /** GET /admin/settings/academic */
     public function academic()
     {
-        return view('admin.settings-academic', [
-            'settings'  => $this->settings(),
-            'activeTab' => 'academic',
+        return view('admin.settings.academic', [
+            'settings'      => $this->settings(),
+            'activeTab'     => 'academic',
+            'programsCount' => \App\Models\Program::count(),
+            'subjectsCount' => \App\Models\CourseSubject::count(),
         ]);
     }
 
@@ -142,6 +152,14 @@ class SettingsController extends Controller
         Setting::updateOrCreate(['key' => 'current_school_year'], ['value' => $request->current_school_year]);
         Setting::updateOrCreate(['key' => 'current_semester'],    ['value' => $request->current_semester]);
         Setting::updateOrCreate(['key' => 'enrollment_open'],     ['value' => $request->boolean('enrollment_open') ? '1' : '0']);
+
+        \App\Models\AuditLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'settings.academic.updated',
+            'description' => "Updated academic settings — SY {$request->current_school_year}, {$request->current_semester} semester, enrollment " . ($request->boolean('enrollment_open') ? 'open' : 'closed') . '.',
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
 
         return redirect()->route('admin.settings.academic')
             ->with('status', 'Academic settings saved successfully.');
@@ -171,6 +189,14 @@ class SettingsController extends Controller
         foreach (['enrollment_fee', 'gcash_number', 'gcash_name', 'payment_deadline'] as $key) {
             Setting::updateOrCreate(['key' => $key], ['value' => $request->input($key, '')]);
         }
+
+        \App\Models\AuditLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'settings.payment.updated',
+            'description' => 'Updated payment settings (enrollment fee, GCash details, payment deadline).',
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
 
         return redirect()->route('admin.settings.payment')
             ->with('status', 'Payment settings saved successfully.');
@@ -202,7 +228,7 @@ class SettingsController extends Controller
     /** GET /admin/settings/notifications */
     public function notifications()
     {
-        return view('admin.settings-notifications', [
+        return view('admin.settings.notifications', [
             'settings'  => $this->settings(),
             'activeTab' => 'notifications',
         ]);
@@ -215,6 +241,14 @@ class SettingsController extends Controller
             Setting::updateOrCreate(['key' => $key], ['value' => $request->boolean($key) ? '1' : '0']);
         }
 
+        \App\Models\AuditLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'settings.notifications.updated',
+            'description' => 'Updated notification channel settings.',
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
+
         return redirect()->route('admin.settings.notifications')
             ->with('status', 'Notification settings saved successfully.');
     }
@@ -224,7 +258,7 @@ class SettingsController extends Controller
     /** GET /admin/settings/security */
     public function security()
     {
-        return view('admin.settings-security', [
+        return view('admin.settings.security', [
             'settings'  => $this->settings(),
             'activeTab' => 'security',
         ]);
@@ -244,6 +278,14 @@ class SettingsController extends Controller
         Setting::updateOrCreate(['key' => 'require_special_chars'], ['value' => $request->boolean('require_special_chars') ? '1' : '0']);
         Setting::updateOrCreate(['key' => 'session_timeout'],       ['value' => $request->session_timeout]);
         Setting::updateOrCreate(['key' => 'max_login_attempts'],    ['value' => $request->max_login_attempts]);
+
+        \App\Models\AuditLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'settings.security.updated',
+            'description' => 'Updated system security settings (password policy, session timeout, login attempts).',
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
 
         return redirect()->route('admin.settings.security')
             ->with('status', 'Security settings saved successfully.');
@@ -332,19 +374,28 @@ class SettingsController extends Controller
     // ── Audit Logs ────────────────────────────────────────────────────────────
 
     /** GET /admin/settings/audit */
+    /** GET /admin/settings/audit-logs */
     public function auditLogs(Request $request)
     {
-        $logs = \Spatie\Activitylog\Models\Activity::with('causer')
+        $logs = \App\Models\AuditLog::with('user')
             ->when($request->filled('search'), fn ($q) =>
-                $q->where('description', 'like', '%' . $request->search . '%')
+                $q->where(function ($q) use ($request) {
+                    $q->where('description', 'like', '%' . $request->search . '%')
+                      ->orWhere('action', 'like', '%' . $request->search . '%');
+                })
+            )
+            ->when($request->filled('action'), fn ($q) =>
+                $q->where('action', $request->action)
             )
             ->latest()
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
-        return view('admin.settings-audit', [
-            'settings'  => $this->settings(),
-            'activeTab' => 'audit',
-            'logs'      => $logs,
+        return view('admin.settings.audit', [
+            'settings'    => $this->settings(),
+            'activeTab'   => 'audit',
+            'logs'        => $logs,
+            'actionTypes' => \App\Models\AuditLog::select('action')->distinct()->orderBy('action')->pluck('action'),
         ]);
     }
 
@@ -393,7 +444,7 @@ class SettingsController extends Controller
     /** GET /admin/settings/general */
     public function general()
     {
-        return view('admin.settings', [
+        return view('admin.settings.general', [
             'settings'   => $this->settings(),
             'systemInfo' => $this->systemInfo(),
             'activeTab'  => 'general',
