@@ -61,9 +61,7 @@
 </div>
 
 {{-- ══ WELCOME CARD ════════════════════════════════════════════════════ --}}
-<div class="card mb-3"
-     style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);
-            border:1.5px solid #C7D2FE; border-radius:16px;">
+<div class="card mb-3 dtc-welcome-card">
     <div class="card-body" style="padding:24px;">
         <div style="display:flex; align-items:center; gap:20px;">
             <div style="width:64px; height:64px; border-radius:50%;
@@ -73,10 +71,10 @@
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
             <div>
-                <h4 style="font-weight:800; margin:0 0 4px;">
+                <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
                     Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
                 </h4>
-                <p style="font-size:13px; color:var(--dtc-text); margin:0;">
+                <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
                     Welcome to Danao Technological College!
                     @if(!$latestEnrollment)
                         Please complete your application and follow the enrollment steps below.

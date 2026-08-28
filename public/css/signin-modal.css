@@ -422,21 +422,25 @@ body.dtc-dark .dtc-modal-label {
     color: var(--dtc-text-secondary, #CBD5E1);
 }
 
-body.dtc-dark .dtc-modal-input-icon {
+body.dtc-dark .dtc-modal-input-icon,
+html.dtc-dark .dtc-modal-input-icon {
     color: var(--dtc-text-muted, #94A3B8);
 }
 
-body.dtc-dark .dtc-modal-input {
+body.dtc-dark .dtc-modal-input,
+html.dtc-dark .dtc-modal-input {
     background: var(--dtc-surface-soft, #1E293B);
     border-color: var(--dtc-border, #334155);
     color: var(--dtc-text, #F8FAFC);
 }
 
-body.dtc-dark .dtc-modal-input::placeholder {
+body.dtc-dark .dtc-modal-input::placeholder,
+html.dtc-dark .dtc-modal-input::placeholder {
     color: #64748B;
 }
 
-body.dtc-dark .dtc-modal-input:focus {
+body.dtc-dark .dtc-modal-input:focus,
+html.dtc-dark .dtc-modal-input:focus {
     border-color: #6C9BFF;
     background: var(--dtc-surface-soft, #1E293B);
     box-shadow: 0 0 0 3px rgba(108, 155, 255, 0.18);
@@ -449,12 +453,26 @@ body.dtc-dark .dtc-modal-input:focus {
 body.dtc-dark .dtc-modal-input:-webkit-autofill,
 body.dtc-dark .dtc-modal-input:-webkit-autofill:hover,
 body.dtc-dark .dtc-modal-input:-webkit-autofill:focus,
-body.dtc-dark .dtc-modal-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px var(--dtc-surface-soft, #1E293B) inset;
-    box-shadow: 0 0 0 1000px var(--dtc-surface-soft, #1E293B) inset;
-    -webkit-text-fill-color: var(--dtc-text, #F8FAFC);
-    caret-color: var(--dtc-text, #F8FAFC);
-    transition: background-color 9999s ease-in-out 0s;
+body.dtc-dark .dtc-modal-input:-webkit-autofill:active,
+html.dtc-dark .dtc-modal-input:-webkit-autofill,
+html.dtc-dark .dtc-modal-input:-webkit-autofill:hover,
+html.dtc-dark .dtc-modal-input:-webkit-autofill:focus,
+html.dtc-dark .dtc-modal-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--dtc-surface-soft, #1E293B) inset !important;
+    box-shadow: 0 0 0 1000px var(--dtc-surface-soft, #1E293B) inset !important;
+    -webkit-text-fill-color: var(--dtc-text, #F8FAFC) !important;
+    caret-color: var(--dtc-text, #F8FAFC) !important;
+    border-color: var(--dtc-border, #334155) !important;
+    transition: background-color 9999s ease-in-out 0s, color 9999s ease-in-out 0s;
+}
+
+/* Firefox (and any browser supporting the unprefixed pseudo-class) does
+   not honor the -webkit-* trick above, but does respect a normal
+   background/color override on :autofill. */
+body.dtc-dark .dtc-modal-input:autofill,
+html.dtc-dark .dtc-modal-input:autofill {
+    background: var(--dtc-surface-soft, #1E293B) !important;
+    color: var(--dtc-text, #F8FAFC) !important;
 }
 
 body.dtc-dark .dtc-modal-input--error {

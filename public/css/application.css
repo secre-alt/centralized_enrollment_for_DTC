@@ -311,6 +311,89 @@ body {
    Responsive
    --------------------------------------------------------- */
 
+/* ---------------------------------------------------------
+   Dark Mode
+   --------------------------------------------------------- */
+
+body.dtc-dark {
+    background: #0F172A;
+    color: #F8FAFC;
+}
+
+body.dtc-dark .application-header h1 {
+    color: #6E93F7;
+}
+
+body.dtc-dark .application-header p,
+body.dtc-dark .application-card-header p,
+body.dtc-dark .application-section-description {
+    color: #94A3B8;
+}
+
+body.dtc-dark .public-main {
+    background: #0F172A;
+}
+
+body.dtc-dark .application-card {
+    background: #111827;
+    border-color: #1E293B;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+body.dtc-dark .application-card-header h2,
+body.dtc-dark .application-section-title {
+    color: #F8FAFC;
+}
+
+body.dtc-dark .application-section-title i {
+    color: #6E93F7;
+}
+
+body.dtc-dark .form-group label {
+    color: #CBD5E1;
+}
+
+body.dtc-dark .form-control,
+body.dtc-dark .form-select,
+body.dtc-dark .application-card input[type="text"],
+body.dtc-dark .application-card input[type="email"],
+body.dtc-dark .application-card input[type="date"],
+body.dtc-dark .application-card input[type="tel"],
+body.dtc-dark .application-card input[type="number"],
+body.dtc-dark .application-card select,
+body.dtc-dark .application-card textarea {
+    background: #1E293B;
+    border-color: #334155;
+    color: #F8FAFC;
+}
+
+body.dtc-dark .form-control::placeholder,
+body.dtc-dark .application-card input::placeholder,
+body.dtc-dark .application-card textarea::placeholder {
+    color: #64748B;
+}
+
+body.dtc-dark .form-control:focus,
+body.dtc-dark .form-select:focus,
+body.dtc-dark .application-card input:focus,
+body.dtc-dark .application-card select:focus,
+body.dtc-dark .application-card textarea:focus {
+    border-color: #6E93F7;
+    box-shadow: 0 0 0 3px rgba(110, 147, 247, 0.18);
+}
+
+body.dtc-dark .application-alert {
+    background: #1E293B;
+    border-color: #334155;
+    color: #CBD5E1;
+}
+
+body.dtc-dark .btn-application-secondary {
+    background: #1E293B;
+    border-color: #334155;
+    color: #E2E8F0;
+}
+
 @media (max-width: 768px) {
 
     .application-page {
