@@ -12,7 +12,7 @@
             </p>
         </div>
         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left mr-1"></i> Back to Users
+            <i data-lucide="arrow-left" class="mr-1"></i> Back to Users
         </a>
     </div>
 @endsection
@@ -35,7 +35,7 @@
     @if($selectedProgram)
     <div>
         <button type="button" class="dtc-btn dtc-btn-primary" data-toggle="modal" data-target="#addSubjectModal">
-            <i class="fas fa-plus"></i> Add Subject
+            <i data-lucide="plus"></i> Add Subject
         </button>
     </div>
     @endif
@@ -58,7 +58,7 @@
     <div class="col-lg-7">
         <div class="card">
             <div class="card-header font-weight-bold u-text" >
-                <i class="fas fa-user-plus mr-2 u-link" ></i>
+                <i data-lucide="user-plus" class="mr-2 u-link"></i>
                 Account Information
             </div>
             <div class="card-body">
@@ -73,7 +73,7 @@
                     <div class="form-group">
                         <label>Full Name</label>
                         <div  class="u-relative">
-                            <i class="fas fa-user" style="position:absolute; left:14px;
+                            <i data-lucide="user" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="text" name="name" class="form-control u-pl-38"
                                    
@@ -85,7 +85,7 @@
                     <div class="form-group">
                         <label>Email Address</label>
                         <div  class="u-relative">
-                            <i class="fas fa-envelope" style="position:absolute; left:14px;
+                            <i data-lucide="mail" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="email" name="email" class="form-control u-pl-38"
                                    
@@ -97,7 +97,7 @@
                     <div class="form-group">
                         <label>Temporary Password</label>
                         <div  class="u-relative">
-                            <i class="fas fa-lock" style="position:absolute; left:14px;
+                            <i data-lucide="lock" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="text" name="password" class="form-control u-pl-38"
                                    
@@ -114,13 +114,13 @@
                             @foreach($roles as $role)
                             @php
                                 $roleColors = [
-                                    'registrar'     => ['bg'=>'#DCFCE7','color'=>'#15803D','icon'=>'fa-id-card'],
-                                    'cashier'       => ['bg'=>'#FEF9C3','color'=>'#A16207','icon'=>'fa-cash-register'],
-                                    'student'       => ['bg'=>'#EDE9FE','color'=>'#7C3AED','icon'=>'fa-user-graduate'],
-                                    'alumni'        => ['bg'=>'#FEE2E2','color'=>'#DC2626','icon'=>'fa-user-tie'],
-                                    'new_applicant' => ['bg'=>'#DBEAFE','color'=>'#1D4ED8','icon'=>'fa-user-clock'],
+                                    'registrar'     => ['bg'=>'#DCFCE7','color'=>'#15803D','icon'=>'id-card'],
+                                    'cashier'       => ['bg'=>'#FEF9C3','color'=>'#A16207','icon'=>'receipt'],
+                                    'student'       => ['bg'=>'#EDE9FE','color'=>'#7C3AED','icon'=>'graduation-cap'],
+                                    'alumni'        => ['bg'=>'#FEE2E2','color'=>'#DC2626','icon'=>'award'],
+                                    'new_applicant' => ['bg'=>'#DBEAFE','color'=>'#1D4ED8','icon'=>'user-plus'],
                                 ];
-                                $rc = $roleColors[$role->name] ?? ['bg'=>'#EEF2FF','color'=>'#0F4CDB','icon'=>'fa-user'];
+                                $rc = $roleColors[$role->name] ?? ['bg'=>'#EEF2FF','color'=>'#0F4CDB','icon'=>'user'];
                             @endphp
                             <div class="col-6 mb-2">
                                 <label style="cursor:pointer; width:100%;">
@@ -131,12 +131,8 @@
                                          style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:14px; display:flex; align-items:center;
                                                 gap:12px; transition:all 0.2s; background:var(--dtc-surface-soft);">
-                                        <div style="width:36px; height:36px; border-radius:10px;
-                                                    background:{{ $rc['bg'] }}; display:flex;
-                                                    align-items:center; justify-content:center;
-                                                    flex-shrink:0;">
-                                            <i class="fas {{ $rc['icon'] }}"
-                                               style="font-size:14px; color:{{ $rc['color'] }};"></i>
+                                        <div class="dtc-icon-swatch is-{{ $rc['tone'] }}" style="width:36px;height:36px;flex-shrink:0;">
+                                            <i data-lucide="{{ $rc['icon'] }}" style="font-size:14px;"></i>
                                         </div>
                                         <div>
                                             <div  class="u-text-sm-bold-primary">
@@ -152,7 +148,7 @@
 
                     <div class="d-flex u-gap-10" >
                         <button type="submit" class="btn btn-primary flex-fill">
-                            <i class="fas fa-user-plus mr-1"></i> Create Account
+                            <i data-lucide="user-plus" class="mr-1"></i> Create Account
                         </button>
                         <a href="{{ route('admin.users.index') }}"
                            class="btn btn-secondary flex-fill">Cancel</a>

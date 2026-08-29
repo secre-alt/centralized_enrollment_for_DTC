@@ -12,7 +12,7 @@
         </div>
         <div>
             <a href="{{ route('admin.users.index') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
-                <i class="fas fa-plus"></i>
+                <i data-lucide="plus"></i>
                 <span class="dtc-header-btn-label">Add New User</span>
             </a>
         </div>
@@ -25,31 +25,31 @@
 <div class="row mb-2">
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-user-graduate" color="primary"
+            icon="graduation-cap" color="primary"
             label="Students" value="{{ number_format($totalStudents) }}"
             href="{{ route('admin.users.index') }}" link-text="Registered learners" />
     </div>
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-user-tie" color="info"
+            icon="award" color="info"
             label="Alumni" value="{{ number_format($totalAlumni) }}"
             note="Total Registered" />
     </div>
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-file-alt" color="warning"
+            icon="file-text" color="warning"
             label="Pending Enrollments" value="{{ number_format($pendingEnrollments) }}"
             note="Needs Approval" />
     </div>
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-calendar-check" color="success"
+            icon="calendar-check" color="success"
             label="Appointments Today" value="{{ number_format($appointmentsToday) }}"
             note="Scheduled visits" />
     </div>
     <div class="col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-coins" color="neutral"
+            icon="coins" color="neutral"
             label="Total Revenue" value="₱{{ number_format($totalRevenue, 2) }}"
             note="Total Collection from {{ $totalPaid }} transaction{{ $totalPaid !== 1 ? 's' : '' }}" />
     </div>
@@ -113,21 +113,27 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Recent Activities</span>
-                <a href="{{ route('notifications.index') }}" style="font-size:12px; color:#0F4CDB;">View All</a>
+                <a href="{{ route('notifications.index') }}" style="font-size:12px; color:var(--dtc-primary);">View All</a>
             </div>
             <div class="card-body p-3">
                 @forelse ($recentActivities as $activity)
+                    @php
+                        $__activityTone = match ($activity->type) {
+                            'success' => 'success',
+                            'danger'  => 'danger',
+                            'warning' => 'warning',
+                            default   => 'info',
+                        };
+                        $__activityIcon = match ($activity->type) {
+                            'success' => 'check',
+                            'danger'  => 'x',
+                            'warning' => 'alert-triangle',
+                            default   => 'info',
+                        };
+                    @endphp
                 <div class="activity-item">
-                    <div class="activity-icon" style="background:
-                        @if($activity->type === 'success') #DCFCE7; color:#15803D;
-                        @elseif($activity->type === 'danger') #FEE2E2; color:#DC2626;
-                        @elseif($activity->type === 'warning') #FEF9C3; color:#A16207;
-                        @else #DBEAFE; color:#1D4ED8; @endif;">
-                        <i class="fas
-                            @if($activity->type === 'success') fa-check
-                            @elseif($activity->type === 'danger') fa-times
-                            @elseif($activity->type === 'warning') fa-exclamation
-                            @else fa-info @endif"></i>
+                    <div class="activity-icon dtc-icon-swatch is-{{ $__activityTone }}">
+                        <i data-lucide="{{ $__activityIcon }}"></i>
                     </div>
                     <div class="flex-grow-1">
                         <div class="activity-text">{{ $activity->title }}</div>
@@ -136,7 +142,7 @@
                 </div>
                 @empty
                 <div class="text-center py-4 u-muted" >
-                    <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                    <i data-lucide="bell-off" class="mb-2" style="width:2em;height:2em"></i>
                     <p  class="u-text-sm">No recent activities.</p>
                 </div>
                 @endforelse
@@ -149,14 +155,14 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Upcoming Appointments</span>
-                <a href="{{ route('registrar.appointments.index') }}" style="font-size:12px; color:#0F4CDB;">View All</a>
+                <a href="{{ route('registrar.appointments.index') }}" style="font-size:12px; color:var(--dtc-primary);">View All</a>
             </div>
             <div class="card-body p-0">
                 @forelse ($upcomingAppointments as $appt)
                 <div style="padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft); display:flex; align-items:center; gap:12px;">
-                    <div style="background:#EEF2FF; color:#0F4CDB; border-radius:10px; padding:8px 10px; font-size:11px; font-weight:700; text-align:center; min-width:50px; line-height:1.2;">
+                    <div class="dtc-date-chip" style="min-width:50px; padding:8px 10px;">
                         {{ \Carbon\Carbon::parse($appt->slot->date)->format('M') }}<br>
-                        <span style="font-size:18px;">{{ \Carbon\Carbon::parse($appt->slot->date)->format('d') }}</span>
+                        <span class="dtc-date-chip-day" style="font-size:18px;">{{ \Carbon\Carbon::parse($appt->slot->date)->format('d') }}</span>
                     </div>
                     <div>
                         <div  class="u-text-sm-bold">{{ $appt->user->name }}</div>
@@ -168,7 +174,7 @@
                 </div>
                 @empty
                 <div class="text-center py-4 u-muted" >
-                    <i class="fas fa-calendar fa-2x mb-2"></i>
+                    <i data-lucide="calendar" class="mb-2" style="width:2em;height:2em"></i>
                     <p  class="u-text-sm">No upcoming appointments.</p>
                 </div>
                 @endforelse
@@ -182,25 +188,25 @@
             <div class="card-header font-weight-bold">Quick Actions</div>
             <div class="card-body p-3">
                 <a href="{{ route('admin.users.index') }}" class="quick-action-btn">
-                    <i class="fas fa-user-plus"></i> Add New User
+                    <i data-lucide="user-plus"></i> Add New User
                 </a>
                 <a href="{{ route('registrar.enrollments.index') }}" class="quick-action-btn">
-                    <i class="fas fa-file-alt"></i> Manage Enrollments
+                    <i data-lucide="file-text"></i> Manage Enrollments
                 </a>
                 <a href="{{ route('registrar.appointments.slots') }}" class="quick-action-btn">
-                    <i class="fas fa-calendar-plus"></i> Manage Slots
+                    <i data-lucide="calendar-plus"></i> Manage Slots
                 </a>
                 <a href="{{ route('cashier.payments.index') }}" class="quick-action-btn">
-                    <i class="fas fa-money-bill-wave"></i> Process Payments
+                    <i data-lucide="banknote"></i> Process Payments
                 </a>
                 <a href="{{ route('admin.users.index') }}" class="quick-action-btn">
-                    <i class="fas fa-users"></i> All Users
+                    <i data-lucide="users"></i> All Users
                 </a>
                 <a href="{{ route('admin.reports.enrollment') }}" class="quick-action-btn" target="_blank">
-                <i class="fas fa-file-pdf"></i> Download Enrollment Report
+                <i data-lucide="file-type"></i> Download Enrollment Report
                 </a>
                 <a href="{{ route('admin.reports.payment') }}" class="quick-action-btn" target="_blank">
-                    <i class="fas fa-file-pdf"></i> Download Payment Report
+                    <i data-lucide="file-type"></i> Download Payment Report
                 </a>
             </div>
         </div>

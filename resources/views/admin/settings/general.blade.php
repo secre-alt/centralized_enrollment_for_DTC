@@ -16,7 +16,7 @@
         </div>
 
         <button type="submit" form="general-settings-form" class="btn btn-primary">
-            <i class="fas fa-save mr-1"></i> Save Changes
+            <i data-lucide="save" class="mr-1"></i> Save Changes
         </button>
     </div>
 @endsection
@@ -29,7 +29,7 @@
 
         @if (session('status'))
             <div class="alert alert-success">
-                <i class="fas fa-check-circle mr-1"></i> {{ session('status') }}
+                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
             </div>
         @endif
 
@@ -44,7 +44,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
-                                    <i class="fas fa-university"></i>
+                                    <i data-lucide="landmark"></i>
                                 </div>
                                 <h3>Institution Information</h3>
                             </div>
@@ -82,7 +82,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
-                                    <i class="fas fa-image"></i>
+                                    <i data-lucide="image"></i>
                                 </div>
                                 <h3>System Logo &amp; Favicon</h3>
                             </div>
@@ -97,12 +97,12 @@
                                         Recommended size:<br>512 x 512px (PNG)
                                     </div>
                                     <label class="btn btn-sm btn-secondary mb-1" style="cursor:pointer;">
-                                        <i class="fas fa-arrow-up mr-1"></i> Change Logo
+                                        <i data-lucide="arrow-up" class="mr-1"></i> Change Logo
                                         <input type="file" name="logo" accept="image/png" hidden>
                                     </label>
                                     <br>
                                     <button type="button" class="btn btn-link btn-sm p-0 dtc-remove-logo" style="color:#DC2626; font-size:12px;">
-                                        <i class="fas fa-trash-alt mr-1"></i> Remove
+                                        <i data-lucide="trash-2" class="mr-1"></i> Remove
                                     </button>
                                 </div>
                             </div>
@@ -117,12 +117,12 @@
                                         Recommended size:<br>32 x 32px (PNG)
                                     </div>
                                     <label class="btn btn-sm btn-secondary mb-1" style="cursor:pointer;">
-                                        <i class="fas fa-arrow-up mr-1"></i> Change Favicon
+                                        <i data-lucide="arrow-up" class="mr-1"></i> Change Favicon
                                         <input type="file" name="favicon" accept="image/png" hidden>
                                     </label>
                                     <br>
                                     <button type="button" class="btn btn-link btn-sm p-0 dtc-remove-favicon" style="color:#DC2626; font-size:12px;">
-                                        <i class="fas fa-trash-alt mr-1"></i> Remove
+                                        <i data-lucide="trash-2" class="mr-1"></i> Remove
                                     </button>
                                 </div>
                             </div>
@@ -136,7 +136,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#DCFCE7; color:#15803D;">
-                                    <i class="fas fa-sliders-h"></i>
+                                    <i data-lucide="sliders-horizontal"></i>
                                 </div>
                                 <h3>System Preferences</h3>
                             </div>
@@ -196,7 +196,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#EDE9FE; color:#7C3AED;">
-                                    <i class="fas fa-info-circle"></i>
+                                    <i data-lucide="info"></i>
                                 </div>
                                 <h3>System Information</h3>
                             </div>
@@ -235,7 +235,7 @@
                         <div class="card-body d-flex align-items-center justify-content-between flex-wrap" style="gap:16px;">
                             <div class="d-flex align-items-center" style="gap:14px;">
                                 <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
-                                    <i class="fas fa-tools"></i>
+                                    <i data-lucide="wrench"></i>
                                 </div>
                                 <div>
                                     <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">Maintenance Mode</h3>

@@ -17,7 +17,7 @@
         </div>
 
         <button type="submit" form="notifications-settings-form" class="btn btn-primary">
-            <i class="fas fa-save mr-1"></i> Save Changes
+            <i data-lucide="save" class="mr-1"></i> Save Changes
         </button>
     </div>
 @endsection
@@ -29,7 +29,7 @@
 
         @if (session('status'))
             <div class="alert alert-success">
-                <i class="fas fa-check-circle mr-1"></i> {{ session('status') }}
+                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
             </div>
         @endif
 
@@ -41,7 +41,7 @@
                 <div class="card-body">
                     <div class="settings-section-title">
                         <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
-                            <i class="fas fa-bell"></i>
+                            <i data-lucide="bell"></i>
                         </div>
                         <h3>Notification Channels</h3>
                     </div>
@@ -54,7 +54,7 @@
                     <div class="settings-toggle-row d-flex align-items-center justify-content-between flex-wrap py-3" style="gap:16px; border-bottom:1px solid var(--dtc-border);">
                         <div class="d-flex align-items-center" style="gap:14px;">
                             <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
-                                <i class="fas fa-envelope"></i>
+                                <i data-lucide="mail"></i>
                             </div>
                             <div>
                                 <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">Email Notifications</h3>
@@ -76,7 +76,7 @@
                     <div class="settings-toggle-row d-flex align-items-center justify-content-between flex-wrap py-3" style="gap:16px; border-bottom:1px solid var(--dtc-border);">
                         <div class="d-flex align-items-center" style="gap:14px;">
                             <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
-                                <i class="fas fa-sms"></i>
+                                <i data-lucide="message-square"></i>
                             </div>
                             <div>
                                 <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">SMS Notifications</h3>
@@ -98,7 +98,7 @@
                     <div class="settings-toggle-row d-flex align-items-center justify-content-between flex-wrap py-3" style="gap:16px;">
                         <div class="d-flex align-items-center" style="gap:14px;">
                             <div class="settings-section-icon" style="background:#E7F8EF; color:#0F9D58;">
-                                <i class="fas fa-desktop"></i>
+                                <i data-lucide="monitor"></i>
                             </div>
                             <div>
                                 <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">In-App Alerts</h3>

@@ -48,7 +48,8 @@
             @break
 
             @default
-                <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+                {{-- Lucide Icons (replaces Font Awesome) --}}
+                <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
                 <link rel="stylesheet" href="{{ asset('vendor/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
                 <link rel="stylesheet" href="{{ asset('vendor/adminlte/dist/css/adminlte.min.css') }}">
 
@@ -150,6 +151,27 @@
 
     {{-- Custom Scripts --}}
     @yield('adminlte_js')
+
+    {{-- Lucide icon initialisation --}}
+    <script>
+        (function () {
+            function initLucide() {
+                if (window.lucide) lucide.createIcons();
+            }
+            // Run immediately (scripts are at end of body, DOM is ready)
+            initLucide();
+            // Also on DOMContentLoaded in case this script somehow runs early
+            document.addEventListener('DOMContentLoaded', initLucide);
+            // Re-run whenever AdminLTE injects dynamic content (sidebar toggles, etc.)
+            if (window.MutationObserver) {
+                var _lucideTimer;
+                new MutationObserver(function () {
+                    clearTimeout(_lucideTimer);
+                    _lucideTimer = setTimeout(initLucide, 50);
+                }).observe(document.body, { childList: true, subtree: true });
+            }
+        })();
+    </script>
 
 </body>
 

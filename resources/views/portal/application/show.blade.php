@@ -275,7 +275,7 @@
                         </div>
 
                         <span class="badge badge-success">
-                            <i class="fas fa-check"></i> Submitted
+                            <i data-lucide="check"></i> Submitted
                         </span>
                     </div>
                 @empty

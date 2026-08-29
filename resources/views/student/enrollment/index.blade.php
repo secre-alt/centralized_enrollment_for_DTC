@@ -12,7 +12,7 @@
             </p>
         </div>
         <a href="{{ route('portal.enrollment.create') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus mr-1"></i> New Enrollment
+            <i data-lucide="plus" class="mr-1"></i> New Enrollment
         </a>
     </div>
 @endsection
@@ -26,13 +26,13 @@
 @if ($enrollments->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-file-alt fa-4x mb-3 u-border-color" ></i>
+            <i data-lucide="file-text" class="mb-3 u-border-color" style="width:4em;height:4em"></i>
             <h5 style="color:var(--dtc-text); font-weight:700;">No Enrollments Yet</h5>
             <p style="color:var(--dtc-text-secondary); font-size:13px; max-width:360px; margin:0 auto 20px;">
                 You haven't submitted any enrollment yet.
             </p>
             <a href="{{ route('portal.enrollment.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus mr-1"></i> Enroll Now
+                <i data-lucide="plus" class="mr-1"></i> Enroll Now
             </a>
         </div>
     </div>
@@ -40,26 +40,21 @@
     @foreach ($enrollments as $enrollment)
     <div class="card mb-3"
          style="border-left:4px solid
-            {{ $enrollment->is_paid ? '#22C55E' :
-               ($enrollment->status === 'approved' ? '#FFC72C' :
-               ($enrollment->status === 'pending' ? '#3B82F6' : '#EF4444')) }};">
+            {{ $enrollment->is_paid ? 'var(--dtc-success)' :
+               ($enrollment->status === 'approved' ? 'var(--dtc-accent)' :
+               ($enrollment->status === 'pending' ? 'var(--dtc-primary)' : 'var(--dtc-danger)')) }};">
         <div class="card-body">
             <div class="row align-items-center">
 
                 {{-- Status Icon --}}
+                @php
+                    $tone = $enrollment->is_paid ? 'success' : ($enrollment->status === 'approved' ? 'warning' : ($enrollment->status === 'pending' ? 'info' : 'danger'));
+                @endphp
                 <div class="col-auto">
-                    <div style="width:52px; height:52px; border-radius:14px; display:flex;
-                                align-items:center; justify-content:center;
-                                background:{{ $enrollment->is_paid ? '#DCFCE7' :
-                                              ($enrollment->status === 'approved' ? '#FEF9C3' :
-                                              ($enrollment->status === 'pending' ? '#DBEAFE' : '#FEE2E2')) }};">
-                        <i class="fas {{ $enrollment->is_paid ? 'fa-check-double' :
-                                        ($enrollment->status === 'approved' ? 'fa-clock' :
-                                        ($enrollment->status === 'pending' ? 'fa-hourglass-half' : 'fa-times')) }}"
-                           style="font-size:20px;
-                                  color:{{ $enrollment->is_paid ? '#15803D' :
-                                           ($enrollment->status === 'approved' ? '#D97706' :
-                                           ($enrollment->status === 'pending' ? '#1D4ED8' : '#DC2626')) }};"></i>
+                    <div class="dtc-icon-swatch is-{{ $tone }}" style="width:52px; height:52px; border-radius:14px;">
+                        <i data-lucide="{{ $enrollment->is_paid ? 'check-check' :
+                                        ($enrollment->status === 'approved' ? 'clock' :
+                                        ($enrollment->status === 'pending' ? 'hourglass' : 'x')) }}" style="font-size:20px;"></i>
                     </div>
                 </div>
 
@@ -78,24 +73,20 @@
                 {{-- Status Badge --}}
                 <div class="col-auto">
                     @if($enrollment->is_paid)
-                        <span style="background:#DCFCE7; color:#15803D; font-size:12px;
-                                     font-weight:700; padding:6px 14px; border-radius:20px;">
-                            <i class="fas fa-check-circle mr-1"></i> Enrolled
+                        <span class="dtc-status-badge is-success" style="font-size:12px; font-weight:700; padding:6px 14px;">
+                            <i data-lucide="check-circle" class="mr-1"></i> Enrolled
                         </span>
                     @elseif($enrollment->status === 'approved')
-                        <span style="background:#FEF9C3; color:#A16207; font-size:12px;
-                                     font-weight:700; padding:6px 14px; border-radius:20px;">
-                            <i class="fas fa-clock mr-1"></i> Awaiting Payment
+                        <span class="dtc-status-badge is-warning" style="font-size:12px; font-weight:700; padding:6px 14px;">
+                            <i data-lucide="clock" class="mr-1"></i> Awaiting Payment
                         </span>
                     @elseif($enrollment->status === 'pending')
-                        <span style="background:#DBEAFE; color:#1D4ED8; font-size:12px;
-                                     font-weight:700; padding:6px 14px; border-radius:20px;">
-                            <i class="fas fa-hourglass-half mr-1"></i> Under Review
+                        <span class="dtc-status-badge is-info" style="font-size:12px; font-weight:700; padding:6px 14px;">
+                            <i data-lucide="hourglass" class="mr-1"></i> Under Review
                         </span>
                     @else
-                        <span style="background:#FEE2E2; color:#DC2626; font-size:12px;
-                                     font-weight:700; padding:6px 14px; border-radius:20px;">
-                            <i class="fas fa-times-circle mr-1"></i> Rejected
+                        <span class="dtc-status-badge is-danger" style="font-size:12px; font-weight:700; padding:6px 14px;">
+                            <i data-lucide="x-circle" class="mr-1"></i> Rejected
                         </span>
                     @endif
                 </div>
@@ -113,18 +104,16 @@
 
             {{-- Rejection Remarks --}}
             @if($enrollment->status === 'rejected' && $enrollment->remarks)
-            <div style="margin-top:14px; background:#FEF2F2; border-radius:10px;
-                        padding:12px 16px; font-size:13px; color:#DC2626;">
-                <i class="fas fa-exclamation-circle mr-2"></i>
+            <div class="alert alert-danger" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                <i data-lucide="alert-circle" class="mr-2"></i>
                 <strong>Reason:</strong> {{ $enrollment->remarks }}
             </div>
             @endif
 
             {{-- Payment Success --}}
             @if($enrollment->is_paid)
-            <div style="margin-top:14px; background:#F0FDF4; border-radius:10px;
-                        padding:12px 16px; font-size:13px; color:#15803D;">
-                <i class="fas fa-check-circle mr-2"></i>
+            <div class="alert alert-success" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                <i data-lucide="check-circle" class="mr-2"></i>
                 Payment confirmed. You are officially enrolled for this semester.
             </div>
             @endif

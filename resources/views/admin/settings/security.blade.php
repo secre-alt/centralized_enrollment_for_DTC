@@ -17,7 +17,7 @@
         </div>
 
         <button type="submit" form="security-settings-form" class="btn btn-primary">
-            <i class="fas fa-save mr-1"></i> Save Changes
+            <i data-lucide="save" class="mr-1"></i> Save Changes
         </button>
     </div>
 @endsection
@@ -29,13 +29,13 @@
 
         @if (session('status'))
             <div class="alert alert-success">
-                <i class="fas fa-check-circle mr-1"></i> {{ session('status') }}
+                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
             </div>
         @endif
 
         @if ($errors->any())
             <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle mr-1"></i>
+                <i data-lucide="alert-circle" class="mr-1"></i>
                 <ul class="mb-0 pl-3">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -56,7 +56,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
-                                    <i class="fas fa-key"></i>
+                                    <i data-lucide="key"></i>
                                 </div>
                                 <h3>Password Policy</h3>
                             </div>
@@ -96,7 +96,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
-                                    <i class="fas fa-user-shield"></i>
+                                    <i data-lucide="user-check"></i>
                                 </div>
                                 <h3>Session &amp; Login</h3>
                             </div>

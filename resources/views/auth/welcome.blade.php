@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DTC EMS — Danao Technological College</title>
 
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
     <link rel="stylesheet" href="{{ asset('css/public-navbar.css') }}">
@@ -87,12 +87,12 @@
                     aria-label="Enable dark mode"
                     aria-pressed="false"
                     title="Enable dark mode">
-                    <i class="fas fa-moon" id="darkModeIcon" aria-hidden="true"></i>
+                    <i data-lucide="moon" id="darkModeIcon" aria-hidden="true"></i>
                 </button>
             </div>
 
             <button type="button" class="public-signin" data-signin-modal="trigger">
-                <i class="fas fa-arrow-right"></i> Sign in
+                <i data-lucide="arrow-right"></i> Sign in
             </button>
 
 
@@ -104,7 +104,7 @@
             aria-expanded="false"
             aria-controls="welcomeMobileNav"
         >
-            <i class="fas fa-bars"></i>
+            <i data-lucide="menu"></i>
         </button>
 
         </div>
@@ -133,7 +133,7 @@
         </a>
 
         <button type="button" class="public-signin" data-signin-modal="trigger">
-            <i class="fas fa-arrow-right"></i> Sign in
+            <i data-lucide="arrow-right"></i> Sign in
         </button>
 
     </div>
@@ -155,7 +155,7 @@
 
                     <div class="hero-cta-group">
                         <a href="{{ route('public.application.create') }}" class="btn-primary-cta">
-                            Apply for Admission <i class="fas fa-arrow-right"></i>
+                            Apply for Admission <i data-lucide="arrow-right"></i>
                         </a>
 
                         <button type="button" class="btn-secondary-cta" data-signin-modal="trigger">
@@ -168,10 +168,10 @@
                     </p>
 
                     <!-- <div class="hero-features">
-                        <div class="feature-pill"><i class="fas fa-file-alt"></i> Online Enrollment</div>
-                        <div class="feature-pill"><i class="fas fa-calendar-check"></i> Certificate Appointments</div>
-                        <div class="feature-pill"><i class="fas fa-money-bill-wave"></i> Payment Processing</div>
-                        <div class="feature-pill"><i class="fas fa-shield-alt"></i> Role-Based Access</div>
+                        <div class="feature-pill"><i data-lucide="file-text"></i> Online Enrollment</div>
+                        <div class="feature-pill"><i data-lucide="calendar-check"></i> Certificate Appointments</div>
+                        <div class="feature-pill"><i data-lucide="banknote"></i> Payment Processing</div>
+                        <div class="feature-pill"><i data-lucide="shield"></i> Role-Based Access</div>
                     </div> -->
                 </div>
 
@@ -203,11 +203,11 @@
 
                                 <div class="mockup-list">
                                     <div class="mockup-list-item">
-                                        <i class="fas fa-file-alt"></i> Certificate Request
+                                        <i data-lucide="file-text"></i> Certificate Request
                                         <span class="badge">Pending</span>
                                     </div>
                                     <div class="mockup-list-item">
-                                        <i class="fas fa-calendar-check"></i> Appointment
+                                        <i data-lucide="calendar-check"></i> Appointment
                                         <span class="badge">Scheduled</span>
                                     </div>
                                 </div>
@@ -234,34 +234,34 @@
                         id="servicesPrev"
                         aria-label="Previous service"
                     >
-                        <i class="fas fa-chevron-left"></i>
+                        <i data-lucide="chevron-left"></i>
                     </button>
 
                     <div class="carousel-viewport" id="servicesViewport" tabindex="0" aria-roledescription="carousel" aria-label="DTC EMS services">
                         <div class="carousel-track" id="servicesTrack">
 
                             <div class="service-card">
-                                <div class="icon-box"><i class="fas fa-user-graduate"></i></div>
+                                <div class="icon-box"><i data-lucide="graduation-cap"></i></div>
                                 <h3>Online Enrollment</h3>
                                 <p>Enroll and manage your student records from anywhere, anytime.</p>
                             </div>
                             <div class="service-card">
-                                <div class="icon-box"><i class="fas fa-file-alt"></i></div>
+                                <div class="icon-box"><i data-lucide="file-text"></i></div>
                                 <h3>Certificate Requests</h3>
                                 <p>Request official certificates and track their status in real time.</p>
                             </div>
                             <div class="service-card">
-                                <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
+                                <div class="icon-box"><i data-lucide="calendar-check"></i></div>
                                 <h3>Appointment Scheduling</h3>
                                 <p>Book a pickup or claiming schedule that works for you.</p>
                             </div>
                             <div class="service-card">
-                                <div class="icon-box"><i class="fas fa-money-bill-wave"></i></div>
+                                <div class="icon-box"><i data-lucide="banknote"></i></div>
                                 <h3>Payment Processing</h3>
                                 <p>Pay online via GCash, or walk in and pay directly at the Cashier.</p>
                             </div>
                             <div class="service-card">
-                                <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+                                <div class="icon-box"><i data-lucide="shield"></i></div>
                                 <h3>Role-Based Access</h3>
                                 <p>Students, alumni, registrars, cashiers, and admins each get their own dashboard.</p>
                             </div>
@@ -275,7 +275,7 @@
                         id="servicesNext"
                         aria-label="Next service"
                     >
-                        <i class="fas fa-chevron-right"></i>
+                        <i data-lucide="chevron-right"></i>
                     </button>
 
                 </div>
@@ -328,7 +328,7 @@
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
                             <span>How do I enroll through DTC EMS?</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
                             <p>Sign in to the portal with your student account, go to the Enrollment section, and follow the on-screen steps to submit your enrollment for the current term.</p>
@@ -338,7 +338,7 @@
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
                             <span>How do I request a certificate?</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
                             <p>From your dashboard, open Certificate Requests, choose the document you need, and submit the request. You can track its status in real time until it's ready for pickup.</p>
@@ -348,7 +348,7 @@
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
                             <span>How does appointment scheduling work?</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
                             <p>After your request is approved, you'll be able to pick an available date and time slot for claiming your certificate or completing enrollment steps in person.</p>
@@ -358,7 +358,7 @@
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
                             <span>What payment options are available?</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
                             <p>You can pay online through GCash via QR code, or pay in person as a walk-in, with the Cashier recording your payment directly in the system.</p>
@@ -368,7 +368,7 @@
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
                             <span>I forgot my password. What do I do?</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
                             <p>Click "Sign In," then use the Forgot Password link on the sign-in form to reset it through your registered email address.</p>
@@ -388,7 +388,7 @@
             id="backToTop"
             aria-label="Back to top"
         >
-            <i class="fas fa-arrow-up"></i>
+            <i data-lucide="arrow-up"></i>
         </button>
     </div>
 
@@ -663,5 +663,10 @@
 
 <script src="{{ asset('js/dtc-app.js') }}" defer></script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>

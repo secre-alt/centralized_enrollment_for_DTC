@@ -32,21 +32,21 @@
 <div class="row mb-3">
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-file-alt" color="primary"
+            icon="file-text" color="primary"
             label="Application Status" value="{{ $appStatusLabel }}"
             href="{{ route('portal.enrollment.index') }}" link-text="View Details" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-list-ol" color="warning"
+            icon="list-ordered" color="warning"
             label="Enrollment Steps" value="{{ $completedSteps }} of {{ count($timeline) ?: 5 }}"
             href="{{ route('portal.enrollment.index') }}" link-text="View Steps" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-calendar" color="success"
+            icon="calendar" color="success"
             label="Last Updated"
             value="{{ $latestEnrollment ? $latestEnrollment->updated_at->format('M d, Y') : 'N/A' }}"
             note="{{ $latestEnrollment ? $latestEnrollment->updated_at->format('h:i A') : '' }}" />
@@ -54,7 +54,7 @@
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-bell" color="info" :badge="$unreadCount"
+            icon="bell" color="info" :badge="$unreadCount"
             label="Notifications" value="{{ $unreadCount }} New"
             href="{{ route('notifications.index') }}" />
     </div>
@@ -112,32 +112,33 @@
 
                     {{-- Progress line --}}
                     <div style="position:absolute; top:18px; left:10%; right:10%;
-                                height:3px; background:#E2E8F0; z-index:0;"></div>
+                                height:3px; background:var(--dtc-border); z-index:0;"></div>
                     <div style="position:absolute; top:18px; left:10%;
-                                height:3px; background:#0F4CDB; z-index:1;
+                                height:3px; background:var(--dtc-primary); z-index:1;
                                 width:{{ $completedSteps> 0 ? (($completedSteps - 1) / (count($timeline) - 1)) * 80 : 0 }}%;"></div>
 
                     @foreach ($timeline as $i => $step)
                     <div style="display:flex; flex-direction:column; align-items:center;
                                 z-index:2; flex:1; text-align:center;">
-                        <div style="width:36px; height:36px; border-radius:50%;
-                                    border:3px solid {{ $step['done'] ? '#0F4CDB' : ($step['active'] ? '#FFC72C' : '#E2E8F0') }};
-                                    background:{{ $step['done'] ? '#0F4CDB' : ($step['active'] ? '#FFF9E6' : '#ffffff') }};
+                        <div data-step-state="{{ $step['done'] ? 'done' : ($step['active'] ? 'active' : 'pending') }}"
+                             style="width:36px; height:36px; border-radius:50%;
+                                    border:3px solid {{ $step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-accent)' : 'var(--dtc-border)') }};
+                                    background:{{ $step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-primary-soft)' : 'var(--dtc-surface)') }};
                                     display:flex; align-items:center; justify-content:center;
                                     font-size:12px; font-weight:700;
-                                    color:{{ $step['done'] ? '#fff' : ($step['active'] ? '#D97706' : '#94A3B8') }};
+                                    color:{{ $step['done'] ? '#fff' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)') }};
                                     margin-bottom:8px;">
                             @if($step['done'])
-                                <i class="fas fa-check u-text-xxs" ></i>
+                                <i data-lucide="check" class="u-text-xxs"></i>
                             @else
                                 {{ $i + 1 }}
                             @endif
                         </div>
                         <div style="font-size:11px; font-weight:{{ $step['done'] || $step['active'] ? '700' : '500' }};
-                                    color:{{ $step['done'] ? '#0F4CDB' : ($step['active'] ? '#D97706' : '#94A3B8') }};">
+                                    color:{{ $step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)') }};">
                             {{ $step['label'] }}
                         </div>
-                        <div style="font-size:10px; color:#94A3B8; margin-top:2px;">
+                        <div style="font-size:10px; color:var(--dtc-text-muted); margin-top:2px;">
                             {{ $step['sublabel'] }}
                         </div>
                     </div>
@@ -147,25 +148,23 @@
                 {{-- Current step info --}}
                 @php $activeStep = collect($timeline)->firstWhere('active', true); @endphp
                 @if($activeStep)
-                <div style="margin-top:20px; background:#FEF9C3; border-radius:12px;
-                            padding:12px 16px; display:flex; align-items:center; gap:12px;
-                            border:1.5px solid #FDE68A;">
-                    <i class="fas fa-arrow-right" style="color:#D97706;"></i>
+                <div class="alert alert-warning" style="margin-top:20px; border-radius:12px;
+                            padding:12px 16px; display:flex; align-items:center; gap:12px;">
+                    <i data-lucide="arrow-right"></i>
                     <div>
-                        <div style="font-size:13px; font-weight:600; color:#92400E;">
+                        <div style="font-size:13px; font-weight:600;">
                             Current Step: {{ $activeStep['label'] }}
                         </div>
-                        <div style="font-size:12px; color:#B45309;">
+                        <div style="font-size:12px; opacity:0.85;">
                             {{ $activeStep['sublabel'] }}
                         </div>
                     </div>
                 </div>
                 @elseif($latestEnrollment && $latestEnrollment->is_paid)
-                <div style="margin-top:20px; background:#DCFCE7; border-radius:12px;
-                            padding:12px 16px; display:flex; align-items:center; gap:12px;
-                            border:1.5px solid #BBF7D0;">
-                    <i class="fas fa-check-circle" style="color:#15803D;"></i>
-                    <div style="font-size:13px; font-weight:600; color:#15803D;">
+                <div class="alert alert-success" style="margin-top:20px; border-radius:12px;
+                            padding:12px 16px; display:flex; align-items:center; gap:12px;">
+                    <i data-lucide="check-circle"></i>
+                    <div style="font-size:13px; font-weight:600;">
                         All steps completed! You are officially enrolled.
                     </div>
                 </div>
@@ -179,7 +178,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Enrolled Subjects</span>
                 @if($subjects->isNotEmpty())
-                    <span style="font-size:12px; color:#0F4CDB; font-weight:600;">
+                    <span style="font-size:12px; color:var(--dtc-primary); font-weight:600;">
                         {{ $subjects->count() }} Subject{{ $subjects->count()> 1 ? 's' : '' }}
                     </span>
                 @endif
@@ -189,10 +188,8 @@
                 <div style="padding:12px 20px; border-bottom:1px solid var(--dtc-border-soft);
                             display:flex; align-items:center; justify-content:space-between;">
                     <div  class="u-flex-center-gap-12">
-                        <div style="width:36px; height:36px; border-radius:10px;
-                                    background:#EEF2FF; display:flex; align-items:center;
-                                    justify-content:center; flex-shrink:0;">
-                            <i class="fas fa-book u-link-md" ></i>
+                        <div class="dtc-icon-swatch is-primary" style="flex-shrink:0;">
+                            <i data-lucide="book" class="u-link-md"></i>
                         </div>
                         <div>
                             <div  class="u-text-sm-bold">
@@ -204,20 +201,18 @@
                         </div>
                     </div>
                     @if($latestEnrollment && $latestEnrollment->is_paid)
-                        <span style="background:#DCFCE7; color:#15803D; font-size:11px;
-                                     font-weight:600; padding:3px 10px; border-radius:20px;">
-                            <i class="fas fa-check mr-1"></i> Enrolled
+                        <span class="dtc-status-badge is-success" style="font-weight:600;">
+                            <i data-lucide="check" class="mr-1"></i> Enrolled
                         </span>
                     @elseif($latestEnrollment && $latestEnrollment->status === 'pending')
-                        <span style="background:#FEF9C3; color:#A16207; font-size:11px;
-                                     font-weight:600; padding:3px 10px; border-radius:20px;">
-                            <i class="fas fa-clock mr-1"></i> Pending
+                        <span class="dtc-status-badge is-warning" style="font-weight:600;">
+                            <i data-lucide="clock" class="mr-1"></i> Pending
                         </span>
                     @endif
                 </div>
                 @empty
                 <div class="text-center py-4 u-muted" >
-                    <i class="fas fa-book fa-2x mb-2"></i>
+                    <i data-lucide="book" class="mb-2" style="width:2em;height:2em"></i>
                     <p  class="u-text-sm">No subjects enrolled yet.</p>
                     @if(!$latestEnrollment)
                         <a href="{{ route('portal.enrollment.create') }}"
@@ -239,10 +234,9 @@
                        class="dtc-payment-btn dtc-next-step-row {{ $step['active'] ? 'is-active' : '' }}"
                        data-url="{{ $step['url'] }}" style="width:100%; border:0; text-align:left;">
                         <div style="width:44px; height:44px; border-radius:12px; flex-shrink:0;
-                                    background:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-surface-soft)' }};
+                                    background:{{ $step['active'] ? 'var(--dtc-primary)' : 'var(--dtc-surface-soft)' }};
                                     display:flex; align-items:center; justify-content:center;">
-                            <i class="fas {{ $step['icon'] }}"
-                               style="font-size:18px;
+                            <i data-lucide="{{ $step['icon'] }}" style="font-size:18px;
                                       color:{{ $step['active'] ? '#fff' : 'var(--dtc-text-muted)' }};"></i>
                         </div>
                         <div  class="u-flex-1">
@@ -254,17 +248,15 @@
                                 {{ $step['desc'] }}
                             </div>
                         </div>
-                        <i class="fas fa-chevron-right"
-                           style="color:{{ $step['active'] ? 'var(--dtc-on-primary-soft)' : 'var(--dtc-text-muted)' }};
+                        <i data-lucide="chevron-right" style="color:{{ $step['active'] ? 'var(--dtc-on-primary-soft)' : 'var(--dtc-text-muted)' }};
                                   font-size:12px;"></i>
                     </button>
                 @else
                     <a href="{{ $step['url'] }}" class="dtc-next-step-row {{ $step['active'] ? 'is-active' : '' }}">
                         <div style="width:44px; height:44px; border-radius:12px; flex-shrink:0;
-                                    background:{{ $step['active'] ? '#0F4CDB' : 'var(--dtc-surface-soft)' }};
+                                    background:{{ $step['active'] ? 'var(--dtc-primary)' : 'var(--dtc-surface-soft)' }};
                                     display:flex; align-items:center; justify-content:center;">
-                            <i class="fas {{ $step['icon'] }}"
-                               style="font-size:18px;
+                            <i data-lucide="{{ $step['icon'] }}" style="font-size:18px;
                                       color:{{ $step['active'] ? '#fff' : 'var(--dtc-text-muted)' }};"></i>
                         </div>
                         <div  class="u-flex-1">
@@ -276,8 +268,7 @@
                                 {{ $step['desc'] }}
                             </div>
                         </div>
-                        <i class="fas fa-chevron-right"
-                           style="color:{{ $step['active'] ? 'var(--dtc-on-primary-soft)' : 'var(--dtc-text-muted)' }};
+                        <i data-lucide="chevron-right" style="color:{{ $step['active'] ? 'var(--dtc-on-primary-soft)' : 'var(--dtc-text-muted)' }};
                                   font-size:12px;"></i>
                     </a>
                 @endif
@@ -293,19 +284,18 @@
 
         {{-- Important Reminder --}}
         @if($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid)
-        <div class="card mb-3"
-             style="background:#FFFBEB; border:1.5px solid #FDE68A; border-radius:16px;">
+        <div class="card mb-3 alert alert-warning"
+             style="border-radius:16px;">
             <div class="card-body p-3">
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                    <div style="width:32px; height:32px; border-radius:10px; background:#FEF3C7;
-                                display:flex; align-items:center; justify-content:center;">
-                        <i class="fas fa-bell" style="color:#D97706; font-size:14px;"></i>
+                    <div class="dtc-icon-swatch is-warning" style="width:32px; height:32px;">
+                        <i data-lucide="bell" style="font-size:14px;"></i>
                     </div>
-                    <span style="font-size:13px; font-weight:700; color:#92400E;">
+                    <span style="font-size:13px; font-weight:700;">
                         Important Reminder
                     </span>
                 </div>
-                <p style="font-size:12px; color:#B45309; margin:0 0 12px; line-height:1.6;">
+                <p style="font-size:12px; opacity:0.85; margin:0 0 12px; line-height:1.6;">
                     Please complete your enrollment process by paying the ₱{{ number_format($fee, 2) }} fee at the Cashier's Office.
                 </p>
                 <button type="button" class="btn btn-warning btn-sm btn-block dtc-payment-btn u-text-xxs"
@@ -322,7 +312,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Announcements</span>
                 <a href="{{ route('notifications.index') }}"
-                   style="font-size:12px; color:#0F4CDB; text-decoration:none; font-weight:600;">
+                   style="font-size:12px; color:var(--dtc-primary); text-decoration:none; font-weight:600;">
                     View All
                 </a>
             </div>
@@ -330,25 +320,21 @@
                 @forelse ($announcements as $notif)
                 <div style="padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);">
                     <div style="display:flex; gap:10px; align-items:flex-start;">
-                        <div style="width:32px; height:32px; border-radius:10px; flex-shrink:0;
-                                    background:{{ $notif->type === 'success' ? '#DCFCE7' : ($notif->type === 'danger' ? '#FEE2E2' : '#DBEAFE') }};
-                                    display:flex; align-items:center; justify-content:center;">
-                            <i class="fas fa-bullhorn"
-                               style="font-size:12px;
-                                      color:{{ $notif->type === 'success' ? '#15803D' : ($notif->type === 'danger' ? '#DC2626' : '#1D4ED8') }};"></i>
+                        <div class="dtc-icon-swatch is-{{ $notif->type === 'success' ? 'success' : ($notif->type === 'danger' ? 'danger' : 'info') }}" style="width:32px; height:32px; flex-shrink:0;">
+                            <i data-lucide="megaphone" style="font-size:12px;"></i>
                         </div>
                         <div>
                             <div  class="u-text-sm-bold">
                                 {{ $notif->title }}
                             </div>
-                            <div style="font-size:11px; color:#94A3B8; margin-top:2px;">
+                            <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:2px;">
                                 {{ $notif->created_at->format('M d, Y') }}
                             </div>
                         </div>
                     </div>
                 </div>
                 @empty
-                <div class="text-center py-4" style="color:#94A3B8; font-size:13px;">
+                <div class="text-center py-4" style="color:var(--dtc-text-muted); font-size:13px;">
                     No announcements yet.
                 </div>
                 @endforelse
@@ -361,12 +347,12 @@
             <div class="card-body p-0">
                 @php
                     $actions = [
-                        ['icon' => 'fa-file-alt',      'label' => 'My Application',     'sub' => 'View enrollment status',    'url' => route('portal.enrollment.index')],
-                        ['icon' => 'fa-calendar-check', 'label' => 'Book Appointment',   'sub' => 'Schedule document pickup',  'url' => route('portal.appointments.create')],
-                        ['icon' => 'fa-bell',           'label' => 'Notifications',      'sub' => $unreadCount . ' unread',    'url' => route('notifications.index')],
+                        ['icon' => 'file-text',      'label' => 'My Application',     'sub' => 'View enrollment status',    'url' => route('portal.enrollment.index')],
+                        ['icon' => 'calendar-check', 'label' => 'Book Appointment',   'sub' => 'Schedule document pickup',  'url' => route('portal.appointments.create')],
+                        ['icon' => 'bell',           'label' => 'Notifications',      'sub' => $unreadCount . ' unread',    'url' => route('notifications.index')],
                     ];
                     if(auth()->user()->hasRole('alumni')) {
-                        $actions[] = ['icon' => 'fa-folder-open', 'label' => 'Document Requests', 'sub' => 'Request TOR, Diploma etc.', 'url' => route('portal.documents.index')];
+                        $actions[] = ['icon' => 'folder-open', 'label' => 'Document Requests', 'sub' => 'Request TOR, Diploma etc.', 'url' => route('portal.documents.index')];
                     }
                 @endphp
                 @foreach($actions as $action)
@@ -376,10 +362,8 @@
                           padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
                           text-decoration:none; transition:background 0.2s;">
                     <div  class="u-flex-center-gap-12">
-                        <div style="width:36px; height:36px; border-radius:10px;
-                                    background:#EEF2FF; display:flex; align-items:center;
-                                    justify-content:center;">
-                            <i class="fas {{ $action['icon'] }} u-link-md"
+                        <div class="dtc-icon-swatch is-primary">
+                            <i data-lucide="{{ $action['icon'] }}" class="u-link-md"
                                ></i>
                         </div>
                         <div>
@@ -391,7 +375,7 @@
                             </div>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right" style="color:#CBD5E1; font-size:12px;"></i>
+                    <i data-lucide="chevron-right" style="color:var(--dtc-text-muted); font-size:12px;"></i>
                 </a>
                 @endforeach
             </div>
@@ -421,11 +405,11 @@
                             {{ ucfirst($nextAppointment->document_type) }}
                         </div>
                         <div style="font-size:11px; opacity:0.75; margin-top:2px;">
-                            <i class="fas fa-clock mr-1"></i>
+                            <i data-lucide="clock" class="mr-1"></i>
                             {{ \Carbon\Carbon::parse($nextAppointment->slot->start_time)->format('h:i A') }}
                         </div>
                         <div style="font-size:11px; opacity:0.75; margin-top:2px;">
-                            <i class="fas fa-map-marker-alt mr-1"></i> Registrar Office
+                            <i data-lucide="map-pin" class="mr-1"></i> Registrar Office
                         </div>
                     </div>
                 </div>
@@ -438,4 +422,14 @@
 
 @include('student.enrollment._payment-modal')
 
+@endsection
+
+@section('css')
+<style>
+/* The "active" step marker uses a pale yellow tint that reads fine on a
+   white card but looks like a stray light patch on a dark card. */
+body.dtc-dark [data-step-state="active"] {
+    background: rgba(255, 199, 44, 0.15) !important;
+}
+</style>
 @endsection

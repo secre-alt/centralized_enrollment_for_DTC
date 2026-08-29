@@ -43,8 +43,8 @@
             input.type = isPassword ? 'text' : 'password';
             const icon = btn.querySelector('i');
             if (icon) {
-                icon.classList.toggle('fa-eye', !isPassword);
-                icon.classList.toggle('fa-eye-slash', isPassword);
+                icon.setAttribute('data-lucide', isPassword ? 'eye' : 'eye-off');
+                if (window.lucide) lucide.createIcons({ nodes: [icon] });
             }
             btn.setAttribute('aria-label',
                 isPassword ? 'Hide password' : 'Show password'

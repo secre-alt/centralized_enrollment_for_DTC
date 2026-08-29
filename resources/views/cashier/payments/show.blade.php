@@ -12,7 +12,7 @@
             </p>
         </div>
         <a href="{{ route('cashier.payments.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left mr-1"></i> Back
+            <i data-lucide="arrow-left" class="mr-1"></i> Back
         </a>
     </div>
 @endsection

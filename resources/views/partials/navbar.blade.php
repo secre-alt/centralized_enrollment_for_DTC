@@ -13,7 +13,7 @@
     <div class="navbar-search-wrapper">
 
         {{-- Icon --}}
-        <i class="fas fa-search navbar-search-icon"></i>
+        <i data-lucide="search" class="navbar-search-icon"></i>
 
         {{-- Input --}}
         <input type="text"
@@ -30,7 +30,7 @@
 
         {{-- Clear button --}}
         <button class="search-clear-btn" id="search-clear" onclick="clearSearch()">
-            <i class="fas fa-times"></i>
+            <i data-lucide="x"></i>
         </button>
 
     </div>
@@ -59,7 +59,7 @@
 
         {{-- Loading --}}
         <div class="search-loading u-hidden" id="search-loading" >
-            <i class="fas fa-spinner fa-spin"></i>
+            <i data-lucide="loader" class="lucide-spin"></i>
         </div>
 
         {{-- Results --}}
@@ -72,7 +72,7 @@
 
         {{-- Empty --}}
         <div class="search-empty u-hidden" id="search-empty" >
-            <i class="fas fa-search"></i>
+            <i data-lucide="search"></i>
             <div class="search-empty-title">No results found</div>
             <div class="search-empty-sub" id="empty-query"></div>
         </div>
@@ -89,7 +89,7 @@
         aria-label="Enable dark mode"
         aria-pressed="false"
         title="Enable dark mode">
-        <i class="fas fa-moon" id="darkModeIcon" aria-hidden="true"></i>
+        <i data-lucide="moon" id="darkModeIcon" aria-hidden="true"></i>
     </button>
 </li>
 
@@ -98,7 +98,7 @@
     <a href="#" class="nav-link dropdown-toggle navbar-icon-link"
        data-toggle="dropdown" id="notifBell" aria-label="Open notifications"
        aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-bell navbar-icon" aria-hidden="true"></i>
+        <i data-lucide="bell" class="navbar-icon" aria-hidden="true"></i>
         @if($unread > 0)
             <span id="notif-badge" class="navbar-notification-badge">
                 {{ $unread }}
@@ -138,9 +138,9 @@
 
                 {{-- Icon --}}
                 <div class="notif-icon notif-icon-{{ $notif->type }}">
-                    <i class="fas {{ $notif->type === 'success' ? 'fa-check-circle' :
-                                    ($notif->type === 'danger'   ? 'fa-times-circle' :
-                                    ($notif->type === 'warning'  ? 'fa-exclamation-circle' : 'fa-info-circle')) }}"></i>
+                    <i data-lucide="{{ $notif->type === 'success' ? 'check-circle' :
+                                    ($notif->type === 'danger'   ? 'x-circle' :
+                                    ($notif->type === 'warning'  ? 'alert-circle' : 'info')) }}"></i>
                 </div>
 
                 {{-- Content --}}
@@ -157,14 +157,14 @@
                         {{ Str::limit($notif->message, 60) }}
                     </div>
                     <div class="notif-time">
-                        <i class="fas fa-clock" aria-hidden="true"></i>
+                        <i data-lucide="clock" aria-hidden="true"></i>
                         {{ $notif->created_at->diffForHumans() }}
                     </div>
                 </div>
             </a>
             @empty
             <div class="notify-empty">
-                <i class="fas fa-bell-slash notify-empty-icon" aria-hidden="true"></i>
+                <i data-lucide="bell-off" class="notify-empty-icon" aria-hidden="true"></i>
                 <div class="notify-empty-title">
                     No notifications yet
                 </div>

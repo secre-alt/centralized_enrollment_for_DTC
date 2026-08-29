@@ -17,7 +17,7 @@
         </div>
 
         <button type="submit" form="payment-settings-form" class="btn btn-primary">
-            <i class="fas fa-save mr-1"></i> Save Changes
+            <i data-lucide="save" class="mr-1"></i> Save Changes
         </button>
     </div>
 @endsection
@@ -30,7 +30,7 @@
 
         @if (session('status'))
             <div class="alert alert-success">
-                <i class="fas fa-check-circle mr-1"></i> {{ session('status') }}
+                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
             </div>
         @endif
         @if (session('success'))
@@ -47,7 +47,7 @@
                     <div class="card-body">
                         <div class="settings-section-title">
                             <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
-                                <i class="fas fa-money-bill"></i>
+                                <i data-lucide="banknote"></i>
                             </div>
                             <h3>Fee &amp; GCash Details</h3>
                         </div>
@@ -106,7 +106,7 @@
                     <div class="card-body">
                         <div class="settings-section-title">
                             <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
-                                <i class="fas fa-qrcode"></i>
+                                <i data-lucide="qr-code"></i>
                             </div>
                             <h3>GCash QR Code</h3>
                         </div>
@@ -127,7 +127,7 @@
                         @else
                             <div style="background:#FEF9C3; border:1.5px solid #FDE68A; border-radius:8px;
                                         padding:12px 16px; margin-bottom:16px; font-size:13px; color:#92400E;">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                <i data-lucide="alert-triangle" class="mr-2"></i>
                                 No QR code uploaded yet. Students will see a placeholder on the payment page.
                             </div>
                         @endif
@@ -151,7 +151,7 @@
                             </div>
 
                             <button type="submit" class="btn btn-dark">
-                                <i class="fas fa-upload mr-1"></i> Upload QR Code
+                                <i data-lucide="upload" class="mr-1"></i> Upload QR Code
                             </button>
                         </form>
                     </div>

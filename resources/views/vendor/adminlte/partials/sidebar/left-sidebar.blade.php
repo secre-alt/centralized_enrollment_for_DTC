@@ -39,25 +39,24 @@
                 ->implode('');
         @endphp
         <div class="dtc-sidebar-user-panel">
-            <div class="dtc-sidebar-user-main">
+            <button class="dtc-sidebar-user-main"
+                    type="button"
+                    id="dtcSidebarProfileToggle"
+                    aria-expanded="false"
+                    aria-controls="dtcSidebarProfileMenu"
+                    aria-label="Open account menu">
                 <div class="dtc-sidebar-avatar" aria-hidden="true">{{ $sidebarInitials ?: 'U' }}</div>
                 <div class="dtc-sidebar-user-copy">
                     <div class="dtc-sidebar-user-name" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
                     <div class="dtc-sidebar-user-role">{{ $sidebarRoleLabel }}</div>
                 </div>
-                <button class="dtc-sidebar-profile-toggle"
-                        type="button"
-                        data-toggle="collapse"
-                        data-target="#dtcSidebarProfileMenu"
-                        aria-expanded="false"
-                        aria-controls="dtcSidebarProfileMenu"
-                        aria-label="Open account menu">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </div>
-            <div class="collapse dtc-sidebar-profile-menu" id="dtcSidebarProfileMenu">
+                <span class="dtc-sidebar-profile-chevron" aria-hidden="true">
+                    <i data-lucide="chevron-up"></i>
+                </span>
+            </button>
+            <div class="dtc-sidebar-profile-menu" id="dtcSidebarProfileMenu" hidden>
                 <a href="{{ route('notifications.index') }}" class="dtc-sidebar-profile-link">
-                    <i class="fas fa-bell"></i>
+                    <i data-lucide="bell"></i>
                     <span>Notifications</span>
                     @if(auth()->user()->unreadNotificationsCount() > 0)
                         <span class="dtc-sidebar-profile-badge">{{ auth()->user()->unreadNotificationsCount() }}</span>
@@ -65,7 +64,7 @@
                 </a>
                 @if(auth()->user()->hasRole('admin'))
                     <a href="{{ route('admin.settings.index') }}" class="dtc-sidebar-profile-link">
-                        <i class="fas fa-cog"></i>
+                        <i data-lucide="settings"></i>
                         <span>Settings</span>
                     </a>
                 @endif
@@ -73,7 +72,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="dtc-sidebar-profile-link is-danger">
-                        <i class="fas fa-sign-out-alt"></i>
+                        <i data-lucide="log-out"></i>
                         <span>Logout</span>
                     </button>
                 </form>

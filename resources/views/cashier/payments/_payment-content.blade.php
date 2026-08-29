@@ -18,7 +18,7 @@
             <div class="dtc-review-avatar">{{ $initials ?: '?' }}</div>
             <div class="dtc-review-identity-copy">
                 <h5 class="dtc-review-name">{{ $enrollment->user->name }}</h5>
-                <p class="dtc-review-email"><i class="fas fa-envelope"></i> {{ $enrollment->user->email }}</p>
+                <p class="dtc-review-email"><i data-lucide="mail"></i> {{ $enrollment->user->email }}</p>
             </div>
         </div>
         <div class="dtc-review-header-right">
@@ -30,7 +30,7 @@
                 <span class="dtc-status-badge is-neutral"><span class="dtc-status-dot"></span> Unpaid</span>
             @endif
             <button type="button" class="dtc-review-close" data-dismiss="modal" aria-label="Close">
-                <i class="fas fa-times"></i>
+                <i data-lucide="x"></i>
             </button>
         </div>
     </div>
@@ -44,7 +44,7 @@
 
         <div class="dtc-review-section">
             <div class="dtc-review-section-title">
-                <span><i class="fas fa-graduation-cap"></i> Payment Summary</span>
+                <span><i data-lucide="graduation-cap"></i> Payment Summary</span>
             </div>
             <div class="dtc-review-info-grid">
                 <div class="dtc-review-info">
@@ -85,7 +85,7 @@
         @if (! $enrollment->is_paid)
             <div style="background:#F0FDF4; border:1.5px solid #BBF7D0; border-radius:12px;
                         padding:12px 14px; margin-bottom:20px; font-size:12.5px; color:#15803D;">
-                <i class="fas fa-info-circle mr-2"></i>
+                <i data-lucide="info" class="mr-2"></i>
                 Upon confirmation, the student's account will be upgraded to
                 <strong>Student</strong> status and they will be officially enrolled.
             </div>
@@ -95,7 +95,7 @@
             {{-- ── GCash Review Branch ─────────────────────────────── --}}
             <div class="dtc-review-section">
                 <div class="dtc-review-section-title">
-                    <span><i class="fas fa-qrcode"></i> GCash Payment Review</span>
+                    <span><i data-lucide="qr-code"></i> GCash Payment Review</span>
                 </div>
                 <div class="dtc-review-info-grid">
                     <div class="dtc-review-info">
@@ -109,7 +109,7 @@
                 </div>
                 <a href="{{ route('cashier.payments.proof', $latestPayment) }}" target="_blank"
                    class="dtc-btn dtc-btn-secondary" style="margin-top:12px;">
-                    <i class="fas fa-image"></i> View Proof of Payment
+                    <i data-lucide="image"></i> View Proof of Payment
                 </a>
             </div>
 
@@ -136,7 +136,7 @@
             <div class="dtc-review-section">
                 <button type="button" class="dtc-btn dtc-btn-secondary dtc-receipt-btn"
                         data-url="{{ route('cashier.payments.receipt', $enrollment) }}">
-                    <i class="fas fa-receipt"></i> View Receipt
+                    <i data-lucide="receipt"></i> View Receipt
                 </button>
             </div>
         @endif
@@ -153,13 +153,13 @@
                 <div class="dtc-review-footer-right">
                     <button type="button" class="dtc-btn dtc-btn-outline-danger dtc-review-reject-trigger"
                             data-target="rejectPanel-{{ $enrollment->id }}">
-                        <i class="fas fa-times"></i> Reject
+                        <i data-lucide="x"></i> Reject
                     </button>
                     <form method="POST" action="{{ route('cashier.payments.verify', $latestPayment) }}">
                         @csrf
                         <button type="submit" class="dtc-btn dtc-btn-success"
                                 onclick="return confirm('Verify this GCash payment and promote applicant to student?')">
-                            <i class="fas fa-check"></i> Verify Payment
+                            <i data-lucide="check"></i> Verify Payment
                         </button>
                     </form>
                 </div>
@@ -167,7 +167,7 @@
                 <div class="dtc-review-footer-right">
                     <button type="submit" form="walkinForm-{{ $enrollment->id }}" class="dtc-btn dtc-btn-success"
                             onclick="return confirm('Confirm cash payment received?')">
-                        <i class="fas fa-check"></i> Confirm Payment Received
+                        <i data-lucide="check"></i> Confirm Payment Received
                     </button>
                 </div>
             @endif
@@ -176,7 +176,7 @@
         <div class="dtc-review-footer-reject u-hidden" >
             <button type="button" class="dtc-btn dtc-btn-secondary dtc-review-reject-cancel">Cancel</button>
             <button type="submit" form="rejectForm-{{ $enrollment->id }}" class="dtc-btn dtc-btn-danger">
-                <i class="fas fa-check"></i> Confirm Rejection
+                <i data-lucide="check"></i> Confirm Rejection
             </button>
         </div>
 

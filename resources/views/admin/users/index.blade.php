@@ -14,7 +14,7 @@
             </p>
         </div>
         <button type="button" class="btn btn-primary btn-sm add-user-btn" data-toggle="modal" data-target="#createUserModal">
-            <i class="fas fa-user-plus mr-1"></i> 
+            <i data-lucide="user-plus" class="mr-1"></i> 
             <span class="add-user-text">Add New User</span>
         </button>
     </div>
@@ -34,12 +34,12 @@
 <div class="row mb-2">
     @php
         $roleStatConfig = [
-            'admin'         => ['icon' => 'fa-user-shield',    'color' => 'primary'],
-            'registrar'     => ['icon' => 'fa-id-card',        'color' => 'success'],
-            'cashier'       => ['icon' => 'fa-cash-register',  'color' => 'warning'],
-            'student'       => ['icon' => 'fa-user-graduate',  'color' => 'info'],
-            'alumni'        => ['icon' => 'fa-user-tie',       'color' => 'danger'],
-            'new_applicant' => ['icon' => 'fa-user-clock',     'color' => 'neutral'],
+            'admin'         => ['icon' => 'user-check',    'color' => 'primary'],
+            'registrar'     => ['icon' => 'id-card',        'color' => 'success'],
+            'cashier'       => ['icon' => 'receipt',  'color' => 'warning'],
+            'student'       => ['icon' => 'graduation-cap',  'color' => 'info'],
+            'alumni'        => ['icon' => 'award',          'color' => 'danger'],
+            'new_applicant' => ['icon' => 'user-plus',      'color' => 'neutral'],
         ];
     @endphp
     @foreach($roleStatConfig as $role => $cfg)
@@ -99,23 +99,17 @@
                         @foreach($user->roles as $role)
                             @php
                                 $rc = [
-                                    'admin'         => ['bg'=>'var(--dtc-primary-soft)','color'=>'var(--dtc-primary)'],
-                                    'registrar'     => ['bg'=>'#DCFCE7','color'=>'#15803D'],
-                                    'cashier'       => ['bg'=>'#FEF9C3','color'=>'#A16207'],
-                                    'student'       => ['bg'=>'#EDE9FE','color'=>'#7C3AED'],
-                                    'alumni'        => ['bg'=>'#FEE2E2','color'=>'#DC2626'],
-                                    'new_applicant' => ['bg'=>'#DBEAFE','color'=>'#1D4ED8'],
-                                ][$role->name] ?? ['bg'=>'var(--dtc-border-soft)','color'=>'var(--dtc-text-secondary)'];
+                                    'admin'         => ['tone'=>'primary'],
+                                    'registrar'     => ['tone'=>'success'],
+                                    'cashier'       => ['tone'=>'warning'],
+                                    'student'       => ['tone'=>'purple'],
+                                    'alumni'        => ['tone'=>'danger'],
+                                    'new_applicant' => ['tone'=>'info'],
+                                ][$role->name] ?? ['tone'=>'neutral'];
                             @endphp
 
-                            <span style="background:{{ $rc['bg'] }};
-                                         color:{{ $rc['color'] }};
-                                         font-size:11px;
-                                         font-weight:700;
-                                         padding:3px 10px;
-                                         border-radius:20px;
-                                         text-transform:capitalize;
-                                         white-space:nowrap; display:inline-block;">
+                            <span class="dtc-status-badge is-{{ $rc['tone'] ?? 'neutral' }}"
+                                  style="font-weight:700; text-transform:capitalize;">
                                 {{ str_replace('_',' ', $role->name) }}
                             </span>
                         @endforeach
@@ -151,7 +145,7 @@
                                            font-size:11px;
                                            font-weight:600;
                                            cursor:pointer;">
-                                <i class="fas fa-edit"></i>
+                                <i data-lucide="pencil"></i>
                             </button>
 
                             @if($user->id !== auth()->id())
@@ -161,8 +155,8 @@
                                 @method('DELETE')
 
                                 <button type="submit"
-                                        style="background:#FEE2E2;
-                                               color:#DC2626;
+                                        class="dtc-status-badge is-danger"
+                                        style="font-size:11px; font-weight:700;
                                                border:none;
                                                width:34px;
                                                height:34px;
@@ -175,7 +169,7 @@
                                                font-weight:600;
                                                cursor:pointer;"
                                         onclick="return confirm('Delete {{ $user->name }}?')">
-                                    <i class="fas fa-trash"></i>
+                                    <i data-lucide="trash-2"></i>
                                 </button>
                             </form>
                             @endif
@@ -230,14 +224,14 @@
             {{-- Header --}}
             <div class="dtc-modal-header">
                 <div class="dtc-modal-header-icon">
-                    <i class="fas fa-user-plus"></i>
+                    <i data-lucide="user-plus"></i>
                 </div>
                 <div class="dtc-modal-header-text">
                     <h5>Add New User</h5>
                     <p>Create an account and assign a role</p>
                 </div>
                 <button type="button" class="dtc-modal-close" data-dismiss="modal" aria-label="Close">
-                    <i class="fas fa-times"></i>
+                    <i data-lucide="x"></i>
                 </button>
             </div>
 
@@ -250,7 +244,7 @@
                             <div class="form-group">
                                 <label class="dtc-form-label">Full Name</label>
                                 <div class="dtc-input-icon-group">
-                                    <i class="fas fa-user dtc-input-icon"></i>
+                                    <i data-lucide="user" class="dtc-input-icon"></i>
                                     <input type="text" name="name" class="form-control dtc-input-with-icon"
                                            value="{{ old('name') }}"
                                            placeholder="Enter full name" required>
@@ -261,7 +255,7 @@
                             <div class="form-group">
                                 <label class="dtc-form-label">Email Address</label>
                                 <div class="dtc-input-icon-group">
-                                    <i class="fas fa-envelope dtc-input-icon"></i>
+                                    <i data-lucide="mail" class="dtc-input-icon"></i>
                                     <input type="email" name="email" class="form-control dtc-input-with-icon"
                                            value="{{ old('email') }}"
                                            placeholder="Enter email address" required>
@@ -273,7 +267,7 @@
                     <div class="form-group">
                         <label class="dtc-form-label">Temporary Password</label>
                         <div class="dtc-input-icon-group">
-                            <i class="fas fa-lock dtc-input-icon"></i>
+                            <i data-lucide="lock" class="dtc-input-icon"></i>
                             <input type="text" name="password" class="form-control dtc-input-with-icon"
                                    placeholder="Min. 6 characters" required>
                         </div>
@@ -288,21 +282,20 @@
                             @foreach($roles as $role)
                             @php
                                 $roleConfig = [
-                                    'registrar'     => ['bg'=>'#DCFCE7','color'=>'#15803D','icon'=>'fa-id-card'],
-                                    'cashier'       => ['bg'=>'#FEF9C3','color'=>'#A16207','icon'=>'fa-cash-register'],
-                                    'student'       => ['bg'=>'#EDE9FE','color'=>'#7C3AED','icon'=>'fa-user-graduate'],
-                                    'alumni'        => ['bg'=>'#FEE2E2','color'=>'#DC2626','icon'=>'fa-user-tie'],
-                                    'new_applicant' => ['bg'=>'#DBEAFE','color'=>'#1D4ED8','icon'=>'fa-user-clock'],
-                                ][$role->name] ?? ['bg'=>'#EEF2FF','color'=>'#0F4CDB','icon'=>'fa-user'];
+                                    'registrar'     => ['tone'=>'success', 'icon'=>'id-card'],
+                                    'cashier'       => ['tone'=>'warning', 'icon'=>'receipt'],
+                                    'student'       => ['tone'=>'purple',  'icon'=>'graduation-cap'],
+                                    'alumni'        => ['tone'=>'danger',  'icon'=>'award'],
+                                    'new_applicant' => ['tone'=>'info',    'icon'=>'user-plus'],
+                                ][$role->name] ?? ['tone'=>'primary', 'icon'=>'user'];
                             @endphp
                             <div class="col-6 col-md-4 mb-2">
                                 <label class="dtc-role-option-label">
                                     <input type="radio" name="role" value="{{ $role->name }}"
                                            class="create-role-radio dtc-sr-only">
                                     <div class="create-role-option">
-                                        <div class="dtc-role-icon" style="background:{{ $roleConfig['bg'] }};">
-                                            <i class="fas {{ $roleConfig['icon'] }}"
-                                               style="color:{{ $roleConfig['color'] }};"></i>
+                                        <div class="dtc-icon-swatch is-{{ $roleConfig['tone'] }} dtc-role-icon" data-role="{{ $role->name }}">
+                                            <i data-lucide="{{ $roleConfig['icon'] }}"></i>
                                         </div>
                                         <span class="dtc-role-name">
                                             {{ str_replace('_',' ', $role->name) }}
@@ -319,7 +312,7 @@
                 <div class="modal-footer dtc-modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-user-plus mr-1"></i> Create Account
+                        <i data-lucide="user-plus" class="mr-1"></i> Create Account
                     </button>
                 </div>
             </form>
@@ -340,7 +333,7 @@
                     <p id="edit-modal-email">user@dtc.edu.ph</p>
                 </div>
                 <button type="button" class="dtc-modal-close" data-dismiss="modal" aria-label="Close">
-                    <i class="fas fa-times"></i>
+                    <i data-lucide="x"></i>
                 </button>
             </div>
 
@@ -353,7 +346,7 @@
                             <div class="form-group">
                                 <label class="dtc-form-label">Full Name</label>
                                 <div class="dtc-input-icon-group">
-                                    <i class="fas fa-user dtc-input-icon"></i>
+                                    <i data-lucide="user" class="dtc-input-icon"></i>
                                     <input type="text" name="name" id="edit-name"
                                            class="form-control dtc-input-with-icon" required>
                                 </div>
@@ -363,7 +356,7 @@
                             <div class="form-group">
                                 <label class="dtc-form-label">Email Address</label>
                                 <div class="dtc-input-icon-group">
-                                    <i class="fas fa-envelope dtc-input-icon"></i>
+                                    <i data-lucide="mail" class="dtc-input-icon"></i>
                                     <input type="email" name="email" id="edit-email"
                                            class="form-control dtc-input-with-icon" required>
                                 </div>
@@ -376,7 +369,7 @@
                             <div class="form-group">
                                 <label class="dtc-form-label">Role</label>
                                 <div class="dtc-input-icon-group">
-                                    <i class="fas fa-user-shield dtc-input-icon"></i>
+                                    <i data-lucide="user-check" class="dtc-input-icon"></i>
                                     <select name="role" id="edit-role"
                                             class="form-control dtc-input-with-icon" required>
                                         @foreach($roles as $role)
@@ -397,8 +390,7 @@
                                         <input type="radio" name="status" value="{{ $status }}"
                                                class="edit-status-radio dtc-sr-only">
                                         <div class="edit-status-option">
-                                            <i class="fas {{ $status === 'active' ? 'fa-check-circle' : ($status === 'locked' ? 'fa-lock' : 'fa-clock') }}"
-                                               style="color:{{ $status === 'active' ? '#22C55E' : ($status === 'locked' ? '#EF4444' : '#F59E0B') }};"></i>
+                                            <i data-lucide="{{ $status === 'active' ? 'check-circle' : ($status === 'locked' ? 'lock' : 'clock') }}" style="color:{{ $status === 'active' ? 'var(--dtc-success)' : ($status === 'locked' ? 'var(--dtc-danger)' : 'var(--dtc-warning)') }};"></i>
                                             <div class="dtc-status-label">{{ ucfirst($status) }}</div>
                                         </div>
                                     </label>
@@ -413,7 +405,7 @@
                 <div class="modal-footer dtc-modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save mr-1"></i> Save Changes
+                        <i data-lucide="save" class="mr-1"></i> Save Changes
                     </button>
                 </div>
             </form>
@@ -531,14 +523,14 @@
 
 .dtc-modal-footer {
     padding: 16px 28px;
-    border-top: 1px solid #F1F5F9;
+    border-top: 1px solid var(--dtc-border-soft);
     gap: 10px;
 }
 
 .dtc-form-label {
     font-size: 13px;
     font-weight: 600;
-    color: #374151;
+    color: var(--dtc-text);
     margin-bottom: 6px;
 }
 
@@ -954,6 +946,54 @@ body.dtc-dark .edit-status-option:hover {
 
 
 /* =========================================================
+   ROLE BADGES / ROLE ICONS
+   ========================================================= */
+
+body.dtc-dark [data-role="registrar"] {
+    background: rgba(21,128,61,0.18) !important;
+    color: #4ade80 !important;
+}
+
+body.dtc-dark [data-role="cashier"] {
+    background: rgba(161,98,7,0.18) !important;
+    color: #facc15 !important;
+}
+
+body.dtc-dark [data-role="student"] {
+    background: rgba(124,58,237,0.18) !important;
+    color: #c4b5fd !important;
+}
+
+body.dtc-dark [data-role="alumni"] {
+    background: rgba(220,38,38,0.18) !important;
+    color: #fca5a5 !important;
+}
+
+body.dtc-dark [data-role="new_applicant"] {
+    background: rgba(29,78,216,0.18) !important;
+    color: #93c5fd !important;
+}
+
+body.dtc-dark [data-role] i {
+    color: inherit !important;
+}
+
+
+/* =========================================================
+   CREATE / EDIT — SELECTED OPTION HIGHLIGHT
+   (the base .create-role-option / .edit-status-option rules
+   above are a catch-all, so the checked option needs a more
+   specific selector to stay visible in dark mode)
+   ========================================================= */
+
+body.dtc-dark .create-role-radio:checked + .create-role-option,
+body.dtc-dark .edit-status-radio:checked + .edit-status-option {
+    background: rgba(15,76,219,0.16) !important;
+    border-color: var(--dtc-primary) !important;
+}
+
+
+/* =========================================================
    ALERTS
    ========================================================= */
 
@@ -1002,8 +1042,8 @@ document.querySelectorAll('.create-role-radio').forEach(radio => {
             opt.style.borderColor = 'var(--dtc-border)';
             opt.style.background  = 'var(--dtc-surface-soft)';
         });
-        this.nextElementSibling.style.borderColor = '#0F4CDB';
-        this.nextElementSibling.style.background  = '#EEF2FF';
+        this.nextElementSibling.style.borderColor = 'var(--dtc-primary)';
+        this.nextElementSibling.style.background  = 'var(--dtc-primary-soft)';
     });
 });
 
@@ -1045,8 +1085,8 @@ document.querySelectorAll('.btn-edit-user').forEach(btn => {
                 r.checked = (r.value === user.status);
                 const opt = r.nextElementSibling;
                 if (r.value === user.status) {
-                    opt.style.borderColor = '#0F4CDB';
-                    opt.style.background  = '#EEF2FF';
+                    opt.style.borderColor = 'var(--dtc-primary)';
+                    opt.style.background  = 'var(--dtc-primary-soft)';
                 } else {
                     opt.style.borderColor = 'var(--dtc-border)';
                     opt.style.background  = 'var(--dtc-surface-soft)';
@@ -1066,8 +1106,8 @@ document.querySelectorAll('.edit-status-radio').forEach(radio => {
             opt.style.borderColor = 'var(--dtc-border)';
             opt.style.background  = 'var(--dtc-surface-soft)';
         });
-        this.nextElementSibling.style.borderColor = '#0F4CDB';
-        this.nextElementSibling.style.background  = '#EEF2FF';
+        this.nextElementSibling.style.borderColor = 'var(--dtc-primary)';
+        this.nextElementSibling.style.background  = 'var(--dtc-primary-soft)';
     });
 });
 

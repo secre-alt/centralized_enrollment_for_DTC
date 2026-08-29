@@ -8,19 +8,19 @@
     <div class="dtc-review-header">
         <div class="dtc-review-identity">
             <div class="dtc-review-avatar">
-                <i class="fas fa-wallet"></i>
+                <i data-lucide="wallet"></i>
             </div>
             <div class="dtc-review-identity-copy">
                 <h5 class="dtc-review-name">Enrollment Payment</h5>
                 <p class="dtc-review-email">
-                    <i class="fas fa-graduation-cap"></i>
+                    <i data-lucide="graduation-cap"></i>
                     {{ $enrollment->program->name }} — Year {{ $enrollment->year_level }}, {{ $enrollment->semester }} Semester
                 </p>
             </div>
         </div>
         <div class="dtc-review-header-right">
             <button type="button" class="dtc-review-close" data-dismiss="modal" aria-label="Close">
-                <i class="fas fa-times"></i>
+                <i data-lucide="x"></i>
             </button>
         </div>
     </div>
@@ -39,23 +39,23 @@
         {{-- Payment Status Block --}}
         @if ($latestPayment)
             @php
-                $statusMap = [
-                    'verified' => ['bg' => '#DCFCE7', 'color' => '#15803D', 'icon' => 'fa-check-circle', 'label' => 'Payment Verified'],
-                    'pending'  => ['bg' => '#FEF9C3', 'color' => '#A16207', 'icon' => 'fa-hourglass-half', 'label' => 'Payment Pending Verification'],
-                    'rejected' => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'icon' => 'fa-times-circle', 'label' => 'Payment Rejected — Please resubmit below'],
+                $statusToneMap = [
+                    'verified' => ['tone' => 'success', 'icon' => 'check-circle', 'label' => 'Payment Verified'],
+                    'pending'  => ['tone' => 'warning', 'icon' => 'hourglass',     'label' => 'Payment Pending Verification'],
+                    'rejected' => ['tone' => 'danger',  'icon' => 'x-circle',      'label' => 'Payment Rejected — Please resubmit below'],
                 ];
                 $statusKey = $latestPayment->isVerified() ? 'verified' : ($latestPayment->isPending() ? 'pending' : 'rejected');
-                $s = $statusMap[$statusKey];
+                $s = $statusToneMap[$statusKey];
             @endphp
-            <div class="dtc-review-section">
-                <div class="card mb-0" style="border-left:4px solid {{ $s['color'] }};">
+            <div class="dtc-review-section" data-pay-status="{{ $statusKey }}">
+                <div class="card mb-0 border-{{ $s['tone'] === 'success' ? 'success' : ($s['tone'] === 'danger' ? 'danger' : 'warning') }}"
+                         style="border-left-width:4px; border-left-style:solid;">
                     <div class="card-body d-flex align-items-center" style="gap:14px;">
-                        <div style="width:44px; height:44px; border-radius:12px; flex-shrink:0; background:{{ $s['bg'] }};
-                                    display:flex; align-items:center; justify-content:center;">
-                            <i class="fas {{ $s['icon'] }}" style="font-size:18px; color:{{ $s['color'] }};"></i>
+                        <div class="dtc-icon-swatch is-{{ $s['tone'] }}" style="width:44px; height:44px; border-radius:12px; flex-shrink:0;">
+                            <i data-lucide="{{ $s['icon'] }}" style="font-size:18px;"></i>
                         </div>
                         <div>
-                            <div style="font-weight:700; font-size:14px; color:{{ $s['color'] }};">{{ $s['label'] }}</div>
+                            <div class="dtc-pay-status-label" style="font-weight:700; font-size:14px;">{{ $s['label'] }}</div>
                             @if ($latestPayment->isVerified())
                                 <div  class="u-text-xxs-secondary">
                                     Receipt No: {{ $latestPayment->receipt_no }} &mdash; ₱{{ number_format($latestPayment->amount, 2) }}
@@ -71,7 +71,7 @@
         {{-- Payment Options --}}
         <div class="dtc-review-section">
             <div class="dtc-review-section-title">
-                <span><i class="fas fa-coins"></i> Enrollment Fee</span>
+                <span><i data-lucide="coins"></i> Enrollment Fee</span>
                 <span class="dtc-review-subject-count">₱{{ number_format($fee, 2) }}</span>
             </div>
 
@@ -81,7 +81,7 @@
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
                         <div class="card-header font-weight-bold">
-                            <i class="fas fa-building mr-1"></i> Walk-in (Cashier)
+                            <i data-lucide="building-2" class="mr-1"></i> Walk-in (Cashier)
                         </div>
                         <div class="card-body">
                             <p  class="u-text-sm-secondary-primary">
@@ -98,7 +98,7 @@
                 <div class="col-md-6 mb-3">
                     <div class="card h-100">
                         <div class="card-header font-weight-bold">
-                            <i class="fas fa-mobile-alt mr-1"></i> GCash
+                            <i data-lucide="smartphone" class="mr-1"></i> GCash
                         </div>
                         <div class="card-body">
 
@@ -131,11 +131,10 @@
                             @php $pendingExists = $latestPayment && $latestPayment->isPending(); @endphp
 
                             @if ($pendingExists)
-                                <div style="font-size:12px; color:#A16207; background:#FEF9C3; border:1px solid #FDE68A;
-                                            border-radius:8px; padding:10px 12px;">
+                                <div class="alert alert-warning" style="font-size:12px; border-radius:8px; padding:10px 12px;">
                                     Your proof has been submitted and is awaiting Cashier review.
                                     <a href="{{ route('portal.enrollment.payment.proof', $latestPayment) }}" target="_blank"
-                                       style="color:#A16207; font-weight:600; text-decoration:underline;">
+                                       style="color:inherit; font-weight:600; text-decoration:underline;">
                                         View submitted proof
                                     </a>
                                 </div>

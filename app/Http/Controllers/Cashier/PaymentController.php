@@ -221,6 +221,13 @@ class PaymentController extends Controller
                 ->with('error', $message);
         }
 
+        // AJAX callers (the receipt modal) need only the partial — returning
+        // the full page meant jQuery had to parse a complete HTML document and
+        // find #receipt-content inside it, which failed silently in some cases.
+        if ($request->ajax()) {
+            return view('cashier.payments._receipt-content', compact('enrollment', 'payment'));
+        }
+
         return view('cashier.payments.receipt', compact('enrollment', 'payment'));
     }
 }

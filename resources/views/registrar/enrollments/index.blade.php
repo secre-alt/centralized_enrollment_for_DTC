@@ -74,7 +74,7 @@
                     </td>
                     <td>
                         <button type="button" class="dtc-review-btn" data-url="{{ route('registrar.enrollments.show', $enrollment) }}">
-                            <i class="fas fa-eye"></i> Review
+                            <i data-lucide="eye"></i> Review
                         </button>
                     </td>
                 </tr>

@@ -12,7 +12,7 @@
 
     <div class="document-input-control @error('documents.' . $name) is-invalid @enderror">
         <label for="document_{{ $name }}" class="document-input-btn">
-            <i class="fas fa-upload mr-1" aria-hidden="true"></i>
+            <i data-lucide="upload" class="mr-1" aria-hidden="true"></i>
             Choose File
         </label>
 

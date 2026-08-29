@@ -8,7 +8,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header font-weight-bold u-text" >
-                <i class="fas fa-file-alt mr-2 u-link" ></i>
+                <i data-lucide="file-text" class="mr-2 u-link"></i>
                 Enrollment Details
             </div>
             <div class="card-body">
@@ -24,15 +24,14 @@
                     @if ($lockedProgram)
                         <div class="form-group">
                             <label>Program</label>
-                            <div style="background:#F0FDF4; border:1.5px solid #BBF7D0;
-                                        border-radius:8px; padding:14px 16px;
+                            <div class="alert alert-success" style="border-radius:8px; padding:14px 16px;
                                         display:flex; align-items:center; gap:12px;">
-                                <i class="fas fa-check-circle" style="color:#15803D; font-size:18px;"></i>
+                                <i data-lucide="check-circle" style="font-size:18px;"></i>
                                 <div>
                                     <div style="font-size:14px; font-weight:600; color:var(--dtc-text);">
                                         {{ $lockedProgram->name }}
                                     </div>
-                                    <div style="font-size:11px; color:#15803D; margin-top:2px;">
+                                    <div style="font-size:11px; margin-top:2px;">
                                         Based on your approved pre-enrollment application
                                     </div>
                                 </div>
@@ -90,7 +89,7 @@
                         <div id="subjects-container">
                             <div style="background:var(--dtc-surface-soft); border:2px dashed var(--dtc-border);
                                         border-radius:12px; padding:24px; text-align:center;">
-                                <i class="fas fa-book fa-2x mb-2 u-border-color" ></i>
+                                <i data-lucide="book" class="mb-2 u-border-color" style="width:2em;height:2em"></i>
                                 <p style="color:var(--dtc-text-muted); font-size:13px; margin:0;">
                                     Select program, year level, and semester to load subjects.
                                 </p>
@@ -99,19 +98,18 @@
                     </div>
 
                     {{-- Fee Notice --}}
-                    <div style="background:#EEF2FF; border:1.5px solid #C7D2FE;
-                                border-radius:12px; padding:16px; margin-bottom:20px;
+                    <div class="alert alert-info" style="border-radius:12px; padding:16px; margin-bottom:20px;
                                 display:flex; align-items:center; gap:12px;">
                         <div style="width:40px; height:40px; border-radius:10px;
-                                    background:#0F4CDB; display:flex; align-items:center;
+                                    background:var(--dtc-primary); display:flex; align-items:center;
                                     justify-content:center; flex-shrink:0;">
-                            <i class="fas fa-info-circle" style="color:#fff; font-size:16px;"></i>
+                            <i data-lucide="info" style="color:#fff; font-size:16px;"></i>
                         </div>
                         <div>
-                            <div style="font-size:13px; font-weight:600; color:#1D4ED8;">
+                            <div style="font-size:13px; font-weight:600;">
                                 Enrollment Fee: ₱{{ number_format($fee, 2) }} (fixed rate)
                             </div>
-                            <div style="font-size:12px; color:#4338CA; margin-top:2px;">
+                            <div style="font-size:12px; opacity:0.85; margin-top:2px;">
                                 Payment is collected at the Cashier's Office after Registrar approval.
                             </div>
                         </div>
@@ -119,7 +117,7 @@
 
                     <div class="d-flex u-gap-10" >
                         <button type="submit" class="btn btn-primary flex-fill">
-                            <i class="fas fa-paper-plane mr-1"></i> Submit Enrollment
+                            <i data-lucide="send" class="mr-1"></i> Submit Enrollment
                         </button>
                         <a href="{{ route('portal.dashboard') }}"
                            class="btn btn-secondary flex-fill">Cancel</a>
@@ -135,18 +133,18 @@
              >
             <div class="card-body p-4">
                 <h5 style="font-weight:700; color:#fff; margin-bottom:16px;">
-                    <i class="fas fa-info-circle mr-2"></i> Enrollment Guide
+                    <i data-lucide="info" class="mr-2"></i> Enrollment Guide
                 </h5>
                 <div style="font-size:13px; line-height:1.8; opacity:0.9;">
                    @foreach([
-                    ['icon'=>'fa-mouse-pointer', 'text'=>'Select your program, year level, and semester.'],
-                    ['icon'=>'fa-check-square',  'text'=>'Choose the subjects you want to enroll in.'],
-                    ['icon'=>'fa-paper-plane',   'text'=>'Submit your enrollment for Registrar review.'],
-                    ['icon'=>'fa-bell',          'text'=>'Wait for approval notification.'],
-                    ['icon'=>'fa-money-bill',    'text'=>'Pay ₱' . number_format($fee, 2) . ' at the Cashier after approval.'],
+                    ['icon'=>'mouse-pointer', 'text'=>'Select your program, year level, and semester.'],
+                    ['icon'=>'check-square',  'text'=>'Choose the subjects you want to enroll in.'],
+                    ['icon'=>'send',   'text'=>'Submit your enrollment for Registrar review.'],
+                    ['icon'=>'bell',          'text'=>'Wait for approval notification.'],
+                    ['icon'=>'banknote',    'text'=>'Pay ₱' . number_format($fee, 2) . ' at the Cashier after approval.'],
                 ] as $step)
                     <div style="display:flex; gap:10px; margin-bottom:12px;">
-                        <i class="fas {{ $step['icon'] }}" style="color:#FFC72C; margin-top:3px; flex-shrink:0;"></i>
+                        <i data-lucide="{{ $step['icon'] }}" style="color:#FFC72C; margin-top:3px; flex-shrink:0;"></i>
                         <span>{{ $step['text'] }}</span>
                     </div>
                     @endforeach
@@ -169,7 +167,7 @@ function loadSubjects() {
 
     container.innerHTML = `
         <div style="text-align:center; padding:20px; color:var(--dtc-text-muted);">
-            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <i data-lucide="loader" class="lucide-spin" style="width:2em;height:2em"></i>
             <p style="margin-top:8px; font-size:13px;">Loading subjects...</p>
         </div>`;
 
@@ -178,10 +176,9 @@ function loadSubjects() {
         .then(subjects => {
             if (subjects.length === 0) {
                 container.innerHTML = `
-                    <div style="background:#FEF9C3; border:1.5px solid #FDE68A;
-                                border-radius:12px; padding:16px; text-align:center;">
-                        <i class="fas fa-exclamation-triangle" style="color:#D97706; margin-bottom:8px;"></i>
-                        <p style="color:#92400E; font-size:13px; margin:0;">
+                    <div class="alert alert-warning" style="border-radius:12px; padding:16px; text-align:center;">
+                        <i data-lucide="alert-triangle" style="margin-bottom:8px;"></i>
+                        <p style="font-size:13px; margin:0;">
                             No subjects found for this selection.
                         </p>
                     </div>`;
@@ -202,7 +199,7 @@ function loadSubjects() {
                                onmouseover="this.style.background='var(--dtc-surface-soft)'"
                                onmouseout="this.style.background='transparent'">
                             <input type="checkbox" name="subject_ids[]" value="${s.id}"
-                                   style="width:18px; height:18px; accent-color:#0F4CDB;
+                                   style="width:18px; height:18px; accent-color:var(--dtc-primary);
                                           cursor:pointer; flex-shrink:0;">
                             <div  class="u-flex-1">
                                 <div  class="u-text-sm-bold-primary">
@@ -217,7 +214,7 @@ function loadSubjects() {
                     <div style="padding:10px 16px; background:var(--dtc-surface-soft); border-top:1px solid var(--dtc-border);
                                 text-align:right;">
                         <button type="button" onclick="selectAll()" style="font-size:12px;
-                                color:#0F4CDB; background:none; border:none; cursor:pointer;
+                                color:var(--dtc-primary); background:none; border:none; cursor:pointer;
                                 font-weight:600; font-family:'Poppins',sans-serif;">
                             Select All
                         </button>

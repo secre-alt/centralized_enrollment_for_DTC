@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 — Page Not Found | DTC EMS</title>
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
@@ -90,7 +90,7 @@
 <body>
     <div class="card">
         <div class="icon-wrap">
-            <i class="fas fa-search"></i>
+            <i data-lucide="search"></i>
         </div>
         <div class="badge">ERROR 404</div>
         <div class="code">404</div>
@@ -103,27 +103,32 @@
         <div class="suggestions">
             <p>Quick Links</p>
             <a href="{{ url('/') }}">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
+                <i data-lucide="gauge"></i> Dashboard
             </a>
             <a href="{{ route('notifications.index') }}">
-                <i class="fas fa-bell"></i> Notifications
+                <i data-lucide="bell"></i> Notifications
             </a>
             <a href="{{ route('login') }}">
-                <i class="fas fa-sign-in-alt"></i> Login Page
+                <i data-lucide="log-in"></i> Login Page
             </a>
         </div>
 
         <div>
             <a href="{{ url('/') }}" class="btn-home">
-                <i class="fas fa-home"></i> Go to Dashboard
+                <i data-lucide="home"></i> Go to Dashboard
             </a>
             <a href="javascript:history.back()" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Go Back
+                <i data-lucide="arrow-left"></i> Go Back
             </a>
         </div>
         <div class="brand">
             <strong>DTC EMS</strong> — Danao Technological College
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>

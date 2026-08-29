@@ -11,7 +11,7 @@
             </p>
         </div>
         <a href="{{ route('registrar.enrollments.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left"></i> Back to List
+            <i data-lucide="arrow-left"></i> Back to List
         </a>
     </div>
 @endsection

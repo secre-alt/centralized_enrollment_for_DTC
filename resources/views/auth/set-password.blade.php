@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Set Your Password — DTC EMS</title>
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/auth-pages.css') }}">
 </head>
@@ -35,14 +35,14 @@
 
         @if (session('success'))
             <div class="auth-alert auth-alert--success">
-                <i class="fas fa-check-circle"></i>
+                <i data-lucide="check-circle"></i>
                 {{ session('success') }}
             </div>
         @endif
 
         @if ($errors->any())
             <div class="auth-alert auth-alert--error">
-                <i class="fas fa-exclamation-circle"></i>
+                <i data-lucide="alert-circle"></i>
                 {{ $errors->first() }}
             </div>
         @endif
@@ -51,7 +51,7 @@
 
             {{-- ── Expired link state ───────────────────── --}}
             <div class="auth-icon-badge auth-icon-badge--warning" style="margin-bottom:14px;">
-                <i class="fas fa-clock"></i>
+                <i data-lucide="clock"></i>
             </div>
 
             <h1 class="auth-card-title">Activation Link Expired</h1>
@@ -63,7 +63,7 @@
             <div class="auth-field">
                 <label class="auth-label">Email</label>
                 <div class="auth-input-wrap">
-                    <i class="fas fa-envelope auth-input-icon" aria-hidden="true"></i>
+                    <i data-lucide="mail" class="auth-input-icon" aria-hidden="true"></i>
                     <input
                         type="text"
                         class="auth-input"
@@ -77,7 +77,7 @@
                 @csrf
                 <input type="hidden" name="email" value="{{ $email }}">
                 <button type="submit" class="auth-btn">
-                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    <i data-lucide="send" aria-hidden="true"></i>
                     Request New Activation Link
                 </button>
             </form>
@@ -86,7 +86,7 @@
 
             {{-- ── Valid link — password setup ─────────── --}}
             <div class="auth-icon-badge">
-                <i class="fas fa-lock"></i>
+                <i data-lucide="lock"></i>
             </div>
 
             <h1 class="auth-card-title">Set Your Password</h1>
@@ -104,7 +104,7 @@
                 <div class="auth-field">
                     <label for="password" class="auth-label">New Password</label>
                     <div class="auth-input-wrap">
-                        <i class="fas fa-lock auth-input-icon" aria-hidden="true"></i>
+                        <i data-lucide="lock" class="auth-input-icon" aria-hidden="true"></i>
                         <input
                             type="password"
                             name="password"
@@ -117,7 +117,7 @@
                             autofocus
                         >
                         <button type="button" class="auth-eye" onclick="togglePw('password', this)" aria-label="Show password">
-                            <i class="fas fa-eye" aria-hidden="true"></i>
+                            <i data-lucide="eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -125,7 +125,7 @@
                 <div class="auth-field">
                     <label for="password_confirmation" class="auth-label">Confirm Password</label>
                     <div class="auth-input-wrap">
-                        <i class="fas fa-lock auth-input-icon" aria-hidden="true"></i>
+                        <i data-lucide="lock" class="auth-input-icon" aria-hidden="true"></i>
                         <input
                             type="password"
                             name="password_confirmation"
@@ -137,13 +137,13 @@
                             required
                         >
                         <button type="button" class="auth-eye" onclick="togglePw('password_confirmation', this)" aria-label="Show password">
-                            <i class="fas fa-eye" aria-hidden="true"></i>
+                            <i data-lucide="eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
 
                 <button type="submit" class="auth-btn">
-                    <i class="fas fa-check" aria-hidden="true"></i>
+                    <i data-lucide="check" aria-hidden="true"></i>
                     Set Password &amp; Continue
                 </button>
             </form>
@@ -171,5 +171,10 @@ function togglePw(id, btn) {
 }
 </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>

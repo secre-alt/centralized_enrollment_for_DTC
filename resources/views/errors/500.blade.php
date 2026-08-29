@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>500 — Server Error | DTC EMS</title>
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
@@ -80,7 +80,7 @@
 <body>
     <div class="card">
         <div class="icon-wrap">
-            <i class="fas fa-server"></i>
+            <i data-lucide="server"></i>
         </div>
         <div class="badge">ERROR 500</div>
         <div class="code">500</div>
@@ -92,7 +92,7 @@
 
         <div class="error-detail">
             <p>
-                <i class="fas fa-info-circle mr-2 u-link" ></i>
+                <i data-lucide="info" class="mr-2 u-link"></i>
                 If this problem persists, please contact your system administrator
                 or try again after a few minutes.
             </p>
@@ -100,15 +100,20 @@
 
         <div>
             <a href="{{ url('/') }}" class="btn-home">
-                <i class="fas fa-home"></i> Go to Dashboard
+                <i data-lucide="home"></i> Go to Dashboard
             </a>
             <a href="javascript:history.back()" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Go Back
+                <i data-lucide="arrow-left"></i> Go Back
             </a>
         </div>
         <div class="brand">
             <strong>DTC EMS</strong> — Danao Technological College
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>

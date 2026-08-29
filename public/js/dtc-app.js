@@ -21,8 +21,8 @@ function applyDtcTheme(theme) {
     }
 
     if (icon) {
-        icon.classList.toggle('fa-moon', !enabled);
-        icon.classList.toggle('fa-sun', enabled);
+        icon.setAttribute('data-lucide', enabled ? 'sun' : 'moon');
+        if (window.lucide) lucide.createIcons({ nodes: [icon] });
     }
 
     // Let any page-specific code (e.g. Chart.js graphs) know the theme
@@ -171,7 +171,7 @@ function renderSuggestions() {
     el.innerHTML = SUGGESTIONS.map(s => `
         <div class="search-suggestion-item"
              onclick="fillSearch('${s}')">
-            <i class="fas fa-search"></i>
+            <i data-lucide="search"></i>
             <span>${s}</span>
         </div>`).join('');
 }
@@ -404,3 +404,65 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+// ── Sidebar profile menu toggle ────────────────────────────────────────────
+// Replaces Bootstrap's collapse plugin for this specific widget.
+// Using [hidden] attribute + a single delegated click listener avoids the
+// open/close race that caused the 3-dot button to need multiple clicks
+// (Bootstrap collapse fires on 'click', but mousedown on the toggle can
+// blur focus and trigger an outside-click close in the same frame).
+(function initSidebarProfileMenu() {
+    function openMenu(toggle, menu) {
+        menu.removeAttribute('hidden');
+        toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeMenu(toggle, menu) {
+        menu.setAttribute('hidden', '');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggle = document.getElementById('dtcSidebarProfileToggle');
+        const menu   = document.getElementById('dtcSidebarProfileMenu');
+        if (!toggle || !menu) return;
+
+        // Toggle on row click
+        toggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+            isOpen ? closeMenu(toggle, menu) : openMenu(toggle, menu);
+        });
+
+        // Close when clicking anywhere outside the panel
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.dtc-sidebar-user-panel')) {
+                closeMenu(toggle, menu);
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+                closeMenu(toggle, menu);
+                toggle.focus();
+            }
+        });
+    });
+})();
+
+// ── Lucide icon init ───────────────────────────────────────────────────────
+// dtc-app.js is loaded with `defer`, so the DOM is fully parsed by the time
+// this runs. Call createIcons() here so icons on pages that use public.blade.php
+// (which doesn't have the MutationObserver from master.blade.php) also render.
+(function initDtcLucide() {
+    if (window.lucide) {
+        lucide.createIcons();
+    } else {
+        // Lucide CDN not yet evaluated (shouldn't happen with sync script tag,
+        // but guard anyway)
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.lucide) lucide.createIcons();
+        });
+    }
+})();

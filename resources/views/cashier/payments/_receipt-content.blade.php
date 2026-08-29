@@ -5,7 +5,7 @@
             <div style="width:44px; height:44px; background:rgba(255,255,255,0.2);
                         border-radius:12px; display:flex; align-items:center;
                         justify-content:center; flex-shrink:0;">
-                <i class="fas fa-receipt" style="font-size:18px; color:#FFC72C;"></i>
+                <i data-lucide="receipt" style="font-size:18px; color:#FFC72C;"></i>
             </div>
             <div class="dtc-review-identity-copy">
                 <h5 class="dtc-review-name" style="color:#fff;">Official Receipt</h5>
@@ -14,7 +14,7 @@
         </div>
         <div class="dtc-review-header-right">
             <button type="button" class="dtc-review-close" data-dismiss="modal" aria-label="Close">
-                <i class="fas fa-times"></i>
+                <i data-lucide="x"></i>
             </button>
         </div>
     </div>
@@ -44,7 +44,7 @@
 
         <div class="dtc-review-section">
             <div class="dtc-review-section-title">
-                <span><i class="fas fa-user"></i> Student Information</span>
+                <span><i data-lucide="user"></i> Student Information</span>
             </div>
             <div class="dtc-review-info-grid">
                 <div class="dtc-review-info">
@@ -68,7 +68,7 @@
 
         <div class="dtc-review-section">
             <div class="dtc-review-section-title">
-                <span><i class="fas fa-money-check-alt"></i> Payment Details</span>
+                <span><i data-lucide="receipt"></i> Payment Details</span>
             </div>
             <div class="dtc-review-info-grid">
                 <div class="dtc-review-info">
@@ -107,10 +107,9 @@
             </div>
         </div>
 
-        <div style="text-align:center; padding:14px; background:#F0FDF4;
-                    border-radius:12px; margin-bottom:4px;">
-            <i class="fas fa-check-circle" style="font-size:20px; color:#22C55E; margin-bottom:6px;"></i>
-            <div style="font-size:14px; font-weight:700; color:#15803D;">
+        <div class="dtc-receipt-confirmed">
+            <i data-lucide="check-circle" style="color:#22C55E; margin-bottom:6px;"></i>
+            <div class="dtc-receipt-confirmed-title">
                 Payment Confirmed — Officially Enrolled
             </div>
             <div style="font-size:11.5px; color:var(--dtc-text-secondary); margin-top:2px;">
@@ -125,7 +124,7 @@
             <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Close</button>
             <div class="dtc-review-footer-right">
                 <button type="button" class="dtc-btn dtc-btn-primary" onclick="window.printReceiptModal()">
-                    <i class="fas fa-print"></i> Print Receipt
+                    <i data-lucide="printer"></i> Print Receipt
                 </button>
             </div>
         </div>

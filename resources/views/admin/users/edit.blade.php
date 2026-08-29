@@ -12,7 +12,7 @@
             </p>
         </div>
         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left mr-1"></i> Back to Users
+            <i data-lucide="arrow-left" class="mr-1"></i> Back to Users
         </a>
     </div>
 @endsection
@@ -51,7 +51,7 @@
 
         <div class="card">
             <div class="card-header font-weight-bold u-text" >
-                <i class="fas fa-edit mr-2 u-link" ></i>
+                <i data-lucide="pencil" class="mr-2 u-link"></i>
                 Edit Account
             </div>
             <div class="card-body">
@@ -66,7 +66,7 @@
                     <div class="form-group">
                         <label>Full Name</label>
                         <div  class="u-relative">
-                            <i class="fas fa-user" style="position:absolute; left:14px;
+                            <i data-lucide="user" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="text" name="name" class="form-control u-pl-38"
                                    
@@ -77,7 +77,7 @@
                     <div class="form-group">
                         <label>Email Address</label>
                         <div  class="u-relative">
-                            <i class="fas fa-envelope" style="position:absolute; left:14px;
+                            <i data-lucide="mail" style="position:absolute; left:14px;
                                top:13px; color:var(--dtc-text-muted); font-size:13px; pointer-events:none;"></i>
                             <input type="email" name="email" class="form-control u-pl-38"
                                    
@@ -110,9 +110,8 @@
                                          style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:12px; text-align:center; transition:all 0.2s;
                                                 background:var(--dtc-surface-soft);">
-                                        <i class="fas {{ $status === 'active' ? 'fa-check-circle' : ($status === 'locked' ? 'fa-lock' : 'fa-clock') }}"
-                                           style="font-size:18px; display:block; margin-bottom:6px;
-                                                  color:{{ $status === 'active' ? '#22C55E' : ($status === 'locked' ? '#EF4444' : '#F59E0B') }};"></i>
+                                        <i data-lucide="{{ $status === 'active' ? 'check-circle' : ($status === 'locked' ? 'lock' : 'clock') }}" style="font-size:18px; display:block; margin-bottom:6px;
+                                                  color:{{ $status === 'active' ? 'var(--dtc-success)' : ($status === 'locked' ? 'var(--dtc-danger)' : 'var(--dtc-warning)') }};"></i>
                                         <div style="font-size:12px; font-weight:600; color:var(--dtc-text);">
                                             {{ ucfirst($status) }}
                                         </div>
@@ -125,7 +124,7 @@
 
                     <div class="d-flex u-gap-10" >
                         <button type="submit" class="btn btn-primary flex-fill">
-                            <i class="fas fa-save mr-1"></i> Save Changes
+                            <i data-lucide="save" class="mr-1"></i> Save Changes
                         </button>
                         <a href="{{ route('admin.users.index') }}"
                            class="btn btn-secondary flex-fill">Cancel</a>
@@ -145,8 +144,8 @@ document.querySelectorAll('.status-radio').forEach(radio => {
             opt.style.borderColor = 'var(--dtc-border)';
             opt.style.background = 'var(--dtc-surface-soft)';
         });
-        this.nextElementSibling.style.borderColor = '#0F4CDB';
-        this.nextElementSibling.style.background = '#EEF2FF';
+        this.nextElementSibling.style.borderColor = 'var(--dtc-primary)';
+        this.nextElementSibling.style.background = 'var(--dtc-primary-soft)';
     });
     if (this.checked) this.dispatchEvent(new Event('change'));
 });

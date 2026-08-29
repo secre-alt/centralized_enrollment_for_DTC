@@ -73,7 +73,7 @@ class PortalDashboardController extends Controller
                 'label' => 'No Approved Application Found',
                 'desc'  => 'Please contact the Registrar\'s Office if you believe this is an error.',
                 'url'   => null,
-                'icon'  => 'fa-exclamation-triangle',
+                'icon'  => 'alert-triangle',
             ];
         }
 
@@ -82,7 +82,7 @@ class PortalDashboardController extends Controller
                 'label' => 'Proceed to Official Enrollment',
                 'desc'  => 'Your pre-enrollment application is approved. Complete your official enrollment to continue.',
                 'url'   => route('portal.enrollment.create'),
-                'icon'  => 'fa-arrow-right',
+                'icon'  => 'arrow-right',
             ];
         }
 
@@ -91,7 +91,7 @@ class PortalDashboardController extends Controller
                 'label' => 'Wait for Registrar Approval',
                 'desc'  => 'Your official enrollment has been submitted and is under review.',
                 'url'   => route('portal.enrollment.index'),
-                'icon'  => 'fa-hourglass-half',
+                'icon'  => 'hourglass',
             ];
         }
 
@@ -100,7 +100,7 @@ class PortalDashboardController extends Controller
                 'label'     => 'Proceed to Payment',
                 'desc'      => 'Your official enrollment is approved. Pay the ₱' . number_format($fee, 2) . ' fee at the Cashier\'s Office.',
                 'url'       => route('portal.enrollment.payment-info', $enrollment),
-                'icon'      => 'fa-money-bill-wave',
+                'icon'      => 'banknote',
                 'isPayment' => true,
             ];
         }
@@ -110,7 +110,7 @@ class PortalDashboardController extends Controller
                 'label' => 'Enrollment Completed',
                 'desc'  => 'Congratulations! Your official enrollment is complete and paid.',
                 'url'   => route('portal.enrollment.index'),
-                'icon'  => 'fa-check-circle',
+                'icon'  => 'check-circle',
             ];
         }
 
@@ -118,7 +118,7 @@ class PortalDashboardController extends Controller
             'label' => 'View Enrollment Status',
             'desc'  => 'Check the current status of your official enrollment.',
             'url'   => route('portal.enrollment.index'),
-            'icon'  => 'fa-list',
+            'icon'  => 'list',
         ];
     }
 
@@ -244,29 +244,29 @@ class PortalDashboardController extends Controller
     {
         if (!$enrollment) {
             return [
-                ['icon' => 'fa-file-alt',      'label' => 'Submit Application',  'desc' => 'Fill out and submit your enrollment form.',        'url' => route('portal.enrollment.create'), 'active' => true],
-                ['icon' => 'fa-calendar-check', 'label' => 'Book Appointment',    'desc' => 'Schedule a pickup appointment.',                   'url' => route('portal.appointments.create'), 'active' => false],
+                ['icon' => 'file-text',      'label' => 'Submit Application',  'desc' => 'Fill out and submit your enrollment form.',        'url' => route('portal.enrollment.create'), 'active' => true],
+                ['icon' => 'calendar-check', 'label' => 'Book Appointment',    'desc' => 'Schedule a pickup appointment.',                   'url' => route('portal.appointments.create'), 'active' => false],
             ];
         }
 
         if ($enrollment->status === 'pending') {
             return [
-                ['icon' => 'fa-hourglass-half', 'label' => 'Await Registrar Review', 'desc' => 'Your enrollment is being reviewed.',           'url' => route('portal.enrollment.index'), 'active' => true],
-                ['icon' => 'fa-bell',            'label' => 'Check Notifications',    'desc' => 'You will be notified once approved.',          'url' => route('notifications.index'), 'active' => false],
+                ['icon' => 'hourglass',  'label' => 'Await Registrar Review', 'desc' => 'Your enrollment is being reviewed.',           'url' => route('portal.enrollment.index'), 'active' => true],
+                ['icon' => 'bell',       'label' => 'Check Notifications',    'desc' => 'You will be notified once approved.',          'url' => route('notifications.index'), 'active' => false],
             ];
         }
 
         if ($enrollment->status === 'approved' && !$enrollment->is_paid) {
             return [
-                ['icon' => 'fa-money-bill-wave', 'label' => 'Pay Enrollment Fee', 'desc' => 'Proceed to Cashier and pay ₱' . number_format($fee, 2) . '.',              'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true, 'isPayment' => true],
-                ['icon' => 'fa-receipt',         'label' => 'Get Your Receipt',    'desc' => 'Official receipt will be issued after payment.',  'url' => route('portal.enrollment.index'), 'active' => false],
+                ['icon' => 'banknote', 'label' => 'Pay Enrollment Fee', 'desc' => 'Proceed to Cashier and pay ₱' . number_format($fee, 2) . '.',              'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true, 'isPayment' => true],
+                ['icon' => 'receipt',  'label' => 'Get Your Receipt',    'desc' => 'Official receipt will be issued after payment.',  'url' => route('portal.enrollment.index'), 'active' => false],
             ];
         }
 
         if ($enrollment->is_paid) {
             return [
-                ['icon' => 'fa-calendar-plus',  'label' => 'Book Appointment',    'desc' => 'Request documents or book a meeting.',             'url' => route('portal.appointments.create'), 'active' => true],
-                ['icon' => 'fa-check-circle',   'label' => 'You Are Enrolled!',   'desc' => 'Congratulations! Your enrollment is complete.',    'url' => route('portal.enrollment.index'), 'active' => false],
+                ['icon' => 'calendar-plus',  'label' => 'Book Appointment',    'desc' => 'Request documents or book a meeting.',             'url' => route('portal.appointments.create'), 'active' => true],
+                ['icon' => 'check-circle',   'label' => 'You Are Enrolled!',   'desc' => 'Congratulations! Your enrollment is complete.',    'url' => route('portal.enrollment.index'), 'active' => false],
             ];
         }
 

@@ -22,7 +22,7 @@ class ViewServiceProvider extends ServiceProvider
             $notifItem = [
                 'text'        => 'Notifications',
                 'url'         => route('notifications.index'),
-                'icon'        => 'fas fa-fw fa-bell',
+                'icon'        => 'bell',
                 'label'       => $unreadCount ?: null,
                 'label_color' => 'danger',
             ];
@@ -40,49 +40,49 @@ class ViewServiceProvider extends ServiceProvider
                         [
                             'text'    => 'Settings',
                             'url'     => route('admin.dashboard'),
-                            'icon'    => 'fas fa-fw fa-arrow-left',
+                            'icon'    => 'arrow-left',
                             'classes' => 'sidebar-context-back',
                         ],
 
                         ['header' => 'ACCOUNT'],
-                        ['text' => 'General',       'url' => route('admin.settings.index'),         'icon' => 'fas fa-fw fa-cog'],
-                        ['text' => 'Academic',      'url' => route('admin.settings.academic'),       'icon' => 'fas fa-fw fa-graduation-cap'],
-                        ['text' => 'Payment',       'url' => route('admin.settings.payment'),        'icon' => 'fas fa-fw fa-credit-card'],
-                        ['text' => 'Notifications', 'url' => route('admin.settings.notifications'),  'icon' => 'fas fa-fw fa-bell'],
+                        ['text' => 'General',          'url' => route('admin.settings.index'),         'icon' => 'settings'],
+                        ['text' => 'Academic',         'url' => route('admin.settings.academic'),       'icon' => 'graduation-cap'],
+                        ['text' => 'Payment',          'url' => route('admin.settings.payment'),        'icon' => 'credit-card'],
+                        ['text' => 'Notifications',    'url' => route('admin.settings.notifications'),  'icon' => 'bell'],
 
                         ['header' => 'SYSTEM'],
-                        ['text' => 'Security',      'url' => route('admin.settings.security'),       'icon' => 'fas fa-fw fa-shield-alt'],
-                        ['text' => 'Backup & Restore', 'url' => route('admin.settings.backup'),      'icon' => 'fas fa-fw fa-cloud-upload-alt'],
-                        ['text' => 'Audit Logs',    'url' => route('admin.settings.audit'),          'icon' => 'fas fa-fw fa-file-alt'],
+                        ['text' => 'Security',         'url' => route('admin.settings.security'),       'icon' => 'shield'],
+                        ['text' => 'Backup & Restore', 'url' => route('admin.settings.backup'),         'icon' => 'cloud-upload'],
+                        ['text' => 'Audit Logs',       'url' => route('admin.settings.audit'),          'icon' => 'file-text'],
                     ];
                 } else {
                     $sidebar = [
                         ['header' => 'ADMIN PANEL'],
-                        ['text' => 'Dashboard',    'url' => route('admin.dashboard'),   'icon' => 'fas fa-fw fa-tachometer-alt'],
-                        ['text' => 'Manage Users', 'url' => route('admin.users.index'), 'icon' => 'fas fa-fw fa-users'],
-                        ['text' => 'Reports', 'icon' => 'fas fa-fw fa-chart-bar', 'submenu' => [
-                            ['text' => 'Enrollment Report', 'url' => route('admin.reports.enrollment'), 'icon' => 'fas fa-fw fa-file-pdf'],
-                            ['text' => 'Payment Report',    'url' => route('admin.reports.payment'),    'icon' => 'fas fa-fw fa-file-pdf'],
+                        ['text' => 'Dashboard',    'url' => route('admin.dashboard'),   'icon' => 'gauge'],
+                        ['text' => 'Manage Users', 'url' => route('admin.users.index'), 'icon' => 'users'],
+                        ['text' => 'Reports', 'icon' => 'chart-bar', 'submenu' => [
+                            ['text' => 'Enrollment Report', 'url' => route('admin.reports.enrollment'), 'icon' => 'file-type'],
+                            ['text' => 'Payment Report',    'url' => route('admin.reports.payment'),    'icon' => 'file-type'],
                         ]],
 
                         ['header' => 'ACADEMIC'],
-                        ['text' => 'Programs & Subjects', 'url' => route('admin.programs.index'), 'icon' => 'fas fa-fw fa-graduation-cap'],
+                        ['text' => 'Programs & Subjects', 'url' => route('admin.programs.index'), 'icon' => 'graduation-cap'],
 
                         ['header' => 'REGISTRAR'],
-                        ['text' => 'Registrar Dashboard',  'url' => route('registrar.dashboard'),          'icon' => 'fas fa-fw fa-tachometer-alt'],
-                        ['text' => 'Applications', 'url' => route('registrar.applications.index'), 'icon' => 'fas fa-fw fa-user-plus'],
-                        ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'fas fa-fw fa-file-alt'],
-                        ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'fas fa-fw fa-calendar-check'],
-                        ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'fas fa-fw fa-clock'],
-                        ['text' => 'Document Requests',    'url' => route('registrar.documents.index'),    'icon' => 'fas fa-fw fa-folder-open'],
+                        ['text' => 'Registrar Dashboard',  'url' => route('registrar.dashboard'),          'icon' => 'gauge'],
+                        ['text' => 'Applications',         'url' => route('registrar.applications.index'), 'icon' => 'user-plus'],
+                        ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'file-text'],
+                        ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'calendar-check'],
+                        ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'clock'],
+                        ['text' => 'Document Requests',    'url' => route('registrar.documents.index'),    'icon' => 'folder-open'],
 
                         ['header' => 'CASHIER'],
-                        ['text' => 'Cashier Dashboard', 'url' => route('cashier.dashboard'),      'icon' => 'fas fa-fw fa-tachometer-alt'],
-                        ['text' => 'Process Payments',  'url' => route('cashier.payments.index'), 'icon' => 'fas fa-fw fa-money-bill-wave'],
+                        ['text' => 'Cashier Dashboard', 'url' => route('cashier.dashboard'),      'icon' => 'gauge'],
+                        ['text' => 'Process Payments',  'url' => route('cashier.payments.index'), 'icon' => 'banknote'],
 
                         ['header' => 'SYSTEM'],
                         $notifItem,
-                        ['text' => 'Settings', 'url' => route('admin.settings.index'), 'icon' => 'fas fa-fw fa-cog'],
+                        ['text' => 'Settings', 'url' => route('admin.settings.index'), 'icon' => 'settings'],
                     ];
                 }
             }
@@ -91,12 +91,12 @@ class ViewServiceProvider extends ServiceProvider
             elseif ($user->hasRole('registrar')) {
                 $sidebar = [
                     ['header' => 'REGISTRAR PANEL'],
-                    ['text' => 'Dashboard',            'url' => route('registrar.dashboard'),          'icon' => 'fas fa-fw fa-tachometer-alt'],
-                    ['text' => 'Applications', 'url' => route('registrar.applications.index'), 'icon' => 'fas fa-fw fa-user-plus'],
-                    ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'fas fa-fw fa-file-alt'],
-                    ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'fas fa-fw fa-calendar-check'],
-                    ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'fas fa-fw fa-clock'],
-                    ['text' => 'Document Requests',    'url' => route('registrar.documents.index'),    'icon' => 'fas fa-fw fa-folder-open'],
+                    ['text' => 'Dashboard',            'url' => route('registrar.dashboard'),          'icon' => 'gauge'],
+                    ['text' => 'Applications',         'url' => route('registrar.applications.index'), 'icon' => 'user-plus'],
+                    ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'file-text'],
+                    ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'calendar-check'],
+                    ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'clock'],
+                    ['text' => 'Document Requests',    'url' => route('registrar.documents.index'),    'icon' => 'folder-open'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];
@@ -106,8 +106,8 @@ class ViewServiceProvider extends ServiceProvider
             elseif ($user->hasRole('cashier')) {
                 $sidebar = [
                     ['header' => 'CASHIER PANEL'],
-                    ['text' => 'Dashboard',  'url' => route('cashier.dashboard'), 'icon' => 'fas fa-fw fa-tachometer-alt'],
-                    ['text' => 'Process Payments', 'url' => route('cashier.payments.index'), 'icon' => 'fas fa-fw fa-money-bill-wave'],
+                    ['text' => 'Dashboard',       'url' => route('cashier.dashboard'),      'icon' => 'gauge'],
+                    ['text' => 'Process Payments','url' => route('cashier.payments.index'), 'icon' => 'banknote'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];
@@ -117,14 +117,14 @@ class ViewServiceProvider extends ServiceProvider
             elseif ($user->hasRole('student')) {
                 $sidebar = [
                     ['header' => 'MY PORTAL'],
-                    ['text' => 'Dashboard', 'url' => route('portal.dashboard'), 'icon' => 'fas fa-fw fa-tachometer-alt'],
-                    ['text' => 'Enrollment', 'icon' => 'fas fa-fw fa-file-alt', 'submenu' => [
-                        ['text' => 'Enroll Now',           'url' => route('portal.enrollment.create'), 'icon' => 'fas fa-fw fa-plus'],
-                        ['text' => 'My Enrollment Status', 'url' => route('portal.enrollment.index'),  'icon' => 'fas fa-fw fa-list'],
+                    ['text' => 'Dashboard', 'url' => route('portal.dashboard'), 'icon' => 'gauge'],
+                    ['text' => 'Enrollment', 'icon' => 'file-text', 'submenu' => [
+                        ['text' => 'Enroll Now',           'url' => route('portal.enrollment.create'), 'icon' => 'plus'],
+                        ['text' => 'My Enrollment Status', 'url' => route('portal.enrollment.index'),  'icon' => 'list'],
                     ]],
-                    ['text' => 'Appointments', 'icon' => 'fas fa-fw fa-calendar', 'submenu' => [
-                        ['text' => 'Book Appointment', 'url' => route('portal.appointments.create'), 'icon' => 'fas fa-fw fa-plus'],
-                        ['text' => 'My Appointments',  'url' => route('portal.appointments.index'),  'icon' => 'fas fa-fw fa-list'],
+                    ['text' => 'Appointments', 'icon' => 'calendar', 'submenu' => [
+                        ['text' => 'Book Appointment', 'url' => route('portal.appointments.create'), 'icon' => 'plus'],
+                        ['text' => 'My Appointments',  'url' => route('portal.appointments.index'),  'icon' => 'list'],
                     ]],
                     ['header' => 'SYSTEM'],
                     $notifItem,
@@ -135,11 +135,11 @@ class ViewServiceProvider extends ServiceProvider
             elseif ($user->hasRole('new_applicant')) {
                 $sidebar = [
                     ['header' => 'MY PORTAL'],
-                    ['text' => 'Dashboard', 'url' => route('portal.dashboard'), 'icon' => 'fas fa-fw fa-tachometer-alt'],
-                    ['text' => 'My Application', 'url' => route('portal.application.show'), 'icon' => 'fas fa-fw fa-file-alt'],
-                    ['text' => 'Enrollment', 'icon' => 'fas fa-fw fa-file-alt', 'submenu' => [
-                        ['text' => 'Enroll Now',           'url' => route('portal.enrollment.create'), 'icon' => 'fas fa-fw fa-plus'],
-                        ['text' => 'My Enrollment Status', 'url' => route('portal.enrollment.index'),  'icon' => 'fas fa-fw fa-list'],
+                    ['text' => 'Dashboard',      'url' => route('portal.dashboard'),          'icon' => 'gauge'],
+                    ['text' => 'My Application', 'url' => route('portal.application.show'),   'icon' => 'file-text'],
+                    ['text' => 'Enrollment', 'icon' => 'file-text', 'submenu' => [
+                        ['text' => 'Enroll Now',           'url' => route('portal.enrollment.create'), 'icon' => 'plus'],
+                        ['text' => 'My Enrollment Status', 'url' => route('portal.enrollment.index'),  'icon' => 'list'],
                     ]],
                     ['header' => 'SYSTEM'],
                     $notifItem,
@@ -150,21 +150,16 @@ class ViewServiceProvider extends ServiceProvider
             elseif ($user->hasRole('alumni')) {
                 $sidebar = [
                     ['header' => 'MY PORTAL'],
-                    ['text' => 'Dashboard', 'url' => route('portal.dashboard'), 'icon' => 'fas fa-fw fa-tachometer-alt'],
-                    ['text' => 'Document Requests', 'icon' => 'fas fa-fw fa-folder-open', 'submenu' => [
-                        ['text' => 'Request Document', 'url' => route('portal.documents.create'), 'icon' => 'fas fa-fw fa-plus'],
-                        ['text' => 'My Requests',      'url' => route('portal.documents.index'),  'icon' => 'fas fa-fw fa-list'],
+                    ['text' => 'Dashboard', 'url' => route('portal.dashboard'), 'icon' => 'gauge'],
+                    ['text' => 'Document Requests', 'icon' => 'folder-open', 'submenu' => [
+                        ['text' => 'Request Document', 'url' => route('portal.documents.create'), 'icon' => 'plus'],
+                        ['text' => 'My Requests',      'url' => route('portal.documents.index'),  'icon' => 'list'],
                     ]],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];
             }
-            //    $sidebar[] = [
-            //         'text'    => 'Logout',
-            //         'url'     => '#logout-form',
-            //         'icon'    => 'fas fa-fw fa-sign-out-alt',
-            //         'classes' => 'sidebar-logout-link',
-            //     ];
+
             config(['adminlte.menu' => $sidebar]);
         });
     }

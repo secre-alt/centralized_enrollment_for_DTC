@@ -17,7 +17,7 @@
         </div>
 
         <button type="submit" form="academic-settings-form" class="btn btn-primary">
-            <i class="fas fa-save mr-1"></i> Save Changes
+            <i data-lucide="save" class="mr-1"></i> Save Changes
         </button>
     </div>
 @endsection
@@ -29,13 +29,13 @@
 
         @if (session('status'))
             <div class="alert alert-success">
-                <i class="fas fa-check-circle mr-1"></i> {{ session('status') }}
+                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
             </div>
         @endif
 
         @if ($errors->any())
             <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle mr-1"></i>
+                <i data-lucide="alert-circle" class="mr-1"></i>
                 <ul class="mb-0 pl-3">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -56,7 +56,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
-                                    <i class="fas fa-calendar-alt"></i>
+                                    <i data-lucide="calendar-days"></i>
                                 </div>
                                 <h3>Current Academic Year &amp; Semester</h3>
                             </div>
@@ -90,7 +90,7 @@
                         <div class="card-body">
                             <div class="settings-section-title">
                                 <div class="settings-section-icon" style="background:#E7F8EF; color:#0F9D58;">
-                                    <i class="fas fa-door-open"></i>
+                                    <i data-lucide="door-open"></i>
                                 </div>
                                 <h3>Enrollment Status</h3>
                             </div>
@@ -122,7 +122,7 @@
                         <div class="card-body">
                             <div class="d-flex align-items-start" style="gap:14px;">
                                 <div class="settings-section-icon" style="background:#F3E8FF; color:#7C3AED;">
-                                    <i class="fas fa-graduation-cap"></i>
+                                    <i data-lucide="graduation-cap"></i>
                                 </div>
                                 <div>
                                     <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">
@@ -136,7 +136,7 @@
                             </div>
 
                             <a href="{{ route('admin.programs.index') }}" class="btn btn-secondary mt-3">
-                                <i class="fas fa-arrow-right mr-1"></i> Manage Programs & Subjects
+                                <i data-lucide="arrow-right" class="mr-1"></i> Manage Programs & Subjects
                             </a>
                         </div>
                     </div>

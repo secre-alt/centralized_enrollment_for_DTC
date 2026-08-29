@@ -24,13 +24,13 @@
 
 @if (session('success'))
     <div class="alert alert-success">
-        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <i data-lucide="check-circle" class="mr-2"></i> {{ session('success') }}
     </div>
 @endif
 
 @if (session('error'))
     <div class="alert alert-danger">
-        <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
+        <i data-lucide="alert-circle" class="mr-2"></i> {{ session('error') }}
     </div>
 @endif
 
@@ -42,7 +42,7 @@
         <div class="card mb-3">
             <div class="card-body backup-action-card">
                 <div class="backup-action-icon">
-                    <i class="fas fa-database"></i>
+                    <i data-lucide="database"></i>
                 </div>
                 <h5 class="backup-action-title">Create Backup</h5>
                 <p class="backup-action-text">
@@ -53,7 +53,7 @@
                     @csrf
                     <button type="submit" class="btn btn-primary btn-block"
                             onclick="return confirm('Create a full database backup now?')">
-                        <i class="fas fa-download mr-2"></i> Backup Now
+                        <i data-lucide="download" class="mr-2"></i> Backup Now
                     </button>
                 </form>
             </div>
@@ -62,12 +62,12 @@
         {{-- ── Restore ─── --}}
         <div class="card">
             <div class="card-header font-weight-bold u-text">
-                <i class="fas fa-upload mr-2" style="color:#F59E0B;"></i>
+                <i data-lucide="upload" class="mr-2" style="color:var(--dtc-warning);"></i>
                 Restore from Backup
             </div>
             <div class="card-body">
                 <div class="backup-warning">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <i data-lucide="alert-triangle" class="mr-2"></i>
                     <strong>Warning:</strong> Restoring will overwrite all current data.
                     Make sure you have a recent backup before proceeding.
                 </div>
@@ -82,7 +82,7 @@
                         </label>
                         <div class="backup-drop-zone" id="drop-zone"
                              onclick="document.getElementById('sql-file').click()">
-                            <i class="fas fa-file-code backup-drop-icon"></i>
+                            <i data-lucide="file-code" class="backup-drop-icon"></i>
                             <div class="backup-drop-title">Click to select file</div>
                             <div class="backup-drop-sub" id="file-name">.sql files only, max 50MB</div>
                         </div>
@@ -92,14 +92,14 @@
                     </div>
 
                     @if($errors->has('sql_file'))
-                        <div style="color:#DC2626; font-size:12px; margin-bottom:12px;">
+                        <div class="dtc-field-error" style="font-size:12px; margin-bottom:12px;">
                             {{ $errors->first('sql_file') }}
                         </div>
                     @endif
 
                     <button type="submit" class="btn btn-warning btn-block"
                             onclick="return confirm('⚠️ This will OVERWRITE all current data. Are you absolutely sure?')">
-                        <i class="fas fa-undo mr-2"></i> Restore Database
+                        <i data-lucide="undo-2" class="mr-2"></i> Restore Database
                     </button>
                 </form>
             </div>
@@ -112,7 +112,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap:8px;">
                 <span class="font-weight-bold u-text">
-                    <i class="fas fa-history mr-2 u-link"></i>
+                    <i data-lucide="history" class="mr-2 u-link"></i>
                     Backup History
                 </span>
                 <span class="u-text-secondary-sm">
@@ -125,10 +125,8 @@
 
                     <div class="backup-row-main">
                         {{-- Icon --}}
-                        <div class="backup-row-icon" style="
-                            background:{{ $backup->status === 'completed' ? '#DCFCE7' : '#FEE2E2' }};
-                            color:{{ $backup->status === 'completed' ? '#15803D' : '#DC2626' }};">
-                            <i class="fas {{ $backup->status === 'completed' ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                        <div class="backup-row-icon dtc-icon-swatch is-{{ $backup->status === 'completed' ? 'success' : 'danger' }}" style="width:44px;height:44px;">
+                            <i data-lucide="{{ $backup->status === 'completed' ? 'check-circle' : 'x-circle' }}"></i>
                         </div>
 
                         {{-- Info --}}
@@ -146,9 +144,7 @@
 
                     <div class="backup-row-side">
                         {{-- Status --}}
-                        <span class="backup-status-pill" style="
-                            background:{{ $backup->status === 'completed' ? '#DCFCE7' : '#FEE2E2' }};
-                            color:{{ $backup->status === 'completed' ? '#15803D' : '#DC2626' }};">
+                        <span class="backup-status-pill dtc-status-badge is-{{ $backup->status === 'completed' ? 'success' : 'danger' }}">
                             {{ ucfirst($backup->status) }}
                         </span>
 
@@ -157,7 +153,7 @@
                             @if($backup->status === 'completed')
                             <a href="{{ route('admin.settings.backup.download', $backup) }}"
                                class="backup-btn backup-btn-download">
-                                <i class="fas fa-download"></i> <span class="d-none d-sm-inline">Download</span>
+                                <i data-lucide="download"></i> <span class="d-none d-sm-inline">Download</span>
                             </a>
                             @endif
 
@@ -166,7 +162,7 @@
                                 @csrf @method('DELETE')
                                 <button type="submit" class="backup-btn backup-btn-delete"
                                         onclick="return confirm('Remove this backup record?')">
-                                    <i class="fas fa-trash"></i>
+                                    <i data-lucide="trash-2"></i>
                                 </button>
                             </form>
                         </div>
@@ -174,7 +170,7 @@
                 </div>
                 @empty
                 <div class="backup-empty">
-                    <i class="fas fa-database backup-empty-icon"></i>
+                    <i data-lucide="database" class="backup-empty-icon"></i>
                     <div class="backup-empty-title">No backups yet</div>
                     <div class="backup-empty-sub">Click "Backup Now" to create your first database backup.</div>
                 </div>
@@ -187,7 +183,7 @@
              style="background:linear-gradient(135deg,#0F4CDB,#1a5feb); border:none;">
             <div class="card-body p-4">
                 <h6 style="font-weight:700; margin-bottom:12px;">
-                    <i class="fas fa-info-circle mr-2 u-accent"></i>
+                    <i data-lucide="info" class="mr-2 u-accent"></i>
                     Backup Tips
                 </h6>
                 <div style="font-size:13px; line-height:1.8; opacity:0.9;">
@@ -198,7 +194,7 @@
                         'Backups are stored in <code style="background:rgba(255,255,255,0.15); padding:1px 6px; border-radius:4px;">storage/app/backups/</code>',
                     ] as $tip)
                     <div style="display:flex; gap:10px; margin-bottom:8px;">
-                        <i class="fas fa-check-circle" style="color:#FFC72C; margin-top:3px; flex-shrink:0;"></i>
+                        <i data-lucide="check-circle" style="color:#FFC72C; margin-top:3px; flex-shrink:0;"></i>
                         <span>{!! $tip !!}</span>
                     </div>
                     @endforeach
@@ -228,13 +224,17 @@
 .backup-action-text  { font-size: 13px; color: var(--dtc-text-secondary); line-height: 1.6; margin-bottom: 20px; }
 
 .backup-warning {
-    background: #FEF9C3; border: 1.5px solid #FDE68A; border-radius: 12px;
-    padding: 14px 16px; margin-bottom: 16px; font-size: 12px; color: #92400E;
+    background: var(--_bw-bg, #FEF9C3);
+    border: 1.5px solid var(--_bw-border, #FDE68A);
+    border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 16px; font-size: 12px;
+    color: var(--_bw-text, #92400E);
+    display: flex; align-items: flex-start; gap: 8px;
 }
 body.dtc-dark .backup-warning {
-    background: rgba(253, 230, 138, 0.12);
-    border-color: rgba(253, 230, 138, 0.3);
-    color: #FDE68A;
+    --_bw-bg:     rgba(253, 230, 138, 0.10);
+    --_bw-border: rgba(253, 230, 138, 0.25);
+    --_bw-text:   #FDE68A;
 }
 
 .backup-drop-zone {
@@ -309,10 +309,12 @@ body.dtc-dark .backup-warning {
     font-size: 11px; font-weight: 600; text-decoration: none;
     display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
 }
-.backup-btn-download { background: #EEF2FF; color: #0F4CDB; }
-.backup-btn-download:hover { background: #E0E7FF; color: #0F4CDB; text-decoration: none; }
-.backup-btn-delete   { background: #FEE2E2; color: #DC2626; }
-.backup-btn-delete:hover { background: #FECACA; }
+.backup-btn-download { background: var(--dtc-primary-soft); color: var(--dtc-primary); }
+.backup-btn-download:hover { background: var(--dtc-primary-soft); color: var(--dtc-primary); text-decoration: none; filter: brightness(0.96); }
+.backup-btn-delete        { background: rgba(220,38,38,0.10); color: var(--dtc-danger); }
+.backup-btn-delete:hover  { background: rgba(220,38,38,0.18); }
+body.dtc-dark .backup-btn-delete       { background: rgba(220,38,38,0.18); color: #FCA5A5; }
+body.dtc-dark .backup-btn-delete:hover { background: rgba(220,38,38,0.28); }
 
 /* ── Mobile ───────────────────────────────────────────────────── */
 @media (max-width: 575.98px) {
@@ -339,9 +341,9 @@ function updateFileName(input) {
         const file = input.files[0];
         const size = (file.size / 1024).toFixed(1) + ' KB';
         label.textContent = file.name + ' (' + size + ')';
-        label.style.color = '#15803D';
-        zone.style.borderColor = '#0F4CDB';
-        zone.style.background  = '#EEF2FF';
+        label.style.color = 'var(--dtc-success)';
+        zone.style.borderColor = 'var(--dtc-primary)';
+        zone.style.background  = 'var(--dtc-primary-soft)';
     }
 }
 
@@ -350,8 +352,8 @@ const zone = document.getElementById('drop-zone');
 if (zone) {
     zone.addEventListener('dragover', function(e) {
         e.preventDefault();
-        this.style.borderColor = '#0F4CDB';
-        this.style.background  = '#EEF2FF';
+        this.style.borderColor = 'var(--dtc-primary)';
+        this.style.background  = 'var(--dtc-primary-soft)';
     });
     zone.addEventListener('dragleave', function() {
         this.style.borderColor = 'var(--dtc-border)';

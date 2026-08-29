@@ -17,7 +17,7 @@
     <div class="col-lg-7">
         <div class="card">
             <div class="card-header font-weight-bold u-text" >
-                <i class="fas fa-folder-plus mr-2 u-link" ></i>
+                <i data-lucide="folder-plus" class="mr-2 u-link"></i>
                 Document Request Form
             </div>
             <div class="card-body">
@@ -34,10 +34,10 @@
                         <label>Document Type</label>
                         <div class="row">
                             @foreach([
-                                ['value' => 'tor',          'label' => 'Transcript of Records', 'icon' => 'fa-file-alt',       'fee' => '₱50/copy'],
-                                ['value' => 'diploma',      'label' => 'Diploma',               'icon' => 'fa-graduation-cap', 'fee' => '₱100/copy'],
-                                ['value' => 'certification','label' => 'Certification',          'icon' => 'fa-certificate',    'fee' => '₱30/copy'],
-                                ['value' => 'true_copy',    'label' => 'True Copy of Records',  'icon' => 'fa-copy',           'fee' => '₱50/copy'],
+                                ['value' => 'tor',          'label' => 'Transcript of Records', 'icon' => 'file-text',       'fee' => '₱50/copy'],
+                                ['value' => 'diploma',      'label' => 'Diploma',               'icon' => 'graduation-cap', 'fee' => '₱100/copy'],
+                                ['value' => 'certification','label' => 'Certification',          'icon' => 'certificate',    'fee' => '₱30/copy'],
+                                ['value' => 'true_copy',    'label' => 'True Copy of Records',  'icon' => 'copy',           'fee' => '₱50/copy'],
                             ] as $doc)
                             <div class="col-6 mb-2">
                                 <label style="cursor:pointer; width:100%;">
@@ -50,8 +50,7 @@
                                          style="border:2px solid var(--dtc-border); border-radius:12px;
                                                 padding:14px; text-align:center; transition:all 0.2s;
                                                 background:var(--dtc-surface-soft);">
-                                        <i class="fas {{ $doc['icon'] }}"
-                                           style="font-size:22px; color:var(--dtc-text-muted); margin-bottom:8px; display:block;"></i>
+                                        <i data-lucide="{{ $doc['icon'] }}" style="font-size:22px; color:var(--dtc-text-muted); margin-bottom:8px; display:block;"></i>
                                         <div style="font-size:12px; font-weight:600; color:var(--dtc-text-secondary);">
                                             {{ $doc['label'] }}
                                         </div>
@@ -114,9 +113,9 @@
                     </div>
 
                     {{-- Fee Summary --}}
-                    <div style="background:#EEF2FF; border-radius:12px; padding:16px;
-                                margin-bottom:20px; border:1.5px solid #C7D2FE;">
-                        <div style="font-size:12px; font-weight:600; color:#0F4CDB;
+                    <div style="background:var(--dtc-primary-soft); border-radius:12px; padding:16px;
+                                margin-bottom:20px; border:1.5px solid var(--dtc-primary-soft);">
+                        <div style="font-size:12px; font-weight:600; color:var(--dtc-primary);
                                     text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
                             Fee Summary
                         </div>
@@ -132,16 +131,16 @@
                                 <span  class="u-text-secondary">Copies:</span>
                                 <span id="fee-copies-label" style="font-weight:600; color:var(--dtc-text);"></span>
                             </div>
-                            <div style="border-top:1px solid #C7D2FE; margin:8px 0;"></div>
+                            <div style="border-top:1px solid var(--dtc-border); margin:8px 0;"></div>
                             <div style="display:flex; justify-content:space-between;">
                                 <span  class="u-text-secondary-sm">Estimated Total:</span>
-                                <span id="fee-total" style="font-size:16px; font-weight:800; color:#0F4CDB;"></span>
+                                <span id="fee-total" style="font-size:16px; font-weight:800; color:var(--dtc-primary);"></span>
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-paper-plane mr-1"></i> Submit Request
+                        <i data-lucide="send" class="mr-1"></i> Submit Request
                     </button>
                     <a href="{{ route('portal.documents.index') }}" class="btn btn-secondary btn-block mt-2">
                         Cancel
@@ -157,7 +156,7 @@
              >
             <div class="card-body p-4">
                 <h5 style="font-weight:700; margin-bottom:16px; color:#fff;">
-                    <i class="fas fa-info-circle mr-2"></i> How It Works
+                    <i data-lucide="info" class="mr-2"></i> How It Works
                 </h5>
                 <div style="font-size:13px; line-height:1.8; opacity:0.9;">
                     <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
@@ -203,7 +202,7 @@
                 <div style="padding:12px 20px; border-bottom:1px solid var(--dtc-border-soft);
                             display:flex; justify-content:space-between; align-items:center;">
                     <span  class="u-text-sm-secondary-primary">{{ $item['label'] }}</span>
-                    <span style="font-size:13px; font-weight:700; color:#0F4CDB;">{{ $item['fee'] }}</span>
+                    <span style="font-size:13px; font-weight:700; color:var(--dtc-primary);">{{ $item['fee'] }}</span>
                 </div>
                 @endforeach
             </div>
@@ -245,9 +244,9 @@ document.querySelectorAll('.doc-radio').forEach(radio => {
             opt.querySelector('i').style.color = 'var(--dtc-text-muted)';
         });
         const selected = this.nextElementSibling;
-        selected.style.borderColor = '#0F4CDB';
-        selected.style.background = '#EEF2FF';
-        selected.querySelector('i').style.color = '#0F4CDB';
+        selected.style.borderColor = 'var(--dtc-primary)';
+        selected.style.background = 'var(--dtc-primary-soft)';
+        selected.querySelector('i').style.color = 'var(--dtc-primary)';
         updateFee();
     });
     if (this.checked) this.dispatchEvent(new Event('change'));

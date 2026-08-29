@@ -12,7 +12,7 @@
             </p>
         </div>
         <a href="{{ route('portal.enrollment.index') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left mr-1"></i> Back to Enrollment Status
+            <i data-lucide="arrow-left" class="mr-1"></i> Back to Enrollment Status
         </a>
     </div>
 @endsection

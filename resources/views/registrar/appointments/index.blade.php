@@ -9,8 +9,9 @@
             <h4 class="mb-0 font-weight-bold u-text" >Appointment Requests</h4>
             <p class="mb-0 u-text-secondary-sm" >Review and confirm student appointment bookings</p>
         </div>
-        <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-clock mr-1"></i> Manage Slots
+        <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary btn-sm dtc-header-btn">
+            <i data-lucide="clock" class="mr-1"></i>
+            <span class="dtc-header-btn-label">Manage Slots</span>
         </a>
     </div>
 @endsection
@@ -24,7 +25,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap u-gap-8" >
         <span class="font-weight-bold u-text" >
-            <i class="fas fa-hourglass-half mr-2 u-link" ></i> Pending Requests
+            <i data-lucide="hourglass" class="mr-2 u-link"></i> Pending Requests
         </span>
         <span  class="u-text-secondary-sm">{{ $appointments->total() }} total</span>
     </div>
@@ -64,8 +65,7 @@
                         </div>
                     </td>
                     <td>
-                        <span style="background:#EEF2FF; color:#0F4CDB; padding:4px 10px;
-                                     border-radius:20px; font-size:12px; font-weight:600;">
+                        <span class="dtc-status-badge is-info" style="font-weight:600;">
                             {{ ucfirst($appointment->document_type) }}
                         </span>
                     </td>
@@ -88,22 +88,24 @@
                                   action="{{ route('registrar.appointments.confirm', $appointment) }}">
                                 @csrf
                                 <button type="submit"
-                                        style="background:#DCFCE7; color:#15803D; border:none;
-                                               padding:5px 12px; border-radius:8px; font-size:11px;
+                                        class="dtc-status-badge is-success"
+                                        style="border:none;
+                                               padding:5px 12px; font-size:11px;
                                                font-weight:600; cursor:pointer;"
                                         onclick="return confirm('Confirm this appointment?')">
-                                    <i class="fas fa-check mr-1"></i> Confirm
+                                    <i data-lucide="check" class="mr-1"></i> Confirm
                                 </button>
                             </form>
 
                             {{-- Cancel --}}
                             <button type="button"
-                                    style="background:#FEE2E2; color:#DC2626; border:none;
-                                           padding:5px 12px; border-radius:8px; font-size:11px;
+                                    class="dtc-status-badge is-danger"
+                                    style="border:none;
+                                           padding:5px 12px; font-size:11px;
                                            font-weight:600; cursor:pointer;"
                                     data-toggle="modal"
                                     data-target="#cancelModal{{ $appointment->id }}">
-                                <i class="fas fa-times mr-1"></i> Cancel
+                                <i data-lucide="x" class="mr-1"></i> Cancel
                             </button>
                         </div>
 
@@ -148,7 +150,7 @@
                 @empty
                 <tr>
                     <td colspan="7" class="text-center py-5">
-                        <i class="fas fa-calendar-check fa-3x mb-3 u-border-color" ></i>
+                        <i data-lucide="calendar-check" class="mb-3 u-border-color" style="width:3em;height:3em"></i>
                         <p style="color:var(--dtc-text-muted); font-size:13px;">No pending appointment requests.</p>
                     </td>
                 </tr>

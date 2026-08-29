@@ -41,12 +41,12 @@
                     aria-label="Enable dark mode"
                     aria-pressed="false"
                     title="Enable dark mode">
-                    <i class="fas fa-moon" id="darkModeIcon" aria-hidden="true"></i>
+                    <i data-lucide="moon" id="darkModeIcon" aria-hidden="true"></i>
                 </button>
             </div>
 
             <button type="button" class="public-signin" data-signin-modal="trigger">
-                <i class="fas fa-arrow-right"></i> Sign in
+                <i data-lucide="arrow-right"></i> Sign in
             </button>
             
             <button
@@ -54,7 +54,7 @@
                 class="public-navbar-toggle"
                 id="applicationNavbarToggle"
             >
-                <i class="fas fa-bars"></i>
+                <i data-lucide="menu"></i>
             </button>
 
         </div>
@@ -77,7 +77,7 @@
             </a>
 
             <button type="button" class="public-signin" data-signin-modal="trigger">
-                <i class="fas fa-arrow-right"></i> Sign in
+                <i data-lucide="arrow-right"></i> Sign in
             </button>
 
         </div>

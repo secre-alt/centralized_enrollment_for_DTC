@@ -16,11 +16,11 @@
 
 @php
     $applicationBadges = [
-        'submitted'         => ['bg' => '#F1F5F9', 'color' => '#475569', 'label' => 'Submitted'],
-        'under_review'      => ['bg' => '#DBEAFE', 'color' => '#1D4ED8', 'label' => 'Under Review'],
-        'revision_required' => ['bg' => '#FEF9C3', 'color' => '#A16207', 'label' => 'Revision Required'],
-        'approved'          => ['bg' => '#DCFCE7', 'color' => '#15803D', 'label' => 'Approved'],
-        'rejected'          => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'label' => 'Rejected'],
+        'submitted'         => ['tone' => 'neutral', 'label' => 'Submitted'],
+        'under_review'      => ['tone' => 'info',    'label' => 'Under Review'],
+        'revision_required' => ['tone' => 'warning', 'label' => 'Revision Required'],
+        'approved'          => ['tone' => 'success', 'label' => 'Approved'],
+        'rejected'          => ['tone' => 'danger',  'label' => 'Rejected'],
     ];
 
     $enrollmentLabel = 'Not Started';
@@ -45,36 +45,34 @@
 <div class="row mb-3">
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-file-alt" color="primary"
+            icon="file-text" color="primary"
             label="Pre-Enrollment Application" value="{{ $appStatusLabel }}"
             href="{{ route('portal.application.show') }}" link-text="View Application" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-graduation-cap" color="warning"
+            icon="graduation-cap" color="warning"
             label="Official Enrollment" value="{{ $enrollmentLabel }}"
             href="{{ route('portal.enrollment.index') }}" link-text="View Details" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-book" color="success"
+            icon="book" color="success"
             label="Approved Program" value="{{ $application->program->name ?? 'Not provided' }}" />
     </div>
 
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-bell" color="info" :badge="$unreadCount"
+            icon="bell" color="info" :badge="$unreadCount"
             label="Notifications" value="{{ $unreadCount }} New"
             href="{{ route('notifications.index') }}" />
     </div>
 </div>
 
 {{-- ══ WELCOME CARD ════════════════════════════════════════════════════ --}}
-<div class="card mb-3"
-     style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);
-            border:1.5px solid #C7D2FE; border-radius:16px;">
+<div class="card mb-3 dtc-welcome-card">
     <div class="card-body" style="padding:24px;">
         <div style="display:flex; align-items:center; gap:20px;">
             <div style="width:64px; height:64px; border-radius:50%;
@@ -84,10 +82,10 @@
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
             <div>
-                <h4 style="font-weight:800; margin:0 0 4px;">
+                <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
                     Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
                 </h4>
-                <p style="font-size:13px; color:var(--dtc-text); margin:0;">
+                <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
                     @if($application && $application->status === 'approved')
                         Your pre-enrollment application has been approved.
                         @if(!$enrollment)
@@ -113,9 +111,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Pre-Enrollment Application</span>
                 @if($application)
-                    <span style="background:{{ $applicationBadges[$application->status]['bg'] ?? '#F1F5F9' }};
-                                 color:{{ $applicationBadges[$application->status]['color'] ?? '#475569' }};
-                                 font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px;">
+                    <span class="dtc-status-badge is-{{ $applicationBadges[$application->status]['tone'] ?? 'neutral' }}" style="font-weight:700;">
                         {{ $applicationBadges[$application->status]['label'] ?? ucwords(str_replace('_',' ',$application->status)) }}
                     </span>
                 @endif
@@ -181,7 +177,7 @@
                     </a>
                 @else
                     <div class="text-center py-4 u-muted" >
-                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <i data-lucide="alert-triangle" class="mb-2" style="width:2em;height:2em"></i>
                         <p  class="u-text-sm">
                             No approved application found for your account.
                             Please contact the Registrar's Office.
@@ -198,39 +194,39 @@
                 @if($nextStep['url'])
                     @if($nextStep['isPayment'] ?? false)
                         <button type="button" class="dtc-payment-btn dtc-next-step-btn" data-url="{{ $nextStep['url'] }}">
-                            <div class="dtc-next-step-icon" style="background:#0F4CDB;">
-                                <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
+                            <div class="dtc-next-step-icon" style="background:var(--dtc-primary);">
+                                <i data-lucide="{{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
                             </div>
                             <div style="flex:1; text-align:left;">
-                                <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
+                                <div style="font-size:14px; font-weight:700; color:var(--dtc-primary);">
                                     {{ $nextStep['label'] }}
                                 </div>
                                 <div  class="u-text-xxs-secondary">
                                     {{ $nextStep['desc'] }}
                                 </div>
                             </div>
-                            <i class="fas fa-chevron-right" style="color:#0F4CDB; font-size:14px;"></i>
+                            <i data-lucide="chevron-right" style="color:var(--dtc-primary); font-size:14px;"></i>
                         </button>
                     @else
                         <a href="{{ $nextStep['url'] }}" class="dtc-next-step-btn">
-                            <div class="dtc-next-step-icon" style="background:#0F4CDB;">
-                                <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
+                            <div class="dtc-next-step-icon" style="background:var(--dtc-primary);">
+                                <i data-lucide="{{ $nextStep['icon'] }}" style="font-size:20px; color:#fff;"></i>
                             </div>
                             <div  class="u-flex-1">
-                                <div style="font-size:14px; font-weight:700; color:#0F4CDB;">
+                                <div style="font-size:14px; font-weight:700; color:var(--dtc-primary);">
                                     {{ $nextStep['label'] }}
                                 </div>
                                 <div  class="u-text-xxs-secondary">
                                     {{ $nextStep['desc'] }}
                                 </div>
                             </div>
-                            <i class="fas fa-chevron-right" style="color:#0F4CDB; font-size:14px;"></i>
+                            <i data-lucide="chevron-right" style="color:var(--dtc-primary); font-size:14px;"></i>
                         </a>
                     @endif
                 @else
                     <div class="dtc-next-step-btn" style="cursor:default;">
                         <div class="dtc-next-step-icon" style="background:var(--dtc-surface-soft);">
-                            <i class="fas {{ $nextStep['icon'] }}" style="font-size:20px; color:var(--dtc-text-muted);"></i>
+                            <i data-lucide="{{ $nextStep['icon'] }}" style="font-size:20px; color:var(--dtc-text-muted);"></i>
                         </div>
                         <div>
                             <div style="font-size:14px; font-weight:700; color:var(--dtc-text);">
@@ -255,7 +251,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Announcements</span>
                 <a href="{{ route('notifications.index') }}"
-                   style="font-size:12px; color:#0F4CDB; text-decoration:none; font-weight:600;">
+                   style="font-size:12px; color:var(--dtc-primary); text-decoration:none; font-weight:600;">
                     View All
                 </a>
             </div>
@@ -263,25 +259,21 @@
                 @forelse ($announcements as $notif)
                 <div style="padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);">
                     <div style="display:flex; gap:10px; align-items:flex-start;">
-                        <div style="width:32px; height:32px; border-radius:10px; flex-shrink:0;
-                                    background:{{ $notif->type === 'success' ? '#DCFCE7' : ($notif->type === 'danger' ? '#FEE2E2' : '#DBEAFE') }};
-                                    display:flex; align-items:center; justify-content:center;">
-                            <i class="fas fa-bullhorn"
-                               style="font-size:12px;
-                                      color:{{ $notif->type === 'success' ? '#15803D' : ($notif->type === 'danger' ? '#DC2626' : '#1D4ED8') }};"></i>
+                        <div class="dtc-icon-swatch is-{{ $notif->type === 'success' ? 'success' : ($notif->type === 'danger' ? 'danger' : 'info') }}" style="width:32px; height:32px; flex-shrink:0;">
+                            <i data-lucide="megaphone" style="font-size:12px;"></i>
                         </div>
                         <div>
                             <div  class="u-text-sm-bold">
                                 {{ $notif->title }}
                             </div>
-                            <div style="font-size:11px; color:#94A3B8; margin-top:2px;">
+                            <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:2px;">
                                 {{ $notif->created_at->format('M d, Y') }}
                             </div>
                         </div>
                     </div>
                 </div>
                 @empty
-                <div class="text-center py-4" style="color:#94A3B8; font-size:13px;">
+                <div class="text-center py-4" style="color:var(--dtc-text-muted); font-size:13px;">
                     No announcements yet.
                 </div>
                 @endforelse
@@ -294,10 +286,10 @@
             <div class="card-body p-0">
                 @php
                     $actions = [
-                        ['icon' => 'fa-file-alt',   'label' => 'My Application',        'sub' => 'View your pre-enrollment application', 'url' => route('portal.application.show')],
-                        ['icon' => 'fa-plus-circle', 'label' => 'Enroll Now',            'sub' => 'Complete your official enrollment',    'url' => route('portal.enrollment.create')],
-                        ['icon' => 'fa-list',        'label' => 'My Enrollment Status',  'sub' => 'Track your official enrollment',        'url' => route('portal.enrollment.index')],
-                        ['icon' => 'fa-bell',        'label' => 'Notifications',         'sub' => $unreadCount . ' unread',                'url' => route('notifications.index')],
+                        ['icon' => 'file-text',   'label' => 'My Application',        'sub' => 'View your pre-enrollment application', 'url' => route('portal.application.show')],
+                        ['icon' => 'plus-circle', 'label' => 'Enroll Now',            'sub' => 'Complete your official enrollment',    'url' => route('portal.enrollment.create')],
+                        ['icon' => 'list',        'label' => 'My Enrollment Status',  'sub' => 'Track your official enrollment',        'url' => route('portal.enrollment.index')],
+                        ['icon' => 'bell',        'label' => 'Notifications',         'sub' => $unreadCount . ' unread',                'url' => route('notifications.index')],
                     ];
                 @endphp
                 @foreach($actions as $action)
@@ -307,10 +299,8 @@
                           padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
                           text-decoration:none; transition:background 0.2s;">
                     <div  class="u-flex-center-gap-12">
-                        <div style="width:36px; height:36px; border-radius:10px;
-                                    background:#EEF2FF; display:flex; align-items:center;
-                                    justify-content:center;">
-                            <i class="fas {{ $action['icon'] }} u-link-md"
+                        <div class="dtc-icon-swatch is-primary">
+                            <i data-lucide="{{ $action['icon'] }}" class="u-link-md"
                                ></i>
                         </div>
                         <div>
@@ -322,7 +312,7 @@
                             </div>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right" style="color:#CBD5E1; font-size:12px;"></i>
+                    <i data-lucide="chevron-right" style="color:var(--dtc-text-muted); font-size:12px;"></i>
                 </a>
                 @endforeach
             </div>

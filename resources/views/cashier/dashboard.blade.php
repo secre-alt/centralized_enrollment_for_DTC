@@ -10,7 +10,7 @@
             <p class="mb-0 u-text-secondary-sm" >Manage payments and receipts</p>
         </div>
         <a href="{{ route('cashier.payments.index') }}" class="dtc-btn dtc-btn-primary dtc-header-btn">
-            <i class="fas fa-money-bill-wave"></i>
+            <i data-lucide="banknote"></i>
             <span class="dtc-header-btn-label">Process Payments</span>
         </a>
     </div>
@@ -22,25 +22,25 @@
 <div class="row mb-2">
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-coins" color="primary"
+            icon="coins" color="primary"
             label="Today's Collection" value="₱{{ number_format($todayCollection, 2) }}"
             note="Total Amount" />
     </div>
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-clock" color="warning"
+            icon="clock" color="warning"
             label="Pending Payments" value="{{ $pendingPayments }}"
             href="{{ route('cashier.payments.index') }}" link-text="For Processing" />
     </div>
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-check-circle" color="success"
+            icon="check-circle" color="success"
             label="Paid This Month" value="{{ $paidThisMonth }}"
             note="Transactions" />
     </div>
     <div class="col-lg-3 col-md-6 col-12 mb-3">
         <x-dtc.stat-card
-            icon="fa-walking" color="info"
+            icon="footprints" color="info"
             label="Walk-in Payments" value="{{ $walkinPayments }}"
             note="This Month" />
     </div>
@@ -55,7 +55,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Recent Payments</span>
                 <a href="{{ route('cashier.payments.index') }}"
-                   style="font-size:12px; color:#0F4CDB; text-decoration:none;">View All</a>
+                   style="font-size:12px; color:var(--dtc-primary); text-decoration:none;">View All</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -72,7 +72,7 @@
                     <tbody>
                         @forelse ($recentPayments as $payment)
                         <tr>
-                            <td style="font-size:12px; font-weight:600; color:#0F4CDB;">
+                            <td style="font-size:12px; font-weight:600; color:var(--dtc-primary);">
                                 {{ $payment->receipt_no }}
                             </td>
                             <td>
@@ -86,7 +86,7 @@
                                     <span  class="u-text-sm">{{ $payment->enrollment->user->name }}</span>
                                 </div>
                             </td>
-                            <td style="font-size:13px; font-weight:600; color:#15803D;">
+                            <td style="font-size:13px; font-weight:600; color:var(--dtc-success);">
                                 ₱{{ number_format($payment->amount, 2) }}
                             </td>
                             <td  class="u-text-xxs-secondary">
@@ -96,7 +96,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4" style="color:#94A3B8; font-size:13px;">
+                            <td colspan="5" class="text-center py-4" style="color:var(--dtc-text-muted); font-size:13px;">
                                 No payments yet.
                             </td>
                         </tr>
@@ -105,25 +105,9 @@
                 </table>
                 </div>
             </div>
-            @if ($recentPayments->hasPages() || $recentPayments->total() > 0)
-                <div class="card-footer u-panel-footer" >
-                    <div class="d-flex justify-content-between align-items-center flex-wrap u-gap-15" >
-                        <small  class="u-text-secondary">
-                            Showing
-                            <strong>{{ $recentPayments->firstItem() ?? 0 }}</strong>
-                            to
-                            <strong>{{ $recentPayments->lastItem() ?? 0 }}</strong>
-                            of
-                            <strong>{{ $recentPayments->total() }}</strong>
-                            results
-                        </small>
-
-                        @if ($recentPayments->hasPages())
-                        <div>
-                            {{ $recentPayments->onEachSide(1)->links('pagination::bootstrap-4') }}
-                        </div>
-                        @endif
-                    </div>
+            @if ($recentPayments->total() > 0)
+                <div class="card-footer u-panel-footer">
+                    <a href="{{ route('cashier.payments.index') }}" class="u-text-sm" style="color:var(--dtc-primary); text-decoration:none;">View All Payments →</a>
                 </div>
             @endif
         </div>
@@ -164,10 +148,10 @@
             <div class="card-header font-weight-bold">Quick Actions</div>
             <div class="card-body p-3">
                 <a href="{{ route('cashier.payments.index') }}" class="quick-action-btn">
-                    <i class="fas fa-money-bill-wave"></i> Process Payments
+                    <i data-lucide="banknote"></i> Process Payments
                 </a>
                 <a href="{{ route('notifications.index') }}" class="quick-action-btn">
-                    <i class="fas fa-bell"></i> Notifications
+                    <i data-lucide="bell"></i> Notifications
                 </a>
             </div>
         </div>
@@ -183,15 +167,15 @@
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-6 col-md-3 mb-3 mb-md-0">
-                        <div style="font-size:22px; font-weight:700; color:#0F4CDB;">{{ $totalTransactions }}</div>
+                        <div style="font-size:22px; font-weight:700; color:var(--dtc-primary);">{{ $totalTransactions }}</div>
                         <div  class="u-text-xxs-secondary-bold">Total Transactions</div>
                     </div>
                     <div class="col-6 col-md-3 mb-3 mb-md-0">
-                        <div style="font-size:22px; font-weight:700; color:#22C55E;">{{ $totalPaid }}</div>
+                        <div style="font-size:22px; font-weight:700; color:var(--dtc-success);">{{ $totalPaid }}</div>
                         <div  class="u-text-xxs-secondary-bold">Paid</div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div style="font-size:22px; font-weight:700; color:#F59E0B;">{{ $pendingPayments }}</div>
+                        <div style="font-size:22px; font-weight:700; color:var(--dtc-warning);">{{ $pendingPayments }}</div>
                         <div  class="u-text-xxs-secondary-bold">Pending</div>
                     </div>
                     <div class="col-6 col-md-3">

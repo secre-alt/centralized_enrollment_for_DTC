@@ -1131,11 +1131,11 @@ display: block;
 .dtc-stat-warning .dtc-stat-icon { background: #FEF9C3 !important; color: #A16207 !important; }
 .dtc-stat-warning .dtc-stat-link { color: #A16207 !important; }
 
-.dtc-stat-success .dtc-stat-icon { background: #DCFCE7 !important; color: #15803D !important; }
-.dtc-stat-success .dtc-stat-link { color: #15803D !important; }
+.dtc-stat-success .dtc-stat-icon { background: #DCFCE7 !important; color: #16A34A !important; }
+.dtc-stat-success .dtc-stat-link { color: #16A34A !important; }
 
-.dtc-stat-danger .dtc-stat-icon { background: #FEE2E2 !important; color: #DC2626 !important; }
-.dtc-stat-danger .dtc-stat-link { color: #DC2626 !important; }
+.dtc-stat-danger .dtc-stat-icon { background: #FEE2E2 !important; color: var(--dtc-danger) !important; }
+.dtc-stat-danger .dtc-stat-link { color: var(--dtc-danger) !important; }
 
 .dtc-stat-info .dtc-stat-icon { background: #EDE9FE !important; color: #7C3AED !important; }
 .dtc-stat-info .dtc-stat-link { color: #7C3AED !important; }
@@ -1490,9 +1490,9 @@ display: block;
 }
 
 .quick-action-btn:hover {
-    background: #EEF2FF;
-    border-color: #0F4CDB;
-    color: #0F4CDB;
+    background: var(--dtc-primary-soft);
+    border-color: var(--dtc-primary);
+    color: var(--dtc-primary);
     text-decoration: none;
 }
 
@@ -1500,13 +1500,18 @@ display: block;
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #0F4CDB;
+    background: var(--dtc-primary);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     flex-shrink: 0;
+}
+
+body.dtc-dark .quick-action-btn i {
+    background: rgba(99,130,245,0.25);
+    color: #93C5FD;
 }
 
 /* ── BREADCRUMB ──────────────────────────────────────────── */
@@ -1783,6 +1788,10 @@ body.dtc-dark {
     --dtc-border-soft: #1E293B;
     --dtc-primary-soft: rgba(108, 155, 255, 0.16);
     --dtc-on-primary-soft: #93C5FD;
+    /* Semantic colors — brightened so they're legible as text on dark surfaces */
+    --dtc-success: #4ADE80;
+    --dtc-warning: #FCD34D;
+    --dtc-danger:  #F87171;
 }
 
 body.dtc-dark {
@@ -1921,6 +1930,11 @@ body.dtc-dark .form-select {
 
 body.dtc-dark .form-control::placeholder {
     color: #64748B;
+}
+
+body.dtc-dark .form-group label,
+body.dtc-dark .form-group .form-check-label {
+    color: var(--dtc-text) !important;
 }
 
 body.dtc-dark .dropdown-item {
@@ -2278,24 +2292,31 @@ body.dtc-dark .page-item .page-link {
     box-shadow: var(--dtc-shadow-md);
 }
 
-/* Account menu: opens UPWARD above the pinned panel (like a
-   ChatGPT-style bottom account switcher) instead of pushing
-   the panel taller / downward off-screen. Still uses
-   Bootstrap's collapse plugin for the open/close animation and
-   aria-expanded state — only the positioning changed. */
+/* Account menu: opens UPWARD above the pinned panel.
+   Uses [hidden] attribute + CSS animation — no Bootstrap
+   collapse dependency, so there is no open/close race. */
 .dtc-sidebar-profile-menu {
     position: absolute;
     left: 0;
     right: 0;
     bottom: calc(100% + 8px);
-    margin-top: 0;
     padding: 8px;
-    border-top: 0;
     background: var(--dtc-surface);
     border: 1px solid var(--dtc-border);
     border-radius: 12px;
     box-shadow: var(--dtc-shadow-md);
-margin-top:8px; border-top:1px solid var(--dtc-border); padding-top:8px;}
+    /* Entry animation */
+    animation: dtcMenuIn 0.15s ease;
+    transform-origin: bottom center;
+}
+/* When hidden attribute is present the menu is gone entirely —
+   no half-open states, no timing bugs. */
+.dtc-sidebar-profile-menu[hidden] { display: none !important; }
+
+@keyframes dtcMenuIn {
+    from { opacity: 0; transform: scale(0.97) translateY(4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
 
 /* ── Mobile sidebar profile panel fix ────────────────────────
    On mobile AdminLTE renders the sidebar as a slide-in overlay
@@ -3319,15 +3340,51 @@ body.dtc-dark .dtc-welcome-card {
 body.dtc-dark .dtc-welcome-title { color: #F8FAFC; }
 body.dtc-dark .dtc-welcome-text { color: #CBD5E1; }
 
-body.dtc-dark .dtc-stat-icon,
 body.dtc-dark .dtc-empty-icon,
 body.dtc-dark .dtc-upload-icon,
 body.dtc-dark .dtc-action-icon,
 body.dtc-dark .dtc-filter-chip:hover,
 body.dtc-dark .dtc-filter-chip.active,
 body.dtc-dark .navbar-icon-link:hover {
-    background: #1E3A8A;
+    background: rgba(99,130,245,0.18);
 }
+
+/* ── STAT ICON: per-tone dark overrides ────────────────────
+   These replace the old single catch-all (#1E3A8A for everything)
+   which made all tones look like low-contrast blue-on-blue.
+   Each tone gets a distinct darkened bg + brightened fg so the
+   icon reads clearly against a dark card surface.            */
+body.dtc-dark .dtc-stat-primary .dtc-stat-icon,
+body.dtc-dark .dtc-stat-icon { /* base fallback = primary */
+    background: rgba(99,130,245,0.18) !important;
+    color: #93C5FD !important;
+}
+body.dtc-dark .dtc-stat-warning .dtc-stat-icon {
+    background: rgba(217,119,6,0.20) !important;
+    color: #FCD34D !important;
+}
+body.dtc-dark .dtc-stat-success .dtc-stat-icon {
+    background: rgba(22,163,74,0.20) !important;
+    color: #86EFAC !important;
+}
+body.dtc-dark .dtc-stat-danger .dtc-stat-icon {
+    background: rgba(220,38,38,0.20) !important;
+    color: #FCA5A5 !important;
+}
+body.dtc-dark .dtc-stat-info .dtc-stat-icon {
+    background: rgba(124,58,237,0.20) !important;
+    color: #C4B5FD !important;
+}
+body.dtc-dark .dtc-stat-neutral .dtc-stat-icon {
+    background: rgba(100,116,139,0.20) !important;
+    color: #CBD5E1 !important;
+}
+
+/* Stat link colours (the "View All" links under each stat card) */
+body.dtc-dark .dtc-stat-warning .dtc-stat-link { color: #FCD34D !important; }
+body.dtc-dark .dtc-stat-success .dtc-stat-link { color: #86EFAC !important; }
+body.dtc-dark .dtc-stat-danger  .dtc-stat-link { color: #FCA5A5 !important; }
+body.dtc-dark .dtc-stat-info    .dtc-stat-link { color: #C4B5FD !important; }
 
 body.dtc-dark .dtc-form-control,
 body.dtc-dark .dtc-form-select,
@@ -3431,20 +3488,43 @@ body.dtc-dark .alert-info { background: #1E3A8A !important; color: #BFDBFE !impo
     box-sizing: border-box;
 }
 
-.dtc-sidebar-user-main { display:flex; align-items:center; gap:10px; }
+/* Whole row is now the toggle — styled as a button but looks like a card row */
+.dtc-sidebar-user-main {
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:0; border:0; border-radius:10px;
+    background:transparent; cursor:pointer; text-align:left;
+    transition: background var(--dtc-transition);
+}
+.dtc-sidebar-user-main:hover { background: rgba(15, 76, 219, 0.06); }
+.dtc-sidebar-user-main:focus-visible {
+    outline: 2px solid var(--dtc-primary);
+    outline-offset: 2px;
+}
+/* When menu is open, subtly highlight the row */
+.dtc-sidebar-user-main[aria-expanded="true"] { background: rgba(15, 76, 219, 0.08); }
+
 .dtc-sidebar-avatar {
     width:40px; height:40px; flex:0 0 40px; border-radius:12px;
     display:flex; align-items:center; justify-content:center;
     color:#fff; background:linear-gradient(135deg,#0F4CDB,#3B82F6);
     font-size:13px; font-weight:700; box-shadow:0 6px 16px rgba(15,76,219,.18);
+    pointer-events:none;
 }
-.dtc-sidebar-user-copy { min-width:0; flex:1; }
+.dtc-sidebar-user-copy { min-width:0; flex:1; pointer-events:none; }
 .dtc-sidebar-user-name { color:var(--dtc-text); font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dtc-sidebar-user-role { margin-top:2px; color:var(--dtc-text-muted); font-size:10.5px; font-weight:500; }
-.dtc-sidebar-profile-toggle {
-    width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--dtc-text-muted);cursor:pointer;
+
+/* Chevron replaces the 3-dot; rotates when menu is open */
+.dtc-sidebar-profile-chevron {
+    flex-shrink:0; width:18px; height:18px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dtc-text-muted); pointer-events:none;
+    transition: transform 0.2s ease, color 0.2s ease;
 }
-.dtc-sidebar-profile-toggle:hover { background:var(--dtc-surface); color:var(--dtc-primary); }
+.dtc-sidebar-user-main[aria-expanded="true"] .dtc-sidebar-profile-chevron {
+    transform: rotate(180deg);
+    color: var(--dtc-primary);
+}
 
 .dtc-sidebar-profile-link {
     display:flex; align-items:center; gap:9px; width:100%; min-height:34px; padding:7px 8px; border:0; border-radius:8px;
@@ -3469,11 +3549,34 @@ body.dtc-dark .alert-info { background: #1E3A8A !important; color: #BFDBFE !impo
 .dtc-status-badge.is-success { color:#15803D;background:#DCFCE7; }
 .dtc-status-badge.is-warning { color:#B45309;background:#FEF3C7; }
 .dtc-status-badge.is-danger { color:#B91C1C;background:#FEE2E2; }
+.dtc-status-badge.is-primary { color:var(--dtc-primary);background:var(--dtc-primary-soft); }
 .dtc-status-badge.is-neutral { color:#475569;background:#F1F5F9; }
+.dtc-status-badge.is-info { color:#1D4ED8;background:#DBEAFE; }
+.dtc-status-badge.is-purple { color:#7C3AED;background:#EDE9FE; }
 body.dtc-dark .dtc-status-badge.is-success { color:#86EFAC;background:#14532D; }
 body.dtc-dark .dtc-status-badge.is-warning { color:#FCD34D;background:#78350F; }
 body.dtc-dark .dtc-status-badge.is-danger { color:#FCA5A5;background:#7F1D1D; }
+body.dtc-dark .dtc-status-badge.is-primary { color:#93C5FD;background:rgba(15,76,219,0.20); }
 body.dtc-dark .dtc-status-badge.is-neutral { color:#CBD5E1;background:#334155; }
+body.dtc-dark .dtc-status-badge.is-info { color:#93C5FD;background:#1E3A8A; }
+body.dtc-dark .dtc-status-badge.is-purple { color:#C4B5FD;background:#4C1D95; }
+
+/* Icon-swatch variant of the same tones — used for small square/round
+   icon containers (e.g. role icons, quick-action icons) rather than
+   inline text pills. Shares the same light/dark color pairs. */
+.dtc-icon-swatch { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.dtc-icon-swatch.is-primary { background:var(--dtc-primary-soft); color:var(--dtc-primary); }
+.dtc-icon-swatch.is-success { color:#15803D;background:#DCFCE7; }
+.dtc-icon-swatch.is-warning { color:#B45309;background:#FEF3C7; }
+.dtc-icon-swatch.is-danger { color:#B91C1C;background:#FEE2E2; }
+.dtc-icon-swatch.is-info { color:#1D4ED8;background:#DBEAFE; }
+.dtc-icon-swatch.is-purple { color:#7C3AED;background:#EDE9FE; }
+body.dtc-dark .dtc-icon-swatch.is-primary { color:#93C5FD;background:rgba(99,130,245,0.20); }
+body.dtc-dark .dtc-icon-swatch.is-success { color:#86EFAC;background:rgba(22,163,74,0.20); }
+body.dtc-dark .dtc-icon-swatch.is-warning { color:#FCD34D;background:rgba(217,119,6,0.20); }
+body.dtc-dark .dtc-icon-swatch.is-danger  { color:#FCA5A5;background:rgba(220,38,38,0.20); }
+body.dtc-dark .dtc-icon-swatch.is-info    { color:#93C5FD;background:rgba(29,78,216,0.25); }
+body.dtc-dark .dtc-icon-swatch.is-purple  { color:#C4B5FD;background:rgba(124,58,237,0.22); }
 
 .dtc-btn { border:1px solid transparent; border-radius:9px; min-height:38px; padding:8px 13px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; gap:7px; cursor:pointer; text-decoration:none !important; }
 .dtc-btn-primary { color:#fff !important; background:var(--dtc-primary); border-color:var(--dtc-primary); }
@@ -3481,6 +3584,7 @@ body.dtc-dark .dtc-status-badge.is-neutral { color:#CBD5E1;background:#334155; }
 .dtc-btn-secondary { color:var(--dtc-text); background:var(--dtc-surface); border-color:var(--dtc-border); }
 .dtc-btn-secondary:hover { color:var(--dtc-primary); border-color:#BFDBFE; background:var(--dtc-primary-soft); }
 .dtc-btn-danger { color:#fff !important; background:var(--dtc-danger); border-color:var(--dtc-danger); }
+.dtc-field-error { color:var(--dtc-danger); }
 
 
 .dtc-empty-message { color:var(--dtc-text-muted); font-size:11.5px; max-width:460px; margin:0 auto; }
@@ -3521,7 +3625,10 @@ body.dtc-dark .dtc-status-badge.is-neutral { color:#CBD5E1;background:#334155; }
 
 
 body.dtc-dark .dtc-sidebar-user-panel { background:#0F172A; }
-body.dtc-dark .dtc-sidebar-profile-link:hover { background:#1E293B; }
+body.dtc-dark .dtc-sidebar-user-main:hover { background: rgba(255,255,255,0.05); }
+body.dtc-dark .dtc-sidebar-user-main[aria-expanded="true"] { background: rgba(255,255,255,0.07); }
+body.dtc-dark .dtc-sidebar-profile-menu { background:#0F172A; border-color:#334155; }
+body.dtc-dark .dtc-sidebar-profile-link:hover { background:#293548; }
 body.dtc-dark .dtc-file-upload:hover { background:#172554; border-color:#60A5FA; }
 body.dtc-dark .dtc-file-upload-icon { background:#1E3A8A; color:#93C5FD; }
 
@@ -3818,6 +3925,31 @@ body.dtc-dark .dtc-review-subject-code {
 
 /* ── Responsive ──────────────────────────────────────────── */
 
+
+/* ── DATE CHIP (slots table) ─────────────────────────────────
+   A small pill showing month + day. Uses explicit dark override
+   so the chip stays readable — primary-soft goes near-invisible
+   in dark mode because it becomes rgba(108,155,255,0.16).      */
+.dtc-date-chip {
+    background: var(--dtc-primary-soft);
+    color: var(--dtc-primary);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.3;
+    min-width: 42px;
+    flex-shrink: 0;
+}
+.dtc-date-chip-day {
+    font-size: 16px;
+    display: block;
+}
+body.dtc-dark .dtc-date-chip {
+    background: rgba(99, 130, 245, 0.25);
+    color: #93C5FD;
+}
 
 /* ── Table "Review" pill button (dashboard + enrollments index) ───── */
 .dtc-review-btn {
@@ -4281,4 +4413,88 @@ button.dtc-next-step-btn:hover {
 }
 body.dtc-dark .sidebar-context-back > .nav-link {
     border-bottom-color: rgba(255,255,255,.08);
+}
+
+/* ============================================================
+   DARK MODE — portal dashboard inline-style overrides
+   These target hardcoded #EEF2FF icon wells and status-dot
+   backgrounds that appear in portal/student/alumni dashboards
+   via inline styles and cannot be overridden from CSS alone.
+   We use a CSS custom property injection approach: the rules
+   below override the well-known tokens so any inline style that
+   references var(--dtc-*) automatically picks up dark values,
+   and separate selector rules handle the static hex backgrounds.
+   ============================================================ */
+
+/* Icon wells (#EEF2FF → dark blue-tinted surface) */
+body.dtc-dark .dtc-icon-well {
+    background: #1E3A8A !important;
+}
+
+/* Quick-action row icon wells and document request icon wells
+   — these use inline style="background:#EEF2FF" so we target
+   their containing row instead */
+body.dtc-dark .dtc-quick-action-row > .u-flex-center-gap-12 > div:first-child,
+body.dtc-dark [style*="background:#EEF2FF"] {
+    background: #1E3A8A !important;
+}
+
+/* Inline status dot/badge backgrounds used in dashboard loops
+   — status: released (green), ready (purple), processing (blue), pending (yellow) */
+body.dtc-dark [style*="background:#DCFCE7"] { background: #14532D !important; color: #86EFAC !important; }
+body.dtc-dark [style*="background:#EDE9FE"] { background: #3B0764 !important; color: #D8B4FE !important; }
+body.dtc-dark [style*="background:#DBEAFE"] { background: #1E3A8A !important; color: #BFDBFE !important; }
+body.dtc-dark [style*="background:#FEF9C3"] { background: #713F12 !important; color: #FDE68A !important; }
+body.dtc-dark [style*="background:#FEE2E2"] { background: #7F1D1D !important; color: #FCA5A5 !important; }
+body.dtc-dark [style*="background:#FEF3C7"] { background: #78350F !important; color: #FCD34D !important; }
+
+/* Inline status text colors — ensure readability on dark backgrounds */
+body.dtc-dark [style*="color:#15803D"] { color: #86EFAC !important; }
+body.dtc-dark [style*="color:#A16207"] { color: #FDE68A !important; }
+body.dtc-dark [style*="color:#1D4ED8"] { color: #BFDBFE !important; }
+body.dtc-dark [style*="color:#7C3AED"] { color: #D8B4FE !important; }
+body.dtc-dark [style*="color:#DC2626"] { color: #FCA5A5 !important; }
+
+/* ============================================================
+   LUCIDE ICONS — global defaults
+   ============================================================ */
+
+/* Every Lucide <i data-lucide> renders as an inline SVG.
+   These rules ensure consistent sizing and stroke weight
+   that matches the previous Font Awesome sizing. */
+[data-lucide],
+[data-lucide] svg {
+    display: inline-block;
+    vertical-align: -0.125em;   /* matches FA's optical baseline */
+    width: 1em;
+    height: 1em;
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+/* fa-spin equivalent */
+@keyframes dtc-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.lucide-spin svg {
+    animation: dtc-spin 1s linear infinite;
+}
+
+/* Explicit size overrides that were previously fa-2x / fa-3x / fa-4x */
+[data-lucide][style*="width:1.25em"] svg { width: 1.25em; height: 1.25em; }
+[data-lucide][style*="width:2em"] svg { width: 2em; height: 2em; }
+[data-lucide][style*="width:3em"] svg { width: 3em; height: 3em; }
+[data-lucide][style*="width:4em"] svg { width: 4em; height: 4em; }
+
+/* Sidebar nav-icon: the <i data-lucide> wrapper is sized to 1.25em via inline style
+   (set in menu-item-link.blade.php). The generic [data-lucide] svg rule above fixes
+   this now, but this explicit selector also overrides the base 1em rule with higher
+   specificity in case of any ordering/cascade conflicts. */
+.nav-sidebar .nav-item > .nav-link .nav-icon svg {
+    width: 1.25em !important;
+    height: 1.25em !important;
 }

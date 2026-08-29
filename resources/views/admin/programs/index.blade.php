@@ -12,7 +12,7 @@
             </p>
         </div>
         <button type="button" class="dtc-btn dtc-btn-primary dtc-header-btn" data-toggle="modal" data-target="#addProgramModal">
-            <i class="fas fa-plus"></i>
+            <i data-lucide="plus"></i>
             <span class="dtc-header-btn-label">Add Program</span>
         </button>
     </div>
@@ -65,7 +65,7 @@
                                 <a href="{{ route('admin.programs.index', ['program' => $program->id]) }}"
                                    class="dtc-btn js-select-program {{ $isSelected ? 'dtc-btn-primary' : 'dtc-btn-secondary' }}"
                                    data-id="{{ $program->id }}">
-                                    <i class="fas fa-book"></i> Subjects
+                                    <i data-lucide="book"></i> Subjects
                                 </a>
                                 <button type="button"
                                         class="dtc-icon-btn js-edit-program"
@@ -73,7 +73,7 @@
                                         data-url="{{ route('admin.programs.update', $program) }}"
                                         data-name="{{ $program->name }}"
                                         data-code="{{ $program->code }}">
-                                    <i class="fas fa-edit"></i>
+                                    <i data-lucide="pencil"></i>
                                 </button>
                                 <form method="POST"
                                       action="{{ route('admin.programs.destroy', $program) }}">
@@ -82,7 +82,7 @@
                                             class="dtc-icon-btn danger"
                                             title="Delete program"
                                             onclick="return confirm('Delete {{ $program->name }}?')">
-                                        <i class="fas fa-trash"></i>
+                                        <i data-lucide="trash-2"></i>
                                     </button>
                                 </form>
                             </div>
@@ -134,7 +134,7 @@
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title u-text" >
-                        <i class="fas fa-plus-circle mr-2" style="color:var(--dtc-primary);"></i> Add New Program
+                        <i data-lucide="plus-circle" class="mr-2" style="color:var(--dtc-primary);"></i> Add New Program
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
@@ -155,7 +155,7 @@
                 <div class="modal-footer">
                     <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="dtc-btn dtc-btn-primary">
-                        <i class="fas fa-plus"></i> Add Program
+                        <i data-lucide="plus"></i> Add Program
                     </button>
                 </div>
             </form>
@@ -173,7 +173,7 @@
                 @csrf @method('PUT')
                 <div class="modal-header">
                     <h5 class="modal-title u-text" >
-                        <i class="fas fa-edit mr-2" style="color:var(--dtc-primary);"></i> Edit Program
+                        <i data-lucide="pencil" class="mr-2" style="color:var(--dtc-primary);"></i> Edit Program
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
@@ -190,7 +190,7 @@
                 <div class="modal-footer">
                     <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="dtc-btn dtc-btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
+                        <i data-lucide="save"></i> Save Changes
                     </button>
                 </div>
             </form>

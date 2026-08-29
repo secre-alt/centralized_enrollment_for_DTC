@@ -113,13 +113,13 @@
                         <div class="d-flex flex-row align-items-center justify-content-center" style="gap:6px;">
                             <button type="button" class="dtc-review-btn dtc-payment-btn dtc-header-btn"
                                     data-url="{{ route('cashier.payments.show', $enrollment) }}">
-                                <i class="fas fa-money-bill-wave"></i>
+                                <i data-lucide="banknote"></i>
                                 <span class="dtc-header-btn-label">Process</span>
                             </button>
                             @if ($enrollment->is_paid)
                                 <button type="button" class="dtc-review-btn dtc-receipt-btn dtc-header-btn"
                                         data-url="{{ route('cashier.payments.receipt', $enrollment) }}">
-                                    <i class="fas fa-receipt"></i>
+                                    <i data-lucide="receipt"></i>
                                     <span class="dtc-header-btn-label">Receipt</span>
                                 </button>
                             @endif

@@ -110,7 +110,7 @@
 
                 <div class="text-center mb-4">
                     <a href="{{ route('public.application.status.form') }}" class="btn btn-outline-secondary px-4">
-                        <i class="fas fa-search me-2"></i>
+                        <i data-lucide="search" class="me-2"></i>
                         Check Another Application
                     </a>
                 </div>

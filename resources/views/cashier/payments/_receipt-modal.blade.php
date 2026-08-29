@@ -28,7 +28,7 @@
 
     var errorMarkup = '\
         <div class="dtc-review-loading">\
-            <i class="fas fa-triangle-exclamation u-danger-lg" ></i>\
+            <i data-lucide="alert-triangle" class="u-danger-lg"></i>\
             <p class="text-danger mb-0">Couldn\'t load this receipt. Please try again.</p>\
         </div>';
 
@@ -42,22 +42,33 @@
         $modalContent.html(loadingMarkup);
         $modal.modal('show');
 
-        $.get(url)
-            .done(function (html) {
-                var content = $('<div>').html(html).find('#receipt-content').html();
-                $modalContent.html(content || errorMarkup);
-            })
-            .fail(function (xhr) {
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function (html) {
+                var $parsed = $('<div>').html(html);
+                var content = $parsed.find('#receipt-content').html();
+                if (content) {
+                    $modalContent.html(content);
+                    if (window.lucide) lucide.createIcons({ nodes: $modalContent[0].querySelectorAll('[data-lucide]') });
+                } else {
+                    $modalContent.html(errorMarkup);
+                }
+            },
+            error: function (xhr) {
                 var message = (xhr.responseJSON && xhr.responseJSON.message)
                     ? xhr.responseJSON.message
                     : "Couldn't load this receipt. Please try again.";
                 $modalContent.html(
                     '<div class="dtc-review-loading">' +
-                        '<i class="fas fa-triangle-exclamation u-danger-lg" ></i>' +
+                        '<i data-lucide="alert-triangle" class="u-danger-lg"></i>' +
                         '<p class="text-danger mb-0">' + message + '</p>' +
                     '</div>'
                 );
-            });
+                if (window.lucide) lucide.createIcons({ nodes: $modalContent[0].querySelectorAll('[data-lucide]') });
+            }
+        });
     });
 
     $modal.on('hidden.bs.modal', function () {
@@ -71,17 +82,18 @@
         if (! content) { return; }
 
         var win = window.open('', '_blank', 'width=650,height=800');
-        win.document.write('\
-            <html>\
-            <head>\
-                <title>Official Receipt</title>\
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">\
-                <style>\
-                    body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; color:#1E293B; padding:24px; }\
-                    * { box-sizing: border-box; }\
-                </style>\
-            </head>\
-            <body>' + content.innerHTML + '</body></html>');
+        win.document.write(
+            '<html>' +
+            '<head>' +
+                '<title>Official Receipt</title>' +
+                '<style>' +
+                    'body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; color:#1E293B; padding:24px; }' +
+                    '* { box-sizing: border-box; }' +
+                '</style>' +
+            '</head>' +
+            '<body>' + content.innerHTML + '</body>' +
+            '</html>'
+        );
         win.document.close();
         win.focus();
         win.onload = function () { win.print(); };

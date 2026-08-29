@@ -9,8 +9,8 @@
         @yield('title', 'DTC EMS')
     </title>
 
-    {{-- Font Awesome --}}
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+    {{-- Lucide Icons --}}
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     {{-- Poppins --}}
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -70,6 +70,13 @@
 
     {{-- Page-specific scripts --}}
     @yield('scripts')
+
+    {{-- Lucide icon initialisation — runs after all page content is in the DOM --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 
 </body>
 

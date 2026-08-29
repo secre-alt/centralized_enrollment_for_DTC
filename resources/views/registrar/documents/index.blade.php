@@ -61,28 +61,22 @@
                             </div>
                         </td>
                         <td>
-                            <span style="background:#EEF2FF; color:#0F4CDB; padding:4px 10px;
-                                         border-radius:20px; font-size:12px; font-weight:600;
-                                         white-space:nowrap; display:inline-block;">
+                            <span class="dtc-status-badge is-info" style="font-weight:600; white-space:nowrap; display:inline-block;">
                                 {{ $req->document_label }}
                             </span>
                         </td>
                         <td  class="u-text-sm-bold-primary">
                             {{ $req->copies }}
                         </td>
-                        <td style="font-size:13px; font-weight:600; color:#15803D;">
+                        <td style="font-size:13px; font-weight:600; color:var(--dtc-success);">
                             ₱{{ number_format($req->fee, 2) }}
                         </td>
                         <td style="font-size:12px; color:var(--dtc-text-secondary); max-width:150px;">
                             {{ $req->purpose ?? '—' }}
                         </td>
                         <td>
-                            <span style="font-size:11px; font-weight:700; padding:4px 10px;
-                                         border-radius:20px;
-                                         background:{{ $req->status === 'released'   ? '#DCFCE7' :
-                                                       ($req->status === 'ready'      ? '#EDE9FE' :
-                                                       ($req->status === 'processing' ? '#DBEAFE' : '#FEF9C3')) }};
-                                         color:{{ $req->status_color }};">
+                            @php $docToneReg = $req->status === 'released' ? 'success' : ($req->status === 'ready' ? 'purple' : ($req->status === 'processing' ? 'info' : 'warning')); @endphp
+                            <span class="dtc-status-badge is-{{ $docToneReg }}" style="font-weight:700;">
                                 {{ ucfirst($req->status) }}
                             </span>
                         </td>

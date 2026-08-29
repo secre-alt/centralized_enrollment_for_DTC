@@ -23,7 +23,7 @@
     </div>
     @if($selectedProgram)
     <button type="button" class="dtc-btn dtc-btn-primary dtc-header-btn" data-toggle="modal" data-target="#addSubjectModal">
-        <i class="fas fa-plus"></i>
+        <i data-lucide="plus"></i>
         <span class="dtc-header-btn-label">Add Subject</span>
     </button>
     @endif
@@ -94,7 +94,7 @@
                                         data-subject-name="{{ $subject->subject_name }}"
                                         data-year-level="{{ $subject->year_level }}"
                                         data-semester="{{ $subject->semester }}">
-                                    <i class="fas fa-edit"></i>
+                                    <i data-lucide="pencil"></i>
                                 </button>
                                 <form method="POST"
                                       action="{{ route('admin.programs.subjects.destroy', $subject) }}">
@@ -103,7 +103,7 @@
                                             class="dtc-icon-btn danger"
                                             title="Remove subject"
                                             onclick="return confirm('Remove this subject?')">
-                                        <i class="fas fa-trash"></i>
+                                        <i data-lucide="trash-2"></i>
                                     </button>
                                 </form>
                             </div>
@@ -140,7 +140,7 @@
     </div>
     @else
     <div class="text-center py-5 u-text-muted" >
-        <i class="fas fa-book" style="font-size:22px; opacity:.5;"></i>
+        <i data-lucide="book" style="font-size:22px; opacity:.5;"></i>
         <p class="mb-0 mt-2 u-text-sm" >No program selected yet.</p>
     </div>
     @endif
@@ -156,7 +156,7 @@
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title u-text" >
-                        <i class="fas fa-plus-circle mr-2" style="color:var(--dtc-primary);"></i>
+                        <i data-lucide="plus-circle" class="mr-2" style="color:var(--dtc-primary);"></i>
                         Add Subject — {{ $selectedProgram->code }}
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -198,7 +198,7 @@
                 <div class="modal-footer">
                     <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="dtc-btn dtc-btn-primary">
-                        <i class="fas fa-plus"></i> Add Subject
+                        <i data-lucide="plus"></i> Add Subject
                     </button>
                 </div>
             </form>
@@ -217,7 +217,7 @@
                 @csrf @method('PUT')
                 <div class="modal-header">
                     <h5 class="modal-title u-text" >
-                        <i class="fas fa-edit mr-2" style="color:var(--dtc-primary);"></i>
+                        <i data-lucide="pencil" class="mr-2" style="color:var(--dtc-primary);"></i>
                         Edit Subject
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -257,7 +257,7 @@
                 <div class="modal-footer">
                     <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="dtc-btn dtc-btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
+                        <i data-lucide="save"></i> Save Changes
                     </button>
                 </div>
             </form>

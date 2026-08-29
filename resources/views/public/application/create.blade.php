@@ -17,7 +17,7 @@
         </div>
         <div class="page-header-actions">
             <a href="{{ route('landing') }}" class="btn btn-outline-secondary back-btn" aria-label="Back">
-                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <i data-lucide="arrow-left" aria-hidden="true"></i>
                 <span class="back-btn-label">Back</span>
             </a>
         </div>
@@ -27,7 +27,7 @@
     @if ($errors->any())
         <div class="alert alert-danger shadow-sm">
             <div class="font-weight-bold mb-2">
-                <i class="fas fa-exclamation-circle mr-1"></i>
+                <i data-lucide="alert-circle" class="mr-1"></i>
                 Please correct the following:
             </div>
 
@@ -43,7 +43,7 @@
     <div class="alert alert-warning shadow-sm border-0">
         <div class="d-flex">
             <div class="mr-3">
-                <i class="fas fa-info-circle fa-lg"></i>
+                <i data-lucide="info" style="width:1.25em;height:1.25em"></i>
             </div>
 
             <div>
@@ -70,7 +70,7 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-user-graduate text-primary mr-2"></i>
+                    <i data-lucide="graduation-cap" class="text-primary mr-2"></i>
                     Applicant Type & Program
                 </h5>
                 <small class="text-muted">
@@ -167,7 +167,7 @@
                     id="crossEnrolleeNotice"
                     class="alert alert-info mb-0 d-none"
                 >
-                    <i class="fas fa-info-circle mr-1"></i>
+                    <i data-lucide="info" class="mr-1"></i>
 
                     <strong>Cross-Enrollee:</strong>
                     Requirements for Cross-Enrollees are subject to confirmation
@@ -186,7 +186,7 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-id-card text-primary mr-2"></i>
+                    <i data-lucide="id-card" class="text-primary mr-2"></i>
                     Personal Information
                 </h5>
                 <small class="text-muted">
@@ -482,7 +482,7 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-address-book text-primary mr-2"></i>
+                    <i data-lucide="book-user" class="text-primary mr-2"></i>
                     Contact Information
                 </h5>
             </div>
@@ -626,7 +626,7 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-users text-primary mr-2"></i>
+                    <i data-lucide="users" class="text-primary mr-2"></i>
                     Family / Parent Information
                 </h5>
                 <small class="text-muted">
@@ -751,7 +751,7 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-clipboard-list text-primary mr-2"></i>
+                    <i data-lucide="clipboard-list" class="text-primary mr-2"></i>
                     Other Information
                 </h5>
             </div>
@@ -832,7 +832,7 @@
         >
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-file-upload text-primary mr-2"></i>
+                    <i data-lucide="file-up" class="text-primary mr-2"></i>
                     Supporting Documents
                 </h5>
 
@@ -847,7 +847,7 @@
                     id="noDocumentNotice"
                     class="alert alert-secondary mb-0"
                 >
-                    <i class="fas fa-info-circle mr-1"></i>
+                    <i data-lucide="info" class="mr-1"></i>
                     Select your applicant type above to see the applicable
                     document uploads.
                 </div>
@@ -933,7 +933,7 @@
                     data-type="shiftee"
                 >
                     <div class="alert alert-secondary mb-0">
-                        <i class="fas fa-info-circle mr-1"></i>
+                        <i data-lucide="info" class="mr-1"></i>
                         No digital document upload is required at this
                         pre-enrollment stage for Shiftees.
                         The Registrar's Office will provide further instructions.
@@ -947,7 +947,7 @@
                     data-type="returnee"
                 >
                     <div class="alert alert-secondary mb-0">
-                        <i class="fas fa-info-circle mr-1"></i>
+                        <i data-lucide="info" class="mr-1"></i>
                         No additional digital document upload is required at this
                         pre-enrollment stage for Returnees / Readmitted students.
                         The Registrar's Office will provide further instructions.
@@ -961,7 +961,7 @@
                     data-type="cross_enrollee"
                 >
                     <div class="alert alert-info mb-0">
-                        <i class="fas fa-info-circle mr-1"></i>
+                        <i data-lucide="info" class="mr-1"></i>
 
                         <strong>Cross-Enrollee:</strong>
                         Requirements are subject to confirmation by the Registrar's Office.
@@ -979,7 +979,7 @@
                     <hr>
 
                     <h6 class="font-weight-bold">
-                        <i class="fas fa-ring mr-1"></i>
+                        <i data-lucide="bell-ring" class="mr-1"></i>
                         Marriage Certificate
                     </h6>
 
@@ -1010,7 +1010,7 @@
 
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-folder-open text-primary mr-2"></i>
+                    <i data-lucide="folder-open" class="text-primary mr-2"></i>
                     Physical Requirements
                 </h5>
 
@@ -1023,7 +1023,7 @@
             <div class="card-body">
 
                 <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    <i data-lucide="alert-triangle" class="mr-1"></i>
                     These physical requirements apply regardless of whether
                     you uploaded a digital copy above.
                 </div>
@@ -1046,7 +1046,7 @@
             <div class="card-body">
 
                 <div class="alert alert-warning border-0">
-                    <i class="fas fa-info-circle mr-1"></i>
+                    <i data-lucide="info" class="mr-1"></i>
 
                     <strong>Important:</strong>
                     Uploaded documents are for preliminary screening only.
@@ -1079,7 +1079,7 @@
                         class="btn btn-primary btn-lg px-4"
                         id="submitButton"
                     >
-                        <i class="fas fa-paper-plane mr-1"></i>
+                        <i data-lucide="send" class="mr-1"></i>
                         Submit Application
                     </button>
 

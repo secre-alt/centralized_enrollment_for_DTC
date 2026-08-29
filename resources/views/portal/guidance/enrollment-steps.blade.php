@@ -2,7 +2,7 @@
 @section('title', $title)
 @section('content_header')
 <div class="content">
-    <x-dtc.page-header title="Enrollment Steps" subtitle="A clear view of your path from application to official enrollment." icon="fa-list-ol" />
+    <x-dtc.page-header title="Enrollment Steps" subtitle="A clear view of your path from application to official enrollment." icon="list-ordered" />
 </div>
 @stop
 
@@ -21,7 +21,7 @@ $steps = [
 <div class="card"><div class="card-body"><div class="dtc-timeline">
 @foreach($steps as $i=>$step)
 <div class="dtc-timeline-item {{ $step['done'] ? 'is-done' : ($i === 0 || ($i>0 && !$steps[$i-1]['done']) ? 'is-active' : '') }}">
-<div class="dtc-timeline-dot"><i class="fas {{ $step['done'] ? 'fa-check' : 'fa-circle' }}"></i></div>
+<div class="dtc-timeline-dot"><i data-lucide="{{ $step['done'] ? 'check' : 'circle' }}"></i></div>
 <div><div class="dtc-timeline-title">{{ $step['title'] }}</div><div class="dtc-timeline-subtitle">{{ $step['desc'] }}</div></div>
 </div>
 @endforeach

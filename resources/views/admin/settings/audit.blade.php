@@ -42,11 +42,11 @@
                     </div>
                     <div class="col-4 col-md-2 d-flex" style="gap:8px;">
                         <button type="submit" class="btn btn-primary flex-fill">
-                            <i class="fas fa-filter"></i>
+                            <i data-lucide="filter"></i>
                         </button>
                         @if (request('search') || request('action'))
                             <a href="{{ route('admin.settings.audit') }}" class="btn btn-secondary flex-fill">
-                                <i class="fas fa-times"></i>
+                                <i data-lucide="x"></i>
                             </a>
                         @endif
                     </div>

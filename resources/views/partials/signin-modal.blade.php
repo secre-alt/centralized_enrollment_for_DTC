@@ -34,7 +34,7 @@
                     data-signin-modal="close"
                     aria-label="Close sign-in dialog"
                 >
-                    <i class="fas fa-times" aria-hidden="true"></i>
+                    <i data-lucide="x" aria-hidden="true"></i>
                 </button>
             </div>
 
@@ -49,7 +49,7 @@
 
             @if (session('error') || $errors->any())
                 <div class="dtc-modal-error" role="alert">
-                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    <i data-lucide="alert-circle" aria-hidden="true"></i>
                     {{ session('error') ?? $errors->first() }}
                 </div>
             @endif
@@ -72,7 +72,7 @@
                         Email address
                     </label>
                     <div class="dtc-modal-input-wrap">
-                        <i class="fas fa-envelope dtc-modal-input-icon" aria-hidden="true"></i>
+                        <i data-lucide="mail" class="dtc-modal-input-icon" aria-hidden="true"></i>
                         <input
                             type="email"
                             id="modal_email"
@@ -95,7 +95,7 @@
                         Password
                     </label>
                     <div class="dtc-modal-input-wrap">
-                        <i class="fas fa-lock dtc-modal-input-icon" aria-hidden="true"></i>
+                        <i data-lucide="lock" class="dtc-modal-input-icon" aria-hidden="true"></i>
                         <input
                             type="password"
                             id="modal_password"
@@ -111,7 +111,7 @@
                             aria-label="Toggle password visibility"
                             data-signin-modal="toggle-pw"
                         >
-                            <i class="fas fa-eye" aria-hidden="true"></i>
+                            <i data-lucide="eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>

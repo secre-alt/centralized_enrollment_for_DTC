@@ -15,13 +15,13 @@
             <div class="dtc-review-avatar">{{ $initials ?: '?' }}</div>
             <div class="dtc-review-identity-copy">
                 <h5 class="dtc-review-name">{{ $enrollment->user->name }}</h5>
-                <p class="dtc-review-email"><i class="fas fa-envelope"></i> {{ $enrollment->user->email }}</p>
+                <p class="dtc-review-email"><i data-lucide="mail"></i> {{ $enrollment->user->email }}</p>
             </div>
         </div>
         <div class="dtc-review-header-right">
             <span class="dtc-status-badge is-warning"><span class="dtc-status-dot"></span> Pending Review</span>
             <button type="button" class="dtc-review-close" data-dismiss="modal" aria-label="Close">
-                <i class="fas fa-times"></i>
+                <i data-lucide="x"></i>
             </button>
         </div>
     </div>
@@ -31,7 +31,7 @@
 
         <div class="dtc-review-section">
             <div class="dtc-review-section-title">
-                <span><i class="fas fa-graduation-cap"></i> Enrollment Details</span>
+                <span><i data-lucide="graduation-cap"></i> Enrollment Details</span>
             </div>
             <div class="dtc-review-info-grid">
                 <div class="dtc-review-info">
@@ -55,7 +55,7 @@
 
         <div class="dtc-review-section">
             <div class="dtc-review-section-title">
-                <span><i class="fas fa-book"></i> Selected Subjects</span>
+                <span><i data-lucide="book"></i> Selected Subjects</span>
                 <span class="dtc-review-subject-count">{{ $subjectCount }} subject{{ $subjectCount === 1 ? '' : 's' }}</span>
             </div>
 
@@ -95,14 +95,14 @@
             <div class="dtc-review-footer-right">
                 <button type="button" class="dtc-btn dtc-btn-outline-danger dtc-review-reject-trigger"
                         data-target="rejectPanel-{{ $enrollment->id }}">
-                    <i class="fas fa-times"></i> Reject
+                    <i data-lucide="x"></i> Reject
                 </button>
 
                 <form method="POST" action="{{ route('registrar.enrollments.approve', $enrollment) }}">
                     @csrf
                     <button type="submit" class="dtc-btn dtc-btn-success"
                             onclick="return confirm('Approve this enrollment?')">
-                        <i class="fas fa-check"></i> Approve
+                        <i data-lucide="check"></i> Approve
                     </button>
                 </form>
             </div>
@@ -111,7 +111,7 @@
         <div class="dtc-review-footer-reject u-hidden" >
             <button type="button" class="dtc-btn dtc-btn-secondary dtc-review-reject-cancel">Cancel</button>
             <button type="submit" form="rejectForm-{{ $enrollment->id }}" class="dtc-btn dtc-btn-danger">
-                <i class="fas fa-check"></i> Confirm Rejection
+                <i data-lucide="check"></i> Confirm Rejection
             </button>
         </div>
 

@@ -27,7 +27,7 @@
 
     var errorMarkup = '\
         <div class="dtc-review-loading">\
-            <i class="fas fa-triangle-exclamation u-danger-lg" ></i>\
+            <i data-lucide="alert-triangle" class="u-danger-lg"></i>\
             <p class="text-danger mb-0">Couldn\'t load this payment. Please try again.</p>\
         </div>';
 

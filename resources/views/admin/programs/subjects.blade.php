@@ -14,7 +14,7 @@
             </p>
         </div>
         <a href="{{ route('admin.programs.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left mr-1"></i> Back to Programs
+            <i data-lucide="arrow-left" class="mr-1"></i> Back to Programs
         </a>
     </div>
 @endsection
@@ -30,7 +30,7 @@
     <div class="col-lg-4 mb-3">
         <div class="card">
             <div class="card-header font-weight-bold u-text" >
-                <i class="fas fa-plus-circle mr-2 u-link" ></i> Add Subject
+                <i data-lucide="plus-circle" class="mr-2 u-link"></i> Add Subject
             </div>
             <div class="card-body">
                 <form method="POST"
@@ -71,7 +71,7 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-plus mr-1"></i> Add Subject
+                        <i data-lucide="plus" class="mr-1"></i> Add Subject
                     </button>
                 </form>
             </div>
@@ -127,7 +127,7 @@
                                                            border-radius:8px; font-size:11px;
                                                            font-weight:600; cursor:pointer;"
                                                     onclick="return confirm('Remove this subject?')">
-                                                <i class="fas fa-trash"></i>
+                                                <i data-lucide="trash-2"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -144,7 +144,7 @@
         @if($subjects->isEmpty())
         <div class="card">
             <div class="card-body text-center py-5 u-text-muted" >
-                <i class="fas fa-book fa-3x mb-3"></i>
+                <i data-lucide="book" class="mb-3" style="width:3em;height:3em"></i>
                 <p>No subjects added yet. Add subjects using the form.</p>
             </div>
         </div>

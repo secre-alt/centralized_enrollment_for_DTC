@@ -4,7 +4,7 @@
     shadow, and spacing consistent in one place.
 
     Props:
-      icon   - FontAwesome icon class, e.g. 'fa-user-graduate'
+      icon   - Lucide icon name, e.g. 'graduation-cap'
       color  - primary | warning | success | danger | info | neutral
       label  - small uppercase label
       value  - main display value
@@ -14,7 +14,7 @@
       badge  - optional number shown as a red dot on the icon (e.g. unread count)
 --}}
 @props([
-    'icon' => 'fa-circle',
+    'icon' => 'circle',
     'color' => 'primary',
     'label' => '',
     'value' => '',
@@ -27,7 +27,7 @@
 <div class="dtc-stat-card dtc-stat-{{ $color }}">
     <div class="dtc-stat-card-top">
         <div class="dtc-stat-icon">
-            <i class="fas {{ $icon }}"></i>
+            <i data-lucide="{{ $icon }}"></i>
             @if(!is_null($badge) && $badge > 0)
                 <span class="dtc-stat-icon-badge">{{ $badge }}</span>
             @endif
