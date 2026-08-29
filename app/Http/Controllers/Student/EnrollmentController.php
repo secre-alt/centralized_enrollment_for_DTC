@@ -122,13 +122,14 @@ class EnrollmentController extends Controller
             'program_id'  => $validated['program_id'],
             'year_level'  => $validated['year_level'],
             'semester'    => $validated['semester'],
+            'school_year' => \App\Models\Setting::get('current_school_year'),
             'subject_ids' => $validated['subject_ids'],
             'status'      => 'pending',
             'is_paid'     => false,
         ]);
 
         // Notify all registrars of the new enrollment submission
-        $registrars = \App\Models\User::role('registrar')->get();
+        $registrars = \App\Models\User::role(['registrar', 'admin'])->get();
         foreach ($registrars as $registrar) {
             \App\Services\NotificationService::send(
                 $registrar,

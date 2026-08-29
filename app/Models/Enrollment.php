@@ -14,6 +14,7 @@ class Enrollment extends Model
         'program_id',
         'year_level',
         'semester',
+        'school_year',
         'subject_ids',
         'status',
         'remarks',

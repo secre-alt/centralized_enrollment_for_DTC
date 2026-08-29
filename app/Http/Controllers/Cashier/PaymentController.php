@@ -96,7 +96,7 @@ class PaymentController extends Controller
         foreach (\App\Models\User::role('admin')->get() as $admin) {
             NotificationService::send($admin, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", 'info', route('cashier.payments.receipt', $enrollment));
         }
-        foreach (\App\Models\User::role('registrar')->get() as $reg) {
+        foreach (\App\Models\User::role(['registrar', 'admin'])->get() as $reg) {
             NotificationService::send($reg, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", 'info', route('cashier.payments.receipt', $enrollment));
         }
 

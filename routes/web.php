@@ -24,6 +24,7 @@ use App\Http\Controllers\Public\ApplicationController;
 use App\Http\Controllers\PasswordSetupController;
 use App\Http\Controllers\Registrar\ApplicationController as RegistrarApplicationController;
 use App\Http\Controllers\Portal\ApplicationController as PortalApplicationController;
+use App\Http\Controllers\Portal\CorController as PortalCorController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
@@ -130,6 +131,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::delete('/subjects/{subject}', [ProgramController::class, 'destroySubject'])->name('programs.subjects.destroy');
     Route::put('/programs/{program}', [ProgramController::class, 'update'])->name('programs.update');
     Route::put('/subjects/{subject}', [ProgramController::class, 'updateSubject'])->name('programs.subjects.update');
+    Route::post('/subjects/{subject}/schedule', [ProgramController::class, 'storeSchedule'])->name('programs.subjects.schedule.store');
+    Route::delete('/schedules/{schedule}', [ProgramController::class, 'destroySchedule'])->name('programs.subjects.schedule.destroy');
     
     // ── REPORTS ───────────────────────────────────────────────────────────────
     Route::get('/reports/enrollment', [ReportController::class, 'enrollmentReport'])->name('reports.enrollment');
@@ -144,6 +147,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::get('/enrollments/{enrollment}', [RegistrarEnrollmentController::class, 'show'])->name('enrollments.show');
     Route::post('/enrollments/{enrollment}/approve', [RegistrarEnrollmentController::class, 'approve'])->name('enrollments.approve');
     Route::post('/enrollments/{enrollment}/reject', [RegistrarEnrollmentController::class, 'reject'])->name('enrollments.reject');
+    Route::get('/enrollments/{enrollment}/cor', [RegistrarEnrollmentController::class, 'showCor'])->name('enrollments.cor.show');
+    Route::get('/enrollments/{enrollment}/cor/download', [RegistrarEnrollmentController::class, 'downloadCor'])->name('enrollments.cor.download');
 
     Route::get('/appointments/slots', [RegistrarAppointmentController::class, 'slots'])->name('appointments.slots');
     Route::post('/appointments/slots', [RegistrarAppointmentController::class, 'storeSlot'])->name('appointments.slots.store');
@@ -199,4 +204,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::get('/documents', [AlumniDocumentController::class, 'index'])->name('documents.index');
     Route::get('/documents/create', [AlumniDocumentController::class, 'create'])->name('documents.create');
     Route::post('/documents', [AlumniDocumentController::class, 'store'])->name('documents.store');
+
+    Route::get('/cor', [PortalCorController::class, 'show'])->name('cor.show');
+    Route::get('/cor/download', [PortalCorController::class, 'download'])->name('cor.download');
 });

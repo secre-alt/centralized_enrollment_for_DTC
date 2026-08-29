@@ -112,9 +112,11 @@
 
             {{-- Payment Success --}}
             @if($enrollment->is_paid)
-            <div class="alert alert-success" style="margin-top:14px; padding:12px 16px; font-size:13px;">
-                <i data-lucide="check-circle" class="mr-2"></i>
-                Payment confirmed. You are officially enrolled for this semester.
+            <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap u-gap-10" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                <span><i data-lucide="check-circle" class="mr-2"></i>Payment confirmed. You are officially enrolled for this semester.</span>
+                <a href="{{ route('portal.cor.show') }}" class="btn btn-sm btn-outline-success">
+                    <i data-lucide="file-text" class="mr-1"></i> View Certificate of Registration
+                </a>
             </div>
             @endif
         </div>

@@ -19,7 +19,20 @@
             </div>
         </div>
         <div class="dtc-review-header-right">
-            <span class="dtc-status-badge is-warning"><span class="dtc-status-dot"></span> Pending Review</span>
+            @if($enrollment->is_paid)
+                <span class="dtc-status-badge is-success"><span class="dtc-status-dot"></span> Enrolled &amp; Paid</span>
+            @elseif($enrollment->status === 'approved')
+                <span class="dtc-status-badge is-info"><span class="dtc-status-dot"></span> Approved — Awaiting Payment</span>
+            @elseif($enrollment->status === 'rejected')
+                <span class="dtc-status-badge is-danger"><span class="dtc-status-dot"></span> Rejected</span>
+            @else
+                <span class="dtc-status-badge is-warning"><span class="dtc-status-dot"></span> Pending Review</span>
+            @endif
+            @if($enrollment->status === 'approved' && $enrollment->is_paid)
+                <a href="{{ route('registrar.enrollments.cor.show', $enrollment) }}" class="btn btn-primary btn-sm">
+                    <i data-lucide="file-badge" class="mr-1"></i> View COR
+                </a>
+            @endif
             <button type="button" class="dtc-review-close" data-dismiss="modal" aria-label="Close">
                 <i data-lucide="x"></i>
             </button>

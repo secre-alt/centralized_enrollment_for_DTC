@@ -27,6 +27,53 @@ class EnrollmentController extends Controller
         return view('registrar.enrollments.show', compact('enrollment', 'subjects'));
     }
 
+    /**
+     * Registrar-side COR lookup for any enrollment (reached from search or
+     * the enrollment show page), not just the ones pending review. Reuses
+     * the same student-facing Blade views since the layout is identical —
+     * only the enrollment/subjects data and the "back" link differ.
+     */
+    public function showCor(Enrollment $enrollment)
+    {
+        if ($enrollment->status !== 'approved' || ! $enrollment->is_paid) {
+            return redirect()->route('registrar.enrollments.show', $enrollment)
+                ->with('error', 'A Certificate of Registration is only available once enrollment is approved and paid.');
+        }
+
+        $enrollment->load('user', 'program');
+        $subjects = \App\Models\CourseSubject::whereIn('id', $enrollment->subject_ids ?? [])
+            ->with('schedules')
+            ->orderBy('subject_code')
+            ->get();
+        $totalUnits = $subjects->sum('units');
+
+        return view('student.cor.show', [
+            'enrollment' => $enrollment,
+            'subjects'   => $subjects,
+            'totalUnits' => $totalUnits,
+            'backUrl'    => route('registrar.enrollments.show', $enrollment),
+        ]);
+    }
+
+    public function downloadCor(Enrollment $enrollment)
+    {
+        if ($enrollment->status !== 'approved' || ! $enrollment->is_paid) {
+            return redirect()->route('registrar.enrollments.show', $enrollment)
+                ->with('error', 'A Certificate of Registration is only available once enrollment is approved and paid.');
+        }
+
+        $enrollment->load('user', 'program');
+        $subjects = \App\Models\CourseSubject::whereIn('id', $enrollment->subject_ids ?? [])
+            ->with('schedules')
+            ->orderBy('subject_code')
+            ->get();
+        $totalUnits = $subjects->sum('units');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('student.cor.pdf', compact('enrollment', 'subjects', 'totalUnits'));
+
+        return $pdf->download('COR_' . str_replace(' ', '_', $enrollment->user->name) . '.pdf');
+    }
+
     public function approve(Enrollment $enrollment)
     {
         $enrollment->update(['status' => 'approved']);

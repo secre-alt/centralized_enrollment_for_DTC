@@ -126,6 +126,7 @@ class ViewServiceProvider extends ServiceProvider
                         ['text' => 'Book Appointment', 'url' => route('portal.appointments.create'), 'icon' => 'plus'],
                         ['text' => 'My Appointments',  'url' => route('portal.appointments.index'),  'icon' => 'list'],
                     ]],
+                    ['text' => 'Certificate of Registration', 'url' => route('portal.cor.show'), 'icon' => 'file-badge'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];

@@ -89,7 +89,7 @@ class DocumentRequestController extends Controller
         ]);
 
         // ── Notify Registrars ──────────────────────────────────────────
-        $registrars = User::role('registrar')->get();
+        $registrars = User::role(['registrar', 'admin'])->get();
         foreach ($registrars as $registrar) {
             NotificationService::send(
                 $registrar,

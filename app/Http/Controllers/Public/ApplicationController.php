@@ -491,7 +491,7 @@ class ApplicationController extends Controller
              * submitted application.
              */
             try {
-                $registrars = User::role('registrar')->get();
+                $registrars = User::role(['registrar', 'admin'])->get();
 
                 foreach ($registrars as $registrar) {
                     NotificationService::send(
@@ -499,7 +499,7 @@ class ApplicationController extends Controller
                         'New Application Submitted',
                         "Application {$application->reference_no} has been submitted by {$application->first_name} {$application->last_name}.",
                         'info',
-                        route('registrar.dashboard')
+                        route('registrar.applications.show', $application)
                     );
                 }
             } catch (\Throwable $notificationException) {

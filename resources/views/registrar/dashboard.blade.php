@@ -20,29 +20,35 @@
 
 {{-- KPI ROW --}}
 <div class="row mb-2">
-    <div class="col-lg-3 col-md-6 col-12 mb-3">
+    <div class="col-lg col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="hourglass" color="warning"
             label="Pending Enrollments" value="{{ $pendingEnrollments }}"
             href="{{ route('registrar.enrollments.index') }}" link-text="For Approval" />
     </div>
-    <div class="col-lg-3 col-md-6 col-12 mb-3">
+    <div class="col-lg col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="calendar-check" color="primary"
             label="Pending Appointments" value="{{ $pendingAppointments }}"
             href="{{ route('registrar.appointments.index') }}" link-text="For Review" />
     </div>
-    <div class="col-lg-3 col-md-6 col-12 mb-3">
+    <div class="col-lg col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="check-check" color="success"
             label="Approved Today" value="{{ $approvedToday }}"
             note="Total" />
     </div>
-    <div class="col-lg-3 col-md-6 col-12 mb-3">
+    <div class="col-lg col-md-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="x-circle" color="danger"
             label="Rejected Requests" value="{{ $rejectedRequests }}"
             href="{{ route('notifications.index') }}" link-text="Review notices" />
+    </div>
+    <div class="col-lg col-md-6 col-12 mb-3">
+        <x-dtc.stat-card
+            icon="file-text" color="info"
+            label="Pending Applications" value="{{ $pendingApplications }}"
+            href="{{ route('registrar.applications.index') }}" link-text="For Review" />
     </div>
 </div>
 
@@ -149,6 +155,9 @@
                 <a href="{{ route('registrar.enrollments.index') }}" class="quick-action-btn">
                     <i data-lucide="file-text"></i> Review Enrollments
                 </a>
+                <a href="{{ route('registrar.applications.index') }}" class="quick-action-btn">
+                    <i data-lucide="clipboard-list"></i> Review Applications
+                </a>
                 <a href="{{ route('registrar.appointments.index') }}" class="quick-action-btn">
                     <i data-lucide="calendar-check"></i> Appointment Requests
                 </a>
@@ -158,6 +167,74 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+{{-- RECENT APPLICATIONS ROW --}}
+<div class="row">
+    <div class="col-12 mb-3">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="font-weight-bold">Recent Applications</span>
+                <a href="{{ route('registrar.applications.index') }}"
+                   style="font-size:12px; color:var(--dtc-primary); text-decoration:none;">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Reference No.</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($recentApplications as $application)
+                        <tr>
+                            <td>
+                                <div  class="u-flex-center-gap-10">
+                                    <div style="width:32px; height:32px; border-radius:50%;
+                                                background:linear-gradient(135deg,#0F4CDB,#1a5feb);
+                                                display:flex; align-items:center; justify-content:center;
+                                                color:#fff; font-weight:700; font-size:12px; flex-shrink:0;">
+                                        {{ strtoupper(substr($application->first_name, 0, 1)) }}
+                                    </div>
+                                    <span style="font-size:13px; font-weight:500;">{{ $application->first_name }} {{ $application->last_name }}</span>
+                                </div>
+                            </td>
+                            <td  class="u-text-sm">{{ $application->reference_no }}</td>
+                            <td  class="u-text-sm">{{ $application->program->code ?? '—' }}</td>
+                            <td>
+                                <x-dtc.status-badge :status="$application->status" />
+                            </td>
+                            <td>
+                                @if(in_array($application->status, ['submitted', 'under_review']))
+                                    <a href="{{ route('registrar.applications.show', $application) }}" class="dtc-review-btn">
+                                        Review
+                                    </a>
+                                @else
+                                    <span style="color:var(--dtc-text-muted); font-size:12px;">—</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-4" style="color:var(--dtc-text-muted); font-size:13px;">
+                                No applications yet.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            <div class="card-footer u-panel-footer">
+                <a href="{{ route('registrar.applications.index') }}" class="u-text-sm" style="color:var(--dtc-primary); text-decoration:none;">View All Applications →</a>
+            </div>
+        </div>
     </div>
 </div>
 

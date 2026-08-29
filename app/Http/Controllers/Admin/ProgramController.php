@@ -23,6 +23,7 @@ class ProgramController extends Controller
 
             if ($selectedProgram) {
                 $subjects = CourseSubject::where('program_id', $selectedProgram->id)
+                    ->with('schedules')
                     ->orderBy('year_level')
                     ->orderBy('semester')
                     ->orderBy('subject_name')
@@ -88,6 +89,7 @@ class ProgramController extends Controller
         $validated = $request->validate([
             'subject_code' => ['required', 'string', 'max:20'],
             'subject_name' => ['required', 'string', 'max:255'],
+            'units'        => ['required', 'numeric', 'min:0.5', 'max:6'],
             'year_level'   => ['required', 'integer', 'min:1', 'max:4'],
             'semester'     => ['required', 'integer', 'in:1,2'],
         ]);
@@ -106,6 +108,7 @@ class ProgramController extends Controller
         $validated = $request->validate([
             'subject_code' => ['required', 'string', 'max:20'],
             'subject_name' => ['required', 'string', 'max:255'],
+            'units'        => ['required', 'numeric', 'min:0.5', 'max:6'],
             'year_level'   => ['required', 'integer', 'min:1', 'max:4'],
             'semester'     => ['required', 'integer', 'in:1,2'],
         ]);
@@ -123,5 +126,40 @@ class ProgramController extends Controller
 
         return redirect()->route('admin.programs.index', ['program' => $programId])
             ->with('success', 'Subject removed.');
+    }
+
+    // ── SCHEDULE (per subject) ──────────────────────────────────────────────
+    // Modeled as hasMany on CourseSubject, but the UI manages one schedule
+    // per subject for now (updateOrCreate keeps it that way).
+
+    public function storeSchedule(Request $request, CourseSubject $subject)
+    {
+        $validated = $request->validate([
+            'day_pattern'      => ['required', 'string', 'max:20'],
+            'time_start'       => ['required', 'date_format:H:i'],
+            'time_end'         => ['required', 'date_format:H:i', 'after:time_start'],
+            'room'             => ['nullable', 'string', 'max:50'],
+            'instructor_name'  => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $subject->schedules()->updateOrCreate(
+            ['course_subject_id' => $subject->id],
+            [
+                ...$validated,
+                'room' => $validated['room'] ?? 'TBA',
+            ]
+        );
+
+        return redirect()->route('admin.programs.index', ['program' => $subject->program_id])
+            ->with('success', 'Schedule saved.');
+    }
+
+    public function destroySchedule(\App\Models\ClassSchedule $schedule)
+    {
+        $programId = $schedule->courseSubject->program_id;
+        $schedule->delete();
+
+        return redirect()->route('admin.programs.index', ['program' => $programId])
+            ->with('success', 'Schedule removed.');
     }
 }

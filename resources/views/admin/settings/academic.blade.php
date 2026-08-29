@@ -116,6 +116,31 @@
                     </div>
                 </div>
 
+                {{-- Registrar Info --}}
+                <div class="col-lg-7 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="settings-section-title">
+                                <div class="settings-section-icon" style="background:#FFF7E6; color:#B45309;">
+                                    <i data-lucide="stamp"></i>
+                                </div>
+                                <h3>Registrar Info</h3>
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label>College Registrar Name</label>
+                                <input type="text" name="registrar_name" class="form-control"
+                                       placeholder="e.g. Marynol Virgie P. Lofranco, LPT"
+                                       value="{{ old('registrar_name', $settings->registrar_name ?? '') }}">
+                                <small class="form-text" style="color:var(--dtc-text-muted);">
+                                    Printed on the signature line of the Certificate of Registration and other
+                                    official documents issued by this office.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Programs & Subjects quick access --}}
                 <div class="col-12 mb-3">
                     <div class="card">

@@ -147,11 +147,13 @@ class SettingsController extends Controller
             'current_school_year' => ['required', 'string', 'max:20'],
             'current_semester'    => ['required', 'in:1st,2nd,Summer'],
             'enrollment_open'     => ['nullable'],
+            'registrar_name'      => ['nullable', 'string', 'max:255'],
         ]);
 
         Setting::updateOrCreate(['key' => 'current_school_year'], ['value' => $request->current_school_year]);
         Setting::updateOrCreate(['key' => 'current_semester'],    ['value' => $request->current_semester]);
         Setting::updateOrCreate(['key' => 'enrollment_open'],     ['value' => $request->boolean('enrollment_open') ? '1' : '0']);
+        Setting::updateOrCreate(['key' => 'registrar_name'],      ['value' => $request->registrar_name]);
 
         \App\Models\AuditLog::create([
             'user_id'     => auth()->id(),

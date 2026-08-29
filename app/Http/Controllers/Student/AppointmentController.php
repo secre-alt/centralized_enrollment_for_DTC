@@ -71,7 +71,7 @@ class AppointmentController extends Controller
         ]);
 
         // ── Notify ALL registrars ─────────────────────────────────────────
-        $registrars = User::role('registrar')->get();
+        $registrars = User::role(['registrar', 'admin'])->get();
         foreach ($registrars as $registrar) {
             NotificationService::send(
                 $registrar,
@@ -116,7 +116,7 @@ public function cancel(Appointment $appointment)
     $appointment->update(['status' => 'cancelled']);
 
     // ── Notify Registrars ─────────────────────────────────────────────
-    $registrars = User::role('registrar')->get();
+    $registrars = User::role(['registrar', 'admin'])->get();
     foreach ($registrars as $registrar) {
         NotificationService::send(
             $registrar,
