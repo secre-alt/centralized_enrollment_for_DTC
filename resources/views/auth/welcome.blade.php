@@ -402,7 +402,7 @@
         });
         @endif
 
-        // ── Active navigation while scrolling ─────────────────────────────
+        // -- Active navigation while scrolling -----------------------------
         (function () {
             const navLinks = document.querySelectorAll('.public-nav-links .nav-link');
             const sections = document.querySelectorAll('#services, #process, #faqs');
@@ -447,7 +447,7 @@
             updateActiveNav();
         })();
         
-        // ── Mobile nav (burger menu) ─────────────────────────────────────
+        // -- Mobile nav (burger menu) -------------------------------------
         (function () {
             const toggle = document.getElementById('welcomeNavbarToggle');
             const mobileNav = document.getElementById('welcomeMobileNav');
@@ -491,7 +491,7 @@
 
             toggle.setAttribute('aria-expanded', 'false');
         })();
-        // ── FAQs accordion ───────────────────────────────────────────────
+        // -- FAQs accordion -----------------------------------------------
         function toggleFaq(button) {
             const item = button.closest('.faq-item');
             const wasActive = item.classList.contains('active');
@@ -504,7 +504,7 @@
             }
         }
 
-        // ── Services 3D carousel ─────────────────────────────────────────
+        // -- Services 3D carousel -----------------------------------------
         (function () {
             const viewport = document.getElementById('servicesViewport');
             const track = document.getElementById('servicesTrack');
@@ -610,7 +610,7 @@
             render();
         })();
 
-        // ── Scroll reveal ────────────────────────────────────────────────
+        // -- Scroll reveal ------------------------------------------------
         (function () {
             const items = document.querySelectorAll('.reveal');
             if (items.length === 0) return;
@@ -633,7 +633,7 @@
             items.forEach(el => observer.observe(el));
         })();
 
-        // ── Back to top ──────────────────────────────────────────────────
+        // -- Back to top --------------------------------------------------
         (function () {
             const btn = document.getElementById('backToTop');
             if (!btn) return;

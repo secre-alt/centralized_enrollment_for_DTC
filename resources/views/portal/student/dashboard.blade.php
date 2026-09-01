@@ -74,6 +74,13 @@
                 <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
                     Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
                 </h4>
+                @if($studentProfile && $studentProfile->enrolled_ay)
+                <p style="font-size:12px; margin:0 0 4px; color:var(--dtc-muted, #6c757d);">
+                    🎓
+                    @if($studentProfile->program){{ $studentProfile->program->name }} · @endif
+                    Enrolled AY {{ $studentProfile->enrolled_ay }}
+                </p>
+                @endif
                 <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
                     Welcome to Danao Technological College!
                     @if(!$latestEnrollment)
@@ -173,53 +180,92 @@
         </div>
         @endif
 
-        {{-- Subject List (as Requirements Checklist) --}}
+        {{-- Enrolled Subjects — COR-style table --}}
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Enrolled Subjects</span>
-                @if($subjects->isNotEmpty())
-                    <span style="font-size:12px; color:var(--dtc-primary); font-weight:600;">
-                        {{ $subjects->count() }} Subject{{ $subjects->count()> 1 ? 's' : '' }}
-                    </span>
-                @endif
-            </div>
-            <div class="card-body p-0">
-                @forelse ($subjects as $subject)
-                <div style="padding:12px 20px; border-bottom:1px solid var(--dtc-border-soft);
-                            display:flex; align-items:center; justify-content:space-between;">
-                    <div  class="u-flex-center-gap-12">
-                        <div class="dtc-icon-swatch is-primary" style="flex-shrink:0;">
-                            <i data-lucide="book" class="u-link-md"></i>
-                        </div>
-                        <div>
-                            <div  class="u-text-sm-bold">
-                                {{ $subject->subject_code }}
-                            </div>
-                            <div  class="u-text-xs-secondary">
-                                {{ $subject->subject_name }}
-                            </div>
-                        </div>
-                    </div>
-                    @if($latestEnrollment && $latestEnrollment->is_paid)
-                        <span class="dtc-status-badge is-success" style="font-weight:600;">
-                            <i data-lucide="check" class="mr-1"></i> Enrolled
-                        </span>
-                    @elseif($latestEnrollment && $latestEnrollment->status === 'pending')
-                        <span class="dtc-status-badge is-warning" style="font-weight:600;">
-                            <i data-lucide="clock" class="mr-1"></i> Pending
+                <div class="d-flex align-items-center" style="gap:10px;">
+                    @if($subjects->isNotEmpty())
+                        <span style="font-size:12px; color:var(--dtc-primary); font-weight:600;">
+                            {{ $subjects->count() }} Subject{{ $subjects->count() > 1 ? 's' : '' }}
                         </span>
                     @endif
+                    @if($latestEnrollment && $latestEnrollment->is_paid)
+                        <a href="{{ route('portal.cor.show') }}"
+                           class="btn btn-outline-primary btn-sm"
+                           style="font-size:11px; padding:3px 10px;">
+                            <i data-lucide="scroll-text" style="width:12px;height:12px;margin-right:4px;"></i>
+                            View Full COR
+                        </a>
+                    @endif
                 </div>
-                @empty
-                <div class="text-center py-4 u-muted" >
-                    <i data-lucide="book" class="mb-2" style="width:2em;height:2em"></i>
-                    <p  class="u-text-sm">No subjects enrolled yet.</p>
+            </div>
+            <div class="card-body p-0">
+                @if($subjects->isNotEmpty())
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0" style="font-size:12.5px;">
+                        <thead>
+                            <tr style="background:var(--dtc-surface-soft);">
+                                <th style="padding:10px 16px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--dtc-text-secondary); border-bottom:1px solid var(--dtc-border);">Course Code</th>
+                                <th style="padding:10px 16px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--dtc-text-secondary); border-bottom:1px solid var(--dtc-border);">Description</th>
+                                <th style="padding:10px 16px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--dtc-text-secondary); border-bottom:1px solid var(--dtc-border); text-align:center;">Units</th>
+                                <th style="padding:10px 16px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--dtc-text-secondary); border-bottom:1px solid var(--dtc-border); text-align:center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($subjects as $subject)
+                            <tr style="border-bottom:1px solid var(--dtc-border-soft);">
+                                <td style="padding:10px 16px; vertical-align:middle;">
+                                    <span class="dtc-status-badge is-neutral" style="font-weight:700; font-size:11px;">
+                                        {{ $subject->subject_code }}
+                                    </span>
+                                </td>
+                                <td style="padding:10px 16px; vertical-align:middle; color:var(--dtc-text); font-weight:500;">
+                                    {{ $subject->subject_name }}
+                                </td>
+                                <td style="padding:10px 16px; vertical-align:middle; text-align:center; color:var(--dtc-text); font-weight:600;">
+                                    {{ rtrim(rtrim(number_format($subject->units ?? 3, 1), '0'), '.') }}
+                                </td>
+                                <td style="padding:10px 16px; vertical-align:middle; text-align:center;">
+                                    @if($latestEnrollment && $latestEnrollment->is_paid)
+                                        <span class="dtc-status-badge is-success" style="font-size:10.5px;">
+                                            <i data-lucide="check" style="width:10px;height:10px;"></i> Enrolled
+                                        </span>
+                                    @elseif($latestEnrollment && $latestEnrollment->status === 'pending')
+                                        <span class="dtc-status-badge is-warning" style="font-size:10.5px;">
+                                            <i data-lucide="clock" style="width:10px;height:10px;"></i> Pending
+                                        </span>
+                                    @else
+                                        <span class="dtc-status-badge is-neutral" style="font-size:10.5px;">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        @php $totalUnits = $subjects->sum(fn($s) => $s->units ?? 3); @endphp
+                        <tfoot>
+                            <tr style="background:var(--dtc-surface-soft);">
+                                <td colspan="2" style="padding:10px 16px; font-weight:700; font-size:12px; color:var(--dtc-text); text-align:right;">
+                                    Total Units
+                                </td>
+                                <td style="padding:10px 16px; font-weight:800; font-size:13px; color:var(--dtc-primary); text-align:center;">
+                                    {{ rtrim(rtrim(number_format($totalUnits, 1), '0'), '.') }}
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                @else
+                <div class="text-center py-4 u-muted">
+                    <i data-lucide="book-open" class="mb-2" style="width:2em;height:2em"></i>
+                    <p class="u-text-sm">No subjects enrolled yet.</p>
                     @if(!$latestEnrollment)
                         <a href="{{ route('portal.enrollment.create') }}"
                            class="btn btn-primary btn-sm">Enroll Now</a>
                     @endif
                 </div>
-                @endforelse
+                @endif
             </div>
         </div>
 
@@ -344,40 +390,24 @@
         {{-- Quick Actions --}}
         <div class="card mb-3">
             <div class="card-header font-weight-bold">Quick Actions</div>
-            <div class="card-body p-0">
-                @php
-                    $actions = [
-                        ['icon' => 'file-text',      'label' => 'My Application',     'sub' => 'View enrollment status',    'url' => route('portal.enrollment.index')],
-                        ['icon' => 'calendar-check', 'label' => 'Book Appointment',   'sub' => 'Schedule document pickup',  'url' => route('portal.appointments.create')],
-                        ['icon' => 'bell',           'label' => 'Notifications',      'sub' => $unreadCount . ' unread',    'url' => route('notifications.index')],
-                    ];
-                    if(auth()->user()->hasRole('alumni')) {
-                        $actions[] = ['icon' => 'folder-open', 'label' => 'Document Requests', 'sub' => 'Request TOR, Diploma etc.', 'url' => route('portal.documents.index')];
-                    }
-                @endphp
-                @foreach($actions as $action)
-                <a href="{{ $action['url'] }}"
-                   class="dtc-quick-action-row"
-                   style="display:flex; align-items:center; justify-content:space-between;
-                          padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
-                          text-decoration:none; transition:background 0.2s;">
-                    <div  class="u-flex-center-gap-12">
-                        <div class="dtc-icon-swatch is-primary">
-                            <i data-lucide="{{ $action['icon'] }}" class="u-link-md"
-                               ></i>
-                        </div>
-                        <div>
-                            <div  class="u-text-sm-bold">
-                                {{ $action['label'] }}
-                            </div>
-                            <div  class="u-text-xs-secondary">
-                                {{ $action['sub'] }}
-                            </div>
-                        </div>
-                    </div>
-                    <i data-lucide="chevron-right" style="color:var(--dtc-text-muted); font-size:12px;"></i>
+            <div class="card-body p-3">
+                <a href="{{ route('portal.enrollment.index') }}" class="quick-action-btn">
+                    <i data-lucide="file-text"></i> My Application
                 </a>
-                @endforeach
+                <a href="{{ route('portal.appointments.create') }}" class="quick-action-btn">
+                    <i data-lucide="calendar-check"></i> Book Appointment
+                </a>
+                @if($latestEnrollment && $latestEnrollment->is_paid)
+                <a href="{{ route('portal.cor.show') }}" class="quick-action-btn">
+                    <i data-lucide="scroll-text"></i> Certificate of Registration
+                </a>
+                @endif
+                <a href="{{ route('notifications.index') }}" class="quick-action-btn">
+                    <i data-lucide="bell"></i> Notifications
+                    @if($unreadCount > 0)
+                        <span class="badge badge-danger ml-auto" style="font-size:10px;">{{ $unreadCount }}</span>
+                    @endif
+                </a>
             </div>
         </div>
 

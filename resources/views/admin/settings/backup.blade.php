@@ -22,17 +22,7 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">
-        <i data-lucide="check-circle" class="mr-2"></i> {{ session('success') }}
-    </div>
-@endif
 
-@if (session('error'))
-    <div class="alert alert-danger">
-        <i data-lucide="alert-circle" class="mr-2"></i> {{ session('error') }}
-    </div>
-@endif
 
 <div class="row">
 
@@ -49,10 +39,16 @@
                     Export your entire database as a <code>.sql</code> file.
                     This includes all tables, records, and data.
                 </p>
-                <form method="POST" action="{{ route('admin.settings.backup.create') }}">
+                <form id="backup-create-form" method="POST" action="{{ route('admin.settings.backup.create') }}">
                     @csrf
-                    <button type="submit" class="btn btn-primary btn-block"
-                            onclick="return confirm('Create a full database backup now?')">
+                    <button type="button"
+                            class="btn btn-primary btn-block"
+                            data-dtc-confirm
+                            data-dtc-confirm-title="Create Backup Now?"
+                            data-dtc-confirm-message="This will export a full copy of the database. Continue?"
+                            data-dtc-confirm-ok="Backup Now"
+                            data-dtc-confirm-type="warning"
+                            data-dtc-confirm-form="#backup-create-form">
                         <i data-lucide="download" class="mr-2"></i> Backup Now
                     </button>
                 </form>
@@ -97,8 +93,13 @@
                         </div>
                     @endif
 
-                    <button type="submit" class="btn btn-warning btn-block"
-                            onclick="return confirm('⚠️ This will OVERWRITE all current data. Are you absolutely sure?')">
+                    <button type="button"
+                            class="btn btn-warning btn-block"
+                            data-dtc-confirm
+                            data-dtc-confirm-title="Restore Database?"
+                            data-dtc-confirm-message="This will OVERWRITE all current data with the uploaded file. This action cannot be undone. Are you absolutely sure?"
+                            data-dtc-confirm-ok="Yes, Restore"
+                            data-dtc-confirm-type="danger">
                         <i data-lucide="undo-2" class="mr-2"></i> Restore Database
                     </button>
                 </form>
@@ -157,11 +158,17 @@
                             </a>
                             @endif
 
-                            <form method="POST"
+                            <form id="del-backup-{{ $backup }}"
+                                  method="POST"
                                   action="{{ route('admin.settings.backup.delete', $backup) }}">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="backup-btn backup-btn-delete"
-                                        onclick="return confirm('Remove this backup record?')">
+                                <button type="button"
+                                        class="backup-btn backup-btn-delete"
+                                        data-dtc-confirm
+                                        data-dtc-confirm-title="Delete Backup?"
+                                        data-dtc-confirm-message="Are you sure you want to permanently delete this backup file? This cannot be undone."
+                                        data-dtc-confirm-ok="Delete Backup"
+                                        data-dtc-confirm-form="#del-backup-{{ $backup }}">
                                     <i data-lucide="trash-2"></i>
                                 </button>
                             </form>
@@ -209,7 +216,7 @@
 
 @push('css')
 <style>
-/* ── Backup & Restore ─────────────────────────────────────────── */
+/* -- Backup & Restore ------------------------------------------- */
 .backup-action-card {
     text-align: center;
     padding: 32px 24px;
@@ -313,10 +320,12 @@ body.dtc-dark .backup-warning {
 .backup-btn-download:hover { background: var(--dtc-primary-soft); color: var(--dtc-primary); text-decoration: none; filter: brightness(0.96); }
 .backup-btn-delete        { background: rgba(220,38,38,0.10); color: var(--dtc-danger); }
 .backup-btn-delete:hover  { background: rgba(220,38,38,0.18); }
+body.dtc-dark .backup-btn-download       { background: rgba(99,130,245,0.25); color: #93C5FD; border: 1px solid rgba(99,130,245,0.35); }
+body.dtc-dark .backup-btn-download:hover { background: rgba(99,130,245,0.38); color: #BFDBFE; filter: none; }
 body.dtc-dark .backup-btn-delete       { background: rgba(220,38,38,0.18); color: #FCA5A5; }
 body.dtc-dark .backup-btn-delete:hover { background: rgba(220,38,38,0.28); }
 
-/* ── Mobile ───────────────────────────────────────────────────── */
+/* -- Mobile ----------------------------------------------------- */
 @media (max-width: 575.98px) {
     .backup-row {
         flex-direction: column;

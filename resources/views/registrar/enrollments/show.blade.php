@@ -18,13 +18,7 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
-@if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
 
 <div class="dtc-card dtc-review-standalone">
     @include('registrar.enrollments._review-content', ['enrollment' => $enrollment, 'subjects' => $subjects])

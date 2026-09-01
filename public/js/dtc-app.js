@@ -105,25 +105,56 @@ document.addEventListener('submit', function (event) {
     submit.innerHTML = submit.getAttribute('data-loading-text') || 'Processing…';
 }, true);
 
-// Delete confirmation fallback
+// Delete confirmation — if the modal is available use it; otherwise fall back
+// to window.confirm so behaviour is correct whether or not the feedback JS
+// has already loaded.
 document.addEventListener('submit', function (event) {
-    // Delete forms get a safe confirmation even when a Blade view does not
-    // explicitly provide data-confirm.
     const form = event.target;
     const method = form.querySelector('input[name="_method"]');
-    if (method && method.value.toUpperCase() === 'DELETE' && form.dataset.confirmed !== 'true') {
-        if (!window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
+    if (!method || method.value.toUpperCase() !== 'DELETE') return;
+    if (form.dataset.confirmed === 'true') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const modal = document.getElementById('dtcConfirmModal');
+    if (modal && window.jQuery) {
+        // Populate modal
+        modal.className = 'modal fade dtc-confirm-modal is-danger';
+        const titleEl = modal.querySelector('#dtcConfirmTitle');
+        const msgEl   = modal.querySelector('#dtcConfirmMessage');
+        const okBtn   = modal.querySelector('#dtcConfirmOk');
+        if (titleEl) titleEl.textContent = form.dataset.confirmTitle  || 'Delete item?';
+        if (msgEl)   msgEl.textContent   = form.dataset.confirmMessage|| 'This action cannot be undone.';
+        if (okBtn)   okBtn.textContent   = form.dataset.confirmOk     || 'Delete';
+
+        // Clone to remove stale listeners
+        const newOk = okBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(newOk, okBtn);
+
+        newOk.textContent = form.dataset.confirmOk || 'Delete';
+        newOk.addEventListener('click', function () {
+            jQuery('#dtcConfirmModal').modal('hide');
+            form.dataset.confirmed = 'true';
+            form.submit();
+        });
+
+        jQuery('#dtcConfirmModal').modal('show');
+    } else {
+        // Fallback for pages without the modal component
+        if (window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+            form.dataset.confirmed = 'true';
+            form.submit();
         }
-        form.dataset.confirmed = 'true';
     }
 }, true);
 
+// data-confirm legacy attribute: route to modal or native confirm
 document.addEventListener('click', function (event) {
     const trigger = event.target.closest('[data-confirm]');
     if (!trigger) return;
+    // Skip elements that also have data-dtc-confirm (handled by dtc-feedback.js)
+    if (trigger.hasAttribute('data-dtc-confirm')) return;
     const message = trigger.getAttribute('data-confirm') || 'Are you sure?';
     if (!window.confirm(message)) {
         event.preventDefault();
@@ -249,7 +280,7 @@ function showResults(results) {
     list.innerHTML = results.map(r => {
         const iconHtml = r.avatar
             ? `<div class="search-result-avatar">${r.avatar}</div>`
-            : `<div class="search-result-icon ${r.type}"><i class="fas ${r.icon}"></i></div>`;
+            : `<div class="search-result-icon ${r.type}"><i data-lucide="${r.icon}"></i></div>`;
 
         return `
             <a href="${r.url}"
@@ -263,6 +294,9 @@ function showResults(results) {
                 <span class="search-result-badge ${r.type}">${r.type}</span>
             </a>`;
     }).join('');
+
+    // Activate Lucide icons injected via innerHTML (createIcons misses them otherwise)
+    if (window.lucide) lucide.createIcons({ nodes: list.querySelectorAll('[data-lucide]') });
 }
 
 function showEmpty(query) {

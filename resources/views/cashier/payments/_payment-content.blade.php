@@ -83,11 +83,10 @@
         </div>
 
         @if (! $enrollment->is_paid)
-            <div style="background:#F0FDF4; border:1.5px solid #BBF7D0; border-radius:12px;
-                        padding:12px 14px; margin-bottom:20px; font-size:12.5px; color:#15803D;">
-                <i data-lucide="info" class="mr-2"></i>
-                Upon confirmation, the student's account will be upgraded to
-                <strong>Student</strong> status and they will be officially enrolled.
+            <div class="dtc-payment-info-notice">
+                <i data-lucide="info" class="dtc-notice-icon" aria-hidden="true"></i>
+                <span>Upon confirmation, the student's account will be upgraded to
+                <strong>Student</strong> status and they will be officially enrolled.</span>
             </div>
         @endif
 
@@ -155,18 +154,32 @@
                             data-target="rejectPanel-{{ $enrollment->id }}">
                         <i data-lucide="x"></i> Reject
                     </button>
-                    <form method="POST" action="{{ route('cashier.payments.verify', $latestPayment) }}">
+                    <form id="verify-gcash-{{ $latestPayment->id }}"
+                          method="POST"
+                          action="{{ route('cashier.payments.verify', $latestPayment) }}">
                         @csrf
-                        <button type="submit" class="dtc-btn dtc-btn-success"
-                                onclick="return confirm('Verify this GCash payment and promote applicant to student?')">
+                        <button type="button"
+                                class="dtc-btn dtc-btn-success"
+                                data-dtc-confirm
+                                data-dtc-confirm-title="Verify GCash Payment?"
+                                data-dtc-confirm-message="This will verify the GCash payment and promote the applicant to student status. Are you sure?"
+                                data-dtc-confirm-ok="Verify Payment"
+                                data-dtc-confirm-type="warning"
+                                data-dtc-confirm-form="#verify-gcash-{{ $latestPayment->id }}">
                             <i data-lucide="check"></i> Verify Payment
                         </button>
                     </form>
                 </div>
             @elseif (! $enrollment->is_paid && (! $latestPayment || $latestPayment->isRejected()))
                 <div class="dtc-review-footer-right">
-                    <button type="submit" form="walkinForm-{{ $enrollment->id }}" class="dtc-btn dtc-btn-success"
-                            onclick="return confirm('Confirm cash payment received?')">
+                    <button type="button"
+                            class="dtc-btn dtc-btn-success"
+                            data-dtc-confirm
+                            data-dtc-confirm-title="Confirm Cash Payment?"
+                            data-dtc-confirm-message="Confirm that cash payment has been received from the student?"
+                            data-dtc-confirm-ok="Confirm Payment"
+                            data-dtc-confirm-type="warning"
+                            data-dtc-confirm-form="#walkinForm-{{ $enrollment->id }}">
                         <i data-lucide="check"></i> Confirm Payment Received
                     </button>
                 </div>

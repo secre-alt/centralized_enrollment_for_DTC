@@ -28,14 +28,6 @@
     {{-- ── Body ───────────────────────────────────────────────────────── --}}
     <div class="dtc-review-body">
 
-        {{-- Flash messages --}}
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-
         {{-- Payment Status Block --}}
         @if ($latestPayment)
             @php
@@ -152,9 +144,15 @@
                                         <label style="font-size:12px; font-weight:600; color:var(--dtc-text);">
                                             Proof of Payment (screenshot / PDF, max 5 MB)
                                         </label>
-                                        <input type="file" name="proof_of_payment" accept=".jpg,.jpeg,.png,.pdf"
-                                            class="form-control @error('proof_of_payment') is-invalid @enderror" required>
-                                        @error('proof_of_payment') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        <label class="dtc-file-label @error('proof_of_payment') is-invalid @enderror">
+                                            <i data-lucide="upload" style="width:15px;height:15px;margin-right:6px;flex-shrink:0;"></i>
+                                            <span class="dtc-file-text">Choose file…</span>
+                                            <input type="file" name="proof_of_payment" accept=".jpg,.jpeg,.png,.pdf"
+                                                class="dtc-file-input @error('proof_of_payment') is-invalid @enderror"
+                                                required
+                                                onchange="this.closest('label').querySelector('.dtc-file-text').textContent = this.files[0] ? this.files[0].name : 'Choose file…'">
+                                        </label>
+                                        @error('proof_of_payment') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-block">
                                         Submit GCash Proof

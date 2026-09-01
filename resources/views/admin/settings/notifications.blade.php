@@ -27,11 +27,6 @@
 
     <div class="col-12">
 
-        @if (session('status'))
-            <div class="alert alert-success">
-                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
-            </div>
-        @endif
 
         <form id="notifications-settings-form" method="POST" action="{{ route('admin.settings.notifications.update') }}">
             @csrf
@@ -40,7 +35,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="settings-section-title">
-                        <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
+                        <div class="settings-section-icon is-primary">
                             <i data-lucide="bell"></i>
                         </div>
                         <h3>Notification Channels</h3>
@@ -53,7 +48,7 @@
                     {{-- Email --}}
                     <div class="settings-toggle-row d-flex align-items-center justify-content-between flex-wrap py-3" style="gap:16px; border-bottom:1px solid var(--dtc-border);">
                         <div class="d-flex align-items-center" style="gap:14px;">
-                            <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
+                            <div class="settings-section-icon is-primary">
                                 <i data-lucide="mail"></i>
                             </div>
                             <div>
@@ -75,7 +70,7 @@
                     {{-- SMS --}}
                     <div class="settings-toggle-row d-flex align-items-center justify-content-between flex-wrap py-3" style="gap:16px; border-bottom:1px solid var(--dtc-border);">
                         <div class="d-flex align-items-center" style="gap:14px;">
-                            <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
+                            <div class="settings-section-icon is-warning">
                                 <i data-lucide="message-square"></i>
                             </div>
                             <div>
@@ -97,7 +92,7 @@
                     {{-- In-app --}}
                     <div class="settings-toggle-row d-flex align-items-center justify-content-between flex-wrap py-3" style="gap:16px;">
                         <div class="d-flex align-items-center" style="gap:14px;">
-                            <div class="settings-section-icon" style="background:#E7F8EF; color:#0F9D58;">
+                            <div class="settings-section-icon is-success">
                                 <i data-lucide="monitor"></i>
                             </div>
                             <div>

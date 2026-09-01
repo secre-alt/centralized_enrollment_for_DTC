@@ -23,7 +23,7 @@
     var loadingMarkup = '\
         <div class="dtc-review-loading">\
             <div class="dtc-spinner u-spinner-sm" ></div>\
-            <p>Loading receipt…</p>\
+            <p>Loading receipt...</p>\
         </div>';
 
     var errorMarkup = '\

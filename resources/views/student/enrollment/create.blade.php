@@ -53,6 +53,25 @@
                         </div>
                     @endif
 
+                    {{-- Enrollment Type --}}
+                    <div class="form-group">
+                        <label>Enrollment Type</label>
+                        <div class="d-flex u-gap-15">
+                            <label style="display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer; margin:0;">
+                                <input type="radio" name="is_irregular" value="0" id="type-regular" checked>
+                                Regular
+                            </label>
+                            <label style="display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer; margin:0;">
+                                <input type="radio" name="is_irregular" value="1" id="type-irregular">
+                                Irregular / Shiftee / Transferee
+                            </label>
+                        </div>
+                        <small style="color:var(--dtc-text-muted); display:block; margin-top:4px;">
+                            Choose Irregular if you need to take subjects from more than one year level or
+                            semester in this enrollment (e.g. catching up on a missed subject).
+                        </small>
+                    </div>
+
                     {{-- Year + Semester --}}
                     <div class="row">
                         <div class="col-md-6">
@@ -82,7 +101,7 @@
                     <div class="form-group">
                         <label>
                             Select Subjects
-                            <span style="font-size:11px; color:var(--dtc-text-muted); font-weight:400;">
+                            <span id="subjects-hint" style="font-size:11px; color:var(--dtc-text-muted); font-weight:400;">
                                 (Select program, year and semester first)
                             </span>
                         </label>
@@ -157,7 +176,15 @@
 
 @section('js')
 <script>
+function isIrregularMode() {
+    return document.getElementById('type-irregular').checked;
+}
+
 function loadSubjects() {
+    if (isIrregularMode()) {
+        return loadAllSubjects();
+    }
+
     const programId = document.getElementById('program_id').value;
     const yearLevel = document.getElementById('year_level').value;
     const semester  = document.getElementById('semester').value;
@@ -226,6 +253,72 @@ function loadSubjects() {
         });
 }
 
+// ── Irregular mode: fetch ALL subjects for the program, grouped by
+// year_level + semester, so students can select across groups in one
+// enrollment (shiftees, transferees, catching up on missed subjects). ──
+
+const YEAR_LABELS = { 1: '1st Year', 2: '2nd Year', 3: '3rd Year', 4: '4th Year' };
+const SEM_LABELS  = { 1: '1st Semester', 2: '2nd Semester', 3: 'Summer' };
+
+function loadAllSubjects() {
+    const programId = document.getElementById('program_id').value;
+    const container = document.getElementById('subjects-container');
+
+    if (!programId) return;
+
+    container.innerHTML = `
+        <div style="text-align:center; padding:20px; color:var(--dtc-text-muted);">
+            <i data-lucide="loader" class="lucide-spin" style="width:2em;height:2em"></i>
+            <p style="margin-top:8px; font-size:13px;">Loading all subjects...</p>
+        </div>`;
+
+    fetch(`/portal/programs/${programId}/subjects?mode=all`)
+        .then(res => res.json())
+        .then(groups => {
+            if (groups.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-warning" style="border-radius:12px; padding:16px; text-align:center;">
+                        <p style="font-size:13px; margin:0;">No subjects found for this program.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = groups.map(group => `
+                <div style="border:1.5px solid var(--dtc-border); border-radius:12px; overflow:hidden; margin-bottom:14px;">
+                    <div style="background:var(--dtc-surface-soft); padding:10px 16px; font-size:12px;
+                                font-weight:700; color:var(--dtc-text); border-bottom:1px solid var(--dtc-border);">
+                        ${YEAR_LABELS[group.year_level] || ('Year ' + group.year_level)} — ${SEM_LABELS[group.semester] || ('Semester ' + group.semester)}
+                    </div>
+                    ${group.subjects.map(s => `
+                        <label style="display:flex; align-items:center; gap:14px;
+                                      padding:14px 16px; border-bottom:1px solid var(--dtc-border-soft);
+                                      cursor:pointer; transition:background 0.2s; margin:0;"
+                               onmouseover="this.style.background='var(--dtc-surface-soft)'"
+                               onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" name="subject_ids[]" value="${s.id}"
+                                   style="width:18px; height:18px; accent-color:var(--dtc-primary);
+                                          cursor:pointer; flex-shrink:0;">
+                            <div  class="u-flex-1">
+                                <div  class="u-text-sm-bold-primary">${s.subject_code}</div>
+                                <div  class="u-text-xxs-secondary">${s.subject_name} · ${s.units} unit${s.units == 1 ? '' : 's'}</div>
+                            </div>
+                        </label>
+                    `).join('')}
+                </div>
+            `).join('') + `
+                <div style="text-align:right;">
+                    <button type="button" onclick="selectAll()" style="font-size:12px;
+                            color:var(--dtc-primary); background:none; border:none; cursor:pointer;
+                            font-weight:600; font-family:'Poppins',sans-serif;">
+                        Select All
+                    </button>
+                </div>`;
+        })
+        .catch(() => {
+            container.innerHTML = `<div class="alert alert-danger">Failed to load subjects.</div>`;
+        });
+}
+
 function selectAll() {
     document.querySelectorAll('input[name="subject_ids[]"]').forEach(cb => cb.checked = true);
 }
@@ -233,6 +326,14 @@ function selectAll() {
 document.getElementById('program_id').addEventListener('change', loadSubjects);
 document.getElementById('year_level').addEventListener('change', loadSubjects);
 document.getElementById('semester').addEventListener('change', loadSubjects);
+document.getElementById('type-regular').addEventListener('change', function () {
+    document.getElementById('subjects-hint').textContent = '(Select program, year and semester first)';
+    loadSubjects();
+});
+document.getElementById('type-irregular').addEventListener('change', function () {
+    document.getElementById('subjects-hint').textContent = '(Showing all subjects for the selected program, grouped by year & semester)';
+    loadSubjects();
+});
 
 @if ($lockedProgram)
 document.addEventListener('DOMContentLoaded', function () {

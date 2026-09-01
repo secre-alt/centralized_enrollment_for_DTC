@@ -14,13 +14,7 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
-@if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
 
 {{-- Enrollments Table --}}
 <div class="card">
@@ -37,6 +31,7 @@
                     <th>Student Name</th>
                     <th>Program</th>
                     <th>Year / Semester</th>
+                    <th>Type</th>
                     <th>Status</th>
                     <th>Submitted</th>
                     <th>Action</th>
@@ -66,6 +61,18 @@
                         <span  class="u-text-muted">&middot; Sem {{ $enrollment->semester }}</span>
                     </td>
                     <td>
+                        @php $classification = $enrollment->resolveClassification(); @endphp
+                        @if($classification !== 'new_student')
+                            <span class="dtc-status-badge is-info" style="font-size:10px;">{{ ucfirst(str_replace('_', ' ', $classification)) }}</span>
+                        @endif
+                        @if($enrollment->is_irregular)
+                            <span class="dtc-status-badge is-warning" style="font-size:10px;">Irregular</span>
+                        @endif
+                        @if($classification === 'new_student' && !$enrollment->is_irregular)
+                            <span class="u-text-muted" style="font-size:11px;">Regular</span>
+                        @endif
+                    </td>
+                    <td>
                         <x-dtc.status-badge :status="$enrollment->status" />
                     </td>
 
@@ -80,7 +87,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 u-text-muted" >
+                    <td colspan="7" class="text-center py-4 u-text-muted" >
                         No pending enrollments.
                     </td>
                 </tr>

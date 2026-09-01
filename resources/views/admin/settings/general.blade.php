@@ -27,11 +27,6 @@
     {{-- ══ General Settings panels ═════════════════════════════ --}}
     <div class="col-12">
 
-        @if (session('status'))
-            <div class="alert alert-success">
-                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
-            </div>
-        @endif
 
         <form id="general-settings-form" method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
             @csrf
@@ -43,7 +38,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
+                                <div class="settings-section-icon is-primary">
                                     <i data-lucide="landmark"></i>
                                 </div>
                                 <h3>Institution Information</h3>
@@ -81,7 +76,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
+                                <div class="settings-section-icon is-warning">
                                     <i data-lucide="image"></i>
                                 </div>
                                 <h3>System Logo &amp; Favicon</h3>
@@ -135,7 +130,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#DCFCE7; color:#15803D;">
+                                <div class="settings-section-icon is-success">
                                     <i data-lucide="sliders-horizontal"></i>
                                 </div>
                                 <h3>System Preferences</h3>
@@ -195,7 +190,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#EDE9FE; color:#7C3AED;">
+                                <div class="settings-section-icon is-purple">
                                     <i data-lucide="info"></i>
                                 </div>
                                 <h3>System Information</h3>
@@ -234,7 +229,7 @@
                     <div class="card">
                         <div class="card-body d-flex align-items-center justify-content-between flex-wrap" style="gap:16px;">
                             <div class="d-flex align-items-center" style="gap:14px;">
-                                <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
+                                <div class="settings-section-icon is-warning">
                                     <i data-lucide="wrench"></i>
                                 </div>
                                 <div>
@@ -289,22 +284,27 @@
 @push('js')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    /* Upgrade native confirm() buttons to use DTC confirm modal.
+       We set data-dtc-confirm attributes at runtime so the logo/favicon
+       buttons are already in the DOM when dtc-feedback.js processes clicks. */
     var logoBtn = document.querySelector('.dtc-remove-logo');
     if (logoBtn) {
-        logoBtn.addEventListener('click', function () {
-            if (confirm('Remove the current system logo and revert to the default?')) {
-                document.getElementById('remove-logo-form').submit();
-            }
-        });
+        logoBtn.setAttribute('data-dtc-confirm', '');
+        logoBtn.setAttribute('data-dtc-confirm-title', 'Remove Logo?');
+        logoBtn.setAttribute('data-dtc-confirm-message', 'The system logo will be removed and reverted to the default. Are you sure?');
+        logoBtn.setAttribute('data-dtc-confirm-ok', 'Remove Logo');
+        logoBtn.setAttribute('data-dtc-confirm-type', 'warning');
+        logoBtn.setAttribute('data-dtc-confirm-form', '#remove-logo-form');
     }
 
     var faviconBtn = document.querySelector('.dtc-remove-favicon');
     if (faviconBtn) {
-        faviconBtn.addEventListener('click', function () {
-            if (confirm('Remove the current favicon and revert to the default?')) {
-                document.getElementById('remove-favicon-form').submit();
-            }
-        });
+        faviconBtn.setAttribute('data-dtc-confirm', '');
+        faviconBtn.setAttribute('data-dtc-confirm-title', 'Remove Favicon?');
+        faviconBtn.setAttribute('data-dtc-confirm-message', 'The favicon will be removed and reverted to the default. Are you sure?');
+        faviconBtn.setAttribute('data-dtc-confirm-ok', 'Remove Favicon');
+        faviconBtn.setAttribute('data-dtc-confirm-type', 'warning');
+        faviconBtn.setAttribute('data-dtc-confirm-form', '#remove-favicon-form');
     }
 });
 </script>

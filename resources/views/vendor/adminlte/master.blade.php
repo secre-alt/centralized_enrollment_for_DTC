@@ -149,6 +149,9 @@
         @endif
     @endif
 
+    {{-- DTC Feedback system (toast + confirm modal) --}}
+    <script src="{{ asset('js/dtc-feedback.js') }}" defer></script>
+
     {{-- Custom Scripts --}}
     @yield('adminlte_js')
 
@@ -162,13 +165,39 @@
             initLucide();
             // Also on DOMContentLoaded in case this script somehow runs early
             document.addEventListener('DOMContentLoaded', initLucide);
-            // Re-run whenever AdminLTE injects dynamic content (sidebar toggles, etc.)
+            // Re-run ONLY when nodes containing [data-lucide] are actually added.
+            //
+            // The old version fired on EVERY body mutation (childList + subtree:true
+            // with no filter). Any classList toggle, style change or attribute set on
+            // any element triggered createIcons() after 50 ms. lucide.createIcons()
+            // replaces each <i data-lucide="…"> with a brand-new <svg> node, which
+            // destroys event listeners that were attached to — or bubble through —
+            // that element. Buttons whose only child was a Lucide <i> (hamburger,
+            // modal X, action icons) lost their Bootstrap data-toggle / data-widget
+            // listeners on the next repaint, so the first click fired correctly but
+            // was immediately followed by createIcons() rebuilding the icon, leaving
+            // the button unresponsive until the user clicked again.
             if (window.MutationObserver) {
-                var _lucideTimer;
-                new MutationObserver(function () {
-                    clearTimeout(_lucideTimer);
-                    _lucideTimer = setTimeout(initLucide, 50);
-                }).observe(document.body, { childList: true, subtree: true });
+                var _lucideObserver = new MutationObserver(function (mutations) {
+                    for (var i = 0; i < mutations.length; i++) {
+                        var added = mutations[i].addedNodes;
+                        for (var j = 0; j < added.length; j++) {
+                            var node = added[j];
+                            if (node.nodeType !== 1) continue;
+                            if (node.hasAttribute('data-lucide') ||
+                                node.querySelector('[data-lucide]')) {
+                                // Disconnect BEFORE calling createIcons() so the
+                                // SVG nodes it injects don't re-trigger this observer
+                                // (which would cause an infinite loop and freeze the page).
+                                _lucideObserver.disconnect();
+                                initLucide();
+                                _lucideObserver.observe(document.body, { childList: true, subtree: true });
+                                return;
+                            }
+                        }
+                    }
+                });
+                _lucideObserver.observe(document.body, { childList: true, subtree: true });
             }
         })();
     </script>

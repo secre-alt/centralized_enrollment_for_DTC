@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const chartTheme = getDtcChartTheme();
 
-    // ── Enrollment Line Chart ──────────────────────────────────────────
+    // -- Enrollment Line Chart ------------------------------------------
     const enrollmentCtx = document.getElementById('enrollmentChart');
     if (enrollmentCtx) {
         registerDtcChart(new Chart(enrollmentCtx.getContext('2d'), {
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }));
     }
 
-    // ── Payment Donut Chart ────────────────────────────────────────────
+    // -- Payment Donut Chart --------------------------------------------
     const paymentCtx = document.getElementById('paymentChart');
     if (paymentCtx) {
         registerDtcChart(new Chart(paymentCtx.getContext('2d'), {

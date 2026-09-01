@@ -21,10 +21,6 @@
 
     <div class="dtc-review-body" id="printable-receipt-modal">
 
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-
         {{-- Receipt No + Date --}}
         <div style="display:flex; justify-content:space-between; align-items:center;
                     margin-bottom:20px; padding-bottom:14px; border-bottom:2px dashed var(--dtc-border);">

@@ -20,9 +20,6 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
 {{-- ============ PROGRAMS ============ --}}
 <div class="card mb-4">
@@ -75,13 +72,18 @@
                                         data-code="{{ $program->code }}">
                                     <i data-lucide="pencil"></i>
                                 </button>
-                                <form method="POST"
+                                <form id="del-program-{{ $program->id }}"
+                                      method="POST"
                                       action="{{ route('admin.programs.destroy', $program) }}">
                                     @csrf @method('DELETE')
-                                    <button type="submit"
+                                    <button type="button"
                                             class="dtc-icon-btn danger"
                                             title="Delete program"
-                                            onclick="return confirm('Delete {{ $program->name }}?')">
+                                            data-dtc-confirm
+                                            data-dtc-confirm-title="Delete Program?"
+                                            data-dtc-confirm-message="Are you sure you want to delete this program? This action cannot be undone."
+                                            data-dtc-confirm-ok="Delete Program"
+                                            data-dtc-confirm-form="#del-program-{{ $program->id }}">
                                         <i data-lucide="trash-2"></i>
                                     </button>
                                 </form>
@@ -212,7 +214,7 @@
 
 @section('css')
 <style>
-/* Selected-program row highlight — CSS-var driven so it stays correct
+/* Selected-program row highlight - CSS-var driven so it stays correct
    in dark mode without a separate body.dtc-dark override. */
 .js-program-row.is-selected {
     background: var(--dtc-surface-soft) !important;
@@ -236,7 +238,7 @@ body.dtc-dark .js-program-row.is-selected td > span {
 
 @section('js')
 <script>
-// ── Edit Program — populate modal from the clicked row's data-* ──────────
+// -- Edit Program - populate modal from the clicked row's data-* ----------
 document.querySelectorAll('.js-edit-program').forEach(function (btn) {
     btn.addEventListener('click', function () {
         document.getElementById('edit-program-form').action = this.dataset.url;
@@ -246,7 +248,7 @@ document.querySelectorAll('.js-edit-program').forEach(function (btn) {
     });
 });
 
-// ── Select Program — swap the Subjects card via AJAX, no full reload ─────
+// -- Select Program - swap the Subjects card via AJAX, no full reload -----
 const subjectsWrapper = document.getElementById('subjects-card-wrapper');
 
 function loadSubjectsCard(url, pushState) {
@@ -277,7 +279,7 @@ document.querySelectorAll('.js-select-program').forEach(function (link) {
         const url = this.getAttribute('href');
         const id = this.dataset.id;
 
-        // Update active/inactive button styling immediately — selected
+        // Update active/inactive button styling immediately - selected
         // program's button matches the "Add Program" primary-blue style.
         document.querySelectorAll('.js-select-program').forEach(function (l) {
             l.classList.remove('dtc-btn-primary');

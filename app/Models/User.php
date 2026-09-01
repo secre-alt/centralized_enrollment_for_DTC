@@ -29,6 +29,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
     /**
+     * Student-specific institutional identity.
+     * Present only for users with the 'student' or 'alumni' role.
+     */
+    public function studentProfile()
+    {
+        return $this->hasOne(\App\Models\StudentProfile::class);
+    }
+
+    /**
     * Get all applications submitted by this user.
     */
     public function applications()

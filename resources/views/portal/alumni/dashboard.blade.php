@@ -66,6 +66,13 @@
                 <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
                     Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
                 </h4>
+                @if($studentProfile && ($studentProfile->graduation_year || $studentProfile->program))
+                <p style="font-size:12px; margin:0 0 4px; color:var(--dtc-muted, #6c757d);">
+                    🎓
+                    @if($studentProfile->program){{ $studentProfile->program->name }}@endif
+                    @if($studentProfile->graduation_year) · Batch {{ $studentProfile->graduation_year }}@endif
+                </p>
+                @endif
                 <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
                     Welcome back! Request transcripts, diplomas, and other documents anytime.
                 </p>
@@ -126,38 +133,22 @@
 
         <div class="card mb-3">
             <div class="card-header font-weight-bold">Quick Actions</div>
-            <div class="card-body p-0">
-                @php
-                    $actions = [
-                        ['icon' => 'plus-circle', 'label' => 'Request Document', 'sub' => 'TOR, Diploma, Certification',  'url' => route('portal.documents.create')],
-                        ['icon' => 'list',        'label' => 'My Requests',      'sub' => 'Track your document requests', 'url' => route('portal.documents.index')],
-                        ['icon' => 'calendar-check', 'label' => 'Book Appointment', 'sub' => 'Schedule document pickup',  'url' => route('portal.appointments.create')],
-                        ['icon' => 'bell',        'label' => 'Notifications',    'sub' => $unreadCount . ' unread',       'url' => route('notifications.index')],
-                    ];
-                @endphp
-                @foreach($actions as $action)
-                <a href="{{ $action['url'] }}"
-                   class="dtc-quick-action-row"
-                   style="display:flex; align-items:center; justify-content:space-between;
-                          padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
-                          text-decoration:none; transition:background 0.2s;">
-                    <div  class="u-flex-center-gap-12">
-                        <div class="dtc-icon-swatch is-primary">
-                            <i data-lucide="{{ $action['icon'] }}" class="u-link-md"
-                               ></i>
-                        </div>
-                        <div>
-                            <div  class="u-text-sm-bold">
-                                {{ $action['label'] }}
-                            </div>
-                            <div  class="u-text-xs-secondary">
-                                {{ $action['sub'] }}
-                            </div>
-                        </div>
-                    </div>
-                    <i data-lucide="chevron-right" style="color:var(--dtc-text-muted); font-size:12px;"></i>
+            <div class="card-body p-3">
+                <a href="{{ route('portal.documents.create') }}" class="quick-action-btn">
+                    <i data-lucide="plus-circle"></i> Request Document
                 </a>
-                @endforeach
+                <a href="{{ route('portal.documents.index') }}" class="quick-action-btn">
+                    <i data-lucide="list"></i> My Requests
+                </a>
+                <a href="{{ route('portal.appointments.create') }}" class="quick-action-btn">
+                    <i data-lucide="calendar-check"></i> Book Appointment
+                </a>
+                <a href="{{ route('notifications.index') }}" class="quick-action-btn">
+                    <i data-lucide="bell"></i> Notifications
+                    @if($unreadCount > 0)
+                        <span class="badge badge-danger ml-auto" style="font-size:10px;">{{ $unreadCount }}</span>
+                    @endif
+                </a>
             </div>
         </div>
 

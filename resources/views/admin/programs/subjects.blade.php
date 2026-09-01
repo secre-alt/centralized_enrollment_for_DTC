@@ -21,9 +21,6 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
 <div class="row">
     {{-- Add Subject Form --}}
@@ -118,15 +115,17 @@
                                         {{ $subject->subject_name }}
                                     </td>
                                     <td>
-                                        <form method="POST"
+                                        <form id="del-subject-{{ $subject->id }}"
+                                              method="POST"
                                               action="{{ route('admin.programs.subjects.destroy', $subject) }}">
                                             @csrf @method('DELETE')
-                                            <button type="submit"
-                                                    style="background:#FEE2E2; color:#DC2626;
-                                                           border:none; padding:4px 10px;
-                                                           border-radius:8px; font-size:11px;
-                                                           font-weight:600; cursor:pointer;"
-                                                    onclick="return confirm('Remove this subject?')">
+                                            <button type="button"
+                                                    class="dtc-icon-btn danger"
+                                                    data-dtc-confirm
+                                                    data-dtc-confirm-title="Remove Subject?"
+                                                    data-dtc-confirm-message="Are you sure you want to remove this subject from the program?"
+                                                    data-dtc-confirm-ok="Remove Subject"
+                                                    data-dtc-confirm-form="#del-subject-{{ $subject->id }}">
                                                 <i data-lucide="trash-2"></i>
                                             </button>
                                         </form>

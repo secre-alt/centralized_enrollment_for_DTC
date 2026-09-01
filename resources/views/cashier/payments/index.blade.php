@@ -14,9 +14,6 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
 {{-- Filter Tabs --}}
 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">

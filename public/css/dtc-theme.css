@@ -175,11 +175,19 @@ textarea {
     transition: all var(--dtc-transition) !important;
     font-size: 13.5px !important;
     font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 .nav-sidebar .nav-item > .nav-link:hover {
     background: var(--dtc-primary-soft) !important;
     color: var(--dtc-primary) !important;
+}
+
+/* Active item hovered: stay blue, don't switch to hover styles */
+.nav-sidebar .nav-item > .nav-link.active:hover {
+    background: var(--dtc-primary) !important;
+    color: #FFFFFF !important;
 }
 
 .nav-sidebar .nav-item > .nav-link.active {
@@ -196,10 +204,59 @@ textarea {
 .nav-sidebar .nav-item > .nav-link .nav-icon {
     color: var(--dtc-text-secondary) !important;
     width: 20px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    margin-right: 8px !important;
+}
+
+/* Active nav-icon re-declared AFTER the general rule so it wins the cascade */
+.nav-sidebar .nav-item > .nav-link.active .nav-icon {
+    color: #FFFFFF !important;
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Lucide SVGs inside nav-icon — fixed 16×16 box so all icons are same size */
+.nav-sidebar .nav-item > .nav-link .nav-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+    display: block !important;
+    flex-shrink: 0 !important;
 }
 
 .nav-sidebar .nav-item > .nav-link:hover .nav-icon {
     color: var(--dtc-primary) !important;
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* When hovering the ACTIVE item, keep icon white (not blue) — active wins over hover */
+.nav-sidebar .nav-item > .nav-link.active:hover .nav-icon {
+    color: #FFFFFF !important;
+}
+
+/* Ensure SVG inside nav-icon stays visible and correctly sized on hover/active */
+.nav-sidebar .nav-item > .nav-link:hover .nav-icon svg,
+.nav-sidebar .nav-item > .nav-link.active .nav-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Active SVG: force white so it shows on the blue active background */
+.nav-sidebar .nav-item > .nav-link.active .nav-icon svg,
+.nav-sidebar .nav-item > .nav-link.active:hover .nav-icon svg {
+    color: #FFFFFF !important;
+    stroke: currentColor !important;
 }
 
 /* Sidebar section headers */
@@ -1339,6 +1396,32 @@ display: block;
     margin-bottom: 6px !important;
 }
 
+/* ── Icon-prefixed inputs (shared across all pages) ──────── */
+.dtc-input-icon-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dtc-input-icon-group .dtc-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    color: var(--dtc-text-muted);
+    pointer-events: none;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.dtc-input-icon-group .form-control.dtc-input-with-icon {
+    padding-left: 42px !important;
+    width: 100%;
+}
+
 /* ── ALERTS ──────────────────────────────────────────────── */
 .alert {
     border: none !important;
@@ -1510,8 +1593,9 @@ display: block;
 }
 
 body.dtc-dark .quick-action-btn i {
-    background: rgba(99,130,245,0.25);
-    color: #93C5FD;
+    background: rgba(99,130,245,0.30);
+    color: #BFDBFE;
+    border: 1px solid rgba(99,130,245,0.35);
 }
 
 /* ── BREADCRUMB ──────────────────────────────────────────── */
@@ -1655,7 +1739,27 @@ body.dtc-dark .quick-action-btn i {
     justify-content: center;
     font-size: 16px;
     flex-shrink: 0;
+    /* default: neutral fallback */
+    background: var(--dtc-surface-soft);
+    color: var(--dtc-text-secondary);
 }
+
+/* Light-mode colour variants */
+.settings-section-icon.is-primary { background: #EEF2FF; color: #0F4CDB; }
+.settings-section-icon.is-warning { background: #FFF7E0; color: #D97706; }
+.settings-section-icon.is-success { background: #DCFCE7; color: #15803D; }
+.settings-section-icon.is-purple  { background: #F3E8FF; color: #7C3AED; }
+.settings-section-icon.is-danger  { background: #FEE2E2; color: #B91C1C; }
+.settings-section-icon.is-info    { background: #DBEAFE; color: #1D4ED8; }
+
+/* Dark-mode colour variants — crisp, clearly visible icons */
+body.dtc-dark .settings-section-icon.is-primary { background: rgba(99,130,245,0.22);  color: #93C5FD; }
+body.dtc-dark .settings-section-icon.is-warning { background: rgba(217,119,6,0.22);   color: #FCD34D; }
+body.dtc-dark .settings-section-icon.is-success { background: rgba(22,163,74,0.22);   color: #86EFAC; }
+body.dtc-dark .settings-section-icon.is-purple  { background: rgba(124,58,237,0.22);  color: #C4B5FD; }
+body.dtc-dark .settings-section-icon.is-danger  { background: rgba(220,38,38,0.22);   color: #FCA5A5; }
+body.dtc-dark .settings-section-icon.is-info    { background: rgba(29,78,216,0.25);   color: #93C5FD; }
+body.dtc-dark .settings-section-icon          { background: rgba(99,130,245,0.15);    color: #93C5FD; }
 
 .settings-section-title h3 {
     font-size: 15px;
@@ -1846,6 +1950,18 @@ body.dtc-dark .nav-sidebar .nav-item > .nav-link:hover {
 body.dtc-dark .nav-sidebar .nav-item > .nav-link:hover .nav-icon,
 body.dtc-dark .nav-sidebar .nav-item > .nav-link.active .nav-icon {
     color: #FFFFFF !important;
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+body.dtc-dark .nav-sidebar .nav-item > .nav-link:hover .nav-icon svg,
+body.dtc-dark .nav-sidebar .nav-item > .nav-link.active .nav-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 body.dtc-dark .nav-sidebar .nav-item > .nav-link.active {
@@ -2794,7 +2910,7 @@ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-
 }
 
 .notif-item:hover {
-    background: #F0F4FF !important;
+    background: #F0F4FF;
 }
 
 .notif-icon {
@@ -4490,11 +4606,1150 @@ body.dtc-dark [style*="color:#DC2626"] { color: #FCA5A5 !important; }
 [data-lucide][style*="width:3em"] svg { width: 3em; height: 3em; }
 [data-lucide][style*="width:4em"] svg { width: 4em; height: 4em; }
 
-/* Sidebar nav-icon: the <i data-lucide> wrapper is sized to 1.25em via inline style
-   (set in menu-item-link.blade.php). The generic [data-lucide] svg rule above fixes
-   this now, but this explicit selector also overrides the base 1em rule with higher
-   specificity in case of any ordering/cascade conflicts. */
-.nav-sidebar .nav-item > .nav-link .nav-icon svg {
-    width: 1.25em !important;
-    height: 1.25em !important;
+/* NOTE: The duplicate .nav-sidebar .nav-item > .nav-link .nav-icon svg rule that
+   set width/height to 1.25em was removed here. It conflicted with the canonical
+   16px fix defined earlier in this file (line ~211) and caused icons to disappear
+   on hover by fighting specificity. The [data-lucide][style*="width:1.25em"] svg
+   rule above handles inline-style overrides; no extra rule needed here. */
+
+/* ============================================================
+   10. DTC TOAST NOTIFICATION SYSTEM
+   ============================================================ */
+
+/* ── Container ───────────────────────────────────────────── */
+#dtc-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: min(400px, calc(100vw - 40px));
+    pointer-events: none;
+}
+
+/* ── Single toast ────────────────────────────────────────── */
+.dtc-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--dtc-radius-md);
+    border-left: 4px solid transparent;
+    background: var(--dtc-surface);
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12),
+                0 2px 8px rgba(15, 23, 42, 0.06);
+    font-size: 13.5px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--dtc-text);
+    pointer-events: all;
+    max-width: 100%;
+    /* Entry animation */
+    animation: dtcToastIn 0.22s ease forwards;
+    position: relative;
+}
+
+.dtc-toast.is-leaving {
+    animation: dtcToastOut 0.22s ease forwards;
+}
+
+/* ── Icon column ─────────────────────────────────────────── */
+.dtc-toast-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+}
+
+.dtc-toast-icon svg,
+.dtc-toast-icon [data-lucide] {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+/* ── Text column ─────────────────────────────────────────── */
+.dtc-toast-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.dtc-toast-title {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.dtc-toast-message {
+    font-size: 13px;
+    color: var(--dtc-text-secondary);
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+/* When there is no title, the message is the only text */
+.dtc-toast-message:only-child {
+    color: var(--dtc-text);
+    font-weight: 500;
+}
+
+/* ── Close button ────────────────────────────────────────── */
+.dtc-toast-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--dtc-text-muted);
+    opacity: 0.6;
+    transition: opacity var(--dtc-transition);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+.dtc-toast-close:hover {
+    opacity: 1;
+}
+
+.dtc-toast-close svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.5;
+}
+
+/* ── Progress bar (auto-dismiss countdown) ───────────────── */
+.dtc-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    border-radius: 0 0 0 var(--dtc-radius-md);
+    animation-name: dtcToastProgress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+/* ── Tone variants ───────────────────────────────────────── */
+.dtc-toast.is-success {
+    border-left-color: var(--dtc-success);
+}
+.dtc-toast.is-success .dtc-toast-icon { color: var(--dtc-success); }
+.dtc-toast.is-success .dtc-toast-progress { background: var(--dtc-success); }
+
+.dtc-toast.is-error {
+    border-left-color: var(--dtc-danger);
+}
+.dtc-toast.is-error .dtc-toast-icon { color: var(--dtc-danger); }
+.dtc-toast.is-error .dtc-toast-progress { background: var(--dtc-danger); }
+
+.dtc-toast.is-warning {
+    border-left-color: var(--dtc-warning);
+}
+.dtc-toast.is-warning .dtc-toast-icon { color: var(--dtc-warning); }
+.dtc-toast.is-warning .dtc-toast-progress { background: var(--dtc-warning); }
+
+.dtc-toast.is-info {
+    border-left-color: var(--dtc-primary);
+}
+.dtc-toast.is-info .dtc-toast-icon { color: var(--dtc-primary); }
+.dtc-toast.is-info .dtc-toast-progress { background: var(--dtc-primary); }
+
+/* ── Dark mode ───────────────────────────────────────────── */
+body.dtc-dark .dtc-toast,
+.dtc-dark .dtc-toast {
+    background: var(--dtc-surface);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35),
+                0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes dtcToastIn {
+    from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+@keyframes dtcToastOut {
+    from { opacity: 1; transform: translateY(0)    scale(1);    max-height: 200px; margin-top: 0; }
+    to   { opacity: 0; transform: translateY(-8px) scale(0.95); max-height: 0;     margin-top: -10px; }
+}
+
+@keyframes dtcToastProgress {
+    from { width: 100%; }
+    to   { width: 0%; }
+}
+
+/* ── Mobile tweaks ───────────────────────────────────────── */
+@media (max-width: 576px) {
+    #dtc-toast-container {
+        top: 16px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+    }
+}
+
+/* ── Max 3 visible toasts on tiny screens ────────────────── */
+@media (max-height: 500px) {
+    #dtc-toast-container {
+        top: 8px;
+        max-height: 200px;
+        overflow: hidden;
+    }
+}
+
+
+/* ============================================================
+   11. DTC CONFIRMATION MODAL
+   ============================================================ */
+
+.dtc-confirm-modal .modal-content {
+    border-radius: 20px !important;
+    overflow: hidden;
+    border: none;
+}
+
+.dtc-confirm-header {
+    padding: 32px 20px 0 !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    border-bottom: none !important;
+}
+
+.dtc-confirm-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* Danger (default) */
+.dtc-confirm-modal.is-danger .dtc-confirm-icon-wrap {
+    background: #FEF2F2;
+    color: var(--dtc-danger);
+}
+
+/* Warning */
+.dtc-confirm-modal.is-warning .dtc-confirm-icon-wrap {
+    background: #FFFBEB;
+    color: var(--dtc-warning);
+}
+
+.dtc-confirm-icon-wrap svg,
+.dtc-confirm-icon-wrap [data-lucide] {
+    width: 30px;
+    height: 30px;
+    stroke-width: 2;
+}
+
+.dtc-confirm-close {
+    position: absolute !important;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--dtc-text-muted);
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 8px;
+    line-height: 1;
+    transition: background var(--dtc-transition), color var(--dtc-transition);
+    z-index: 1;
+}
+.dtc-confirm-close:hover {
+    background: var(--dtc-surface-soft, rgba(0,0,0,0.06));
+    color: var(--dtc-text);
+}
+.dtc-confirm-close svg { width: 18px; height: 18px; }
+
+.dtc-confirm-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dtc-text);
+    margin-bottom: 8px;
+}
+
+.dtc-confirm-message {
+    font-size: 14px;
+    color: var(--dtc-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.dtc-confirm-modal .modal-body {
+    padding: 20px 28px 8px !important;
+}
+
+.dtc-confirm-modal .modal-footer {
+    padding: 8px 28px 28px !important;
+    gap: 10px;
+}
+
+/* ── Confirm button colours ──────────────────────────────── */
+.dtc-confirm-modal.is-danger  #dtcConfirmOk {
+    background: var(--dtc-danger);
+    border-color: var(--dtc-danger);
+    color: #fff;
+}
+.dtc-confirm-modal.is-danger  #dtcConfirmOk:hover {
+    background: #B91C1C;
+    border-color: #B91C1C;
+}
+.dtc-confirm-modal.is-warning #dtcConfirmOk {
+    background: var(--dtc-warning);
+    border-color: var(--dtc-warning);
+    color: #fff;
+}
+.dtc-confirm-modal.is-warning #dtcConfirmOk:hover {
+    background: #B45309;
+    border-color: #B45309;
+}
+
+/* ── Dark mode ───────────────────────────────────────────── */
+body.dtc-dark .dtc-confirm-modal.is-danger .dtc-confirm-icon-wrap {
+    background: #7F1D1D;
+    color: #FCA5A5;
+}
+body.dtc-dark .dtc-confirm-modal.is-warning .dtc-confirm-icon-wrap {
+    background: #78350F;
+    color: #FDE68A;
+}
+
+/* ============================================================
+   PAYMENT INFO NOTICE — dark-mode safe
+   Replaces the hardcoded #F0FDF4 inline style in _payment-content
+   ============================================================ */
+.dtc-payment-info-notice {
+    background: #F0FDF4;
+    border: 1.5px solid #BBF7D0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    font-size: 12.5px;
+    color: #15803D;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.dtc-payment-info-notice .dtc-notice-icon,
+.dtc-payment-info-notice .dtc-notice-icon svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    margin-top: 1px; /* optical alignment with first line of text */
+}
+
+body.dtc-dark .dtc-payment-info-notice {
+    background: rgba(21, 128, 61, 0.15);
+    border-color: rgba(21, 128, 61, 0.35);
+    color: #86EFAC;
+}
+
+/* ============================================================
+   STAT CARD — slightly larger value for dashboard readability
+   ============================================================ */
+.dtc-stat-value {
+    font-size: 19px !important;
+}
+
+.dtc-stat-label {
+    font-size: 11px !important;
+}
+
+/* ============================================================
+   ENROLLED SUBJECTS TABLE — dark mode overrides
+   ============================================================ */
+body.dtc-dark .dtc-subjects-table th {
+    background: var(--dtc-surface-soft);
+    color: var(--dtc-text-secondary);
+    border-color: var(--dtc-border);
+}
+
+body.dtc-dark .dtc-subjects-table tfoot tr {
+    background: var(--dtc-surface-soft);
+}
+
+body.dtc-dark .dtc-subjects-table td {
+    border-color: var(--dtc-border-soft);
+}
+
+/* ============================================================
+   QUICK ACTION BTN — badge alignment
+   ============================================================ */
+.quick-action-btn .badge {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   APPLICATIONS — Mobile card layout
+   ============================================================ */
+.dtc-app-card {
+    border-bottom: 1px solid var(--dtc-border);
+    padding: 14px 16px;
+}
+
+.dtc-app-card:last-child {
+    border-bottom: none;
+}
+
+.dtc-app-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.dtc-app-card-ref {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--dtc-text-muted);
+    margin-bottom: 2px;
+}
+
+.dtc-app-card-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dtc-text);
+}
+
+.dtc-app-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.dtc-app-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12.5px;
+}
+
+.dtc-app-card-label {
+    color: var(--dtc-text-muted);
+    font-weight: 600;
+    flex-shrink: 0;
+    min-width: 68px;
+}
+
+.dtc-app-card-value {
+    color: var(--dtc-text);
+    text-align: right;
+    word-break: break-word;
+}
+
+.dtc-app-card-footer {
+    /* full-width Review button */
+}
+
+/* Dark mode */
+body.dtc-dark .dtc-app-card {
+    border-color: var(--dtc-border);
+}
+
+/* ============================================================
+   NOTIFICATIONS PAGE
+   ============================================================ */
+
+/* ── Tabs ──────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   NOTIFICATION PAGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Page header ───────────────────────────────────────────────────── */
+.dtc-notif-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.dtc-notif-page-header-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.dtc-notif-page-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────── */
+.dtc-notif-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--dtc-surface);
+    border: 1.5px solid var(--dtc-border);
+    border-radius: 12px;
+    padding: 4px;
+    width: fit-content;
+}
+
+.dtc-notif-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dtc-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dtc-notif-tab:hover {
+    background: var(--dtc-surface-soft);
+    color: var(--dtc-text);
+}
+
+.dtc-notif-tab.active {
+    background: var(--dtc-primary);
+    color: #fff;
+}
+
+.dtc-notif-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.25);
+    color: inherit;
+}
+
+.dtc-notif-tab:not(.active) .dtc-notif-tab-count {
+    background: var(--dtc-surface-soft);
+    color: var(--dtc-text-muted);
+    border: 1px solid var(--dtc-border);
+}
+
+.dtc-notif-tab-count.is-danger {
+    background: var(--dtc-danger) !important;
+    color: #fff !important;
+}
+
+/* ── Group label ───────────────────────────────────────────────────── */
+.dtc-notif-group-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--dtc-text-muted);
+    text-transform: uppercase;
+    padding: 4px 0 8px;
+    margin-top: 8px;
+}
+
+/* ── Notification item ─────────────────────────────────────────────── */
+.dtc-notif-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--dtc-surface);
+    border: 1.5px solid var(--dtc-border);
+    border-radius: 14px;
+    padding: 14px 14px 14px 18px;
+    margin-bottom: 8px;
+    transition: box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.dtc-notif-item.is-unread {
+    background: var(--dtc-surface);
+    border-color: var(--dtc-border);
+    box-shadow: 0 2px 8px rgba(15, 76, 219, 0.07);
+}
+
+.dtc-notif-item.is-read {
+    opacity: 0.65;
+    background: var(--dtc-surface-soft);
+}
+
+.dtc-notif-item:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    opacity: 1 !important;
+}
+
+/* Unread blue dot */
+.dtc-notif-unread-dot {
+    position: absolute;
+    top: 16px;
+    left: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--dtc-primary);
+    flex-shrink: 0;
+}
+
+/* ── Content ───────────────────────────────────────────────────────── */
+.dtc-notif-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dtc-notif-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.dtc-notif-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dtc-text);
+}
+
+.dtc-notif-message {
+    font-size: 12.5px;
+    color: var(--dtc-text-secondary);
+    margin: 0 0 6px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.dtc-notif-meta {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: var(--dtc-text-muted);
+}
+
+/* ── Actions column: delete top, view bottom ───────────────────────── */
+.dtc-notif-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 6px;
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+/* Delete button — hidden until hover (desktop pointer devices) */
+.dtc-notif-btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1.5px solid var(--dtc-border);
+    background: transparent;
+    color: var(--dtc-text-muted);
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.dtc-notif-item:hover .dtc-notif-btn-delete {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.dtc-notif-btn-delete:hover {
+    border-color: var(--dtc-danger);
+    background: var(--dtc-danger-soft, rgba(220,53,69,0.08));
+    color: var(--dtc-danger);
+}
+
+/* View button — always visible, pushes to bottom of actions column */
+.dtc-notif-btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--dtc-primary-soft);
+    color: var(--dtc-primary);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s;
+    margin-top: auto;
+}
+
+.dtc-notif-btn-view:hover {
+    background: var(--dtc-primary);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* ── Empty state ───────────────────────────────────────────────────── */
+.dtc-notif-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--dtc-text-secondary);
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────────── */
+body.dtc-dark .dtc-notif-tabs {
+    background: var(--dtc-surface);
+    border-color: var(--dtc-border);
+}
+
+body.dtc-dark .dtc-notif-item {
+    background: #1E293B;
+    border-color: #334155;
+}
+
+body.dtc-dark .dtc-notif-item.is-read {
+    background: #151f2e;
+}
+
+body.dtc-dark .dtc-notif-btn-delete {
+    border-color: #334155;
+    color: #64748B;
+}
+
+/* ── Responsive: tablet ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Header: title left, buttons right — same row, right-edge flush with col */
+    .dtc-notif-page-header {
+        flex-wrap: nowrap;
+        align-items: flex-start;
+    }
+
+    .dtc-notif-page-header-right {
+        margin-top: 0;
+    }
+
+    .dtc-notif-item {
+        gap: 10px;
+        padding: 12px 12px 12px 16px;
+    }
+
+    .dtc-notif-btn-view {
+        padding: 4px 10px;
+        font-size: 11.5px;
+    }
+}
+
+/* ── Responsive: mobile ────────────────────────────────────────────── */
+@media (max-width: 575px) {
+    /* Tabs stretch full width */
+    .dtc-notif-tabs {
+        width: 100%;
+    }
+
+    .dtc-notif-tab {
+        flex: 1;
+        justify-content: center;
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+
+    .dtc-notif-item {
+        gap: 10px;
+        padding: 10px 10px 10px 14px;
+    }
+
+    /* Always show delete on touch/mobile — no hover available */
+    .dtc-notif-btn-delete {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* View button: icon only on mobile to save space */
+    .dtc-notif-btn-view {
+        padding: 6px 8px;
+        gap: 0;
+    }
+
+    .dtc-notif-btn-view i {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /* Hide "View" text, keep icon */
+    .dtc-notif-btn-view-text {
+        display: none;
+    }
+
+    /* Header stays on one row: hide "Delete read" label text */
+    .dtc-notif-btn-label {
+        display: none;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   APPOINTMENT SLOTS PAGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Summary stats strip ───────────────────────────────────────────── */
+.dtc-slot-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.dtc-slot-stat-card {
+    background: var(--dtc-surface);
+    border: 1.5px solid var(--dtc-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dtc-slot-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dtc-slot-stat-icon svg,
+.dtc-slot-stat-icon [data-lucide] {
+    width: 18px;
+    height: 18px;
+}
+
+.dtc-slot-stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--dtc-text);
+    line-height: 1.1;
+}
+
+.dtc-slot-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dtc-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* ── Slot row ──────────────────────────────────────────────────────── */
+.dtc-slot-row {
+    display: grid;
+    grid-template-columns: 170px 1fr 200px 110px 80px;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--dtc-border);
+    transition: background 0.12s ease;
+}
+
+.dtc-slot-row:last-child {
+    border-bottom: none;
+}
+
+.dtc-slot-row:hover {
+    background: var(--dtc-surface-soft);
+}
+
+.dtc-slot-row.is-past {
+    opacity: 0.55;
+}
+
+/* Date block */
+.dtc-slot-date-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dtc-slot-day-label {
+    font-size: 12px;
+    color: var(--dtc-text-secondary);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.dtc-slot-past-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--dtc-text-muted);
+    background: var(--dtc-surface-soft);
+    border: 1px solid var(--dtc-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-left: 4px;
+}
+
+/* Time block */
+.dtc-slot-time-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dtc-text);
+    white-space: nowrap;
+}
+
+.dtc-slot-meta-icon {
+    width: 13px;
+    height: 13px;
+    color: var(--dtc-text-muted);
+    flex-shrink: 0;
+}
+
+/* Capacity bar block */
+.dtc-slot-capacity-block {
+    min-width: 0;
+}
+
+.dtc-slot-capacity-nums {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.dtc-slot-avail-text {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.dtc-slot-bar-track {
+    height: 6px;
+    background: var(--dtc-border);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.dtc-slot-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.3s ease;
+}
+
+/* Status block */
+.dtc-slot-status-block {
+    display: flex;
+    align-items: center;
+}
+
+/* Actions block */
+.dtc-slot-actions-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+/* ── Slot modal shared styles ──────────────────────────────────────── */
+.dtc-slot-modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.dtc-slot-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 24px 16px;
+    background: linear-gradient(135deg, #0F4CDB, #1a5feb);
+    position: relative;
+}
+
+.dtc-slot-modal-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #FFC72C;
+}
+
+.dtc-slot-modal-header-icon svg,
+.dtc-slot-modal-header-icon [data-lucide] {
+    width: 20px;
+    height: 20px;
+}
+
+.dtc-slot-modal-title {
+    color: #fff;
+    font-weight: 700;
+    margin: 0 0 2px;
+    font-size: 16px;
+}
+
+.dtc-slot-modal-sub {
+    color: rgba(255,255,255,0.72);
+    font-size: 12px;
+    margin: 0;
+}
+
+.dtc-slot-modal-header .dtc-confirm-close {
+    position: static !important;
+    color: rgba(255,255,255,0.7);
+    margin-left: auto;
+}
+
+.dtc-slot-modal-header .dtc-confirm-close:hover {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+.dtc-slot-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--dtc-text);
+    margin-bottom: 5px;
+    display: block;
+}
+
+.dtc-slot-input {
+    border-radius: 10px !important;
+    border-color: var(--dtc-border) !important;
+    font-size: 13px !important;
+    color: var(--dtc-text) !important;
+    background: var(--dtc-surface) !important;
+}
+
+.dtc-slot-input:focus {
+    border-color: var(--dtc-primary) !important;
+    box-shadow: 0 0 0 3px rgba(15, 76, 219, 0.1) !important;
+}
+
+.dtc-slot-hint {
+    font-size: 11px;
+    color: var(--dtc-text-muted);
+    margin-top: 4px;
+    display: block;
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────────── */
+body.dtc-dark .dtc-slot-stat-card {
+    background: #1E293B;
+    border-color: #334155;
+}
+
+body.dtc-dark .dtc-slot-row:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+body.dtc-dark .dtc-slot-bar-track {
+    background: #334155;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 992px) {
+    .dtc-slot-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dtc-slot-row {
+        grid-template-columns: 160px 1fr 160px auto 70px;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dtc-slot-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dtc-slot-row {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 10px 12px;
+        padding: 14px 16px;
+    }
+    .dtc-slot-date-block  { grid-column: 1 / 2; }
+    .dtc-slot-status-block { grid-column: 2 / 3; justify-content: flex-end; }
+    .dtc-slot-time-block  { grid-column: 1 / 3; }
+    .dtc-slot-capacity-block { grid-column: 1 / 3; }
+    .dtc-slot-actions-block { grid-column: 1 / 3; justify-content: flex-start; }
+}
+
+@media (max-width: 480px) {
+    .dtc-slot-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .dtc-slot-stat-card {
+        padding: 10px 12px;
+    }
+}
+
+/* ── Custom file input (replaces native "Choose File | No file chosen") ── */
+.dtc-file-label {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--dtc-surface-soft, #1e2130);
+    border: 1.5px solid var(--dtc-border, rgba(255,255,255,.1));
+    border-radius: 8px;
+    color: var(--dtc-text-muted, #8892a4);
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    min-height: 40px;
+    overflow: hidden;
+}
+.dtc-file-label:hover {
+    border-color: var(--dtc-primary, #4f6ef7);
+    background: var(--dtc-surface, #161827);
+}
+.dtc-file-label.is-invalid {
+    border-color: var(--dtc-danger, #e05252);
+}
+.dtc-file-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--dtc-text-muted, #8892a4);
+}
+.dtc-file-label:has(.dtc-file-input:not([value=""])) .dtc-file-text,
+.dtc-file-label[data-has-file] .dtc-file-text {
+    color: var(--dtc-text, #e2e8f0);
+}
+.dtc-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+/* Dark mode overrides (already inherited via CSS vars, but explicit for safety) */
+body.dtc-dark .dtc-file-label {
+    background: var(--dtc-surface-soft);
+    border-color: var(--dtc-border);
+    color: var(--dtc-text-muted);
+}
+body.dtc-dark .dtc-file-label:hover {
+    border-color: var(--dtc-primary);
 }

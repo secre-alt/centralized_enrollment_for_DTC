@@ -28,14 +28,6 @@
     {{-- Payment Settings panels --}}
     <div class="col-12">
 
-        @if (session('status'))
-            <div class="alert alert-success">
-                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
-            </div>
-        @endif
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
         @if ($errors->any())
             <div class="alert alert-danger">{{ $errors->first() }}</div>
         @endif
@@ -46,7 +38,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="settings-section-title">
-                            <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
+                            <div class="settings-section-icon is-primary">
                                 <i data-lucide="banknote"></i>
                             </div>
                             <h3>Fee &amp; GCash Details</h3>
@@ -105,7 +97,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="settings-section-title">
-                            <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
+                            <div class="settings-section-icon is-warning">
                                 <i data-lucide="qr-code"></i>
                             </div>
                             <h3>GCash QR Code</h3>

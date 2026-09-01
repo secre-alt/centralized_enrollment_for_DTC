@@ -13,12 +13,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PortalDashboardController extends Controller
 {
-    /**
-     * Shared entry point for all three portal roles (student, alumni,
-     * new_applicant). Route name/URI stay the same for every role — only
-     * the data source and view differ, chosen here based on the
-     * authenticated user's role.
-     */
     public function index()
     {
         $user = Auth::user();
@@ -34,11 +28,6 @@ class PortalDashboardController extends Controller
         return $this->studentDashboard($user);
     }
 
-    /**
-     * new_applicant: driven by the approved pre-enrollment Application,
-     * not by Enrollment. Distinguishes "Pre-Enrollment Application" status
-     * from "Official Enrollment" status rather than conflating the two.
-     */
     private function newApplicantDashboard($user)
     {
         $application = Application::where('user_id', $user->id)
@@ -57,7 +46,6 @@ class PortalDashboardController extends Controller
         $announcements = UserNotification::where('user_id', $user->id)
             ->latest()->take(3)->get();
 
-        // Determine the single "next step" message/action for this applicant.
         $fee = Setting::get('enrollment_fee', 500);
         $nextStep = $this->getNewApplicantNextStep($application, $enrollment, $fee);
 
@@ -122,11 +110,6 @@ class PortalDashboardController extends Controller
         ];
     }
 
-    /**
-     * alumni: driven by DocumentRequest, reusing the same aggregation
-     * already used in Alumni\DocumentRequestController@index rather than
-     * duplicating that logic differently here.
-     */
     private function alumniDashboard($user)
     {
         $requests = DocumentRequest::where('user_id', $user->id)
@@ -150,17 +133,16 @@ class PortalDashboardController extends Controller
         $announcements = UserNotification::where('user_id', $user->id)
             ->latest()->take(3)->get();
 
+        // ── New: load the student profile so the view can show Batch YYYY ──
+        $studentProfile = $user->studentProfile;
+
         return view('portal.alumni.dashboard', compact(
             'totalRequests', 'readyRequests', 'releasedDocs', 'totalFees',
-            'recentRequests', 'nextAppointment', 'unreadCount', 'announcements'
+            'recentRequests', 'nextAppointment', 'unreadCount', 'announcements',
+            'studentProfile'
         ));
     }
 
-    /**
-     * student: unchanged from the original shared controller — same
-     * queries, same variables, only relocated into its own method and
-     * pointed at the new view path.
-     */
     private function studentDashboard($user)
     {
         $latestEnrollment = Enrollment::where('user_id', $user->id)
@@ -173,20 +155,17 @@ class PortalDashboardController extends Controller
             ->where('is_paid', true)->count();
         $unreadCount      = $user->unreadNotificationsCount();
 
-        // Subjects
         $subjects = collect();
         if ($latestEnrollment) {
             $subjects = CourseSubject::whereIn('id', $latestEnrollment->subject_ids ?? [])->get();
         }
 
-        // Next appointment
         $nextAppointment = Appointment::with('slot')
             ->where('user_id', $user->id)
             ->where('status', 'confirmed')
             ->whereHas('slot', fn($q) => $q->whereDate('date', '>=', today()))
             ->latest()->first();
 
-        // Enrollment timeline steps
         $fee = Setting::get('enrollment_fee', 500);
         $timeline = [];
         $completedSteps = 0;
@@ -226,17 +205,19 @@ class PortalDashboardController extends Controller
             $completedSteps = collect($timeline)->where('done', true)->count();
         }
 
-        // Recent notifications (as announcements)
         $announcements = UserNotification::where('user_id', $user->id)
             ->latest()->take(3)->get();
 
-        // Next steps based on status
         $nextSteps = $this->getNextSteps($latestEnrollment, $fee);
+
+        // ── New: load the student profile so the view can show Enrolled AY ──
+        $studentProfile = $user->studentProfile;
 
         return view('portal.student.dashboard', compact(
             'latestEnrollment', 'totalEnrollments', 'approvedCount',
             'paidCount', 'unreadCount', 'subjects', 'nextAppointment',
-            'timeline', 'completedSteps', 'announcements', 'nextSteps', 'fee'
+            'timeline', 'completedSteps', 'announcements', 'nextSteps', 'fee',
+            'studentProfile'
         ));
     }
 

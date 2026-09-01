@@ -27,11 +27,6 @@
 
     <div class="col-12">
 
-        @if (session('status'))
-            <div class="alert alert-success">
-                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
-            </div>
-        @endif
 
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -55,7 +50,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
+                                <div class="settings-section-icon is-primary">
                                     <i data-lucide="calendar-days"></i>
                                 </div>
                                 <h3>Current Academic Year &amp; Semester</h3>
@@ -89,7 +84,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#E7F8EF; color:#0F9D58;">
+                                <div class="settings-section-icon is-success">
                                     <i data-lucide="door-open"></i>
                                 </div>
                                 <h3>Enrollment Status</h3>
@@ -121,7 +116,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#FFF7E6; color:#B45309;">
+                                <div class="settings-section-icon is-warning">
                                     <i data-lucide="stamp"></i>
                                 </div>
                                 <h3>Registrar Info</h3>
@@ -146,7 +141,7 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex align-items-start" style="gap:14px;">
-                                <div class="settings-section-icon" style="background:#F3E8FF; color:#7C3AED;">
+                                <div class="settings-section-icon is-purple">
                                     <i data-lucide="graduation-cap"></i>
                                 </div>
                                 <div>

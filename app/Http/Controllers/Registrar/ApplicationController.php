@@ -23,6 +23,17 @@ class ApplicationController extends Controller
     public function index(Request $request)
     {
         $applications = Application::with(['program', 'user', 'reviewer', 'documents'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $term = '%' . $request->query('search') . '%';
+                $query->where(function ($q) use ($term) {
+                    $q->whereRaw("CONCAT(first_name, ' ', COALESCE(middle_name, ''), ' ', last_name) LIKE ?", [$term])
+                      ->orWhere('email', 'like', $term)
+                      ->orWhere('reference_no', 'like', $term);
+                });
+            })
+            ->when($request->filled('type'), function ($query) use ($request) {
+                $query->where('academic_status', $request->query('type'));
+            })
             ->when($request->filled('status'), function ($query) use ($request) {
                 $query->where('status', $request->query('status'));
             })

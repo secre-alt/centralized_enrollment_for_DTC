@@ -22,7 +22,7 @@
     var loadingMarkup = '\
         <div class="dtc-review-loading">\
             <div class="dtc-spinner u-spinner-sm" ></div>\
-            <p>Loading payment details…</p>\
+            <p>Loading payment details...</p>\
         </div>';
 
     var errorMarkup = '\
@@ -54,7 +54,7 @@
         $modalContent.html(loadingMarkup);
     });
 
-    // Reveal the inline reject-reason panel (event delegation — this
+    // Reveal the inline reject-reason panel (event delegation - this
     // content is injected dynamically, so listeners are bound on document).
     $(document).on('click', '#paymentModalContent .dtc-review-reject-trigger', function () {
         var targetId = $(this).data('target');

@@ -94,10 +94,9 @@ class ProgramController extends Controller
             'semester'     => ['required', 'integer', 'in:1,2'],
         ]);
 
-        CourseSubject::create([
-            ...$validated,
+        CourseSubject::create(array_merge($validated, [
             'program_id' => $program->id,
-        ]);
+        ]));
 
         return redirect()->route('admin.programs.index', ['program' => $program->id])
             ->with('success', 'Subject added.');
@@ -144,10 +143,9 @@ class ProgramController extends Controller
 
         $subject->schedules()->updateOrCreate(
             ['course_subject_id' => $subject->id],
-            [
-                ...$validated,
+            array_merge($validated, [
                 'room' => $validated['room'] ?? 'TBA',
-            ]
+            ])
         );
 
         return redirect()->route('admin.programs.index', ['program' => $subject->program_id])

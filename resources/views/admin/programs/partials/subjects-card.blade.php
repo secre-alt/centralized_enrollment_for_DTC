@@ -123,13 +123,18 @@
                                         data-instructor="{{ $sched->instructor_name ?? '' }}">
                                     <i data-lucide="calendar-clock"></i>
                                 </button>
-                                <form method="POST"
+                                <form id="del-sub-card-{{ $subject->id }}"
+                                      method="POST"
                                       action="{{ route('admin.programs.subjects.destroy', $subject) }}">
                                     @csrf @method('DELETE')
-                                    <button type="submit"
+                                    <button type="button"
                                             class="dtc-icon-btn danger"
                                             title="Remove subject"
-                                            onclick="return confirm('Remove this subject?')">
+                                            data-dtc-confirm
+                                            data-dtc-confirm-title="Remove Subject?"
+                                            data-dtc-confirm-message="Are you sure you want to remove this subject from the program?"
+                                            data-dtc-confirm-ok="Remove Subject"
+                                            data-dtc-confirm-form="#del-sub-card-{{ $subject->id }}">
                                         <i data-lucide="trash-2"></i>
                                     </button>
                                 </form>
@@ -360,7 +365,7 @@
 @endif
 
 <script>
-// Re-bind whenever this partial is (re)inserted — see loadSubjectsCard() in index.blade.php
+// Re-bind whenever this partial is (re)inserted - see loadSubjectsCard() in index.blade.php
 (function initSubjectsCardScripts() {
     document.querySelectorAll('.js-edit-subject').forEach(function (btn) {
         btn.addEventListener('click', function () {

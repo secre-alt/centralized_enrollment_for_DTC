@@ -283,38 +283,22 @@
         {{-- Quick Actions --}}
         <div class="card mb-3">
             <div class="card-header font-weight-bold">Quick Actions</div>
-            <div class="card-body p-0">
-                @php
-                    $actions = [
-                        ['icon' => 'file-text',   'label' => 'My Application',        'sub' => 'View your pre-enrollment application', 'url' => route('portal.application.show')],
-                        ['icon' => 'plus-circle', 'label' => 'Enroll Now',            'sub' => 'Complete your official enrollment',    'url' => route('portal.enrollment.create')],
-                        ['icon' => 'list',        'label' => 'My Enrollment Status',  'sub' => 'Track your official enrollment',        'url' => route('portal.enrollment.index')],
-                        ['icon' => 'bell',        'label' => 'Notifications',         'sub' => $unreadCount . ' unread',                'url' => route('notifications.index')],
-                    ];
-                @endphp
-                @foreach($actions as $action)
-                <a href="{{ $action['url'] }}"
-                   class="dtc-quick-action-row"
-                   style="display:flex; align-items:center; justify-content:space-between;
-                          padding:14px 20px; border-bottom:1px solid var(--dtc-border-soft);
-                          text-decoration:none; transition:background 0.2s;">
-                    <div  class="u-flex-center-gap-12">
-                        <div class="dtc-icon-swatch is-primary">
-                            <i data-lucide="{{ $action['icon'] }}" class="u-link-md"
-                               ></i>
-                        </div>
-                        <div>
-                            <div  class="u-text-sm-bold">
-                                {{ $action['label'] }}
-                            </div>
-                            <div  class="u-text-xs-secondary">
-                                {{ $action['sub'] }}
-                            </div>
-                        </div>
-                    </div>
-                    <i data-lucide="chevron-right" style="color:var(--dtc-text-muted); font-size:12px;"></i>
+            <div class="card-body p-3">
+                <a href="{{ route('portal.application.show') }}" class="quick-action-btn">
+                    <i data-lucide="file-text"></i> My Application
                 </a>
-                @endforeach
+                <a href="{{ route('portal.enrollment.create') }}" class="quick-action-btn">
+                    <i data-lucide="plus-circle"></i> Enroll Now
+                </a>
+                <a href="{{ route('portal.enrollment.index') }}" class="quick-action-btn">
+                    <i data-lucide="list"></i> My Enrollment Status
+                </a>
+                <a href="{{ route('notifications.index') }}" class="quick-action-btn">
+                    <i data-lucide="bell"></i> Notifications
+                    @if($unreadCount > 0)
+                        <span class="badge badge-danger ml-auto" style="font-size:10px;">{{ $unreadCount }}</span>
+                    @endif
+                </a>
             </div>
         </div>
 

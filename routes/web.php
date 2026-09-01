@@ -28,11 +28,6 @@ use App\Http\Controllers\Portal\CorController as PortalCorController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
-    Route::middleware(['auth'])->group(function () {
-        // ...existing notifications routes...
-        Route::get('/search', [SearchController::class, 'search'])->name('search');
-    });
-    
     // ── AUTH ──────────────────────────────────────────────────────────────────────
     Route::get('/', [AuthController::class, 'showLanding'])->name('landing');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
@@ -77,29 +72,31 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 
     // ── PUBLIC APPLICATION / PRE-ENROLLMENT ─────────────────────────────────────
     Route::prefix('apply')->name('public.application.')->group(function () {
-        Route::get('/', [ApplicationController::class, 'create'])
-            ->name('create');
-        Route::post('/', [ApplicationController::class, 'store'])
-            ->name('store');
-        Route::get('/success/{application}', [ApplicationController::class, 'success'])
-            ->name('success');
-        Route::get('/status', [ApplicationController::class, 'statusForm'])
-            ->name('status.form');
-        Route::post('/status', [ApplicationController::class, 'status'])
-            ->name('status');
+        Route::get('/', [ApplicationController::class, 'create'])->name('create');
+        Route::post('/', [ApplicationController::class, 'store'])->name('store');
+        Route::get('/success/{application}', [ApplicationController::class, 'success'])->name('success');
+        Route::get('/status', [ApplicationController::class, 'statusForm'])->name('status.form');
+        Route::post('/status', [ApplicationController::class, 'status'])->name('status');
     });
     
-    // ── NOTIFICATIONS (all roles) ─────────────────────────────────────────────────
+    // ── NOTIFICATIONS & SEARCH (all roles) ───────────────────────────────────────
     Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+    Route::delete('/notifications/read',        [NotificationController::class, 'destroyRead'])->name('notifications.destroyRead');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     });
+
 
     // ── ADMIN ─────────────────────────────────────────────────────────────────────
     Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class)->except(['show']);
+    Route::put('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
     Route::get('/settings/payment/qr-preview', [EnrollmentController::class, 'showGcashQr'])->name('settings.payment.qr.preview');
+
     // ── SETTINGS ──────────────
     Route::get('/settings',              [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings',              [SettingsController::class, 'update'])->name('settings.update');
@@ -149,13 +146,21 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::post('/enrollments/{enrollment}/reject', [RegistrarEnrollmentController::class, 'reject'])->name('enrollments.reject');
     Route::get('/enrollments/{enrollment}/cor', [RegistrarEnrollmentController::class, 'showCor'])->name('enrollments.cor.show');
     Route::get('/enrollments/{enrollment}/cor/download', [RegistrarEnrollmentController::class, 'downloadCor'])->name('enrollments.cor.download');
+    Route::post('/enrollments/{enrollment}/credited-subjects', [RegistrarEnrollmentController::class, 'storeCreditedSubject'])->name('enrollments.credited-subjects.store');
+    Route::post('/students/{user}/promote-alumni', [RegistrarEnrollmentController::class, 'promoteToAlumni'])->name('students.promote-alumni');
+    Route::put('/credited-subjects/{creditedSubject}', [RegistrarEnrollmentController::class, 'updateCreditedSubject'])->name('enrollments.credited-subjects.update');
+    Route::delete('/credited-subjects/{creditedSubject}', [RegistrarEnrollmentController::class, 'destroyCreditedSubject'])->name('enrollments.credited-subjects.destroy');
 
     Route::get('/appointments/slots', [RegistrarAppointmentController::class, 'slots'])->name('appointments.slots');
     Route::post('/appointments/slots', [RegistrarAppointmentController::class, 'storeSlot'])->name('appointments.slots.store');
+    Route::put('/appointments/slots/{slot}', [RegistrarAppointmentController::class, 'updateSlot'])->name('appointments.slots.update');
     Route::delete('/appointments/slots/{slot}', [RegistrarAppointmentController::class, 'deleteSlot'])->name('appointments.slots.delete');
     Route::get('/appointments', [RegistrarAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments/{appointment}/confirm', [RegistrarAppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::post('/appointments/{appointment}/cancel', [RegistrarAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/payments/{payment}/verify', [RegistrarAppointmentController::class, 'verifyPayment'])->name('appointments.payments.verify');
+    Route::post('/appointments/payments/{payment}/reject', [RegistrarAppointmentController::class, 'rejectPayment'])->name('appointments.payments.reject');
+    Route::get('/appointments/payments/{payment}/proof', [RegistrarAppointmentController::class, 'viewProof'])->name('appointments.payments.proof');
 
     Route::get('/documents', [RegistrarDocumentController::class, 'index'])->name('documents.index');
     Route::post('/documents/{documentRequest}/status', [RegistrarDocumentController::class, 'updateStatus'])->name('documents.status');
@@ -200,6 +205,11 @@ use App\Http\Controllers\Auth\ResetPasswordController;
     Route::post('/appointments', [StudentAppointmentController::class, 'store'])->name('appointments.store');
     Route::get('/appointments', [StudentAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments/{appointment}/cancel', [StudentAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::get('/appointments/{appointment}/edit', [StudentAppointmentController::class, 'edit'])->name('appointments.edit');
+    Route::put('/appointments/{appointment}', [StudentAppointmentController::class, 'update'])->name('appointments.update');
+    Route::post('/appointments/{appointment}/payment/gcash', [StudentAppointmentController::class, 'submitGcash'])->name('appointments.payment.gcash');
+    Route::get('/appointments/payment/proof/{payment}', [StudentAppointmentController::class, 'viewProof'])->name('appointments.payment.proof');
+    Route::get('/appointments/payment/gcash-qr', [StudentAppointmentController::class, 'showGcashQr'])->name('appointments.gcash.qr');
 
     Route::get('/documents', [AlumniDocumentController::class, 'index'])->name('documents.index');
     Route::get('/documents/create', [AlumniDocumentController::class, 'create'])->name('documents.create');

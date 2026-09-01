@@ -57,6 +57,10 @@
 @stop
 
 @section('adminlte_js')
+    {{-- DTC: toast container + flash bridge --}}
+    <x-dtc.toast />
+    {{-- DTC: confirmation modal --}}
+    <x-dtc.confirm-modal />
     @stack('js')
     @yield('js')
 @stop

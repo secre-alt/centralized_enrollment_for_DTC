@@ -91,9 +91,30 @@ class EnrollmentController extends Controller
             'program_id'  => ['required', 'exists:programs,id'],
             'year_level'  => ['required', 'integer', 'min:1', 'max:5'],
             'semester' => ['required', 'integer', 'in:1,2,3'],
+            'is_irregular' => ['nullable', 'boolean'],
             'subject_ids' => ['required', 'array', 'min:1'],
             'subject_ids.*' => ['exists:course_subjects,id'],
         ]);
+
+        $isIrregular = $request->boolean('is_irregular');
+
+        // ── Reject duplicate subject submissions outright.
+        if (count($validated['subject_ids']) !== count(array_unique($validated['subject_ids']))) {
+            abort(422, 'Duplicate subjects were submitted.');
+        }
+
+        // ── Authorization: subjects must belong to the selected program.
+        // This is the authoritative check — it applies whether the student
+        // used the regular (locked year/semester) picker or the irregular
+        // (all-subjects, grouped) picker, since the frontend selection is
+        // never trusted on its own.
+        $validSubjectCount = \App\Models\CourseSubject::where('program_id', $validated['program_id'])
+            ->whereIn('id', $validated['subject_ids'])
+            ->count();
+
+        if ($validSubjectCount !== count($validated['subject_ids'])) {
+            abort(422, 'One or more selected subjects do not belong to the selected program.');
+        }
 
         // ── Authorization: new_applicant must enroll in approved program only
         if ($user->hasRole('new_applicant')) {
@@ -123,6 +144,7 @@ class EnrollmentController extends Controller
             'year_level'  => $validated['year_level'],
             'semester'    => $validated['semester'],
             'school_year' => \App\Models\Setting::get('current_school_year'),
+            'is_irregular' => $isIrregular,
             'subject_ids' => $validated['subject_ids'],
             'status'      => 'pending',
             'is_paid'     => false,
@@ -246,10 +268,36 @@ class EnrollmentController extends Controller
         );
     }
 
-    // ── getSubjects() — unchanged ──────────────────────────────────
+    // ── getSubjects() — regular mode unchanged; new grouped "all" mode ──
 
     public function getSubjects(Request $request, Program $program)
     {
+        // Irregular mode: return every subject in this program, grouped by
+        // year_level + semester, so the student can pick across groups in
+        // a single enrollment. Program scoping still applies — a student
+        // can never see or select another program's subjects.
+        if ($request->query('mode') === 'all') {
+            $subjects = \App\Models\CourseSubject::where('program_id', $program->id)
+                ->orderBy('year_level')
+                ->orderBy('semester')
+                ->orderBy('subject_code')
+                ->get(['id', 'subject_code', 'subject_name', 'units', 'year_level', 'semester']);
+
+            $grouped = $subjects->groupBy(function ($s) {
+                return $s->year_level . '|' . $s->semester;
+            })->map(function ($group, $key) {
+                [$year, $sem] = explode('|', $key);
+                return [
+                    'year_level' => (int) $year,
+                    'semester'   => (int) $sem,
+                    'subjects'   => $group->values(),
+                ];
+            })->values();
+
+            return response()->json($grouped);
+        }
+
+        // ── Regular mode — unchanged ────────────────────────────────────
         $validated = $request->validate([
             'year_level' => ['required', 'integer', 'min:1', 'max:5'],
             'semester'   => ['required'],

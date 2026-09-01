@@ -43,7 +43,7 @@
  
 <style>
 /* Shrinks with the viewport instead of wrapping to 2 lines and pushing
-   the Add Subject button around — heading always stays on one line,
+   the Add Subject button around - heading always stays on one line,
    button always stays put on the left below it. */
 .dtc-subjects-title {
     font-size: clamp(15px, 4.2vw, 22px);

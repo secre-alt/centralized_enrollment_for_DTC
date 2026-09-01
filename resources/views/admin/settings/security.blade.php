@@ -27,11 +27,6 @@
 
     <div class="col-12">
 
-        @if (session('status'))
-            <div class="alert alert-success">
-                <i data-lucide="check-circle" class="mr-1"></i> {{ session('status') }}
-            </div>
-        @endif
 
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -55,7 +50,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#EEF2FF; color:#0F4CDB;">
+                                <div class="settings-section-icon is-primary">
                                     <i data-lucide="key"></i>
                                 </div>
                                 <h3>Password Policy</h3>
@@ -95,7 +90,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="settings-section-title">
-                                <div class="settings-section-icon" style="background:#FFF7E0; color:#D97706;">
+                                <div class="settings-section-icon is-warning">
                                     <i data-lucide="user-check"></i>
                                 </div>
                                 <h3>Session &amp; Login</h3>

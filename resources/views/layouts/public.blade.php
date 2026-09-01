@@ -67,6 +67,10 @@
 
 
     <script src="{{ asset('js/dtc-app.js') }}" defer></script>
+    <script src="{{ asset('js/dtc-feedback.js') }}" defer></script>
+
+    {{-- DTC toast container (flash messages → toasts) --}}
+    <x-dtc.toast />
 
     {{-- Page-specific scripts --}}
     @yield('scripts')

@@ -49,13 +49,7 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
-@if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
 
 <div class="row">
     <div class="col-lg-8">
@@ -417,10 +411,19 @@
             </div>
             <div class="card-body">
 
-                <form method="POST" action="{{ route('registrar.applications.approve', $application) }}" class="mb-2">
+                <form id="approve-application-{{ $application->id }}"
+                      method="POST"
+                      action="{{ route('registrar.applications.approve', $application) }}"
+                      class="mb-2">
                     @csrf
-                    <button type="submit" class="btn btn-success btn-block"
-                            onclick="return confirm('Approve this application and create the applicant account?');">
+                    <button type="button"
+                            class="btn btn-success btn-block"
+                            data-dtc-confirm
+                            data-dtc-confirm-title="Approve Application?"
+                            data-dtc-confirm-message="This will approve the application and create a student account. Are you sure?"
+                            data-dtc-confirm-ok="Approve"
+                            data-dtc-confirm-type="warning"
+                            data-dtc-confirm-form="#approve-application-{{ $application->id }}">
                         Approve
                     </button>
                 </form>

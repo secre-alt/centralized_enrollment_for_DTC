@@ -1120,7 +1120,7 @@
         margin-bottom: 0.5rem;
     }
 
-    /* ── Page header ───────────────────────────────────────── */
+    /* -- Page header ----------------------------------------- */
     .back-btn {
         display: inline-flex;
         align-items: center;
@@ -1128,7 +1128,7 @@
         white-space: nowrap;
     }
 
-    /* ── Document upload ─────────────────────────────────── */
+    /* -- Document upload ----------------------------------- */
     .document-input {
         border: 1px solid #dee2e6;
         border-radius: 10px;
@@ -1207,7 +1207,7 @@
         margin: 0;
     }
 
-    /* ── Dark mode ────────────────────────────────────────── */
+    /* -- Dark mode ------------------------------------------ */
     body.dtc-dark .document-input {
         background: var(--dtc-surface-soft, #1E293B);
         border-color: var(--dtc-border, #334155);
@@ -1236,7 +1236,7 @@
         color: #F8FAFC;
     }
 
-    /* ── Mobile / responsive polish ───────────────────────── */
+    /* -- Mobile / responsive polish ------------------------- */
     @media (max-width: 575.98px) {
         .card-body {
             padding: 1.1rem;
@@ -1334,12 +1334,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const physicalRequirements = {
 
         new_student: [
-            'Form 138 or equivalent — original/required physical copy',
-            'Certificate of Good Moral Character — original/required physical copy',
-            'PSA Birth Certificate — required physical copy',
-            'Marriage Certificate — if applicable',
-            '2 copies recent 2×2 picture',
-            '2 copies recent 1×1 picture',
+            'Form 138 or equivalent - original/required physical copy',
+            'Certificate of Good Moral Character - original/required physical copy',
+            'PSA Birth Certificate - required physical copy',
+            'Marriage Certificate - if applicable',
+            '2 copies recent 2x2 picture',
+            '2 copies recent 1x1 picture',
             '2 pcs Long Brown Envelope'
         ],
 
@@ -1348,9 +1348,9 @@ document.addEventListener('DOMContentLoaded', function () {
             'Transcript of Records',
             'Certificate of Good Moral Character',
             'PSA Birth Certificate',
-            'Marriage Certificate — if applicable',
-            '2 copies recent 2×2 picture',
-            '2 copies recent 1×1 picture',
+            'Marriage Certificate - if applicable',
+            '2 copies recent 2x2 picture',
+            '2 copies recent 1x1 picture',
             '2 pcs Long Brown Envelope'
         ],
 

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Cashier;
 
 use App\Http\Controllers\Controller;
+use App\Models\Application;
 use App\Models\Enrollment;
 use App\Models\Payment;
 use App\Models\Setting;
+use App\Models\StudentProfile;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,23 +17,22 @@ use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
-    // ── index() — adds method/status filter ───────────────────────
+    // ── index() ───────────────────────────────────────────────────
 
     public function index(Request $request)
     {
         $query = Enrollment::where('status', 'approved')
             ->with(['user', 'program', 'payment']);
 
-        // Filter by payment method / status using ?filter= query param
         $filter = $request->query('filter', 'all');
 
         $query = match ($filter) {
-            'walk_in'        => $query->whereHas('payment', fn($q) => $q->where('payment_method', 'walk_in')),
-            'gcash_pending'  => $query->whereHas('payment', fn($q) => $q->where('payment_method', 'gcash')->where('status', 'pending')),
-            'verified'       => $query->whereHas('payment', fn($q) => $q->where('status', 'verified')),
-            'rejected'       => $query->whereHas('payment', fn($q) => $q->where('status', 'rejected')),
-            'unpaid'         => $query->where('is_paid', false)->whereDoesntHave('payment', fn($q) => $q->where('status', 'pending')),
-            default          => $query,
+            'walk_in'       => $query->whereHas('payment', fn($q) => $q->where('payment_method', 'walk_in')),
+            'gcash_pending' => $query->whereHas('payment', fn($q) => $q->where('payment_method', 'gcash')->where('status', 'pending')),
+            'verified'      => $query->whereHas('payment', fn($q) => $q->where('status', 'verified')),
+            'rejected'      => $query->whereHas('payment', fn($q) => $q->where('status', 'rejected')),
+            'unpaid'        => $query->where('is_paid', false)->whereDoesntHave('payment', fn($q) => $q->where('status', 'pending')),
+            default         => $query,
         };
 
         $enrollments = $query->latest()->paginate(20)->withQueryString();
@@ -39,7 +40,7 @@ class PaymentController extends Controller
         return view('cashier.payments.index', compact('enrollments', 'filter'));
     }
 
-    // ── show() — now branches on walk-in vs GCash pending ─────────
+    // ── show() ────────────────────────────────────────────────────
 
     public function show(Enrollment $enrollment)
     {
@@ -52,7 +53,7 @@ class PaymentController extends Controller
         return view('cashier.payments.show', compact('enrollment', 'latestPayment'));
     }
 
-    // ── store() — walk-in, fee now from Setting ───────────────────
+    // ── store() — walk-in ─────────────────────────────────────────
 
     public function store(Request $request, Enrollment $enrollment)
     {
@@ -81,11 +82,12 @@ class PaymentController extends Controller
 
             $enrollment->update(['is_paid' => true]);
             $enrollment->user->syncRoles(['student']);
+
+            static::createStudentProfileIfMissing($enrollment->user, $enrollment);
         });
 
         $payment = Payment::where('enrollment_id', $enrollment->id)->latest()->first();
 
-        // Notify student, all admins, all registrars — unchanged
         NotificationService::send(
             $enrollment->user,
             'Payment Confirmed',
@@ -104,7 +106,7 @@ class PaymentController extends Controller
             ->with('success', 'Payment recorded successfully.');
     }
 
-    // ── verify() — NEW ────────────────────────────────────────────
+    // ── verify() — GCash verification ─────────────────────────────
 
     public function verify(Request $request, Payment $payment)
     {
@@ -129,6 +131,8 @@ class PaymentController extends Controller
             $enrollment = $payment->enrollment;
             $enrollment->update(['is_paid' => true]);
             $enrollment->user->syncRoles(['student']);
+
+            static::createStudentProfileIfMissing($enrollment->user, $enrollment);
         });
 
         $enrollment = $payment->fresh()->enrollment;
@@ -145,7 +149,7 @@ class PaymentController extends Controller
             ->with('success', 'GCash payment verified. Student role assigned.');
     }
 
-    // ── reject() — NEW ────────────────────────────────────────────
+    // ── reject() ──────────────────────────────────────────────────
 
     public function reject(Request $request, Payment $payment)
     {
@@ -165,9 +169,6 @@ class PaymentController extends Controller
             'processed_by' => Auth::id(),
         ]);
 
-        // Store rejection reason — reuse enrollment.remarks convention
-        // (Payment model has no remarks column — store on the payment's enrollment or
-        //  notify directly; we notify and include the remarks in the message)
         $enrollment = $payment->enrollment;
 
         NotificationService::send(
@@ -182,7 +183,7 @@ class PaymentController extends Controller
             ->with('success', 'Payment rejected. Applicant has been notified.');
     }
 
-    // ── viewProof() — NEW (Cashier viewing applicant's proof) ─────
+    // ── viewProof() ───────────────────────────────────────────────
 
     public function viewProof(Payment $payment)
     {
@@ -195,7 +196,7 @@ class PaymentController extends Controller
         );
     }
 
-    // ── receipt() — gains GCash method line, otherwise unchanged ──
+    // ── receipt() ─────────────────────────────────────────────────
 
     public function receipt(Request $request, Enrollment $enrollment)
     {
@@ -209,10 +210,6 @@ class PaymentController extends Controller
         if (! $payment) {
             $message = 'No verified payment found for this enrollment.';
 
-            // AJAX (modal) callers get a real error status + message instead
-            // of silently following a redirect to a page with no receipt
-            // markup on it, which used to surface as a generic, unhelpful
-            // "couldn't load" with no indication of the actual cause.
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['message' => $message], 404);
             }
@@ -221,13 +218,51 @@ class PaymentController extends Controller
                 ->with('error', $message);
         }
 
-        // AJAX callers (the receipt modal) need only the partial — returning
-        // the full page meant jQuery had to parse a complete HTML document and
-        // find #receipt-content inside it, which failed silently in some cases.
         if ($request->ajax()) {
             return view('cashier.payments._receipt-content', compact('enrollment', 'payment'));
         }
 
         return view('cashier.payments.receipt', compact('enrollment', 'payment'));
+    }
+
+    // ── createStudentProfileIfMissing ─────────────────────────────
+    //
+    // Called on both walk-in and GCash payment confirmation — the two
+    // points at which a new_applicant becomes a student.
+    //
+    // Sets enrolled_ay from the enrollment's school_year so the student's
+    // first AY is permanently anchored in student_profiles without
+    // requiring any manual input.
+    //
+    // This is idempotent — safe to call even if a profile already exists.
+
+    private static function createStudentProfileIfMissing(
+        \App\Models\User $user,
+        Enrollment $enrollment
+    ): void {
+        if ($user->studentProfile()->exists()) {
+            return;
+        }
+
+        $application = Application::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->latest()
+            ->first();
+
+        $admissionType = $application?->academic_status ?? 'new_student';
+
+        StudentProfile::create([
+            'user_id'        => $user->id,
+            'student_number' => StudentProfile::generateStudentNumber(),
+            'lrn'            => $application?->lrn,
+            'admission_type' => $admissionType,
+            'gender'         => $application?->gender,
+            'birthdate'      => $application?->birthdate,
+            'phone'          => $application?->phone,
+            'address'        => $application?->current_address ?? $application?->address,
+            'program_id'     => $enrollment->program_id,
+            // ── New: anchor the AY at the moment of first payment ───────
+            'enrolled_ay'    => $enrollment->school_year,
+        ]);
     }
 }
