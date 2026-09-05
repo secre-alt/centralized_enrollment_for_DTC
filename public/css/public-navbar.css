@@ -43,7 +43,7 @@
    ============================================================ */
 
 .public-navbar-container {
-  width: min(1180px, calc(100% - 40px));
+  width: min(1280px, calc(100% - 160px));
   min-height: 88px;
   margin: 0 auto;
   display: flex;
@@ -59,11 +59,8 @@
 .public-brand {
   display: inline-flex;
   align-items: center;
-
   gap: 12px;
-
   flex-shrink: 0;
-
   color: var(--dtc-text);
   text-decoration: none;
 }
@@ -78,13 +75,10 @@
    ============================================================ */
 
 .public-logo {
-  width: 48px;
-  height: 48px;
-
+  width: 62px;
+  height: 62px;
   display: block;
-
   object-fit: contain;
-
   flex-shrink: 0;
 }
 
@@ -100,25 +94,20 @@
 
 .public-brand-text h1 {
   margin: 0;
-
   font-family: "Poppins", sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.2;
   font-weight: 700;
-
   color: var(--dtc-text);
 }
 
 .public-brand-text p {
   margin: 3px 0 0;
-
   font-family: "Poppins", sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
   font-weight: 500;
-
   letter-spacing: 0.2px;
-
   color: var(--dtc-muted);
 }
 
@@ -138,22 +127,15 @@
 .public-nav-links a {
   display: inline-flex;
   align-items: center;
-
   min-height: 88px;
-
   padding: 0;
-
   position: relative;
-
   color: #334155;
   text-decoration: none;
-
   font-family: "Poppins", sans-serif;
   font-size: 15px;
   font-weight: 500;
-
   white-space: nowrap;
-
   transition:
     color 0.2s ease,
     opacity 0.2s ease;
@@ -182,17 +164,12 @@ body.dtc-dark .public-nav-links a.active {
 
 .public-nav-links a.active::after {
   content: "";
-
   position: absolute;
-
   left: 0;
   right: 0;
   bottom: 20px;
-
   height: 3px;
-
   background: var(--dtc-blue);
-
   border-radius: 10px;
 }
 
@@ -219,33 +196,22 @@ body.dtc-dark .public-nav-links a.active {
 
 .public-signin {
   height: 44px;
-
   min-width: 112px;
-
   padding: 0 20px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   gap: 8px;
-
   border: none;
   border-radius: 10px;
-
   background: var(--dtc-blue);
   color: #ffffff !important;
-
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 600;
-
   line-height: 1;
-
   text-decoration: none;
-
   flex-shrink: 0;
-
   transition:
     background 0.2s ease,
     transform 0.2s ease,
@@ -255,11 +221,8 @@ body.dtc-dark .public-nav-links a.active {
 .public-signin:hover {
   background: var(--dtc-blue-dark);
   color: #ffffff !important;
-
   transform: translateY(-1px);
-
   box-shadow: 0 6px 18px rgba(15, 76, 219, 0.18);
-
   text-decoration: none;
 }
 
@@ -273,21 +236,15 @@ body.dtc-dark .public-nav-links a.active {
 
 .public-navbar-toggle {
   display: none;
-
   width: 42px;
   height: 42px;
-
   padding: 0;
-
   border: 1px solid var(--dtc-border);
   border-radius: 9px;
-
   background: var(--dtc-surface);
   color: var(--dtc-text);
-
   align-items: center;
   justify-content: center;
-
   cursor: pointer;
 }
 
@@ -316,7 +273,6 @@ body.dtc-dark .public-navbar-toggle:hover {
 .public-mobile-nav.open {
   display: flex;
   flex-direction: column;
-
   gap: 4px;
 }
 
@@ -341,15 +297,14 @@ body.dtc-dark .public-navbar-toggle:hover {
 
 .public-mobile-nav .public-signin {
   width: fit-content;
-
   margin-top: 8px;
-
   color: #ffffff !important;
 }
 
 .public-mobile-nav .public-signin:hover {
   color: #ffffff !important;
 }
+
 body.dtc-dark .public-mobile-nav a {
   color: var(--dtc-text-secondary) 
 }
@@ -391,12 +346,12 @@ body.dtc-dark .public-mobile-nav a {
 
 @media (max-width: 576px) {
   .public-navbar-container {
-    width: calc(100% - 30px);
+    width: calc(100% - 40px);
   }
 
   .public-logo {
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
   }
 
   .public-brand-text h1 {
@@ -414,3 +369,46 @@ body.dtc-dark .public-mobile-nav a {
     top: 0;
     z-index: 1000;
 } */
+
+/* ============================================================
+   THEME TOGGLE — match hamburger button exactly
+   Overrides dtc-theme.css base styles so both buttons look
+   identical on the public navbar in both light and dark mode.
+   ============================================================ */
+
+.public-navbar-theme .theme-toggle-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  border: 1px solid var(--dtc-border);
+  background: var(--dtc-surface);
+  color: var(--dtc-text);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.public-navbar-theme .theme-toggle-btn:hover {
+  border-color: var(--dtc-primary);
+  background: var(--dtc-primary-soft);
+  color: var(--dtc-primary);
+  transform: none;
+}
+
+body.dtc-dark .public-navbar-theme .theme-toggle-btn {
+  background: var(--dtc-surface);
+  border-color: var(--dtc-border);
+  color: var(--dtc-text);
+}
+
+body.dtc-dark .public-navbar-theme .theme-toggle-btn:hover {
+  background: var(--dtc-surface-soft);
+  border-color: var(--dtc-border);
+  color: var(--dtc-text);
+}
+
+
+body.dtc-dark .public-navbar-theme .theme-toggle-btn i {
+  color: var(--dtc-text);
+}

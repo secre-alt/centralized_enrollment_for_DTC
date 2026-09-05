@@ -240,32 +240,40 @@
                     <div class="carousel-viewport" id="servicesViewport" tabindex="0" aria-roledescription="carousel" aria-label="DTC EMS services">
                         <div class="carousel-track" id="servicesTrack">
 
-                            <div class="service-card">
+                            <div class="service-card" data-service-id="enrollment">
                                 <div class="icon-box"><i data-lucide="graduation-cap"></i></div>
                                 <h3>Online Enrollment</h3>
                                 <p>Enroll and manage your student records from anywhere, anytime.</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
                             </div>
-                            <div class="service-card">
+
+                            <div class="service-card" data-service-id="certificates">
                                 <div class="icon-box"><i data-lucide="file-text"></i></div>
                                 <h3>Certificate Requests</h3>
                                 <p>Request official certificates and track their status in real time.</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
                             </div>
-                            <div class="service-card">
+
+                            <div class="service-card" data-service-id="appointments">
                                 <div class="icon-box"><i data-lucide="calendar-check"></i></div>
                                 <h3>Appointment Scheduling</h3>
                                 <p>Book a pickup or claiming schedule that works for you.</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
                             </div>
-                            <div class="service-card">
+
+                            <div class="service-card" data-service-id="payments">
                                 <div class="icon-box"><i data-lucide="banknote"></i></div>
                                 <h3>Payment Processing</h3>
                                 <p>Pay online via GCash, or walk in and pay directly at the Cashier.</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
                             </div>
-                            <div class="service-card">
+
+                            <div class="service-card" data-service-id="access">
                                 <div class="icon-box"><i data-lucide="shield"></i></div>
                                 <h3>Role-Based Access</h3>
                                 <p>Students, alumni, registrars, cashiers, and admins each get their own dashboard.</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
                             </div>
-
                         </div>
                     </div>
 
@@ -662,6 +670,7 @@
 @include('partials.signin-modal')
 
 <script src="{{ asset('js/dtc-app.js') }}" defer></script>
+<script src="{{ asset('js/welcome-interactive.js') }}" defer></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
