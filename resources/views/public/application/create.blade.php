@@ -2,1534 +2,831 @@
 
 @section('title', 'Pre-Enrollment Application')
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/application-wizard.css') }}">
+@stop
+
+
 @section('content')
+<div class="app-wizard-page">
 
-    <div class="container">
-        <div class="container-fluid px-0">
-
-    {{-- Page Header --}}
-    <div class="d-flex justify-content-between align-items-start mb-4 gap-2">
-        <div>
-            <h1 class="mb-1">Pre-Enrollment Application</h1>
-            <p class="text-muted mb-0">
-                Submit your application for preliminary screening.
-            </p>
+    {{-- ── Top bar ──────────────────────────────────────────────── --}}
+    <div class="app-wizard-topbar">
+        <a href="{{ route('landing') }}" class="app-wizard-back" aria-label="Back to home">
+            <i data-lucide="arrow-left"></i>
+        </a>
+        <div class="app-wizard-brand">
+            <span class="app-wizard-brand-label">DTC EMS</span>
+            <span class="app-wizard-brand-title">Pre-Enrollment Application</span>
         </div>
-        <div class="page-header-actions">
-            <a href="{{ route('landing') }}" class="btn btn-outline-secondary back-btn" aria-label="Back">
-                <i data-lucide="arrow-left" aria-hidden="true"></i>
-                <span class="back-btn-label">Back</span>
-            </a>
+        <div class="app-wizard-progress-label">
+            Step <span id="wizCurrentStep">1</span> of <span id="wizTotalSteps">6</span>
         </div>
     </div>
 
-    {{-- Validation Errors --}}
-    @if ($errors->any())
-        <div class="alert alert-danger shadow-sm">
-            <div class="font-weight-bold mb-2">
-                <i data-lucide="alert-circle" class="mr-1"></i>
-                Please correct the following:
-            </div>
+    {{-- ── Step Tracker ─────────────────────────────────────────── --}}
+    <div class="app-wizard-tracker" id="wizardTracker" role="list">
+        <div class="wiz-step active" data-step="1" role="listitem" tabindex="0">
+            <div class="wiz-step-dot"><i data-lucide="graduation-cap"></i></div>
+            <span class="wiz-step-label">Program</span>
+        </div>
+        <div class="wiz-connector"></div>
+        <div class="wiz-step" data-step="2" role="listitem" tabindex="0">
+            <div class="wiz-step-dot"><i data-lucide="user"></i></div>
+            <span class="wiz-step-label">Personal</span>
+        </div>
+        <div class="wiz-connector"></div>
+        <div class="wiz-step" data-step="3" role="listitem" tabindex="0">
+            <div class="wiz-step-dot"><i data-lucide="phone"></i></div>
+            <span class="wiz-step-label">Contact</span>
+        </div>
+        <div class="wiz-connector"></div>
+        <div class="wiz-step" data-step="4" role="listitem" tabindex="0">
+            <div class="wiz-step-dot"><i data-lucide="users"></i></div>
+            <span class="wiz-step-label">Family</span>
+        </div>
+        <div class="wiz-connector"></div>
+        <div class="wiz-step" data-step="5" role="listitem" tabindex="0">
+            <div class="wiz-step-dot"><i data-lucide="file-up"></i></div>
+            <span class="wiz-step-label">Documents</span>
+        </div>
+        <div class="wiz-connector"></div>
+        <div class="wiz-step" data-step="6" role="listitem" tabindex="0">
+            <div class="wiz-step-dot"><i data-lucide="clipboard-check"></i></div>
+            <span class="wiz-step-label">Review</span>
+        </div>
+    </div>
 
-            <ul class="mb-0 pl-4">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    {{-- ── Progress Bar ─────────────────────────────────────────── --}}
+    <div class="app-wizard-bar-wrap" aria-hidden="true">
+        <div class="app-wizard-bar" id="wizardBar" style="width:16.67%"></div>
+    </div>
+
+    {{-- ── Server-side Validation Errors ───────────────────────── --}}
+    @if ($errors->any())
+        <div class="wiz-server-errors" id="serverErrors">
+            <div class="wiz-server-errors-icon"><i data-lucide="alert-triangle"></i></div>
+            <div class="wiz-server-errors-body">
+                <p class="wiz-server-errors-title">Your application couldn't be submitted</p>
+                <p class="wiz-server-errors-sub">Please fix the following before resubmitting:</p>
+                <ul class="wiz-server-errors-list">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
     @endif
 
-    {{-- Preliminary Screening Notice --}}
-    <div class="alert alert-warning shadow-sm border-0">
-        <div class="d-flex">
-            <div class="mr-3">
-                <i data-lucide="info" style="width:1.25em;height:1.25em"></i>
-            </div>
-
-            <div>
-                <strong>Important:</strong>
-                Uploaded documents are for preliminary screening only.
-                You must still present the required original/physical documents
-                to the Registrar's Office for verification before official enrollment.
-            </div>
+    {{-- ── Screening Notice ─────────────────────────────────────── --}}
+    <div class="wiz-notice">
+        <i data-lucide="info"></i>
+        <div>
+            <strong>Preliminary screening only.</strong>
+            Uploaded documents are for initial review. You must still present
+            original documents to the Registrar's Office before official enrollment.
         </div>
     </div>
 
+    {{-- ══════════════════════════════════════════════════════════ --}}
     <form
         action="{{ route('public.application.store') }}"
         method="POST"
         enctype="multipart/form-data"
         id="applicationForm"
+        novalidate
+        autocomplete="on"
     >
         @csrf
 
-        {{-- ============================================================= --}}
-        {{-- 1. APPLICANT TYPE & PROGRAM                                   --}}
-        {{-- ============================================================= --}}
-
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 font-weight-bold">
-                    <i data-lucide="graduation-cap" class="text-primary mr-2"></i>
-                    Applicant Type & Program
-                </h5>
-                <small class="text-muted">
-                    Tell us what type of applicant you are and which program you intend to apply for.
-                </small>
+        {{-- ╔══════════════════════════════════════════════════╗
+             ║  STEP 1 — APPLICANT TYPE & PROGRAM              ║
+             ╚══════════════════════════════════════════════════╝ --}}
+        <div class="wiz-panel active" id="step-1">
+            <div class="wiz-panel-header">
+                <div class="wiz-panel-icon"><i data-lucide="graduation-cap"></i></div>
+                <div>
+                    <h2 class="wiz-panel-title">Applicant Type &amp; Program</h2>
+                    <p class="wiz-panel-sub">Tell us what type of applicant you are and which program you're applying for.</p>
+                </div>
             </div>
+            <div class="wiz-panel-body">
 
-            <div class="card-body">
-
-                <div class="row">
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="academic_status">
-                                Applicant Type
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <select
-                                name="academic_status"
-                                id="academic_status"
-                                class="form-control @error('academic_status') is-invalid @enderror"
-                                required
-                            >
-                                <option value="">Select applicant type</option>
-
-                                <option value="new_student"
-                                    {{ old('academic_status') === 'new_student' ? 'selected' : '' }}>
-                                    New Student / First Year
-                                </option>
-
-                                <option value="transferee"
-                                    {{ old('academic_status') === 'transferee' ? 'selected' : '' }}>
-                                    Transferee
-                                </option>
-
-                                <option value="shiftee"
-                                    {{ old('academic_status') === 'shiftee' ? 'selected' : '' }}>
-                                    Shiftee
-                                </option>
-
-                                <option value="returnee"
-                                    {{ old('academic_status') === 'returnee' ? 'selected' : '' }}>
-                                    Returnee / Readmitted
-                                </option>
-
-                                <option value="cross_enrollee"
-                                    {{ old('academic_status') === 'cross_enrollee' ? 'selected' : '' }}>
-                                    Cross-Enrollee
-                                </option>
-                            </select>
-
-                            @error('academic_status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field" id="field-academic_status">
+                        <label for="academic_status">Applicant Type <span class="req">*</span></label>
+                        <select name="academic_status" id="academic_status"
+                            class="wiz-input @error('academic_status') wiz-invalid @enderror"
+                            autocomplete="off" required>
+                            <option value="">Select applicant type</option>
+                            <option value="new_student"    {{ old('academic_status') === 'new_student'    ? 'selected' : '' }}>New Student / First Year</option>
+                            <option value="transferee"     {{ old('academic_status') === 'transferee'     ? 'selected' : '' }}>Transferee</option>
+                            <option value="shiftee"        {{ old('academic_status') === 'shiftee'        ? 'selected' : '' }}>Shiftee</option>
+                            <option value="returnee"       {{ old('academic_status') === 'returnee'       ? 'selected' : '' }}>Returnee / Readmitted</option>
+                            <option value="cross_enrollee" {{ old('academic_status') === 'cross_enrollee' ? 'selected' : '' }}>Cross-Enrollee</option>
+                        </select>
+                        @error('academic_status')
+                            <span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>
+                        @enderror
                     </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="program_id">
-                                Intended Program
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <select
-                                name="program_id"
-                                id="program_id"
-                                class="form-control @error('program_id') is-invalid @enderror"
-                                required
-                            >
-                                <option value="">Select program</option>
-
-                                @foreach ($programs as $program)
-                                    <option
-                                        value="{{ $program->id }}"
-                                        {{ old('program_id') == $program->id ? 'selected' : '' }}
-                                    >
-                                        {{ $program->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            @error('program_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <div class="wiz-field" id="field-program_id">
+                        <label for="program_id">Intended Program <span class="req">*</span></label>
+                        <select name="program_id" id="program_id"
+                            class="wiz-input @error('program_id') wiz-invalid @enderror"
+                            autocomplete="off" required>
+                            <option value="">Select program</option>
+                            @foreach ($programs as $program)
+                                <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>
+                                    {{ $program->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('program_id')
+                            <span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>
+                        @enderror
                     </div>
-
                 </div>
 
-                {{-- Cross-Enrollee Notice --}}
-                <div
-                    id="crossEnrolleeNotice"
-                    class="alert alert-info mb-0 d-none"
-                >
-                    <i data-lucide="info" class="mr-1"></i>
-
-                    <strong>Cross-Enrollee:</strong>
-                    Requirements for Cross-Enrollees are subject to confirmation
-                    by the Registrar's Office. Please proceed with your application,
-                    and the Registrar will provide further instructions.
+                <div id="crossEnrolleeNotice" class="wiz-inline-notice wiz-inline-notice--info d-none">
+                    <i data-lucide="info"></i>
+                    <div><strong>Cross-Enrollee:</strong> Requirements are subject to confirmation by the Registrar's Office. Please proceed — the Registrar will provide further instructions.</div>
                 </div>
 
             </div>
         </div>
 
 
-        {{-- ============================================================= --}}
-        {{-- 2. PERSONAL INFORMATION                                       --}}
-        {{-- ============================================================= --}}
-
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 font-weight-bold">
-                    <i data-lucide="id-card" class="text-primary mr-2"></i>
-                    Personal Information
-                </h5>
-                <small class="text-muted">
-                    Please provide your personal information accurately.
-                </small>
+        {{-- ╔══════════════════════════════════════════════════╗
+             ║  STEP 2 — PERSONAL INFORMATION                  ║
+             ╚══════════════════════════════════════════════════╝ --}}
+        <div class="wiz-panel" id="step-2">
+            <div class="wiz-panel-header">
+                <div class="wiz-panel-icon"><i data-lucide="user"></i></div>
+                <div>
+                    <h2 class="wiz-panel-title">Personal Information</h2>
+                    <p class="wiz-panel-sub">Please provide your personal details accurately.</p>
+                </div>
             </div>
+            <div class="wiz-panel-body">
 
-            <div class="card-body">
+                {{-- ── Name row: Last (Title prefix) | First | Middle (Suffix) ── --}}
+                <div class="wiz-row--name">
 
-                <div class="row">
-
-                    {{-- Last Name --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="last_name">
-                                Last Name
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="last_name"
-                                id="last_name"
-                                class="form-control @error('last_name') is-invalid @enderror"
-                                value="{{ old('last_name') }}"
-                                required
-                                placeholder="Dela Cruz"
-                            >
-
-                            @error('last_name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                    {{-- Last Name with Title fused to its left edge --}}
+                    <div class="wiz-field" id="field-last_name">
+                        <label for="last_name">Last Name <span class="req">*</span></label>
+                        <div class="name-group name-group--prefix @error('last_name') wiz-invalid @enderror">
+                            <select name="honorific" id="honorific"
+                                class="name-addon" autocomplete="honorific-prefix"
+                                title="Title / Honorific (optional)">
+                                <option value="">—</option>
+                                <option value="Mr."  {{ old('honorific') === 'Mr.'  ? 'selected' : '' }}>Mr.</option>
+                                <option value="Ms."  {{ old('honorific') === 'Ms.'  ? 'selected' : '' }}>Ms.</option>
+                                <option value="Mrs." {{ old('honorific') === 'Mrs.' ? 'selected' : '' }}>Mrs.</option>
+                                <option value="Dr."  {{ old('honorific') === 'Dr.'  ? 'selected' : '' }}>Dr.</option>
+                                <option value="Prof."{{ old('honorific') === 'Prof.'? 'selected' : '' }}>Prof.</option>
+                                <option value="Engr."{{ old('honorific') === 'Engr.'? 'selected' : '' }}>Engr.</option>
+                                <option value="Atty."{{ old('honorific') === 'Atty.'? 'selected' : '' }}>Atty.</option>
+                            </select>
+                            <input type="text" name="last_name" id="last_name" placeholder="Dela Cruz"
+                                class="wiz-input" value="{{ old('last_name') }}"
+                                autocomplete="family-name" required>
                         </div>
+                        @error('last_name')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                     </div>
 
-                    {{-- First Name --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="first_name">
-                                First Name
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="first_name"
-                                id="first_name"
-                                class="form-control @error('first_name') is-invalid @enderror"
-                                value="{{ old('first_name') }}"
-                                required
-                                placeholder="Juan"
-                            >
-
-                            @error('first_name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    {{-- First Name — plain, no addon --}}
+                    <div class="wiz-field" id="field-first_name">
+                        <label for="first_name">First Name <span class="req">*</span></label>
+                        <input type="text" name="first_name" id="first_name" placeholder="Juan"
+                            class="wiz-input @error('first_name') wiz-invalid @enderror"
+                            value="{{ old('first_name') }}"
+                            autocomplete="given-name" required>
+                        @error('first_name')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                     </div>
 
-                    {{-- Middle Name --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="middle_name">
-                                Middle Name
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="middle_name"
-                                id="middle_name"
-                                class="form-control @error('middle_name') is-invalid @enderror"
+                    {{-- Middle Name with Suffix fused to its right edge --}}
+                    <div class="wiz-field">
+                        <label for="middle_name">Middle Name <span class="opt">(Optional)</span></label>
+                        <div class="name-group name-group--suffix">
+                            <input type="text" name="middle_name" id="middle_name" placeholder="Santos"
+                                class="wiz-input @error('middle_name') wiz-invalid @enderror"
                                 value="{{ old('middle_name') }}"
-                                placeholder="Santos"
-                            >
-
-                            @error('middle_name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div class="row">
-
-                    {{-- Gender --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="gender">
-                                Gender
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <select
-                                name="gender"
-                                id="gender"
-                                class="form-control @error('gender') is-invalid @enderror"
-                                required
-                            >
-                                <option value="">Select gender</option>
-                                <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>
-                                    Male
-                                </option>
-                                <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>
-                                    Female
-                                </option>
+                                autocomplete="additional-name">
+                            <select name="suffix" id="suffix"
+                                class="name-addon" autocomplete="honorific-suffix"
+                                title="Suffix (optional)">
+                                <option value="">—</option>
+                                <option value="Jr."  {{ old('suffix') === 'Jr.'  ? 'selected' : '' }}>Jr.</option>
+                                <option value="Sr."  {{ old('suffix') === 'Sr.'  ? 'selected' : '' }}>Sr.</option>
+                                <option value="II"   {{ old('suffix') === 'II'   ? 'selected' : '' }}>II</option>
+                                <option value="III"  {{ old('suffix') === 'III'  ? 'selected' : '' }}>III</option>
+                                <option value="IV"   {{ old('suffix') === 'IV'   ? 'selected' : '' }}>IV</option>
                             </select>
-
-                            @error('gender')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
-                    </div>
-
-                    {{-- Birthdate --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="birthdate">
-                                Date of Birth
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <input
-                                type="date"
-                                name="birthdate"
-                                id="birthdate"
-                                class="form-control @error('birthdate') is-invalid @enderror"
-                                value="{{ old('birthdate') }}"
-                                required
-                            >
-
-                            @error('birthdate')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    {{-- Birth Place --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="birth_place">
-                                Place of Birth
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="birth_place"
-                                id="birth_place"
-                                class="form-control"
-                                value="{{ old('birth_place') }}"
-                                placeholder="City / Municipality, Province"
-                            >
-                        </div>
+                        @error('middle_name')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                     </div>
 
                 </div>
 
-
-                <div class="row">
-
-                    {{-- Religion --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="religion">
-                                Religion
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="religion"
-                                id="religion"
-                                class="form-control"
-                                value="{{ old('religion') }}"
-                                placeholder="Roman Catholic"
-                            >
-                        </div>
+                <div class="wiz-row wiz-row--3">
+                    <div class="wiz-field" id="field-gender">
+                        <label for="gender">Gender <span class="req">*</span></label>
+                        <select name="gender" id="gender"
+                            class="wiz-input @error('gender') wiz-invalid @enderror"
+                            autocomplete="sex" required>
+                            <option value="">Select gender</option>
+                            <option value="male"   {{ old('gender') === 'male'   ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
+                        </select>
+                        @error('gender')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                     </div>
-
-                    {{-- Nationality --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="nationality">
-                                Nationality
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="nationality"
-                                id="nationality"
-                                class="form-control"
-                                value="{{ old('nationality', 'Filipino') }}"
-                                placeholder="Filipino"
-                            >
-                        </div>
+                    <div class="wiz-field" id="field-birthdate">
+                        <label for="birthdate">Date of Birth <span class="req">*</span></label>
+                        <input type="date" name="birthdate" id="birthdate"
+                            class="wiz-input @error('birthdate') wiz-invalid @enderror"
+                            value="{{ old('birthdate') }}"
+                            autocomplete="bday" required>
+                        @error('birthdate')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                     </div>
-
-                    {{-- LRN --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="lrn">
-                                Learner Reference Number (LRN)
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="lrn"
-                                id="lrn"
-                                class="form-control"
-                                value="{{ old('lrn') }}"
-                                maxlength="12"
-                                placeholder="e.g. 136041123456"
-                            >
-
-                            <small class="form-text text-muted">
-                                Applicable primarily to learners from the basic education system.
-                            </small>
-                        </div>
+                    <div class="wiz-field">
+                        <label for="birth_place">Place of Birth <span class="opt">(Optional)</span></label>
+                        <input type="text" name="birth_place" id="birth_place"
+                            placeholder="e.g. Danao, Bohol"
+                            class="wiz-input" value="{{ old('birth_place') }}"
+                            autocomplete="off">
                     </div>
-
                 </div>
 
+                <div class="wiz-row wiz-row--3">
+                    <div class="wiz-field">
+                        <label for="religion">Religion <span class="opt">(Optional)</span></label>
+                        {{-- Combo: type-ahead via datalist, or pick from dropdown --}}
+                        <input type="text" name="religion" id="religion"
+                            list="religion-list"
+                            placeholder="e.g. Roman Catholic"
+                            class="wiz-input" value="{{ old('religion') }}"
+                            autocomplete="off">
+                        <datalist id="religion-list">
+                            <option value="Roman Catholic">
+                            <option value="Islam">
+                            <option value="Iglesia ni Cristo">
+                            <option value="Philippine Independent Church (Aglipayan)">
+                            <option value="Seventh-day Adventist">
+                            <option value="United Church of Christ in the Philippines">
+                            <option value="Christianity (Other)">
+                            <option value="Evangelical">
+                            <option value="Baptist">
+                            <option value="Born-Again Christian">
+                            <option value="Jehovah's Witnesses">
+                            <option value="The Church of Jesus Christ of Latter-day Saints">
+                            <option value="Buddhism">
+                            <option value="Hinduism">
+                            <option value="No Religion / Atheist / Agnostic">
+                            <option value="Prefer not to say">
+                        </datalist>
+                    </div>
+                    <div class="wiz-field">
+                        <label for="nationality">Nationality <span class="opt">(Optional)</span></label>
+                        <input type="text" name="nationality" id="nationality" placeholder="Filipino"
+                            class="wiz-input" value="{{ old('nationality', 'Filipino') }}"
+                            autocomplete="off">
+                    </div>
+                    <div class="wiz-field">
+                        <label for="lrn">LRN <span class="opt">(Optional)</span></label>
+                        <input type="text" name="lrn" id="lrn" placeholder="136041123456"
+                            class="wiz-input" value="{{ old('lrn') }}" maxlength="12"
+                            autocomplete="off">
+                        <span class="wiz-hint">Learner Reference Number — for DepEd graduates.</span>
+                    </div>
+                </div>
 
-                <div class="row">
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="marital_status">Marital Status <span class="opt">(Optional)</span></label>
+                        <select name="marital_status" id="marital_status" class="wiz-input" autocomplete="off">
+                            <option value="">Select status</option>
+                            <option value="single"   {{ old('marital_status') === 'single'   ? 'selected' : '' }}>Single</option>
+                            <option value="married"  {{ old('marital_status') === 'married'  ? 'selected' : '' }}>Married</option>
+                            <option value="divorced" {{ old('marital_status') === 'divorced' ? 'selected' : '' }}>Divorced</option>
+                            <option value="widowed"  {{ old('marital_status') === 'widowed'  ? 'selected' : '' }}>Widowed</option>
+                        </select>
+                    </div>
+                    <div class="wiz-field" id="spouseField">
+                        <label for="spouse_name">Spouse Name <span class="opt">(Optional)</span></label>
+                        <input type="text" name="spouse_name" id="spouse_name"
+                            placeholder="Spouse's full name"
+                            class="wiz-input" value="{{ old('spouse_name') }}"
+                            autocomplete="off">
+                    </div>
+                </div>
 
-                    {{-- Marital Status --}}
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="marital_status">
-                                Marital Status
-                                <small class="text-muted">(Optional)</small>
-                            </label>
+            </div>
+        </div>
 
-                            <select
-                                name="marital_status"
-                                id="marital_status"
-                                class="form-control"
-                            >
-                                <option value="">Select status</option>
-                                <option value="single" {{ old('marital_status') === 'single' ? 'selected' : '' }}>
-                                    Single
-                                </option>
-                                <option value="married" {{ old('marital_status') === 'married' ? 'selected' : '' }}>
-                                    Married
-                                </option>
-                                <option value="divorced" {{ old('marital_status') === 'divorced' ? 'selected' : '' }}>
-                                    Divorced
-                                </option>
-                                <option value="widowed" {{ old('marital_status') === 'widowed' ? 'selected' : '' }}>
-                                    Widowed
-                                </option>
+
+        {{-- ╔══════════════════════════════════════════════════╗
+             ║  STEP 3 — CONTACT INFORMATION                   ║
+             ╚══════════════════════════════════════════════════╝ --}}
+        <div class="wiz-panel" id="step-3">
+            <div class="wiz-panel-header">
+                <div class="wiz-panel-icon"><i data-lucide="phone"></i></div>
+                <div>
+                    <h2 class="wiz-panel-title">Contact Information</h2>
+                    <p class="wiz-panel-sub">Where can we reach you regarding your application?</p>
+                </div>
+            </div>
+            <div class="wiz-panel-body">
+
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field" id="field-email">
+                        <label for="email">Email Address <span class="req">*</span></label>
+                        <input type="email" name="email" id="email" placeholder="juandelacruz@email.com"
+                            class="wiz-input @error('email') wiz-invalid @enderror"
+                            value="{{ old('email') }}"
+                            autocomplete="email" required>
+                        @error('email')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
+                    </div>
+                    <div class="wiz-field">
+                        <label for="phone">Contact Number <span class="opt">(Optional)</span></label>
+                        <input type="text" name="phone" id="phone" placeholder="09XXXXXXXXX"
+                            class="wiz-input" value="{{ old('phone') }}"
+                            autocomplete="tel-national">
+                    </div>
+                </div>
+
+                {{-- ── Street / House address ─────────────────── --}}
+                <div class="wiz-field">
+                    <label for="current_address">House No., Street <span class="opt">(Optional)</span></label>
+                    <input type="text" name="current_address" id="current_address"
+                        placeholder="e.g. 12 Rizal Street, Poblacion"
+                        class="wiz-input" value="{{ old('current_address') }}"
+                        autocomplete="street-address">
+                </div>
+
+                {{-- ── Cascading PH location ──────────────────── --}}
+                {{--
+                    VISIBLE: 4 <select> dropdowns (Region → Province → City → Barangay)
+                    HIDDEN:  4 text inputs submitted to the server with human-readable names
+                    The JS cascade in application-wizard.js drives everything.
+                --}}
+
+                {{-- Hidden text inputs that the server actually receives --}}
+                <input type="hidden" name="region"   id="region_text"   value="{{ old('region') }}">
+                <input type="hidden" name="province" id="province_text" value="{{ old('province') }}">
+                <input type="hidden" name="city"     id="city_text"     value="{{ old('city') }}">
+                <input type="hidden" name="barangay" id="barangay_text" value="{{ old('barangay') }}">
+
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="addr_region">Region <span class="opt">(Optional)</span></label>
+                        <div class="loc-select-wrap loc-loading">
+                            <select id="addr_region" name="_addr_region" class="loc-select wiz-input"
+                                autocomplete="off" disabled>
+                                <option value="">Loading regions…</option>
                             </select>
                         </div>
                     </div>
-
-                    {{-- Spouse --}}
-                    <div
-                        class="col-md-8"
-                        id="spouseField"
-                    >
-                        <div class="form-group">
-                            <label for="spouse_name">
-                                Spouse Name
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="spouse_name"
-                                id="spouse_name"
-                                class="form-control"
-                                value="{{ old('spouse_name') }}"
-                                placeholder="Spouse's full name"
-                            >
+                    <div class="wiz-field">
+                        <label for="addr_province">Province <span class="opt">(Optional)</span></label>
+                        <div class="loc-select-wrap">
+                            <select id="addr_province" name="_addr_province" class="loc-select wiz-input"
+                                autocomplete="off" disabled>
+                                <option value="">Select province…</option>
+                            </select>
                         </div>
                     </div>
+                </div>
 
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="addr_city">City / Municipality <span class="opt">(Optional)</span></label>
+                        <div class="loc-select-wrap">
+                            <select id="addr_city" name="_addr_city" class="loc-select wiz-input"
+                                autocomplete="address-level2" disabled>
+                                <option value="">Select city / municipality…</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="wiz-field">
+                        <label for="addr_barangay">Barangay <span class="opt">(Optional)</span></label>
+                        <div class="loc-select-wrap">
+                            <select id="addr_barangay" name="_addr_barangay" class="loc-select wiz-input"
+                                autocomplete="off" disabled>
+                                <option value="">Select barangay…</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Postal code (auto-filled when city is picked, also editable) --}}
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="postal_code">Postal Code <span class="opt">(Optional)</span></label>
+                        <input type="text" name="postal_code" id="postal_code" placeholder="e.g. 6004"
+                            class="wiz-input" value="{{ old('postal_code') }}"
+                            autocomplete="postal-code" inputmode="numeric" maxlength="4">
+                        <span class="wiz-hint">Auto-filled when you select a city or barangay — you can edit it.</span>
+                    </div>
+                    <div class="wiz-field" style="max-width:220px">
+                        <label for="country">Country</label>
+                        <input type="text" name="country" id="country" placeholder="Philippines"
+                            class="wiz-input" value="{{ old('country', 'Philippines') }}"
+                            autocomplete="country-name">
+                    </div>
+                </div>
+
+                {{-- Address summary chip — shown by JS once all 4 selects are filled --}}
+                <div class="loc-summary" id="locSummary">
+                    <i data-lucide="map-pin"></i>
+                    <span id="locSummaryText"></span>
                 </div>
 
             </div>
         </div>
 
 
-        {{-- ============================================================= --}}
-        {{-- 3. CONTACT INFORMATION                                        --}}
-        {{-- ============================================================= --}}
-
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 font-weight-bold">
-                    <i data-lucide="book-user" class="text-primary mr-2"></i>
-                    Contact Information
-                </h5>
+        {{-- ╔══════════════════════════════════════════════════╗
+             ║  STEP 4 — FAMILY & OTHER INFORMATION            ║
+             ╚══════════════════════════════════════════════════╝ --}}
+        <div class="wiz-panel" id="step-4">
+            <div class="wiz-panel-header">
+                <div class="wiz-panel-icon"><i data-lucide="users"></i></div>
+                <div>
+                    <h2 class="wiz-panel-title">Family &amp; Other Information</h2>
+                    <p class="wiz-panel-sub">Optional — kept for the Registrar's records.</p>
+                </div>
             </div>
+            <div class="wiz-panel-body">
 
-            <div class="card-body">
+                <p class="wiz-group-label"><i data-lucide="heart"></i> Parent / Guardian</p>
 
-                <div class="row">
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="email">
-                                Email Address
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <input
-                                type="email"
-                                name="email"
-                                id="email"
-                                class="form-control @error('email') is-invalid @enderror"
-                                value="{{ old('email') }}"
-                                required
-                            >
-
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="father_name">Father's Name</label>
+                        <input type="text" name="father_name" id="father_name"
+                            placeholder="Father's full name" class="wiz-input"
+                            value="{{ old('father_name') }}" autocomplete="off">
                     </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="phone">
-                                Contact Number
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="phone"
-                                id="phone"
-                                class="form-control"
-                                value="{{ old('phone') }}"
-                                placeholder="09XXXXXXXXX"
-                            >
-                        </div>
+                    <div class="wiz-field">
+                        <label for="father_occupation">Father's Occupation</label>
+                        <input type="text" name="father_occupation" id="father_occupation"
+                            placeholder="e.g. Driver, Farmer, OFW" class="wiz-input"
+                            value="{{ old('father_occupation') }}" autocomplete="off">
                     </div>
-
                 </div>
 
-
-                <div class="form-group">
-                    <label for="current_address">
-                        Current Address
-                        <small class="text-muted">(Optional)</small>
-                    </label>
-
-                    <input
-                        type="text"
-                        name="current_address"
-                        id="current_address"
-                        class="form-control"
-                        value="{{ old('current_address') }}"
-                        placeholder="House No., Street, Barangay"
-                    >
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="mother_name">Mother's Name</label>
+                        <input type="text" name="mother_name" id="mother_name"
+                            placeholder="Mother's full name" class="wiz-input"
+                            value="{{ old('mother_name') }}" autocomplete="off">
+                    </div>
+                    <div class="wiz-field">
+                        <label for="mother_occupation">Mother's Occupation</label>
+                        <input type="text" name="mother_occupation" id="mother_occupation"
+                            placeholder="e.g. Housewife, Teacher, OFW" class="wiz-input"
+                            value="{{ old('mother_occupation') }}" autocomplete="off">
+                    </div>
                 </div>
 
-
-                <div class="row">
-
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="city">City / Municipality</label>
-
-                            <input
-                                type="text"
-                                name="city"
-                                id="city"
-                                class="form-control"
-                                value="{{ old('city') }}"
-                                placeholder="Danao City"
-                            >
-                        </div>
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="parent_address">Parent's Address</label>
+                        <input type="text" name="parent_address" id="parent_address"
+                            placeholder="Same as current address, if applicable" class="wiz-input"
+                            value="{{ old('parent_address') }}" autocomplete="off">
                     </div>
-
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="province">Province</label>
-
-                            <input
-                                type="text"
-                                name="province"
-                                id="province"
-                                class="form-control"
-                                value="{{ old('province') }}"
-                                placeholder="Cebu"
-                            >
-                        </div>
+                    <div class="wiz-field">
+                        <label for="parent_contact">Parent's Contact</label>
+                        <input type="text" name="parent_contact" id="parent_contact"
+                            placeholder="09XXXXXXXXX" class="wiz-input"
+                            value="{{ old('parent_contact') }}" autocomplete="off">
                     </div>
+                </div>
 
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label for="postal_code">Postal Code</label>
+                <div class="wiz-divider"></div>
+                <p class="wiz-group-label"><i data-lucide="clipboard-list"></i> Other Details</p>
 
-                            <input
-                                type="text"
-                                name="postal_code"
-                                id="postal_code"
-                                class="form-control"
-                                value="{{ old('postal_code') }}"
-                                placeholder="6004"
-                            >
-                        </div>
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="occupation">Occupation <span class="opt">(Optional)</span></label>
+                        <input type="text" name="occupation" id="occupation"
+                            placeholder="e.g. Student, Employed, Self-employed" class="wiz-input"
+                            value="{{ old('occupation') }}" autocomplete="organization-title">
                     </div>
-
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label for="country">Country</label>
-
-                            <input
-                                type="text"
-                                name="country"
-                                id="country"
-                                class="form-control"
-                                value="{{ old('country', 'Philippines') }}"
-                                placeholder="Philippines"
-                            >
-                        </div>
+                    <div class="wiz-field">
+                        <label for="disability">Disability <span class="opt">(Optional)</span></label>
+                        <input type="text" name="disability" id="disability"
+                            placeholder="If applicable" class="wiz-input"
+                            value="{{ old('disability') }}" autocomplete="off">
                     </div>
+                </div>
 
+                <div class="wiz-field d-none" id="pwdIdField" style="max-width:360px">
+                    <label for="pwd_id">PWD ID Number <span class="opt">(Optional)</span></label>
+                    <input type="text" name="pwd_id" id="pwd_id"
+                        placeholder="PWD ID number, if applicable" class="wiz-input"
+                        value="{{ old('pwd_id') }}" autocomplete="off">
                 </div>
 
             </div>
         </div>
 
 
-        {{-- ============================================================= --}}
-        {{-- 4. FAMILY / PARENT INFORMATION                                --}}
-        {{-- ============================================================= --}}
-
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 font-weight-bold">
-                    <i data-lucide="users" class="text-primary mr-2"></i>
-                    Family / Parent Information
-                </h5>
-                <small class="text-muted">
-                    Optional information for the Registrar's records.
-                </small>
+        {{-- ╔══════════════════════════════════════════════════╗
+             ║  STEP 5 — DOCUMENTS + REVIEW + SUBMIT           ║
+             ╚══════════════════════════════════════════════════╝ --}}
+        <div class="wiz-panel" id="step-5">
+            <div class="wiz-panel-header">
+                <div class="wiz-panel-icon"><i data-lucide="file-up"></i></div>
+                <div>
+                    <h2 class="wiz-panel-title">Supporting Documents &amp; Submit</h2>
+                    <p class="wiz-panel-sub">Optional digital uploads for preliminary screening. Review everything before submitting.</p>
+                </div>
             </div>
-
-            <div class="card-body">
-
-                <div class="row">
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="father_name">Father's Name</label>
-
-                            <input
-                                type="text"
-                                name="father_name"
-                                id="father_name"
-                                class="form-control"
-                                value="{{ old('father_name') }}"
-                                placeholder="Father's full name"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="father_occupation">Father's Occupation</label>
-
-                            <input
-                                type="text"
-                                name="father_occupation"
-                                id="father_occupation"
-                                class="form-control"
-                                value="{{ old('father_occupation') }}"
-                                placeholder="e.g. Driver, Farmer, OFW"
-                            >
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div class="row">
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="mother_name">Mother's Name</label>
-
-                            <input
-                                type="text"
-                                name="mother_name"
-                                id="mother_name"
-                                class="form-control"
-                                value="{{ old('mother_name') }}"
-                                placeholder="Mother's full name"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="mother_occupation">Mother's Occupation</label>
-
-                            <input
-                                type="text"
-                                name="mother_occupation"
-                                id="mother_occupation"
-                                class="form-control"
-                                value="{{ old('mother_occupation') }}"
-                                placeholder="e.g. Housewife, Teacher, OFW"
-                            >
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div class="row">
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="parent_address">Parent's Address</label>
-
-                            <input
-                                type="text"
-                                name="parent_address"
-                                id="parent_address"
-                                class="form-control"
-                                value="{{ old('parent_address') }}"
-                                placeholder="Same as current address, if applicable"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="parent_contact">Parent's Contact</label>
-
-                            <input
-                                type="text"
-                                name="parent_contact"
-                                id="parent_contact"
-                                class="form-control"
-                                value="{{ old('parent_contact') }}"
-                                placeholder="09XXXXXXXXX"
-                            >
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-
-
-        {{-- ============================================================= --}}
-        {{-- 5. OTHER INFORMATION                                           --}}
-        {{-- ============================================================= --}}
-
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 font-weight-bold">
-                    <i data-lucide="clipboard-list" class="text-primary mr-2"></i>
-                    Other Information
-                </h5>
-            </div>
-
-            <div class="card-body">
-
-                <div class="row">
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="occupation">
-                                Occupation
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="occupation"
-                                id="occupation"
-                                class="form-control"
-                                value="{{ old('occupation') }}"
-                                placeholder="e.g. Student, Employed, Self-employed"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="disability">
-                                Disability
-                                <small class="text-muted">(Optional)</small>
-                            </label>
-
-                            <input
-                                type="text"
-                                name="disability"
-                                id="disability"
-                                class="form-control"
-                                value="{{ old('disability') }}"
-                                placeholder="If applicable"
-                            >
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="form-group d-none"
-                    id="pwdIdField"
-                >
-                    <label for="pwd_id">
-                        PWD ID Number
-                        <small class="text-muted">(Optional)</small>
-                    </label>
-
-                    <input
-                        type="text"
-                        name="pwd_id"
-                        id="pwd_id"
-                        class="form-control"
-                        value="{{ old('pwd_id') }}"
-                        placeholder="PWD ID number, if applicable"
-                    >
-                </div>
-
-            </div>
-        </div>
-
-
-        {{-- ============================================================= --}}
-        {{-- 6. SUPPORTING DOCUMENTS                                       --}}
-        {{-- ============================================================= --}}
-
-        <div
-            class="card shadow-sm border-0 mb-4"
-            id="documentsCard"
-        >
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 font-weight-bold">
-                    <i data-lucide="file-up" class="text-primary mr-2"></i>
-                    Supporting Documents
-                </h5>
-
-                <small class="text-muted">
-                    Optional digital uploads for preliminary screening.
-                </small>
-            </div>
-
-            <div class="card-body">
-
-                <div
-                    id="noDocumentNotice"
-                    class="alert alert-secondary mb-0"
-                >
-                    <i data-lucide="info" class="mr-1"></i>
-                    Select your applicant type above to see the applicable
-                    document uploads.
-                </div>
-
-
-                {{-- New Student --}}
-                <div
-                    class="document-section d-none"
-                    data-type="new_student"
-                >
-
-                    <div class="alert alert-info">
-                        <strong>New Student / First Year</strong>
-                        <br>
-                        The following documents may be uploaded for preliminary screening.
-                        Uploading them is optional.
-                    </div>
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'form_138',
-                        'label' => 'Form 138 or Equivalent',
-                        'description' => 'Issued by your originating school.'
-                    ])
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'good_moral_certificate',
-                        'label' => 'Certificate of Good Moral Character',
-                        'description' => 'Issued by your originating school.'
-                    ])
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'birth_certificate',
-                        'label' => 'PSA Birth Certificate',
-                        'description' => 'Digital copy for preliminary screening.'
-                    ])
-
-                </div>
-
-
-                {{-- Transferee --}}
-                <div
-                    class="document-section d-none"
-                    data-type="transferee"
-                >
-
-                    <div class="alert alert-info">
-                        <strong>Transferee</strong>
-                        <br>
-                        The following documents may be uploaded for preliminary screening.
-                        Uploading them is optional.
-                    </div>
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'transfer_credentials',
-                        'label' => 'Certificate of Transfer Credentials',
-                        'description' => 'Issued by your originating school.'
-                    ])
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'transcript_of_records',
-                        'label' => 'Transcript of Records',
-                        'description' => 'For preliminary evaluation.'
-                    ])
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'good_moral_certificate',
-                        'label' => 'Certificate of Good Moral Character',
-                        'description' => 'Issued by your originating school.'
-                    ])
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'birth_certificate',
-                        'label' => 'PSA Birth Certificate',
-                        'description' => 'Digital copy for preliminary screening.'
-                    ])
-
-                </div>
-
-
-                {{-- Shiftee --}}
-                <div
-                    class="document-section d-none"
-                    data-type="shiftee"
-                >
-                    <div class="alert alert-secondary mb-0">
-                        <i data-lucide="info" class="mr-1"></i>
-                        No digital document upload is required at this
-                        pre-enrollment stage for Shiftees.
-                        The Registrar's Office will provide further instructions.
-                    </div>
-                </div>
-
-
-                {{-- Returnee --}}
-                <div
-                    class="document-section d-none"
-                    data-type="returnee"
-                >
-                    <div class="alert alert-secondary mb-0">
-                        <i data-lucide="info" class="mr-1"></i>
-                        No additional digital document upload is required at this
-                        pre-enrollment stage for Returnees / Readmitted students.
-                        The Registrar's Office will provide further instructions.
-                    </div>
-                </div>
-
-
-                {{-- Cross-Enrollee --}}
-                <div
-                    class="document-section d-none"
-                    data-type="cross_enrollee"
-                >
-                    <div class="alert alert-info mb-0">
-                        <i data-lucide="info" class="mr-1"></i>
-
-                        <strong>Cross-Enrollee:</strong>
-                        Requirements are subject to confirmation by the Registrar's Office.
-                        Please proceed with your application, and the Registrar will provide
-                        further instructions.
-                    </div>
-                </div>
-
-
-                {{-- Marriage Certificate --}}
-                <div
-                    id="marriageDocument"
-                    class="mt-4 d-none"
-                >
-                    <hr>
-
-                    <h6 class="font-weight-bold">
-                        <i data-lucide="bell-ring" class="mr-1"></i>
-                        Marriage Certificate
-                    </h6>
-
-                    <p class="text-muted small">
-                        Applicable only to married applicants.
-                        This upload is optional and intended for preliminary screening.
-                    </p>
-
-                    @include('public.application.partials.document-input', [
-                        'name' => 'marriage_certificate',
-                        'label' => 'Marriage Certificate (PSA)',
-                        'description' => 'Upload if applicable.'
-                    ])
-                </div>
-
-            </div>
-        </div>
-
-
-        {{-- ============================================================= --}}
-        {{-- 7. PHYSICAL REQUIREMENTS                                      --}}
-        {{-- ============================================================= --}}
-
-        <div
-            id="physicalRequirementsCard"
-            class="card shadow-sm border-0 mb-4 d-none"
-        >
-
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 font-weight-bold">
-                    <i data-lucide="folder-open" class="text-primary mr-2"></i>
-                    Physical Requirements
-                </h5>
-
-                <small class="text-muted">
-                    Please prepare these requirements for physical verification
-                    at the Registrar's Office.
-                </small>
-            </div>
-
-            <div class="card-body">
-
-                <div class="alert alert-warning">
-                    <i data-lucide="alert-triangle" class="mr-1"></i>
-                    These physical requirements apply regardless of whether
-                    you uploaded a digital copy above.
-                </div>
-
-                <ul
-                    id="physicalRequirementsList"
-                    class="mb-0 pl-4"
-                ></ul>
-
-            </div>
-        </div>
-
-
-        {{-- ============================================================= --}}
-        {{-- 8. FINAL NOTICE + SUBMIT                                      --}}
-        {{-- ============================================================= --}}
-
-        <div class="card shadow-sm border-0 mb-5">
-
-            <div class="card-body">
-
-                <div class="alert alert-warning border-0">
-                    <i data-lucide="info" class="mr-1"></i>
-
-                    <strong>Important:</strong>
-                    Uploaded documents are for preliminary screening only.
-                    You must still present the required original/physical documents
-                    to the Registrar's Office for verification before official enrollment.
-                </div>
-
-                <div class="custom-control custom-checkbox mb-4">
-                    <input
-                        type="checkbox"
-                        class="custom-control-input"
-                        id="acknowledgement"
-                        required
-                    >
-
-                    <label
-                        class="custom-control-label"
-                        for="acknowledgement"
-                    >
-                        I understand that submission of this application does not
-                        constitute official enrollment and that I may still be required
-                        to present the original physical requirements to the Registrar's Office.
-                    </label>
-                </div>
-
-                <div class="d-flex justify-content-end">
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary btn-lg px-4"
-                        id="submitButton"
-                    >
-                        <i data-lucide="send" class="mr-1"></i>
-                        Submit Application
+            <div class="wiz-panel-body">
+
+                {{-- ── Tab Navigation ─────────────────────────────── --}}
+                <div class="doc-tabs" role="tablist">
+                    <button type="button" class="doc-tab-btn active"
+                        data-tab="uploads" role="tab" aria-selected="true">
+                        <i data-lucide="upload-cloud"></i> Upload Documents
                     </button>
+                    <button type="button" class="doc-tab-btn"
+                        data-tab="checklist" role="tab" aria-selected="false">
+                        <i data-lucide="clipboard-check"></i> Requirements Checklist
+                    </button>
+                </div>
 
+                {{-- ── Tab Panel: Upload Documents ─────────────────── --}}
+                <div class="doc-tab-panel active" data-tab-panel="uploads" role="tabpanel">
+
+                    <div id="noDocumentNotice" class="wiz-inline-notice wiz-inline-notice--neutral">
+                        <i data-lucide="info"></i>
+                        <span>Select your applicant type in Step 1 to see the applicable document uploads.</span>
+                    </div>
+
+                    {{-- New Student --}}
+                    <div class="document-section d-none" data-type="new_student">
+                        <div class="wiz-inline-notice wiz-inline-notice--info" style="margin-bottom:16px">
+                            <i data-lucide="info"></i>
+                            <div><strong>New Student / First Year</strong> — documents below are optional for preliminary screening.</div>
+                        </div>
+                        @include('public.application.partials.document-input', ['name'=>'form_138','label'=>'Form 138 or Equivalent','description'=>'Issued by your originating school.'])
+                        @include('public.application.partials.document-input', ['name'=>'good_moral_certificate','label'=>'Certificate of Good Moral Character','description'=>'Issued by your originating school.'])
+                        @include('public.application.partials.document-input', ['name'=>'birth_certificate','label'=>'PSA Birth Certificate','description'=>'Digital copy for preliminary screening.'])
+                    </div>
+
+                    {{-- Transferee --}}
+                    <div class="document-section d-none" data-type="transferee">
+                        <div class="wiz-inline-notice wiz-inline-notice--info" style="margin-bottom:16px">
+                            <i data-lucide="info"></i>
+                            <div><strong>Transferee</strong> — documents below are optional for preliminary screening.</div>
+                        </div>
+                        @include('public.application.partials.document-input', ['name'=>'transfer_credentials','label'=>'Certificate of Transfer Credentials','description'=>'Issued by your originating school.'])
+                        @include('public.application.partials.document-input', ['name'=>'transcript_of_records','label'=>'Transcript of Records','description'=>'For preliminary evaluation.'])
+                        @include('public.application.partials.document-input', ['name'=>'good_moral_certificate','label'=>'Certificate of Good Moral Character','description'=>'Issued by your originating school.'])
+                        @include('public.application.partials.document-input', ['name'=>'birth_certificate','label'=>'PSA Birth Certificate','description'=>'Digital copy for preliminary screening.'])
+                    </div>
+
+                    {{-- Shiftee --}}
+                    <div class="document-section d-none" data-type="shiftee">
+                        <div class="wiz-inline-notice wiz-inline-notice--neutral">
+                            <i data-lucide="info"></i>
+                            <span>No document upload required for Shiftees at this stage. The Registrar's Office will provide further instructions.</span>
+                        </div>
+                    </div>
+
+                    {{-- Returnee --}}
+                    <div class="document-section d-none" data-type="returnee">
+                        <div class="wiz-inline-notice wiz-inline-notice--neutral">
+                            <i data-lucide="info"></i>
+                            <span>No additional document upload required for Returnees. The Registrar's Office will provide further instructions.</span>
+                        </div>
+                    </div>
+
+                    {{-- Cross-Enrollee --}}
+                    <div class="document-section d-none" data-type="cross_enrollee">
+                        <div class="wiz-inline-notice wiz-inline-notice--info">
+                            <i data-lucide="info"></i>
+                            <div><strong>Cross-Enrollee:</strong> Requirements are subject to confirmation by the Registrar's Office.</div>
+                        </div>
+                    </div>
+
+                    {{-- Marriage Certificate --}}
+                    <div id="marriageDocument" class="d-none" style="margin-top:20px">
+                        <div class="wiz-divider"></div>
+                        <p class="wiz-group-label"><i data-lucide="bell-ring"></i> Marriage Certificate</p>
+                        <p style="font-size:13px;color:#64748b;margin:-8px 0 14px">Applicable only to married applicants. Upload is optional.</p>
+                        @include('public.application.partials.document-input', ['name'=>'marriage_certificate','label'=>'Marriage Certificate (PSA)','description'=>'Upload if applicable.'])
+                    </div>
+
+                </div>{{-- end uploads tab panel --}}
+
+                {{-- ── Tab Panel: Requirements Checklist ──────────── --}}
+                <div class="doc-tab-panel" data-tab-panel="checklist" role="tabpanel">
+
+                    <div id="physicalRequirementsCard" class="wiz-reqs">
+                        <div class="wiz-reqs-header">
+                            <i data-lucide="folder-open"></i>
+                            Physical Requirements to Bring
+                        </div>
+                        <p class="wiz-reqs-sub">
+                            These must be presented at the Registrar's Office regardless of digital uploads.
+                            Tick each item off as you prepare it — this checklist is for your reference only.
+                        </p>
+                        <ul id="physicalRequirementsList" class="wiz-reqs-checklist">
+                            <li>
+                                <span class="wiz-reqs-empty">
+                                    Select your applicant type in Step 1 to see the requirements list.
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>{{-- end checklist tab panel --}}
+
+
+            </div>
+        </div>
+
+        {{-- ╔══════════════════════════════════════════════════╗
+             ║  STEP 6 — REVIEW & SUBMIT                        ║
+             ╚══════════════════════════════════════════════════╝ --}}
+        <div class="wiz-panel" id="step-6">
+            <div class="wiz-panel-header">
+                <div class="wiz-panel-icon"><i data-lucide="clipboard-check"></i></div>
+                <div>
+                    <h2 class="wiz-panel-title">Review Your Application</h2>
+                    <p class="wiz-panel-sub">Please check all your details carefully before submitting.</p>
+                </div>
+            </div>
+            <div class="wiz-panel-body">
+
+                {{-- ── Review Summary (populated by JS buildReview()) ── --}}
+                <div id="reviewSummary" class="rev-summary">
+                    <div class="rev-loading">
+                        <i data-lucide="loader"></i> Loading your summary…
+                    </div>
+                </div>
+
+                <div class="wiz-divider"></div>
+
+                {{-- ── Simple Acknowledgement with Clickable Links ── --}}
+                <div class="simple-ack-bar">
+                    <label class="simple-ack-label" for="ack_enrollment">
+                        <input type="checkbox" id="ack_enrollment" name="ack_enrollment"
+                            class="consent-chk" required>
+                        <span class="consent-check-box"></span>
+                        <span class="simple-ack-text">
+                            By clicking "Submit Application", you agree to our <a href="#" class="simple-ack-link" id="openTermsModal">Terms</a> and have read our <a href="#" class="simple-ack-link" id="openPrivacyModal">Privacy Policy</a>.
+                        </span>
+                    </label>
+
+                    {{-- Single hidden ack field for server --}}
+                    <input type="hidden" name="ack_privacy" id="ack_privacy" value="1">
+                    <input type="hidden" name="acknowledgement" id="acknowledgement" value="">
+
+                    <div class="wiz-err-msg d-none" id="ackError" style="margin-top:10px">
+                        <i data-lucide="alert-circle"></i> You must agree to the terms and privacy policy before submitting.
+                    </div>
                 </div>
 
             </div>
+        </div>
+
+        {{-- ── Wizard Navigation ────────────────────────────────────── --}}
+        <div class="wiz-nav">
+            <button type="button" class="wiz-btn wiz-btn--ghost" id="wizPrev" style="visibility:hidden">
+                <i data-lucide="arrow-left"></i> Previous
+            </button>
+            <button type="button" class="wiz-btn wiz-btn--primary" id="wizNext">
+                Next <i data-lucide="arrow-right"></i>
+            </button>
+            <button type="button" class="wiz-btn wiz-btn--submit d-none" id="wizSubmit">
+                <i data-lucide="send"></i> Submit Application
+            </button>
         </div>
 
     </form>
 
-</div>
-
+    {{-- ── Submit Confirmation Modal ────────────────────────────────────── --}}
+    <div class="confirm-modal-overlay" id="confirmModal">
+        <div class="confirm-modal">
+            <div class="confirm-modal-header">
+                <div class="confirm-modal-icon">
+                    <i data-lucide="alert-circle"></i>
+                </div>
+                <h3 class="confirm-modal-title">Confirm Submission</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p>Are you sure you want to submit your pre-enrollment application?</p>
+                <p class="confirm-modal-sub">Please review all information carefully before confirming. Once submitted, you cannot make changes.</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button type="button" class="wiz-btn wiz-btn--ghost" id="confirmCancel">
+                    Cancel
+                </button>
+                <button type="button" class="wiz-btn wiz-btn--primary" id="confirmSubmit">
+                    <i data-lucide="send"></i> Yes, Submit Application
+                </button>
+            </div>
+        </div>
     </div>
-@stop
 
+    {{-- ── Privacy Policy Modal ────────────────────────────────────── --}}
+    <div class="privacy-modal-overlay" id="privacyModal">
+        <div class="privacy-modal">
+            <div class="privacy-modal-header">
+                <h3 class="privacy-modal-title">Privacy Policy</h3>
+            </div>
+            <div class="privacy-modal-body">
+                <p>
+                    We take your privacy seriously. When you fill out this enrollment form, you're sharing personal information with Danao Technological College (DTC). This notice explains what we collect, why we need it, and how we keep it safe. This follows the Data Privacy Act of 2012 (RA 10173).
+                </p>
 
-@section('styles')
+                <div class="privacy-section">
+                    <h4>What we collect</h4>
+                    <p>Your name, birthdate, address, phone number, family information, academic records, and the documents you upload here. Only what you choose to share with us.</p>
+                </div>
 
-<style>
+                <div class="privacy-section">
+                    <h4>Why we need it</h4>
+                    <p>To process your enrollment, verify your credentials, send you updates about your application, and maintain your official student records as required by CHED.</p>
+                </div>
 
-    .card {
-        border-radius: 12px;
-    }
-    .card-header {
-        padding: 1rem 1.25rem;
-    }
-    .card-body {
-        padding: 1.5rem;
-    }
-    .form-control {
-        border-radius: 8px;
-        min-height: 42px;
-    }
-    .form-control:focus {
-        box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.12);
-    }
-    .physical-requirement-item {
-        margin-bottom: 0.5rem;
-    }
+                <div class="privacy-section">
+                    <h4>How we protect it</h4>
+                    <p>Your information stays with DTC. Only our staff who need it for your enrollment can access it. We don't sell your data to anyone, and we won't share it without your permission.</p>
+                </div>
 
-    /* -- Page header ----------------------------------------- */
-    .back-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        white-space: nowrap;
-    }
+                <div class="privacy-section">
+                    <h4>Your rights</h4>
+                    <p>You can ask to see, correct, or delete your information anytime. Just visit the Registrar's Office. If you have concerns, you can also contact the National Privacy Commission at complaints@privacy.gov.ph.</p>
+                </div>
+            </div>
+            <div class="privacy-modal-footer">
+                <button type="button" class="wiz-btn wiz-btn--primary" id="closePrivacyModal">
+                    I Understand
+                </button>
+            </div>
+        </div>
+    </div>
 
-    /* -- Document upload ----------------------------------- */
-    .document-input {
-        border: 1px solid #dee2e6;
-        border-radius: 10px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        background: #fafafa;
-    }
-    .document-input:last-child {
-        margin-bottom: 0;
-    }
-    .document-input label {
-        font-weight: 600;
-    }
+    {{-- ── Terms Modal ────────────────────────────────────── --}}
+    <div class="privacy-modal-overlay" id="termsModal">
+        <div class="privacy-modal">
+            <div class="privacy-modal-header">
+                <h3 class="privacy-modal-title">Terms of Service</h3>
+            </div>
+            <div class="privacy-modal-body">
+                <div class="privacy-section">
+                    <h4>About this form</h4>
+                    <p>This is a preliminary application - it doesn't guarantee admission. You'll still need to bring your original documents to the Registrar's Office. We review all applications and may reject those with incorrect information.</p>
+                </div>
 
-    .document-input-control {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        border: 1.5px dashed #cbd5e1;
-        border-radius: 8px;
-        padding: 0.6rem 0.75rem;
-        background: #ffffff;
-        position: relative;
-        transition: border-color 0.2s ease, background 0.2s ease;
-    }
-    .document-input-control:focus-within {
-        border-color: #0F4CDB;
-        border-style: solid;
-        box-shadow: 0 0 0 0.15rem rgba(15, 76, 219, 0.12);
-    }
-    .document-input-control.is-invalid {
-        border-color: #dc3545;
-        border-style: solid;
-    }
-    .document-input-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        margin: 0;
-        padding: 0.45rem 0.9rem;
-        background: #eef2f7;
-        border: 1px solid #d7dee7;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #334155;
-        cursor: pointer;
-        white-space: nowrap;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    .document-input-control:focus-within .document-input-btn {
-        background: #dbe6ff;
-        color: #0F4CDB;
-    }
-    .document-input-filename {
-        flex: 1 1 160px;
-        min-width: 0;
-        font-size: 0.85rem;
-        color: #94A3B8;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .document-input-control.has-file .document-input-filename {
-        color: #1E293B;
-        font-weight: 500;
-    }
-    .document-input-file {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-        margin: 0;
-    }
+                <div class="privacy-section">
+                    <h4>Your responsibilities</h4>
+                    <p>By submitting this form, you certify that all information provided is true and accurate to the best of your knowledge. You agree to provide original documents when requested by the Registrar's Office.</p>
+                </div>
 
-    /* -- Dark mode ------------------------------------------ */
-    body.dtc-dark .document-input {
-        background: var(--dtc-surface-soft, #1E293B);
-        border-color: var(--dtc-border, #334155);
-    }
-    body.dtc-dark .document-input-control {
-        background: var(--dtc-surface, #111827);
-        border-color: #475569;
-    }
-    body.dtc-dark .document-input-control:focus-within {
-        border-color: #6C9BFF;
-        box-shadow: 0 0 0 0.15rem rgba(108, 155, 255, 0.18);
-    }
-    body.dtc-dark .document-input-btn {
-        background: #334155;
-        border-color: #475569;
-        color: #E2E8F0;
-    }
-    body.dtc-dark .document-input-control:focus-within .document-input-btn {
-        background: #3B4F72;
-        color: #BFD3FF;
-    }
-    body.dtc-dark .document-input-filename {
-        color: #64748B;
-    }
-    body.dtc-dark .document-input-control.has-file .document-input-filename {
-        color: #F8FAFC;
-    }
+                <div class="privacy-section">
+                    <h4>Data collection</h4>
+                    <p>You consent to the collection and processing of your personal information as described in our Privacy Policy. This includes providing accurate and complete information for enrollment purposes.</p>
+                </div>
 
-    /* -- Mobile / responsive polish ------------------------- */
-    @media (max-width: 575.98px) {
-        .card-body {
-            padding: 1.1rem;
-        }
-        .card-header {
-            padding: 0.85rem 1.1rem;
-        }
-        .document-input {
-            padding: 0.85rem;
-        }
-        .document-input-btn {
-            width: 100%;
-            justify-content: center;
-        }
-        .document-input-filename {
-            flex-basis: 100%;
-            text-align: center;
-        }
-        .page-header-actions {
-            flex-shrink: 0;
-        }
-        .back-btn {
-            padding: 0.5rem 0.65rem;
-            gap: 0;
-        }
-        .back-btn-label {
-            display: none;
-        }
-        .back-btn i {
-            margin: 0;
-        }
-    }
-</style>
-
+                <div class="privacy-section">
+                    <h4>Changes to terms</h4>
+                    <p>DTC reserves the right to update these terms as needed. Continued use of our enrollment system constitutes acceptance of any changes.</p>
+                </div>
+            </div>
+            <div class="privacy-modal-footer">
+                <button type="button" class="wiz-btn wiz-btn--primary" id="closeTermsModal">
+                    I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @stop
 
 
 @section('scripts')
-
+<script src="{{ asset('js/application-wizard.js') }}" defer></script>
 <script>
-
-document.addEventListener('DOMContentLoaded', function () {
-
-    // Custom "Choose File" control: reflect the selected filename and
-    // forward clicks on the styled button to the (visually hidden)
-    // native file input so it still opens the OS file picker.
-    document.querySelectorAll('.document-input-file').forEach(function (input) {
-        const wrap = input.closest('.document-input-control');
-        const filenameEl = wrap ? wrap.querySelector('.document-input-filename') : null;
-
-        input.addEventListener('change', function () {
-            if (!filenameEl) return;
-            if (input.files && input.files.length > 0) {
-                filenameEl.textContent = input.files[0].name;
-                wrap.classList.add('has-file');
-            } else {
-                filenameEl.textContent = filenameEl.dataset.placeholder || 'No file chosen';
-                wrap.classList.remove('has-file');
-            }
-        });
+    /* Tell the wizard which step to open first.
+       Runs after application-wizard.js because it is defer-loaded
+       but this inline script runs after DOMContentLoaded as well. */
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window._wizGoTo) {
+            @if ($errors->any())
+                window._wizGoTo(5, true);
+            @else
+                window._wizGoTo(1, true);
+            @endif
+        }
     });
-
-    const applicantType = document.getElementById('academic_status');
-    const maritalStatus = document.getElementById('marital_status');
-    const disability = document.getElementById('disability');
-
-    const documentSections =
-        document.querySelectorAll('.document-section');
-
-    const noDocumentNotice =
-        document.getElementById('noDocumentNotice');
-
-    const marriageDocument =
-        document.getElementById('marriageDocument');
-
-    const spouseField =
-        document.getElementById('spouseField');
-
-    const pwdIdField =
-        document.getElementById('pwdIdField');
-
-    const crossEnrolleeNotice =
-        document.getElementById('crossEnrolleeNotice');
-
-    const physicalRequirementsCard =
-        document.getElementById('physicalRequirementsCard');
-
-    const physicalRequirementsList =
-        document.getElementById('physicalRequirementsList');
-
-
-    /*
-     * Physical requirements confirmed by the Registrar.
-     */
-    const physicalRequirements = {
-
-        new_student: [
-            'Form 138 or equivalent - original/required physical copy',
-            'Certificate of Good Moral Character - original/required physical copy',
-            'PSA Birth Certificate - required physical copy',
-            'Marriage Certificate - if applicable',
-            '2 copies recent 2x2 picture',
-            '2 copies recent 1x1 picture',
-            '2 pcs Long Brown Envelope'
-        ],
-
-        transferee: [
-            'Certificate of Transfer Credentials',
-            'Transcript of Records',
-            'Certificate of Good Moral Character',
-            'PSA Birth Certificate',
-            'Marriage Certificate - if applicable',
-            '2 copies recent 2x2 picture',
-            '2 copies recent 1x1 picture',
-            '2 pcs Long Brown Envelope'
-        ],
-
-        shiftee: [],
-
-        returnee: [],
-
-        cross_enrollee: []
-
-    };
-
-
-    /*
-     * Update applicant-type-specific sections.
-     */
-    function updateApplicantType() {
-
-        const selectedType = applicantType.value;
-
-        let hasDocuments = false;
-
-        documentSections.forEach(function (section) {
-
-            const sectionType =
-                section.getAttribute('data-type');
-
-            if (sectionType === selectedType) {
-
-                section.classList.remove('d-none');
-
-                /*
-                 * Shiftee, Returnee and Cross-Enrollee sections
-                 * are informational rather than upload sections.
-                 */
-                if (
-                    selectedType === 'new_student' ||
-                    selectedType === 'transferee'
-                ) {
-                    hasDocuments = true;
-                }
-
-            } else {
-
-                section.classList.add('d-none');
-
-            }
-
-        });
-
-
-        if (selectedType) {
-
-            noDocumentNotice.classList.add('d-none');
-
-        } else {
-
-            noDocumentNotice.classList.remove('d-none');
-
-        }
-
-
-        /*
-         * Cross-Enrollee special notice.
-         */
-        if (selectedType === 'cross_enrollee') {
-
-            crossEnrolleeNotice.classList.remove('d-none');
-
-        } else {
-
-            crossEnrolleeNotice.classList.add('d-none');
-
-        }
-
-
-        /*
-         * Physical requirements.
-         */
-        const requirements =
-            physicalRequirements[selectedType] || [];
-
-        physicalRequirementsList.innerHTML = '';
-
-        if (requirements.length > 0) {
-
-            requirements.forEach(function (requirement) {
-
-                const li =
-                    document.createElement('li');
-
-                li.className =
-                    'physical-requirement-item';
-
-                li.textContent =
-                    requirement;
-
-                physicalRequirementsList.appendChild(li);
-
-            });
-
-            physicalRequirementsCard.classList.remove('d-none');
-
-        } else {
-
-            physicalRequirementsCard.classList.add('d-none');
-
-        }
-
-    }
-
-
-    /*
-     * Marriage-specific fields.
-     */
-    function updateMaritalStatus() {
-
-        if (maritalStatus.value === 'married') {
-
-            spouseField.classList.remove('d-none');
-            marriageDocument.classList.remove('d-none');
-
-        } else {
-
-            spouseField.classList.add('d-none');
-            marriageDocument.classList.add('d-none');
-
-            /*
-             * Clear spouse input when not married.
-             */
-            document.getElementById('spouse_name').value = '';
-
-        }
-
-    }
-
-
-    /*
-     * PWD ID is shown only when disability is provided.
-     */
-    function updateDisability() {
-
-        if (disability.value.trim() !== '') {
-
-            pwdIdField.classList.remove('d-none');
-
-        } else {
-
-            pwdIdField.classList.add('d-none');
-
-        }
-
-    }
-
-
-    applicantType.addEventListener(
-        'change',
-        updateApplicantType
-    );
-
-    maritalStatus.addEventListener(
-        'change',
-        updateMaritalStatus
-    );
-
-    disability.addEventListener(
-        'input',
-        updateDisability
-    );
-
-
-    /*
-     * Preserve the user's selections after validation errors.
-     */
-    updateApplicantType();
-    updateMaritalStatus();
-    updateDisability();
-
-});
-
 </script>
-
 @stop

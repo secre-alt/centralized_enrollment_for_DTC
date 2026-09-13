@@ -3625,6 +3625,13 @@ body.dtc-dark .alert-info { background: #1E3A8A !important; color: #BFDBFE !impo
     font-size:13px; font-weight:700; box-shadow:0 6px 16px rgba(15,76,219,.18);
     pointer-events:none;
 }
+/* Photo variant of the avatar (img.dtc-sidebar-avatar.dtc-sidebar-avatar-img)
+   was inheriting the box above with no object-fit — non-square uploads got
+   stretched to fill the 40×40 box. */
+.dtc-sidebar-avatar-img {
+    object-fit: cover;
+    display: block;
+}
 .dtc-sidebar-user-copy { min-width:0; flex:1; pointer-events:none; }
 .dtc-sidebar-user-name { color:var(--dtc-text); font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dtc-sidebar-user-role { margin-top:2px; color:var(--dtc-text-muted); font-size:10.5px; font-weight:500; }
@@ -3640,6 +3647,89 @@ body.dtc-dark .alert-info { background: #1E3A8A !important; color: #BFDBFE !impo
     transform: rotate(180deg);
     color: var(--dtc-primary);
 }
+
+/* ── Collapsed sidebar (desktop burger toggle) ───────────────────────────
+   AdminLTE's sidebar-mini toggle shrinks .main-sidebar to 4.6rem and widens
+   it back to 250px on hover/focus (see adminlte.css ~L14249). The user panel
+   lives outside .sidebar (see left-sidebar.blade.php note on why) so it
+   shrinks along with .main-sidebar, but its row (40px avatar + name/role +
+   chevron) never had a collapsed layout — the row just overflowed past the
+   4.6rem rail. This mirrors AdminLTE's own hover-to-expand pattern instead
+   of introducing a new interaction. */
+@media (min-width: 768px) {
+    body.sidebar-mini.sidebar-collapse .main-sidebar,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar {
+        /* A touch more separation from the page so the icon rail doesn't
+           blend into the (also white) content area in light mode. */
+        box-shadow: 2px 0 10px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    body.sidebar-mini.sidebar-collapse .dtc-sidebar-user-panel,
+    body.sidebar-mini-md.sidebar-collapse .dtc-sidebar-user-panel,
+    body.sidebar-mini-xs.sidebar-collapse .dtc-sidebar-user-panel {
+        padding: 10px 0;
+    }
+    body.sidebar-mini.sidebar-collapse .dtc-sidebar-user-main,
+    body.sidebar-mini-md.sidebar-collapse .dtc-sidebar-user-main,
+    body.sidebar-mini-xs.sidebar-collapse .dtc-sidebar-user-main {
+        justify-content: center;
+        gap: 0;
+    }
+    body.sidebar-mini.sidebar-collapse .dtc-sidebar-user-copy,
+    body.sidebar-mini.sidebar-collapse .dtc-sidebar-profile-chevron,
+    body.sidebar-mini-md.sidebar-collapse .dtc-sidebar-user-copy,
+    body.sidebar-mini-md.sidebar-collapse .dtc-sidebar-profile-chevron,
+    body.sidebar-mini-xs.sidebar-collapse .dtc-sidebar-user-copy,
+    body.sidebar-mini-xs.sidebar-collapse .dtc-sidebar-profile-chevron {
+        display: none;
+    }
+    /* Ring around the collapsed avatar so a light-mode photo (or the blue
+       initials tile) reads as a distinct, clickable control instead of
+       blending into the white rail/page boundary. */
+    body.sidebar-mini.sidebar-collapse .dtc-sidebar-avatar,
+    body.sidebar-mini-md.sidebar-collapse .dtc-sidebar-avatar,
+    body.sidebar-mini-xs.sidebar-collapse .dtc-sidebar-avatar {
+        box-shadow: 0 0 0 2px var(--dtc-surface), 0 0 0 3.5px var(--dtc-border), 0 6px 16px rgba(15,76,219,.18);
+    }
+
+    /* Expand back to the full row on the exact same trigger AdminLTE uses
+       to widen .main-sidebar itself back to 250px. */
+    body.sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-panel,
+    body.sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-panel,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-panel,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-panel,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-panel,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-panel {
+        padding: 10px;
+    }
+    body.sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-main,
+    body.sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-main,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-main,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-main,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-main,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-main {
+        justify-content: flex-start;
+        gap: 10px;
+    }
+    body.sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-copy,
+    body.sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-copy,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-copy,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-copy,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-user-copy,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-user-copy {
+        display: block;
+    }
+    body.sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-profile-chevron,
+    body.sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-profile-chevron,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-profile-chevron,
+    body.sidebar-mini-md.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-profile-chevron,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .dtc-sidebar-profile-chevron,
+    body.sidebar-mini-xs.sidebar-collapse .main-sidebar.sidebar-focused .dtc-sidebar-profile-chevron {
+        display: flex;
+    }
+}
+
 
 .dtc-sidebar-profile-link {
     display:flex; align-items:center; gap:9px; width:100%; min-height:34px; padding:7px 8px; border:0; border-radius:8px;

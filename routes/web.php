@@ -27,6 +27,7 @@ use App\Http\Controllers\Portal\ApplicationController as PortalApplicationContro
 use App\Http\Controllers\Portal\CorController as PortalCorController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Portal\ProfileController;
 
     // ── AUTH ──────────────────────────────────────────────────────────────────────
     Route::get('/', [AuthController::class, 'showLanding'])->name('landing');
@@ -217,4 +218,10 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 
     Route::get('/cor', [PortalCorController::class, 'show'])->name('cor.show');
     Route::get('/cor/download', [PortalCorController::class, 'download'])->name('cor.download');
+
+    // ── PROFILE SETTINGS (Student / Alumni / New Applicant) ──────────────────
+    Route::get('/profile',          [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile',          [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::delete('/profile/avatar',[ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
 });

@@ -45,7 +45,14 @@
                     aria-expanded="false"
                     aria-controls="dtcSidebarProfileMenu"
                     aria-label="Open account menu">
-                <div class="dtc-sidebar-avatar" aria-hidden="true">{{ $sidebarInitials ?: 'U' }}</div>
+                @if(auth()->user()->avatar)
+                    <img src="{{ Storage::url(auth()->user()->avatar) }}"
+                         alt="Avatar"
+                         class="dtc-sidebar-avatar dtc-sidebar-avatar-img"
+                         aria-hidden="true">
+                @else
+                    <div class="dtc-sidebar-avatar" aria-hidden="true">{{ $sidebarInitials ?: 'U' }}</div>
+                @endif
                 <div class="dtc-sidebar-user-copy">
                     <div class="dtc-sidebar-user-name" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
                     <div class="dtc-sidebar-user-role">{{ $sidebarRoleLabel }}</div>
@@ -55,6 +62,12 @@
                 </span>
             </button>
             <div class="dtc-sidebar-profile-menu" id="dtcSidebarProfileMenu" hidden>
+                @if(auth()->user()->hasAnyRole(['student', 'alumni', 'new_applicant']))
+                <a href="{{ route('portal.profile.show') }}" class="dtc-sidebar-profile-link {{ request()->routeIs('portal.profile.*') ? 'is-active' : '' }}">
+                    <i data-lucide="user-cog"></i>
+                    <span>Profile Settings</span>
+                </a>
+                @endif
                 <a href="{{ route('notifications.index') }}" class="dtc-sidebar-profile-link">
                     <i data-lucide="bell"></i>
                     <span>Notifications</span>
