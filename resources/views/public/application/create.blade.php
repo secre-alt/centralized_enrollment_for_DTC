@@ -234,7 +234,7 @@
                         <label for="gender">Gender <span class="req">*</span></label>
                         <select name="gender" id="gender"
                             class="wiz-input @error('gender') wiz-invalid @enderror"
-                            autocomplete="sex" required>
+                            autocomplete="off" required>
                             <option value="">Select gender</option>
                             <option value="male"   {{ old('gender') === 'male'   ? 'selected' : '' }}>Male</option>
                             <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
@@ -246,7 +246,7 @@
                         <input type="date" name="birthdate" id="birthdate"
                             class="wiz-input @error('birthdate') wiz-invalid @enderror"
                             value="{{ old('birthdate') }}"
-                            autocomplete="bday" required>
+                            autocomplete="off" required>
                         @error('birthdate')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                     </div>
                     <div class="wiz-field">
@@ -377,44 +377,68 @@
                 <input type="hidden" name="city"     id="city_text"     value="{{ old('city') }}">
                 <input type="hidden" name="barangay" id="barangay_text" value="{{ old('barangay') }}">
 
-                <div class="wiz-row wiz-row--2">
-                    <div class="wiz-field">
-                        <label for="addr_region">Region <span class="opt">(Optional)</span></label>
-                        <div class="loc-select-wrap loc-loading">
-                            <select id="addr_region" name="_addr_region" class="loc-select wiz-input"
-                                autocomplete="off" disabled>
-                                <option value="">Loading regions…</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="wiz-field">
-                        <label for="addr_province">Province <span class="opt">(Optional)</span></label>
-                        <div class="loc-select-wrap">
-                            <select id="addr_province" name="_addr_province" class="loc-select wiz-input"
-                                autocomplete="off" disabled>
-                                <option value="">Select province…</option>
-                            </select>
-                        </div>
-                    </div>
+                {{-- ── Location drill-down picker (bottom-sheet) ──────── --}}
+                {{-- Hidden selects kept for existing JS cascade logic --}}
+                <div style="display:none" aria-hidden="true">
+                    <select id="addr_region"   name="_addr_region"   class="loc-select" autocomplete="off" disabled><option value="">Loading regions…</option></select>
+                    <select id="addr_province" name="_addr_province" class="loc-select" autocomplete="off" disabled><option value="">Select province…</option></select>
+                    <select id="addr_city"     name="_addr_city"     class="loc-select" autocomplete="off" disabled><option value="">Select city / municipality…</option></select>
+                    <select id="addr_barangay" name="_addr_barangay" class="loc-select" autocomplete="off" disabled><option value="">Select barangay…</option></select>
                 </div>
 
-                <div class="wiz-row wiz-row--2">
-                    <div class="wiz-field">
-                        <label for="addr_city">City / Municipality <span class="opt">(Optional)</span></label>
-                        <div class="loc-select-wrap">
-                            <select id="addr_city" name="_addr_city" class="loc-select wiz-input"
-                                autocomplete="address-level2" disabled>
-                                <option value="">Select city / municipality…</option>
-                            </select>
+                {{-- Trigger button --}}
+                <div class="wiz-field">
+                    <label>Location <span class="opt">(Optional)</span></label>
+                    <button type="button" id="locPickerTrigger" class="loc-picker-trigger wiz-input">
+                        <i data-lucide="map-pin" class="loc-picker-trigger-icon"></i>
+                        <span id="locPickerTriggerText">Select region, province, city…</span>
+                        <i data-lucide="chevron-right" class="loc-picker-trigger-chevron"></i>
+                    </button>
+                </div>
+
+                {{-- Barangay trigger (shown after city is selected) --}}
+                <div class="wiz-field" id="locBarangayField" style="display:none">
+                    <label>Barangay <span class="opt">(Optional)</span></label>
+                    <button type="button" id="locBarangayTrigger" class="loc-picker-trigger wiz-input">
+                        <i data-lucide="map-pin" class="loc-picker-trigger-icon"></i>
+                        <span id="locBarangayTriggerText">Select barangay…</span>
+                        <i data-lucide="chevron-right" class="loc-picker-trigger-chevron"></i>
+                    </button>
+                </div>
+
+                {{-- Bottom-sheet modal --}}
+                <div id="locPickerModal" class="loc-picker-modal" role="dialog" aria-modal="true" aria-label="Select location" hidden>
+                    <div class="loc-picker-backdrop"></div>
+                    <div class="loc-picker-sheet">
+                        {{-- Sheet header --}}
+                        <div class="loc-picker-header">
+                            <button type="button" id="locPickerBack" class="loc-picker-nav-btn" aria-label="Back" hidden>
+                                <i data-lucide="chevron-left"></i>
+                            </button>
+                            <span id="locPickerTitle" class="loc-picker-title">Enter your location</span>
+                            <button type="button" id="locPickerClose" class="loc-picker-nav-btn" aria-label="Close">
+                                <i data-lucide="x"></i>
+                            </button>
                         </div>
-                    </div>
-                    <div class="wiz-field">
-                        <label for="addr_barangay">Barangay <span class="opt">(Optional)</span></label>
-                        <div class="loc-select-wrap">
-                            <select id="addr_barangay" name="_addr_barangay" class="loc-select wiz-input"
-                                autocomplete="off" disabled>
-                                <option value="">Select barangay…</option>
-                            </select>
+
+                        {{-- Breadcrumb tabs --}}
+                        <div class="loc-picker-tabs" id="locPickerTabs">
+                            <button type="button" class="loc-tab active" data-level="region">Region</button>
+                            <button type="button" class="loc-tab" data-level="province" disabled>Province</button>
+                            <button type="button" class="loc-tab" data-level="city" disabled>City</button>
+                        </div>
+
+                        {{-- Search --}}
+                        <div class="loc-picker-search-wrap">
+                            <i data-lucide="search" class="loc-picker-search-icon"></i>
+                            <input type="text" id="locPickerSearch" class="loc-picker-search" placeholder="Search…" autocomplete="off">
+                        </div>
+
+                        {{-- List --}}
+                        <div id="locPickerList" class="loc-picker-list">
+                            <div class="loc-picker-loading">
+                                <span class="loc-picker-spinner"></span> Loading…
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -123,6 +123,33 @@ document.addEventListener('DOMContentLoaded', function () {
             btnSubmit.classList.add('d-none');
         }
         if (current === 6) buildReview();
+
+        /* Swap completed step icons to a plain check before Lucide re-renders.
+           Lucide replaces <i data-lucide="..."> with <svg> each time createIcons()
+           runs, so we must reset the icon attribute first. */
+        steps.forEach(function (s) {
+            var dot = s.querySelector('.wiz-step-dot');
+            if (!dot) return;
+            var existing = dot.querySelector('svg') || dot.querySelector('i');
+            if (s.classList.contains('completed')) {
+                /* Replace with check icon */
+                if (existing) existing.remove();
+                var checkEl = document.createElement('i');
+                checkEl.setAttribute('data-lucide', 'check');
+                dot.appendChild(checkEl);
+            } else {
+                /* Restore original icon (stored on the step element) */
+                var origIcon = s.getAttribute('data-original-icon');
+                if (origIcon && existing) {
+                    existing.setAttribute('data-lucide', origIcon);
+                } else if (origIcon && !existing) {
+                    var origEl = document.createElement('i');
+                    origEl.setAttribute('data-lucide', origIcon);
+                    dot.appendChild(origEl);
+                }
+            }
+        });
+
         if (window.lucide) lucide.createIcons();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -181,6 +208,10 @@ document.addEventListener('DOMContentLoaded', function () {
     btnPrev.addEventListener('click', function () { goTo(current - 1, true); });
 
     steps.forEach(function (s, i) {
+        /* Store the original icon name so goTo() can restore it when going back */
+        var origI = s.querySelector('.wiz-step-dot i');
+        if (origI) s.setAttribute('data-original-icon', origI.getAttribute('data-lucide'));
+
         s.addEventListener('click', function () { if (s.classList.contains('completed')) goTo(i + 1, true); });
         s.addEventListener('keydown', function (e) {
             if ((e.key === 'Enter' || e.key === ' ') && s.classList.contains('completed')) { e.preventDefault(); goTo(i + 1, true); }
@@ -680,8 +711,291 @@ document.addEventListener('DOMContentLoaded', function () {
         selCity.addEventListener('change',     function () { addrOnCity(false); });
         selBarangay.addEventListener('change', function () { addrOnBarangay(false); });
         addrLoadRegions();
+
+        /* ── Bottom-sheet picker wired to the existing cascade ─── */
+        locPickerInit();
     }
 
+    /* ════════════════════════════════════════════════════════════
+       BOTTOM-SHEET LOCATION PICKER
+       Drives the hidden <select> elements so the existing cascade
+       logic (addrOnRegion / addrOnProvince / addrOnCity / addrOnBarangay)
+       continues to work unchanged.
+    ════════════════════════════════════════════════════════════ */
+    function locPickerInit() {
+        var trigger        = document.getElementById('locPickerTrigger');
+        var barangayField  = document.getElementById('locBarangayField');
+        var barangayTrigger= document.getElementById('locBarangayTrigger');
+        var modal          = document.getElementById('locPickerModal');
+        var backdrop       = modal && modal.querySelector('.loc-picker-backdrop');
+        var btnBack        = document.getElementById('locPickerBack');
+        var btnClose       = document.getElementById('locPickerClose');
+        var titleEl        = document.getElementById('locPickerTitle');
+        var tabs           = document.querySelectorAll('.loc-tab');
+        var searchInp      = document.getElementById('locPickerSearch');
+        var listEl         = document.getElementById('locPickerList');
+
+        if (!trigger || !modal) return;
+
+        /* Current picker state */
+        var pickerLevel    = 'region'; /* region | province | city | barangay */
+        var pickerItems    = [];       /* current list items */
+        var pickerSearchVal= '';
+
+        /* ── Open / close ──────────────────────────────────────── */
+        function openPicker(startLevel) {
+            pickerLevel = startLevel || 'region';
+            modal.hidden = false;
+            /* Lock body scroll AND pin the scroll position so the fixed modal
+               stays at the bottom of the visible viewport, not the document */
+            var scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = '-' + scrollY + 'px';
+            document.body.style.width = '100%';
+            document.body.dataset.scrollY = scrollY;
+            searchInp.value = '';
+            pickerSearchVal = '';
+            renderTabs();
+            renderList();
+            setTimeout(function () { searchInp.focus(); }, 320);
+        }
+
+        function closePicker() {
+            modal.hidden = true;
+            /* Restore body scroll position */
+            var scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, scrollY);
+            updateTriggerLabel();
+        }
+
+        trigger.addEventListener('click', function () { openPicker('region'); });
+        if (barangayTrigger) barangayTrigger.addEventListener('click', function () { openPicker('barangay'); });
+        if (backdrop)  backdrop.addEventListener('click', closePicker);
+        btnClose.addEventListener('click', closePicker);
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) closePicker(); });
+
+        /* ── Tab navigation ────────────────────────────────────── */
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                if (tab.disabled) return;
+                openPicker(tab.getAttribute('data-level'));
+            });
+        });
+
+        btnBack.addEventListener('click', function () {
+            var levels = ['region', 'province', 'city', 'barangay'];
+            var idx = levels.indexOf(pickerLevel);
+            if (idx > 0) openPicker(levels[idx - 1]);
+        });
+
+        /* ── Search ────────────────────────────────────────────── */
+        searchInp.addEventListener('input', function () {
+            pickerSearchVal = searchInp.value.trim().toLowerCase();
+            renderList();
+        });
+
+        /* ── Render helpers ────────────────────────────────────── */
+        function renderTabs() {
+            var levels = ['region', 'province', 'city'];
+            var labels = {
+                region:   selRegion.value   ? (selRegion.options[selRegion.selectedIndex]   || {}).text || 'Region'   : 'Region',
+                province: selProvince.value ? (selProvince.options[selProvince.selectedIndex]|| {}).text || 'Province' : 'Province',
+                city:     selCity.value     ? (selCity.options[selCity.selectedIndex]        || {}).text || 'City'     : 'City'
+            };
+            tabs.forEach(function (tab) {
+                var lv = tab.getAttribute('data-level');
+                tab.classList.toggle('active', lv === pickerLevel);
+                tab.classList.toggle('done',   lv !== pickerLevel && isLevelDone(lv));
+
+                /* Enable tab if the level before it is done */
+                var idx = levels.indexOf(lv);
+                tab.disabled = (idx > 0 && !isLevelDone(levels[idx - 1]));
+
+                /* Shorten label on small screens */
+                var shortLabel = labels[lv] || (lv.charAt(0).toUpperCase() + lv.slice(1));
+                tab.textContent = shortLabel.length > 12
+                    ? shortLabel.substring(0, 11) + '…'
+                    : shortLabel;
+            });
+
+            var levelLabels = { region: 'Select Region', province: 'Select Province', city: 'Select City / Municipality', barangay: 'Select Barangay' };
+            titleEl.textContent = levelLabels[pickerLevel] || 'Select Location';
+            btnBack.hidden = (pickerLevel === 'region');
+        }
+
+        function isLevelDone(lv) {
+            if (lv === 'region')   return !!selRegion.value;
+            if (lv === 'province') return !!selProvince.value || selProvince.querySelector('[value="__none__"]');
+            if (lv === 'city')     return !!selCity.value;
+            return false;
+        }
+
+        function renderList() {
+            var sel = levelToSelect(pickerLevel);
+            if (!sel) { listEl.innerHTML = ''; return; }
+
+            /* Collect options (skip first placeholder) */
+            pickerItems = Array.from(sel.options)
+                .filter(function (o) { return o.value && o.value !== '__none__'; })
+                .map(function (o) { return { value: o.value, label: o.textContent.trim() }; });
+
+            /* If still loading (only placeholder) show spinner */
+            if (!pickerItems.length) {
+                listEl.innerHTML = '<div class="loc-picker-loading"><span class="loc-picker-spinner"></span> Loading…</div>';
+                /* Poll until options arrive */
+                var poll = setInterval(function () {
+                    var opts = Array.from(sel.options).filter(function (o) { return o.value && o.value !== '__none__'; });
+                    if (opts.length) {
+                        clearInterval(poll);
+                        pickerItems = opts.map(function (o) { return { value: o.value, label: o.textContent.trim() }; });
+                        buildListHTML(sel);
+                    }
+                }, 80);
+                return;
+            }
+            buildListHTML(sel);
+        }
+
+        function buildListHTML(sel) {
+            var q = pickerSearchVal;
+            var filtered = pickerItems.filter(function (it) {
+                return !q || it.label.toLowerCase().indexOf(q) !== -1;
+            });
+
+            if (!filtered.length) {
+                listEl.innerHTML = '<div class="loc-picker-empty">No results for "' + escHtml(searchInp.value) + '"</div>';
+                return;
+            }
+
+            /* Group alphabetically */
+            var groups = {};
+            filtered.forEach(function (it) {
+                var letter = it.label.charAt(0).toUpperCase();
+                if (!groups[letter]) groups[letter] = [];
+                groups[letter].push(it);
+            });
+
+            var html = '';
+            Object.keys(groups).sort().forEach(function (letter) {
+                html += '<div class="loc-picker-group-label">' + escHtml(letter) + '</div>';
+                groups[letter].forEach(function (it) {
+                    var isSelected = sel.value === it.value;
+                    html += '<button type="button" class="loc-picker-item' + (isSelected ? ' selected' : '') + '" data-value="' + escHtml(it.value) + '" data-label="' + escHtml(it.label) + '">'
+                        + escHtml(it.label)
+                        + (isSelected ? '<svg class="loc-picker-item-check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '')
+                        + '</button>';
+                });
+            });
+
+            listEl.innerHTML = html;
+            if (window.lucide) lucide.createIcons({ nodes: [listEl] });
+        }
+
+        /* Single delegated click handler — set once, never duplicated */
+        listEl.addEventListener('click', function (e) {
+            var btn = e.target.closest('.loc-picker-item');
+            if (btn) onItemSelected(btn.getAttribute('data-value'), btn.getAttribute('data-label'));
+        });
+
+        function onItemSelected(value, label) {
+            var sel = levelToSelect(pickerLevel);
+            if (!sel) return;
+
+            /* Drive the hidden select → triggers existing cascade */
+            sel.value = value;
+            sel.dispatchEvent(new Event('change'));
+
+            if (pickerLevel === 'region') {
+                /* Wait for province options to load, then advance */
+                waitForOptions(selProvince, function () { openPicker('province'); });
+            } else if (pickerLevel === 'province') {
+                waitForOptions(selCity, function () { openPicker('city'); });
+            } else if (pickerLevel === 'city') {
+                /* Show barangay trigger; close picker */
+                closePicker();
+                if (barangayField) barangayField.style.display = '';
+                /* Wait for barangay options */
+                waitForOptions(selBarangay, function () {
+                    if (barangayTrigger) {
+                        var txt = barangayTrigger.querySelector('#locBarangayTriggerText');
+                        if (txt) txt.textContent = 'Select barangay (optional)…';
+                    }
+                });
+            } else if (pickerLevel === 'barangay') {
+                closePicker();
+            }
+        }
+
+        function waitForOptions(sel, cb) {
+            if (!sel) return;
+            var tries = 0;
+            var t = setInterval(function () {
+                var opts = Array.from(sel.options).filter(function (o) { return o.value && o.value !== '__none__'; });
+                if (opts.length || ++tries > 60) { clearInterval(t); if (opts.length) cb(); }
+            }, 100);
+        }
+
+        function levelToSelect(lv) {
+            if (lv === 'region')   return selRegion;
+            if (lv === 'province') return selProvince;
+            if (lv === 'city')     return selCity;
+            if (lv === 'barangay') return selBarangay;
+            return null;
+        }
+
+        function escHtml(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        /* ── Update trigger button label ───────────────────────── */
+        function updateTriggerLabel() {
+            var parts = [];
+            if (hidRegion   && hidRegion.value)   parts.push(hidRegion.value);
+            if (hidProvince && hidProvince.value && hidProvince.value !== '—') parts.push(hidProvince.value);
+            if (hidCity     && hidCity.value)     parts.push(hidCity.value);
+            var txt = document.getElementById('locPickerTriggerText');
+            if (txt) {
+                if (parts.length) {
+                    txt.textContent = parts.join(' › ');
+                    trigger.classList.add('has-value');
+                } else {
+                    txt.textContent = 'Select region, province, city…';
+                    trigger.classList.remove('has-value');
+                }
+            }
+            /* Barangay trigger */
+            if (barangayTrigger && hidBarangay) {
+                var btxt = document.getElementById('locBarangayTriggerText');
+                if (btxt) {
+                    if (hidBarangay.value) {
+                        btxt.textContent = 'Brgy. ' + hidBarangay.value;
+                        barangayTrigger.classList.add('has-value');
+                    } else {
+                        btxt.textContent = 'Select barangay…';
+                        barangayTrigger.classList.remove('has-value');
+                    }
+                }
+            }
+        }
+
+        /* Update trigger labels whenever the cascade fires */
+        [selRegion, selProvince, selCity, selBarangay].forEach(function (sel) {
+            if (sel) sel.addEventListener('change', updateTriggerLabel);
+        });
+
+        /* Restore trigger label from draft on page load */
+        setTimeout(updateTriggerLabel, 800);
+
+        /* Show barangay field if city already selected (e.g. draft restore) */
+        setTimeout(function () {
+            if (selCity && selCity.value && barangayField) {
+                barangayField.style.display = '';
+            }
+        }, 1200);
+    }
 
 
     /* ════════════════════════════════════════════════════════════
