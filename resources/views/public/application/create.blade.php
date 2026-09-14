@@ -234,7 +234,7 @@
                         <label for="gender">Gender <span class="req">*</span></label>
                         <select name="gender" id="gender"
                             class="wiz-input @error('gender') wiz-invalid @enderror"
-                            autocomplete="off" required>
+                            autocomplete="sex" required>
                             <option value="">Select gender</option>
                             <option value="male"   {{ old('gender') === 'male'   ? 'selected' : '' }}>Male</option>
                             <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
@@ -246,7 +246,7 @@
                         <input type="date" name="birthdate" id="birthdate"
                             class="wiz-input @error('birthdate') wiz-invalid @enderror"
                             value="{{ old('birthdate') }}"
-                            autocomplete="off" required>
+                            autocomplete="bday" required>
                         @error('birthdate')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                     </div>
                     <div class="wiz-field">
