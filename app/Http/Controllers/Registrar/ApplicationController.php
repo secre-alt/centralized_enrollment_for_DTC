@@ -51,8 +51,43 @@ class ApplicationController extends Controller
         return view('registrar.applications.show', compact('application'));
     }
 
+    public function startReview(Application $application)
+    {
+        // ── Only allow starting review for submitted applications ───────
+        if ($application->status !== 'submitted') {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('error', 'This application has already been reviewed.');
+        }
+
+        $application->update([
+            'status' => 'under_review',
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        // ── Notify Student if they have an account ─────────────────────
+        if ($application->user) {
+            NotificationService::send(
+                $application->user,
+                'Application Under Review',
+                'Your application is now being reviewed by the Registrar.',
+                'info',
+                route('portal.application.show')
+            );
+        }
+
+        return redirect()->route('registrar.applications.show', $application)
+            ->with('success', 'Review started. The applicant has been notified.');
+    }
+
     public function approve(Application $application)
     {
+        // ── Only allow approval for applications under review ───────────
+        if ($application->status !== 'under_review') {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('error', 'This application must be under review before it can be approved.');
+        }
+
         // ── Prevent duplicate approval ──────────────────────────────────
         if ($application->user_id !== null || $application->status === 'approved') {
             return redirect()->route('registrar.applications.index')
@@ -127,12 +162,29 @@ class ApplicationController extends Controller
             );
         }
 
+        // ── Notify Student (now that they have an account) ─────────────
+        if ($user) {
+            NotificationService::send(
+                $user,
+                'Application Approved',
+                'Congratulations! Your pre-enrollment application has been approved. You can now proceed with enrollment.',
+                'success',
+                route('portal.application.show')
+            );
+        }
+
         return redirect()->route('registrar.applications.index')
             ->with('success', 'Application approved. The applicant has been emailed instructions to activate their account.');
     }
 
     public function reject(Request $request, Application $application)
     {
+        // ── Only allow rejection for applications under review ───────────
+        if ($application->status !== 'under_review') {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('error', 'This application must be under review before it can be rejected.');
+        }
+
         $validated = $request->validate([
             'remarks' => ['required', 'string', 'max:500'],
         ]);
@@ -160,12 +212,29 @@ class ApplicationController extends Controller
             );
         }
 
+        // ── Notify Student if they have an account ─────────────────────
+        if ($application->user) {
+            NotificationService::send(
+                $application->user,
+                'Application Rejected',
+                'Your pre-enrollment application was not approved. Reason: ' . $validated['remarks'],
+                'danger',
+                route('portal.application.show')
+            );
+        }
+
         return redirect()->route('registrar.applications.index')
             ->with('success', 'Application rejected. The applicant has been notified by email.');
     }
 
     public function revision(Request $request, Application $application)
     {
+        // ── Only allow revision requests for applications under review ───
+        if ($application->status !== 'under_review') {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('error', 'This application must be under review before requesting revision.');
+        }
+
         $validated = $request->validate([
             'remarks' => ['required', 'string', 'max:500'],
         ]);
@@ -190,6 +259,17 @@ class ApplicationController extends Controller
                 'Registrar requested revision on the pre-enrollment application for ' . $application->first_name . ' ' . $application->last_name . '.',
                 'info',
                 route('registrar.applications.show', $application)
+            );
+        }
+
+        // ── Notify Student if they have an account ─────────────────────
+        if ($application->user) {
+            NotificationService::send(
+                $application->user,
+                'Action Required: Application Revision',
+                'Your application requires document corrections. Please review the remarks and contact the Registrar.',
+                'warning',
+                route('portal.application.show')
             );
         }
 

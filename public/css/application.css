@@ -11,6 +11,15 @@ body {
     background: #f5f8fc;
     color: #17233c;
     font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sticky footer: the main content area grows to push the footer down */
+body > main,
+body > .public-main {
+    flex: 1;
 }
 
 /* ---------------------------------------------------------
@@ -51,8 +60,8 @@ body {
 
 .public-main {
     background: #f4f7fb;
-    min-height: calc(100vh - 80px);
-    padding: 32px 0 60px;
+    min-height: calc(100vh - 88px);
+    padding: 8px 0 60px;
 }
 
 .public-main .container {
@@ -380,6 +389,32 @@ body.dtc-dark .application-card select:focus,
 body.dtc-dark .application-card textarea:focus {
     border-color: #6E93F7;
     box-shadow: 0 0 0 3px rgba(110, 147, 247, 0.18);
+}
+
+/* ── Autofill override (light mode) ── */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #17233c !important;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* ── Autofill override (dark mode) ── */
+body.dtc-dark .form-control:-webkit-autofill,
+body.dtc-dark .form-control:-webkit-autofill:hover,
+body.dtc-dark .form-control:-webkit-autofill:focus,
+body.dtc-dark input:-webkit-autofill,
+body.dtc-dark input:-webkit-autofill:hover,
+body.dtc-dark input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #F8FAFC !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1E293B inset !important;
+    box-shadow: 0 0 0px 1000px #1E293B inset !important;
+    transition: background-color 5000s ease-in-out 0s !important;
 }
 
 body.dtc-dark .application-alert {

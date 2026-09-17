@@ -3,7 +3,7 @@
 @section('title', 'Check Application Status')
 
 @section('content')
-<div class="container py-5">
+<div class="container pb-5" style="padding-top: 8px;">
     <div class="row justify-content-center">
         <div class="col-lg-7 col-md-9">
 

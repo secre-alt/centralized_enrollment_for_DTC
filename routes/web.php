@@ -169,6 +169,7 @@ use App\Http\Controllers\Portal\ProfileController;
     Route::get('/applications', [RegistrarApplicationController::class, 'index'])->name('applications.index');
     Route::get('/applications/{application}/documents/{document}', [RegistrarApplicationController::class, 'downloadDocument'])->name('applications.documents.show');
     Route::get('/applications/{application}', [RegistrarApplicationController::class, 'show'])->name('applications.show');
+    Route::post('/applications/{application}/start-review', [RegistrarApplicationController::class, 'startReview'])->name('applications.start-review');
     Route::post('/applications/{application}/approve', [RegistrarApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/applications/{application}/reject', [RegistrarApplicationController::class, 'reject'])->name('applications.reject');
     Route::post('/applications/{application}/revision', [RegistrarApplicationController::class, 'revision'])->name('applications.revision');

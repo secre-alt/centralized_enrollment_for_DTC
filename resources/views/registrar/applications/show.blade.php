@@ -20,7 +20,7 @@
             'cross_enrollee' => 'Cross-Enrollee',
         ];
 
-        $isFinalized = in_array($application->status, ['approved', 'rejected']);
+        $hasActions = !in_array($application->status, ['approved', 'rejected']);
     @endphp
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -404,12 +404,31 @@
         {{-- ===================================================== --}}
         {{-- SECTION 8 — ACTIONS                                    --}}
         {{-- ===================================================== --}}
-        @unless($isFinalized)
+        @unless($hasActions)
         <div class="card">
             <div class="card-header">
                 <span class="font-weight-bold">Registrar Actions</span>
             </div>
             <div class="card-body">
+
+                @if($application->status === 'submitted')
+                    <form id="start-review-{{ $application->id }}"
+                          method="POST"
+                          action="{{ route('registrar.applications.start-review', $application) }}"
+                          class="mb-2">
+                        @csrf
+                        <button type="button"
+                                class="btn btn-primary btn-block"
+                                data-dtc-confirm
+                                data-dtc-confirm-title="Start Review?"
+                                data-dtc-confirm-message="This will mark the application as under review and notify the student. Are you sure?"
+                                data-dtc-confirm-ok="Start Review"
+                                data-dtc-confirm-type="info"
+                                data-dtc-confirm-form="#start-review-{{ $application->id }}">
+                            Start Review
+                        </button>
+                    </form>
+                @endif
 
                 <form id="approve-application-{{ $application->id }}"
                       method="POST"
@@ -417,7 +436,8 @@
                       class="mb-2">
                     @csrf
                     <button type="button"
-                            class="btn btn-success btn-block"
+                            class="btn btn-success btn-block {{ $application->status === 'submitted' ? 'disabled' : '' }}"
+                            {{ $application->status === 'submitted' ? 'disabled' : '' }}
                             data-dtc-confirm
                             data-dtc-confirm-title="Approve Application?"
                             data-dtc-confirm-message="This will approve the application and create a student account. Are you sure?"
@@ -428,11 +448,15 @@
                     </button>
                 </form>
 
-                <button type="button" class="btn btn-warning btn-block mb-2" data-toggle="modal" data-target="#revisionModal">
+                <button type="button" class="btn btn-warning btn-block mb-2 {{ $application->status === 'submitted' ? 'disabled' : '' }}"
+                        {{ $application->status === 'submitted' ? 'disabled' : '' }}
+                        data-toggle="modal" data-target="#revisionModal">
                     Request Revision
                 </button>
 
-                <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#rejectModal">
+                <button type="button" class="btn btn-danger btn-block {{ $application->status === 'submitted' ? 'disabled' : '' }}"
+                        {{ $application->status === 'submitted' ? 'disabled' : '' }}
+                        data-toggle="modal" data-target="#rejectModal">
                     Reject
                 </button>
 

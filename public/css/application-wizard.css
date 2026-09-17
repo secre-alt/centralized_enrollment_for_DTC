@@ -21,8 +21,8 @@ main:has(.app-wizard-page) {
     display: block;
     width: 100%;
     background: #f5f8fc;
-    min-height: calc(100vh - 72px);
-    padding-top: 24px;
+    min-height: calc(100vh - 88px);
+    padding-top: 8px;
 }
 body.dtc-dark main:has(.app-wizard-page) {
     background: #0a0f1a;
@@ -727,6 +727,26 @@ body.dtc-dark .wiz-input               { background:#1e293b; border-color:#33415
 body.dtc-dark .wiz-input::placeholder  { color:#475569; }
 body.dtc-dark .wiz-input:focus         { border-color:#6e93f7; box-shadow:0 0 0 3px rgba(110,147,247,.18); }
 body.dtc-dark .wiz-input.wiz-invalid   { background:#1a0a0a; border-color:#dc2626; }
+
+/* ── Autofill override (light mode) ── */
+.wiz-input:-webkit-autofill,
+.wiz-input:-webkit-autofill:hover,
+.wiz-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #17233c;
+    -webkit-box-shadow: 0 0 0px 1000px #fff inset;
+    box-shadow: 0 0 0px 1000px #fff inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ── Autofill override (dark mode) ── */
+body.dtc-dark .wiz-input:-webkit-autofill,
+body.dtc-dark .wiz-input:-webkit-autofill:hover,
+body.dtc-dark .wiz-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f8fafc;
+    -webkit-box-shadow: 0 0 0px 1000px #1e293b inset;
+    box-shadow: 0 0 0px 1000px #1e293b inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
 body.dtc-dark .wiz-group-label         { color:#93c5fd; }
 body.dtc-dark .wiz-divider             { border-color:#1e293b; }
 body.dtc-dark .wiz-hint                { color:#64748b; }
