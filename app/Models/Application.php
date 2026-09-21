@@ -103,8 +103,8 @@ class Application extends Model
                 'key' => 'submitted',
                 'label' => 'Application Submitted',
                 'description' => 'Your application has been received and is awaiting initial review.',
-                'status' => 'completed',
-                'timestamp' => $this->created_at,
+                'status' => 'pending',
+                'timestamp' => null,
             ],
             [
                 'key' => 'under_review',
@@ -141,12 +141,14 @@ class Application extends Model
             case 'submitted':
                 // Only first step completed
                 $timeline[0]['status'] = 'completed';
+                $timeline[0]['timestamp'] = $this->created_at;
                 $timeline[1]['status'] = 'current';
                 break;
 
             case 'under_review':
-                // First two steps in progress
+                // First step completed, second step current
                 $timeline[0]['status'] = 'completed';
+                $timeline[0]['timestamp'] = $this->created_at;
                 $timeline[1]['status'] = 'current';
                 $timeline[1]['timestamp'] = $this->reviewed_at;
                 $timeline[2]['status'] = 'pending';
@@ -155,28 +157,32 @@ class Application extends Model
             case 'revision_required':
                 // Document verification failed, needs action
                 $timeline[0]['status'] = 'completed';
+                $timeline[0]['timestamp'] = $this->created_at;
                 $timeline[1]['status'] = 'completed';
                 $timeline[1]['timestamp'] = $this->reviewed_at;
                 $timeline[2]['status'] = 'action_required';
                 $timeline[2]['description'] = 'Document correction required. Please review the remarks below.';
+                $timeline[2]['timestamp'] = $this->reviewed_at;
                 break;
 
             case 'approved':
-                // All steps completed
+                // All steps completed, but only show timestamps we actually have
                 $timeline[0]['status'] = 'completed';
+                $timeline[0]['timestamp'] = $this->created_at;
                 $timeline[1]['status'] = 'completed';
                 $timeline[1]['timestamp'] = $this->reviewed_at;
                 $timeline[2]['status'] = 'completed';
-                $timeline[2]['timestamp'] = $this->reviewed_at;
+                $timeline[2]['timestamp'] = null;
                 $timeline[3]['status'] = 'completed';
-                $timeline[3]['timestamp'] = $this->reviewed_at;
+                $timeline[3]['timestamp'] = null;
                 $timeline[4]['status'] = 'completed';
-                $timeline[4]['timestamp'] = $this->reviewed_at;
+                $timeline[4]['timestamp'] = null;
                 break;
 
             case 'rejected':
                 // Process stopped at review stage
                 $timeline[0]['status'] = 'completed';
+                $timeline[0]['timestamp'] = $this->created_at;
                 $timeline[1]['status'] = 'rejected';
                 $timeline[1]['timestamp'] = $this->reviewed_at;
                 $timeline[1]['description'] = 'Application was not approved. Please review the remarks below.';

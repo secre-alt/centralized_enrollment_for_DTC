@@ -88,6 +88,15 @@ use App\Http\Controllers\Portal\ProfileController;
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
     Route::delete('/notifications/read',        [NotificationController::class, 'destroyRead'])->name('notifications.destroyRead');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    // Staff account settings. Student-facing accounts keep the /portal/profile
+    // routes below so their portal URLs remain unchanged.
+    Route::middleware('role:admin|registrar|cashier')->group(function () {
+        Route::get('/profile',           [ProfileController::class, 'show'])->name('profile.show');
+        Route::post('/profile',          [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+        Route::delete('/profile/avatar', [ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
+    });
     });
 
 

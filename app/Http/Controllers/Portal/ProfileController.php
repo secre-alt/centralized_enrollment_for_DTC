@@ -19,7 +19,8 @@ class ProfileController extends Controller
         $user           = Auth::user();
         $studentProfile = $user->studentProfile;
 
-        return view('portal.profile.show', compact('user', 'studentProfile'));
+        return view('portal.profile.show', compact('user', 'studentProfile'))
+            ->with('profileRoutePrefix', $this->routePrefix($user));
     }
 
     /**
@@ -42,7 +43,7 @@ class ProfileController extends Controller
 
         $user->update($fillable);
 
-        return redirect()->route('portal.profile.show')
+        return redirect()->route($this->routePrefix($user) . '.show')
             ->with('success', 'Profile updated successfully.');
     }
 
@@ -67,7 +68,7 @@ class ProfileController extends Controller
 
         $user->update(['password' => Hash::make($request->password)]);
 
-        return redirect()->route('portal.profile.show')
+        return redirect()->route($this->routePrefix($user) . '.show')
             ->with('success', 'Password changed successfully.');
     }
 
@@ -84,7 +85,15 @@ class ProfileController extends Controller
 
         $user->update(['avatar' => null]);
 
-        return redirect()->route('portal.profile.show')
+        return redirect()->route($this->routePrefix($user) . '.show')
             ->with('success', 'Profile photo removed.');
+    }
+
+    /** Return the matching route namespace for portal and staff profiles. */
+    private function routePrefix($user): string
+    {
+        return $user->hasAnyRole(['student', 'alumni', 'new_applicant'])
+            ? 'portal.profile'
+            : 'profile';
     }
 }

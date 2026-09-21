@@ -15,6 +15,7 @@
 @section('content')
 
 @php
+    $profileRoutePrefix = $profileRoutePrefix ?? 'portal.profile';
     $initials = collect(preg_split('/\s+/', trim($user->name)))
         ->filter()->take(2)
         ->map(fn($p) => strtoupper(substr($p, 0, 1)))->implode('');
@@ -68,13 +69,7 @@
             <div class="ps-hero-email">{{ $user->email }}</div>
             <span class="ps-role-badge">
                 <i data-lucide="shield" style="width:11px;height:11px;"></i>
-                @if ($user->hasRole('alumni'))
-                    Alumni
-                @elseif ($user->hasRole('student'))
-                    Student
-                @else
-                    Portal User
-                @endif
+                {{ $user->getRoleNames()->map(fn ($role) => ucfirst(str_replace('_', ' ', $role)))->implode(' / ') ?: 'User' }}
             </span>
         </div>
     </div>
@@ -95,7 +90,7 @@
     </div>
     <div class="card-body">
         <form method="POST"
-              action="{{ route('portal.profile.update') }}"
+              action="{{ route($profileRoutePrefix . '.update') }}"
               enctype="multipart/form-data"
               id="profileForm">
             @csrf
@@ -183,7 +178,7 @@
 
             @if ($user->avatar)
                 <form method="POST"
-                      action="{{ route('portal.profile.avatar.remove') }}"
+                      action="{{ route($profileRoutePrefix . '.avatar.remove') }}"
                       data-confirm-title="Remove Profile Photo"
                       data-confirm-message="This will permanently remove your profile photo."
                       data-confirm-ok="Remove"
@@ -291,7 +286,7 @@
         @endif
 
         <form method="POST"
-              action="{{ route('portal.profile.password') }}"
+              action="{{ route($profileRoutePrefix . '.password') }}"
               id="passwordForm">
             @csrf
 

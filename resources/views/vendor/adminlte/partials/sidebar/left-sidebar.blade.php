@@ -68,6 +68,12 @@
                     <span>Profile Settings</span>
                 </a>
                 @endif
+                @if(auth()->user()->hasAnyRole(['admin', 'registrar', 'cashier']))
+                <a href="{{ route('profile.show') }}" class="dtc-sidebar-profile-link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
+                    <i data-lucide="user-cog"></i>
+                    <span>Profile Settings</span>
+                </a>
+                @endif
                 <a href="{{ route('notifications.index') }}" class="dtc-sidebar-profile-link">
                     <i data-lucide="bell"></i>
                     <span>Notifications</span>

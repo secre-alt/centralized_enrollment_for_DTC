@@ -142,6 +142,11 @@
                                         <i data-lucide="calendar" style="width: 12px; height: 12px; margin-right: 4px;"></i>
                                         {{ $step['timestamp']->format('M d, Y · h:i A') }}
                                     </div>
+                                @elseif($step['status'] === 'completed')
+                                    <div class="timeline-timestamp">
+                                        <i data-lucide="check" style="width: 12px; height: 12px; margin-right: 4px;"></i>
+                                        Completed
+                                    </div>
                                 @endif
                             </div>
                         </div>
