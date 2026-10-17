@@ -59,7 +59,7 @@
                     onclick="document.getElementById('avatarFileInput').click()"
                     title="Change photo"
                     aria-label="Change profile photo">
-                <i data-lucide="pencil" style="width:12px;height:12px;"></i>
+                <i data-lucide="camera" style="width:14px;height:14px;"></i>
             </button>
         </div>
 

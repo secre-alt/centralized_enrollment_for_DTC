@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\CourseSubject;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\SeedsRoles;
 use Tests\TestCase;
 
@@ -98,5 +99,36 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
             ->assertSee('Payment Verification')
             ->assertSee('Your payment proof is awaiting Cashier verification.')
             ->assertDontSee('All steps completed! You are officially enrolled.');
+    }
+
+    public function test_student_avatar_links_to_the_existing_profile_settings_page(): void
+    {
+        $student = $this->makeUserWithRole('student');
+
+        $this->actingAs($student)->get(route('portal.dashboard'))
+            ->assertOk()
+            ->assertSee('href="' . route('portal.profile.show') . '"', false)
+            ->assertSee('aria-label="Open profile settings"', false)
+            ->assertSee('aria-label="Choose a new profile photo"', false)
+            ->assertSee('data-dashboard-avatar-input', false)
+            ->assertSee('action="' . route('portal.profile.update') . '"', false)
+            ->assertSee('data-lucide="camera"', false);
+
+        $this->actingAs($student)->get(route('portal.profile.show'))
+            ->assertOk()
+            ->assertSee('data-lucide="camera"', false)
+            ->assertSee('aria-label="Change profile photo"', false);
+    }
+
+    public function test_dashboard_avatar_uses_the_saved_profile_photo_when_available(): void
+    {
+        $student = $this->makeUserWithRole('student', [
+            'avatar' => 'avatars/john.jpg',
+        ]);
+
+        $this->actingAs($student)->get(route('portal.dashboard'))
+            ->assertOk()
+            ->assertSee('src="' . Storage::url($student->avatar) . '"', false)
+            ->assertDontSee('>J</div>', false);
     }
 }

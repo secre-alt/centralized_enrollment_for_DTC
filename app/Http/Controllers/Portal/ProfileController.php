@@ -43,7 +43,13 @@ class ProfileController extends Controller
 
         $user->update($fillable);
 
-        return redirect()->route($this->routePrefix($user) . '.show')
+        $redirectRoute = $request->boolean('return_to_dashboard')
+            && $request->hasFile('avatar')
+            && $user->hasAnyRole(['student', 'alumni', 'new_applicant'])
+                ? 'portal.dashboard'
+                : $this->routePrefix($user) . '.show';
+
+        return redirect()->route($redirectRoute)
             ->with('success', 'Profile updated successfully.');
     }
 

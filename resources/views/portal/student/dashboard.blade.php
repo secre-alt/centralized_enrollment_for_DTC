@@ -65,14 +65,48 @@
 {{-- ══ WELCOME CARD ════════════════════════════════════════════════════ --}}
 <div class="card mb-3 dtc-welcome-card">
     <div class="card-body" style="padding:24px;">
-        <div style="display:flex; align-items:center; gap:20px;">
-            <div style="width:64px; height:64px; border-radius:50%;
-                        background:linear-gradient(135deg,#0F4CDB,#1a5feb);
-                        display:flex; align-items:center; justify-content:center;
-                        color:#fff; font-weight:800; font-size:26px; flex-shrink:0;">
+        <div class="dtc-welcome-layout">
+            <div class="dtc-welcome-avatar-wrap">
+            <a href="{{ route('portal.profile.show') }}"
+               class="dtc-welcome-avatar-link"
+               aria-label="Open profile settings"
+               title="Profile settings">
+            @if(auth()->user()->avatar)
+            <img src="{{ Storage::url(auth()->user()->avatar) }}"
+                 alt=""
+                 aria-hidden="true"
+                 class="dtc-welcome-avatar-image">
+            @else
+            <div aria-hidden="true" class="dtc-welcome-avatar-initials">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
-            <div>
+            @endif
+            </a>
+            <button type="button"
+               class="dtc-avatar-camera-badge"
+               data-avatar-picker-trigger
+               aria-label="Choose a new profile photo"
+               title="Change profile photo">
+                <i data-lucide="camera" style="width:15px;height:15px;"></i>
+            </button>
+            </div>
+            <form method="POST"
+                  action="{{ route('portal.profile.update') }}"
+                  enctype="multipart/form-data"
+                  id="dashboardAvatarForm"
+                  class="d-none"
+                  data-dashboard-avatar-form>
+                @csrf
+                <input type="hidden" name="return_to_dashboard" value="1">
+                <input type="hidden" name="name" value="{{ auth()->user()->name }}">
+                <input type="hidden" name="email" value="{{ auth()->user()->email }}">
+                <input type="file"
+                       id="dashboardAvatarInput"
+                       name="avatar"
+                       accept="image/jpeg,image/png,image/webp"
+                       data-dashboard-avatar-input>
+            </form>
+            <div class="dtc-welcome-copy">
                 <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
                     Hello, {{ explode(' ', auth()->user()->name)[0] }}! 
                 </h4>
@@ -477,14 +511,259 @@
 
 @include('student.enrollment._payment-modal')
 
+<div class="modal fade" id="dashboardAvatarCropModal" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
+        <div class="modal-content ps-crop-modal">
+            <div class="modal-header ps-crop-header">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="ps-crop-header-icon"><i data-lucide="image" style="width:16px;height:16px;"></i></div>
+                    <h6 class="modal-title mb-0">Crop Profile Photo</h6>
+                </div>
+                <button type="button" class="close ps-crop-close" data-dismiss="modal" aria-label="Close">
+                    <i data-lucide="x" style="width:18px;height:18px;"></i>
+                </button>
+            </div>
+            <div class="modal-body ps-crop-body">
+                <div class="ps-crop-hint"><i data-lucide="move" style="width:13px;height:13px;"></i> Drag to reposition, scroll to zoom, or rotate the image.</div>
+                <div class="ps-crop-container">
+                    <img id="dashboardCropImage" src="" alt="Crop profile photo" style="max-width:100%;display:block;">
+                </div>
+            </div>
+            <div class="modal-footer ps-crop-footer">
+                <button type="button" class="btn ps-crop-btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn ps-crop-btn-rotate" id="dashboardCropRotateLeft" title="Rotate left"><i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn ps-crop-btn-rotate" id="dashboardCropRotateRight" title="Rotate right"><i data-lucide="rotate-cw" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn ps-crop-btn-primary" id="dashboardCropApply">Crop Photo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dashboardAvatarConfirmModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="dashboardAvatarConfirmTitle">
+    <div class="modal-dialog modal-dialog-centered dtc-avatar-confirm-dialog" role="document">
+        <div class="modal-content dtc-avatar-confirm-card">
+            <div class="modal-body text-center">
+                <img id="dashboardAvatarConfirmPreview" class="dtc-avatar-confirm-preview" src="" alt="Cropped profile photo preview">
+                <h5 id="dashboardAvatarConfirmTitle" class="dtc-avatar-confirm-title">Use this profile photo?</h5>
+                <p class="dtc-avatar-confirm-copy">This will replace your current profile photo.</p>
+                <div class="dtc-avatar-confirm-actions">
+                    <button type="button" class="btn dtc-avatar-confirm-cancel" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn dtc-avatar-confirm-apply" id="dashboardAvatarConfirmApply">Save photo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('css')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 <style>
 /* The "active" step marker uses a pale yellow tint that reads fine on a
    white card but looks like a stray light patch on a dark card. */
 body.dtc-dark [data-step-state="active"] {
     background: rgba(255, 199, 44, 0.15) !important;
 }
+.dtc-welcome-layout {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.dtc-welcome-avatar-wrap {
+    position: relative;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+}
+.dtc-welcome-avatar-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    line-height: 0;
+}
+.dtc-welcome-avatar-image,
+.dtc-welcome-avatar-initials {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.dtc-welcome-avatar-initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(135deg, #0F4CDB, #1a5feb);
+    font-size: 26px;
+    font-weight: 800;
+}
+.dtc-welcome-copy {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.dtc-avatar-camera-badge {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dtc-text-secondary);
+    background: var(--dtc-surface-soft);
+    border: 2px solid var(--dtc-surface);
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .25);
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+}
+.dtc-avatar-camera-badge:hover {
+    color: var(--dtc-text);
+    filter: brightness(.96);
+}
+@media (max-width: 576px) {
+    .dtc-welcome-card .card-body {
+        padding: 16px !important;
+    }
+    .dtc-welcome-layout {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .dtc-welcome-avatar-wrap {
+        flex-basis: 52px;
+        width: 52px;
+        height: 52px;
+    }
+    .dtc-avatar-camera-badge {
+        width: 20px;
+        height: 20px;
+    }
+    .dtc-welcome-title {
+        font-size: clamp(1rem, 5vw, 1.25rem);
+    }
+    .dtc-welcome-text {
+        font-size: 12px !important;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+    .dtc-avatar-confirm-dialog { margin: .5rem; }
+    .dtc-avatar-confirm-actions { flex-direction: column-reverse; }
+    .dtc-avatar-confirm-actions .btn { width: 100%; }
+}
 </style>
+@endsection
+
+@section('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const trigger = document.querySelector('[data-avatar-picker-trigger]');
+    const input = document.getElementById('dashboardAvatarInput');
+    const form = document.getElementById('dashboardAvatarForm');
+    const cropModal = $('#dashboardAvatarCropModal');
+    const confirmModal = $('#dashboardAvatarConfirmModal');
+    const cropImage = document.getElementById('dashboardCropImage');
+    const confirmPreview = document.getElementById('dashboardAvatarConfirmPreview');
+    let cropper = null;
+    let croppedFile = null;
+    let previewUrl = null;
+
+    if (!trigger || !input || !form || typeof Cropper === 'undefined') return;
+
+    trigger.addEventListener('click', function () {
+        input.click();
+    });
+
+    input.addEventListener('change', function () {
+        if (!input.files || !input.files.length) return;
+        const selectedFile = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            cropImage.src = event.target.result;
+            cropModal.modal('show');
+        };
+        reader.readAsDataURL(selectedFile);
+    });
+
+    cropModal.on('shown.bs.modal', function () {
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(cropImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: .85,
+            guides: false,
+            center: true,
+            highlight: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+        });
+        if (window.lucide) window.lucide.createIcons();
+    });
+
+    cropModal.on('hidden.bs.modal', function () {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        if (!croppedFile) {
+            input.value = '';
+        } else {
+            previewUrl = URL.createObjectURL(croppedFile);
+            confirmPreview.src = previewUrl;
+            confirmModal.modal('show');
+        }
+    });
+
+    document.getElementById('dashboardCropRotateLeft').addEventListener('click', function () {
+        if (cropper) cropper.rotate(-90);
+    });
+    document.getElementById('dashboardCropRotateRight').addEventListener('click', function () {
+        if (cropper) cropper.rotate(90);
+    });
+
+    document.getElementById('dashboardCropApply').addEventListener('click', function () {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas({
+            width: 400,
+            height: 400,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+        canvas.toBlob(function (blob) {
+            if (!blob) return;
+            croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+            cropModal.modal('hide');
+        }, 'image/jpeg', .92);
+    });
+
+    confirmModal.on('hidden.bs.modal', function () {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+        confirmPreview.removeAttribute('src');
+        croppedFile = null;
+        input.value = '';
+    });
+
+    document.getElementById('dashboardAvatarConfirmApply').addEventListener('click', function () {
+        if (!croppedFile) return;
+        const transfer = new DataTransfer();
+        transfer.items.add(croppedFile);
+        input.files = transfer.files;
+
+        if (form.requestSubmit) {
+            form.requestSubmit();
+        } else {
+            form.submit();
+        }
+    });
+});
+</script>
 @endsection
