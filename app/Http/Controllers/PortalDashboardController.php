@@ -146,6 +146,7 @@ class PortalDashboardController extends Controller
     private function studentDashboard($user)
     {
         $latestEnrollment = Enrollment::where('user_id', $user->id)
+            ->with('payment')
             ->latest()->first();
 
         $totalEnrollments = Enrollment::where('user_id', $user->id)->count();
@@ -187,19 +188,19 @@ class PortalDashboardController extends Controller
                 [
                     'label'    => 'Approval',
                     'sublabel' => 'Get confirmed',
-                    'done'     => $latestEnrollment->status === 'approved' || $latestEnrollment->is_paid,
+                    'done'     => $latestEnrollment->status === 'approved',
                     'active'   => false,
                 ],
                 [
                     'label'    => 'Pay Fee',
                     'sublabel' => '₱' . number_format($fee, 2),
-                    'done'     => $latestEnrollment->is_paid,
+                    'done'     => $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid,
                     'active'   => $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid,
                 ],
                 [
                     'label'    => 'Enrolled',
                     'sublabel' => 'Official student',
-                    'done'     => $latestEnrollment->is_paid,
+                    'done'     => $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid,
                     'active'   => false,
                 ],
             ];

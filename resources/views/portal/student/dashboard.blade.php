@@ -17,14 +17,16 @@
 @php
     if (!$latestEnrollment) {
         $appStatusLabel = 'Not Started';
-    } elseif ($latestEnrollment->is_paid) {
+    } elseif ($latestEnrollment->status === 'approved' && $latestEnrollment->is_paid) {
         $appStatusLabel = 'Enrolled ✓';
     } elseif ($latestEnrollment->status === 'approved') {
         $appStatusLabel = 'Approved';
     } elseif ($latestEnrollment->status === 'pending') {
         $appStatusLabel = 'In Progress';
-    } else {
+    } elseif ($latestEnrollment->status === 'rejected') {
         $appStatusLabel = 'Rejected';
+    } else {
+        $appStatusLabel = 'Status Unavailable';
     }
 @endphp
 
@@ -85,8 +87,12 @@
                     Welcome to Danao Technological College!
                     @if(!$latestEnrollment)
                         Please complete your application and follow the enrollment steps below.
-                    @elseif($latestEnrollment->is_paid)
-                        Congratulations! You are officially enrolled.
+                    @elseif($latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
+                        Your payment is confirmed and your enrollment is complete.
+                    @elseif($latestEnrollment->status === 'approved' && $latestEnrollment->payment && $latestEnrollment->payment->status === 'pending')
+                        Your payment proof is awaiting Cashier verification.
+                    @elseif($latestEnrollment->status === 'approved' && $latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected')
+                        Your payment proof was rejected. Review the payment details and submit a corrected proof.
                     @elseif($latestEnrollment->status === 'approved')
                         Your enrollment is approved! Please proceed to the Cashier to pay ₱{{ number_format($fee, 2) }}.
                     @elseif($latestEnrollment->status === 'pending')
@@ -171,7 +177,7 @@
                         </div>
                     </div>
                 </div>
-                @elseif($latestEnrollment && $latestEnrollment->is_paid)
+                @elseif($latestEnrollment && $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
                 <div class="alert alert-success" style="margin-top:20px; border-radius:12px;
                             padding:12px 16px; display:flex; align-items:center; gap:12px;">
                     <i data-lucide="check-circle"></i>
@@ -201,7 +207,7 @@
                             {{ $subjects->count() }} Subject{{ $subjects->count() > 1 ? 's' : '' }}
                         </span>
                     @endif
-                    @if($latestEnrollment && $latestEnrollment->is_paid)
+                    @if($latestEnrollment && $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
                         <a href="{{ route('portal.cor.show') }}"
                            class="btn btn-outline-primary btn-sm"
                            style="font-size:11px; padding:3px 10px;">
@@ -238,7 +244,7 @@
                                     {{ rtrim(rtrim(number_format($subject->units ?? 3, 1), '0'), '.') }}
                                 </td>
                                 <td style="padding:10px 16px; vertical-align:middle; text-align:center;">
-                                    @if($latestEnrollment && $latestEnrollment->is_paid)
+                                    @if($latestEnrollment && $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
                                         <span class="dtc-status-badge is-success" style="font-size:10.5px;">
                                             <i data-lucide="check" style="width:10px;height:10px;"></i> Enrolled
                                         </span>
@@ -246,6 +252,10 @@
                                         <span class="dtc-status-badge is-warning" style="font-size:10.5px;">
                                             <i data-lucide="clock" style="width:10px;height:10px;"></i> Pending
                                         </span>
+                                    @elseif($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid && $latestEnrollment->payment && $latestEnrollment->payment->status === 'pending')
+                                        <span class="dtc-status-badge is-warning" style="font-size:10.5px;">Payment Verification</span>
+                                    @elseif($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid && $latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected')
+                                        <span class="dtc-status-badge is-danger" style="font-size:10.5px;">Payment Rejected</span>
                                     @elseif($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid)
                                         <span class="dtc-status-badge is-warning" style="font-size:10.5px;">Awaiting Payment</span>
                                     @elseif($latestEnrollment && $latestEnrollment->status === 'rejected')
@@ -412,7 +422,7 @@
                 <a href="{{ route('portal.appointments.create') }}" class="quick-action-btn">
                     <i data-lucide="calendar-check"></i> Book Appointment
                 </a>
-                @if($latestEnrollment && $latestEnrollment->is_paid)
+                @if($latestEnrollment && $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
                 <a href="{{ route('portal.cor.show') }}" class="quick-action-btn">
                     <i data-lucide="scroll-text"></i> Certificate of Registration
                 </a>
