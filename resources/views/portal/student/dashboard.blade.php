@@ -28,99 +28,66 @@
     } else {
         $appStatusLabel = 'Status Unavailable';
     }
+    if (!$latestEnrollment || $latestEnrollment->status !== 'approved') {
+        $paymentStatusLabel = 'Not Required';
+    } elseif ($latestEnrollment->is_paid) {
+        $paymentStatusLabel = 'Confirmed';
+    } elseif ($latestEnrollment->payment && $latestEnrollment->payment->status === 'pending') {
+        $paymentStatusLabel = 'Awaiting Verification';
+    } elseif ($latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected') {
+        $paymentStatusLabel = 'Proof Rejected';
+    } else {
+        $paymentStatusLabel = 'Awaiting Payment';
+    }
+    $nextStepSummary = $nextSteps[0]['label'] ?? 'Review enrollment record';
 @endphp
 
-<!-- TOP STAT CARDS -->
-<div class="row mb-3">
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="file-text" color="primary"
-            label="Enrollment Status" value="{{ $appStatusLabel }}"
-            href="{{ route('portal.enrollment.index') }}" link-text="View Details" />
+<div class="dtc-portal-dashboard">
+<div class="dtc-dashboard-overview mb-3" aria-label="Enrollment overview">
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Enrollment</span>
+        <strong>{{ $appStatusLabel }}</strong>
+        <a href="{{ route('portal.enrollment.index') }}">View application</a>
     </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="list-ordered" color="warning"
-            label="Enrollment Steps" value="{{ $completedSteps }} of {{ count($timeline) ?: 5 }}"
-            href="{{ route('portal.enrollment.index') }}" link-text="View Steps" />
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Payment</span>
+        <strong>{{ $paymentStatusLabel }}</strong>
+        @if($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid && (!$latestEnrollment->payment || $latestEnrollment->payment->status !== 'pending'))
+            <a href="{{ route('portal.enrollment.payment-info', $latestEnrollment) }}">Payment details</a>
+        @else
+            <span class="dtc-overview-note">{{ $latestEnrollment && $latestEnrollment->is_paid ? 'Payment recorded' : 'No payment action due' }}</span>
+        @endif
     </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="calendar" color="success"
-            label="Last Updated"
-            value="{{ $latestEnrollment ? $latestEnrollment->updated_at->format('M d, Y') : 'N/A' }}"
-            note="{{ $latestEnrollment ? $latestEnrollment->updated_at->format('h:i A') : '' }}" />
-    </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="bell" color="info" :badge="$unreadCount"
-            label="Notifications" value="{{ $unreadCount }} New"
-            href="{{ route('notifications.index') }}" />
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Next step</span>
+        <strong>{{ $nextStepSummary }}</strong>
+        @if(!empty($nextSteps[0]['url']))
+            <a href="{{ $nextSteps[0]['url'] }}">Continue</a>
+        @else
+            <span class="dtc-overview-note">See the Registrar for guidance</span>
+        @endif
     </div>
 </div>
 
 {{-- ══ WELCOME CARD ════════════════════════════════════════════════════ --}}
 <div class="card mb-3 dtc-welcome-card">
-    <div class="card-body" style="padding:24px;">
+    <div class="card-body">
         <div class="dtc-welcome-layout">
-            <div class="dtc-welcome-avatar-wrap">
-            <a href="{{ route('portal.profile.show') }}"
-               class="dtc-welcome-avatar-link"
-               aria-label="Open profile settings"
-               title="Profile settings">
-            @if(auth()->user()->avatar)
-            <img src="{{ Storage::url(auth()->user()->avatar) }}"
-                 alt=""
-                 aria-hidden="true"
-                 class="dtc-welcome-avatar-image">
-            @else
-            <div aria-hidden="true" class="dtc-welcome-avatar-initials">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-            </div>
-            @endif
-            </a>
-            <button type="button"
-               class="dtc-avatar-camera-badge"
-               data-avatar-picker-trigger
-               aria-label="Choose a new profile photo"
-               title="Change profile photo">
-                <i data-lucide="camera" style="width:15px;height:15px;"></i>
-            </button>
-            </div>
-            <form method="POST"
-                  action="{{ route('portal.profile.update') }}"
-                  enctype="multipart/form-data"
-                  id="dashboardAvatarForm"
-                  class="d-none"
-                  data-dashboard-avatar-form>
-                @csrf
-                <input type="hidden" name="return_to_dashboard" value="1">
-                <input type="hidden" name="name" value="{{ auth()->user()->name }}">
-                <input type="hidden" name="email" value="{{ auth()->user()->email }}">
-                <input type="file"
-                       id="dashboardAvatarInput"
-                       name="avatar"
-                       accept="image/jpeg,image/png,image/webp"
-                       data-dashboard-avatar-input>
-            </form>
+            @include('portal.partials.dashboard-avatar')
             <div class="dtc-welcome-copy">
-                <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
-                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 
+                <h4 class="dtc-welcome-title">
+                    Hello, {{ auth()->user()->name }}
                 </h4>
                 @if($studentProfile && $studentProfile->enrolled_ay)
-                <p style="font-size:12px; margin:0 0 4px; color:var(--dtc-muted, #6c757d);">
+                <p class="dtc-welcome-meta">
                     🎓
                     @if($studentProfile->program){{ $studentProfile->program->name }} · @endif
-                    Enrolled AY {{ $studentProfile->enrolled_ay }}
+                    Academic Year {{ $studentProfile->enrolled_ay }}
                 </p>
                 @endif
-                <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
-                    Welcome to Danao Technological College!
+                <p class="dtc-welcome-text">
                     @if(!$latestEnrollment)
-                        Please complete your application and follow the enrollment steps below.
+                        Submit your application to begin enrollment.
                     @elseif($latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
                         Your payment is confirmed and your enrollment is complete.
                     @elseif($latestEnrollment->status === 'approved' && $latestEnrollment->payment && $latestEnrollment->payment->status === 'pending')
@@ -132,7 +99,7 @@
                     @elseif($latestEnrollment->status === 'pending')
                         Your enrollment is under review. Please wait for the Registrar's approval.
                     @elseif($latestEnrollment->status === 'rejected')
-                        Your enrollment was rejected. Review the Registrar's feedback in the progress section and use the resubmission option below.
+                        Your enrollment was rejected. Review the Registrar's feedback and follow the resubmission step below.
                     @else
                         Your enrollment was not approved. Please contact the Registrar.
                     @endif
@@ -156,19 +123,14 @@
             </div>
             <div class="card-body">
                 {{-- Stepper --}}
-                <div style="display:flex; align-items:flex-start; justify-content:space-between;
-                            position:relative; padding:0 10px;">
+                <div class="dtc-enrollment-steps">
 
                     {{-- Progress line --}}
-                    <div style="position:absolute; top:18px; left:10%; right:10%;
-                                height:3px; background:var(--dtc-border); z-index:0;"></div>
-                    <div style="position:absolute; top:18px; left:10%;
-                                height:3px; background:var(--dtc-primary); z-index:1;
-                                width:{{ $completedSteps> 0 ? (($completedSteps - 1) / (count($timeline) - 1)) * 80 : 0 }}%;"></div>
+                    <div class="dtc-enrollment-track"></div>
+                    <div class="dtc-enrollment-track-progress" style="width:{{ $completedSteps > 0 ? (($completedSteps - 1) / (count($timeline) - 1)) * 80 : 0 }}%;"></div>
 
                     @foreach ($timeline as $i => $step)
-                    <div style="display:flex; flex-direction:column; align-items:center;
-                                z-index:2; flex:1; text-align:center;">
+                    <div class="dtc-enrollment-step">
                         <div data-step-state="{{ ($step['rejected'] ?? false) ? 'rejected' : ($step['done'] ? 'done' : ($step['active'] ? 'active' : 'pending')) }}"
                              style="width:36px; height:36px; border-radius:50%;
                                     border:3px solid {{ ($step['rejected'] ?? false) ? 'var(--dtc-danger, #dc3545)' : ($step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-accent)' : 'var(--dtc-border)')) }};
@@ -388,7 +350,7 @@
     <div class="col-lg-4">
 
         {{-- Important Reminder --}}
-        @if($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid)
+        @if($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid && (!$latestEnrollment->payment || $latestEnrollment->payment->status !== 'pending'))
         <div class="card mb-3 alert alert-warning"
              style="border-radius:16px;">
             <div class="card-body p-3">
@@ -401,7 +363,11 @@
                     </span>
                 </div>
                 <p style="font-size:12px; opacity:0.85; margin:0 0 12px; line-height:1.6;">
-                    Please complete your enrollment process by paying the ₱{{ number_format($fee, 2) }} fee at the Cashier's Office.
+                    @if($latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected')
+                        Your payment proof was rejected. Review the cashier's feedback and submit a corrected proof.
+                    @else
+                        Please complete your enrollment process by paying the ₱{{ number_format($fee, 2) }} fee at the Cashier's Office.
+                    @endif
                 </p>
                 <button type="button" class="btn btn-warning btn-sm btn-block dtc-payment-btn u-text-xxs"
                         data-url="{{ route('portal.enrollment.payment-info', $latestEnrollment) }}"
@@ -412,10 +378,10 @@
         </div>
         @endif
 
-        {{-- Announcements (Recent Notifications) --}}
+        {{-- Recent notifications use the real messages stored for this student. --}}
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="font-weight-bold">Announcements</span>
+                <span class="font-weight-bold">Recent Notifications</span>
                 <a href="{{ route('notifications.index') }}"
                    style="font-size:12px; color:var(--dtc-primary); text-decoration:none; font-weight:600;">
                     View All
@@ -428,10 +394,11 @@
                         <div class="dtc-icon-swatch is-{{ $notif->type === 'success' ? 'success' : ($notif->type === 'danger' ? 'danger' : 'info') }}" style="width:32px; height:32px; flex-shrink:0;">
                             <i data-lucide="megaphone" style="font-size:12px;"></i>
                         </div>
-                        <div>
+                        <div class="dtc-notification-copy">
                             <div  class="u-text-sm-bold">
                                 {{ $notif->title }}
                             </div>
+                            <div class="u-text-xxs-secondary">{{ $notif->message }}</div>
                             <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:2px;">
                                 {{ $notif->created_at->format('M d, Y') }}
                             </div>
@@ -472,7 +439,7 @@
 
         {{-- Next Appointment --}}
         @if($nextAppointment)
-        <div class="card u-primary-gradient-btn"
+        <div class="card dtc-upcoming-appointment-card"
              >
             <div class="card-body p-3">
                 <div style="font-size:11px; font-weight:600; opacity:0.75; margin-bottom:8px;
@@ -509,261 +476,20 @@
     </div>
 </div>
 
+</div>
+
 @include('student.enrollment._payment-modal')
 
-<div class="modal fade" id="dashboardAvatarCropModal" tabindex="-1" role="dialog" aria-modal="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
-        <div class="modal-content ps-crop-modal">
-            <div class="modal-header ps-crop-header">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="ps-crop-header-icon"><i data-lucide="image" style="width:16px;height:16px;"></i></div>
-                    <h6 class="modal-title mb-0">Crop Profile Photo</h6>
-                </div>
-                <button type="button" class="close ps-crop-close" data-dismiss="modal" aria-label="Close">
-                    <i data-lucide="x" style="width:18px;height:18px;"></i>
-                </button>
-            </div>
-            <div class="modal-body ps-crop-body">
-                <div class="ps-crop-hint"><i data-lucide="move" style="width:13px;height:13px;"></i> Drag to reposition, scroll to zoom, or rotate the image.</div>
-                <div class="ps-crop-container">
-                    <img id="dashboardCropImage" src="" alt="Crop profile photo" style="max-width:100%;display:block;">
-                </div>
-            </div>
-            <div class="modal-footer ps-crop-footer">
-                <button type="button" class="btn ps-crop-btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn ps-crop-btn-rotate" id="dashboardCropRotateLeft" title="Rotate left"><i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i></button>
-                <button type="button" class="btn ps-crop-btn-rotate" id="dashboardCropRotateRight" title="Rotate right"><i data-lucide="rotate-cw" style="width:14px;height:14px;"></i></button>
-                <button type="button" class="btn ps-crop-btn-primary" id="dashboardCropApply">Crop Photo</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="dashboardAvatarConfirmModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="dashboardAvatarConfirmTitle">
-    <div class="modal-dialog modal-dialog-centered dtc-avatar-confirm-dialog" role="document">
-        <div class="modal-content dtc-avatar-confirm-card">
-            <div class="modal-body text-center">
-                <img id="dashboardAvatarConfirmPreview" class="dtc-avatar-confirm-preview" src="" alt="Cropped profile photo preview">
-                <h5 id="dashboardAvatarConfirmTitle" class="dtc-avatar-confirm-title">Use this profile photo?</h5>
-                <p class="dtc-avatar-confirm-copy">This will replace your current profile photo.</p>
-                <div class="dtc-avatar-confirm-actions">
-                    <button type="button" class="btn dtc-avatar-confirm-cancel" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn dtc-avatar-confirm-apply" id="dashboardAvatarConfirmApply">Save photo</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@include('portal.partials.dashboard-avatar-modals')
 
 @endsection
 
 @section('css')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
-<style>
-/* The "active" step marker uses a pale yellow tint that reads fine on a
-   white card but looks like a stray light patch on a dark card. */
-body.dtc-dark [data-step-state="active"] {
-    background: rgba(255, 199, 44, 0.15) !important;
-}
-.dtc-welcome-layout {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-.dtc-welcome-avatar-wrap {
-    position: relative;
-    flex: 0 0 64px;
-    width: 64px;
-    height: 64px;
-}
-.dtc-welcome-avatar-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    line-height: 0;
-}
-.dtc-welcome-avatar-image,
-.dtc-welcome-avatar-initials {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.dtc-welcome-avatar-initials {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    background: linear-gradient(135deg, #0F4CDB, #1a5feb);
-    font-size: 26px;
-    font-weight: 800;
-}
-.dtc-welcome-copy {
-    flex: 1 1 0;
-    min-width: 0;
-}
-.dtc-avatar-camera-badge {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 22px;
-    height: 22px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--dtc-text-secondary);
-    background: var(--dtc-surface-soft);
-    border: 2px solid var(--dtc-surface);
-    border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(15, 23, 42, .25);
-    padding: 0;
-    cursor: pointer;
-    line-height: 1;
-}
-.dtc-avatar-camera-badge:hover {
-    color: var(--dtc-text);
-    filter: brightness(.96);
-}
-@media (max-width: 576px) {
-    .dtc-welcome-card .card-body {
-        padding: 16px !important;
-    }
-    .dtc-welcome-layout {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    .dtc-welcome-avatar-wrap {
-        flex-basis: 52px;
-        width: 52px;
-        height: 52px;
-    }
-    .dtc-avatar-camera-badge {
-        width: 20px;
-        height: 20px;
-    }
-    .dtc-welcome-title {
-        font-size: clamp(1rem, 5vw, 1.25rem);
-    }
-    .dtc-welcome-text {
-        font-size: 12px !important;
-        line-height: 1.5;
-        overflow-wrap: anywhere;
-    }
-    .dtc-avatar-confirm-dialog { margin: .5rem; }
-    .dtc-avatar-confirm-actions { flex-direction: column-reverse; }
-    .dtc-avatar-confirm-actions .btn { width: 100%; }
-}
-</style>
 @endsection
 
 @section('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const trigger = document.querySelector('[data-avatar-picker-trigger]');
-    const input = document.getElementById('dashboardAvatarInput');
-    const form = document.getElementById('dashboardAvatarForm');
-    const cropModal = $('#dashboardAvatarCropModal');
-    const confirmModal = $('#dashboardAvatarConfirmModal');
-    const cropImage = document.getElementById('dashboardCropImage');
-    const confirmPreview = document.getElementById('dashboardAvatarConfirmPreview');
-    let cropper = null;
-    let croppedFile = null;
-    let previewUrl = null;
-
-    if (!trigger || !input || !form || typeof Cropper === 'undefined') return;
-
-    trigger.addEventListener('click', function () {
-        input.click();
-    });
-
-    input.addEventListener('change', function () {
-        if (!input.files || !input.files.length) return;
-        const selectedFile = input.files[0];
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            cropImage.src = event.target.result;
-            cropModal.modal('show');
-        };
-        reader.readAsDataURL(selectedFile);
-    });
-
-    cropModal.on('shown.bs.modal', function () {
-        if (cropper) cropper.destroy();
-        cropper = new Cropper(cropImage, {
-            aspectRatio: 1,
-            viewMode: 1,
-            dragMode: 'move',
-            autoCropArea: .85,
-            guides: false,
-            center: true,
-            highlight: false,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false,
-        });
-        if (window.lucide) window.lucide.createIcons();
-    });
-
-    cropModal.on('hidden.bs.modal', function () {
-        if (cropper) {
-            cropper.destroy();
-            cropper = null;
-        }
-        if (!croppedFile) {
-            input.value = '';
-        } else {
-            previewUrl = URL.createObjectURL(croppedFile);
-            confirmPreview.src = previewUrl;
-            confirmModal.modal('show');
-        }
-    });
-
-    document.getElementById('dashboardCropRotateLeft').addEventListener('click', function () {
-        if (cropper) cropper.rotate(-90);
-    });
-    document.getElementById('dashboardCropRotateRight').addEventListener('click', function () {
-        if (cropper) cropper.rotate(90);
-    });
-
-    document.getElementById('dashboardCropApply').addEventListener('click', function () {
-        if (!cropper) return;
-        const canvas = cropper.getCroppedCanvas({
-            width: 400,
-            height: 400,
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high',
-        });
-        canvas.toBlob(function (blob) {
-            if (!blob) return;
-            croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-            cropModal.modal('hide');
-        }, 'image/jpeg', .92);
-    });
-
-    confirmModal.on('hidden.bs.modal', function () {
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        previewUrl = null;
-        confirmPreview.removeAttribute('src');
-        croppedFile = null;
-        input.value = '';
-    });
-
-    document.getElementById('dashboardAvatarConfirmApply').addEventListener('click', function () {
-        if (!croppedFile) return;
-        const transfer = new DataTransfer();
-        transfer.items.add(croppedFile);
-        input.files = transfer.files;
-
-        if (form.requestSubmit) {
-            form.requestSubmit();
-        } else {
-            form.submit();
-        }
-    });
-});
-</script>
+<script src="{{ asset('js/dashboard-avatar.js') }}"></script>
 @endsection

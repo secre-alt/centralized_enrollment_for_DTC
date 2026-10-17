@@ -31,13 +31,13 @@ class PortalDashboardController extends Controller
     private function newApplicantDashboard($user)
     {
         $application = Application::where('user_id', $user->id)
-            ->where('status', 'approved')
             ->with(['program', 'reviewer'])
             ->withCount('documents')
             ->latest()
             ->first();
 
         $enrollment = Enrollment::where('user_id', $user->id)
+            ->with('payment')
             ->latest()
             ->first();
 
@@ -65,6 +65,33 @@ class PortalDashboardController extends Controller
             ];
         }
 
+        if ($application->status !== 'approved') {
+            if ($application->status === 'revision_required') {
+                return [
+                    'label' => 'Review Required Corrections',
+                    'desc'  => 'Review the Registrar\'s remarks in your application and follow the provided guidance.',
+                    'url'   => route('portal.application.show'),
+                    'icon'  => 'alert-triangle',
+                ];
+            }
+
+            if ($application->status === 'rejected') {
+                return [
+                    'label' => 'Review Application Decision',
+                    'desc'  => 'Read the Registrar\'s decision and remarks. Contact the Registrar\'s Office if you need guidance.',
+                    'url'   => route('portal.application.show'),
+                    'icon'  => 'file-text',
+                ];
+            }
+
+            return [
+                'label' => 'Await Registrar Review',
+                'desc'  => 'Your pre-enrollment application is awaiting a decision. Check its status for updates.',
+                'url'   => route('portal.application.show'),
+                'icon'  => 'hourglass',
+            ];
+        }
+
         if (! $enrollment) {
             return [
                 'label' => 'Proceed to Official Enrollment',
@@ -84,6 +111,25 @@ class PortalDashboardController extends Controller
         }
 
         if ($enrollment->status === 'approved' && ! $enrollment->is_paid) {
+            if ($enrollment->payment && $enrollment->payment->status === 'pending') {
+                return [
+                    'label' => 'Wait for Payment Verification',
+                    'desc'  => 'The Cashier is reviewing your submitted payment proof.',
+                    'url'   => route('portal.enrollment.index'),
+                    'icon'  => 'hourglass',
+                ];
+            }
+
+            if ($enrollment->payment && $enrollment->payment->status === 'rejected') {
+                return [
+                    'label'     => 'Submit Corrected Payment Proof',
+                    'desc'      => 'Review the Cashier\'s feedback and upload a corrected proof.',
+                    'url'       => route('portal.enrollment.payment-info', $enrollment),
+                    'icon'      => 'rotate-ccw',
+                    'isPayment' => true,
+                ];
+            }
+
             return [
                 'label'     => 'Proceed to Payment',
                 'desc'      => 'Your official enrollment is approved. Pay the ₱' . number_format($fee, 2) . ' fee at the Cashier\'s Office.',
@@ -135,11 +181,12 @@ class PortalDashboardController extends Controller
 
         // ── New: load the student profile so the view can show Batch YYYY ──
         $studentProfile = $user->studentProfile;
+        $latestRequest = $recentRequests->first();
 
         return view('portal.alumni.dashboard', compact(
             'totalRequests', 'readyRequests', 'releasedDocs', 'totalFees',
             'recentRequests', 'nextAppointment', 'unreadCount', 'announcements',
-            'studentProfile'
+            'studentProfile', 'latestRequest'
         ));
     }
 
@@ -193,7 +240,11 @@ class PortalDashboardController extends Controller
                 ],
                 [
                     'label'    => 'Pay Fee',
-                    'sublabel' => '₱' . number_format($fee, 2),
+                    'sublabel' => $latestEnrollment->payment && $latestEnrollment->payment->status === 'pending'
+                        ? 'Payment proof awaiting verification'
+                        : ($latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected'
+                            ? 'Payment proof rejected — submit a corrected proof'
+                            : '₱' . number_format($fee, 2)),
                     'done'     => $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid,
                     'active'   => $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid,
                 ],
@@ -205,6 +256,14 @@ class PortalDashboardController extends Controller
                 ],
             ];
             $completedSteps = collect($timeline)->where('done', true)->count();
+        } else {
+            $timeline = [
+                ['label' => 'Submit Application', 'sublabel' => 'Application not started', 'done' => false, 'active' => true],
+                ['label' => 'Registrar Review', 'sublabel' => 'Await submission', 'done' => false, 'active' => false],
+                ['label' => 'Approval', 'sublabel' => 'Await review', 'done' => false, 'active' => false],
+                ['label' => 'Pay Fee', 'sublabel' => 'After approval', 'done' => false, 'active' => false],
+                ['label' => 'Enrolled', 'sublabel' => 'After payment confirmation', 'done' => false, 'active' => false],
+            ];
         }
 
         $announcements = UserNotification::where('user_id', $user->id)
@@ -247,8 +306,10 @@ class PortalDashboardController extends Controller
         }
 
         if ($enrollment->status === 'approved' && !$enrollment->is_paid) {
+            $paymentRejected = $enrollment->payment && $enrollment->payment->status === 'rejected';
+
             return [
-                ['icon' => 'banknote', 'label' => 'Pay Enrollment Fee', 'desc' => 'Proceed to Cashier and pay ₱' . number_format($fee, 2) . '.',              'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true, 'isPayment' => true],
+                ['icon' => $paymentRejected ? 'rotate-ccw' : 'banknote', 'label' => $paymentRejected ? 'Resubmit Payment Proof' : 'Pay Enrollment Fee', 'desc' => $paymentRejected ? 'Review the rejection feedback and submit a corrected payment proof.' : 'Proceed to Cashier and pay ₱' . number_format($fee, 2) . '.', 'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true, 'isPayment' => true],
                 ['icon' => 'receipt',  'label' => 'Get Your Receipt',    'desc' => 'Official receipt will be issued after payment.',  'url' => route('portal.enrollment.index'), 'active' => false],
             ];
         }

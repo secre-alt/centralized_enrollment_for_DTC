@@ -23,57 +23,63 @@
     ];
 @endphp
 
-<!-- TOP STAT CARDS -->
-<div class="row mb-3">
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="folder-open" color="primary"
-            label="Total Requests" value="{{ $totalRequests }}"
-            href="{{ route('portal.documents.index') }}" />
-    </div>
+@php
+    if ($readyRequests > 0) {
+        $dashboardNextStep = 'Pick up a ready document';
+        $dashboardNextStepNote = $readyRequests . ' request' . ($readyRequests === 1 ? ' is' : 's are') . ' ready for pickup.';
+        $dashboardNextStepUrl = route('portal.documents.index');
+    } elseif ($latestRequest) {
+        $dashboardNextStep = 'Check your latest request';
+        $dashboardNextStepNote = ucfirst(str_replace('_', ' ', $latestRequest->status)) . ' · ' . $latestRequest->document_label;
+        $dashboardNextStepUrl = route('portal.documents.index');
+    } else {
+        $dashboardNextStep = 'Request a document';
+        $dashboardNextStepNote = 'Start a transcript, diploma, or other document request.';
+        $dashboardNextStepUrl = route('portal.documents.create');
+    }
+@endphp
 
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="package-open" color="info"
-            label="Ready for Pickup" value="{{ $readyRequests }}" />
+<div class="dtc-portal-dashboard">
+<div class="dtc-dashboard-overview mb-3" aria-label="Document request overview">
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Document requests</span>
+        <strong>{{ $totalRequests }} total · {{ $releasedDocs }} released</strong>
+        <a href="{{ route('portal.documents.index') }}">View request history</a>
     </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="check-circle" color="success"
-            label="Released" value="{{ $releasedDocs }}" />
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Ready for pickup</span>
+        <strong>{{ $readyRequests }}</strong>
+        @if($readyRequests > 0)
+            <a href="{{ route('portal.documents.index') }}">View ready requests</a>
+        @else
+            <span class="dtc-overview-note">No documents awaiting pickup</span>
+        @endif
     </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="bell" color="info" :badge="$unreadCount"
-            label="Notifications" value="{{ $unreadCount }} New"
-            href="{{ route('notifications.index') }}" />
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Next step</span>
+        <strong>{{ $dashboardNextStep }}</strong>
+        <a href="{{ $dashboardNextStepUrl }}">{{ $readyRequests > 0 ? 'View request details' : ($latestRequest ? 'View latest request' : 'Start request') }}</a>
+        <span class="d-block dtc-overview-note">{{ $dashboardNextStepNote }}</span>
     </div>
 </div>
 
 {{-- ══ WELCOME CARD ════════════════════════════════════════════════════ --}}
 <div class="card mb-3 dtc-welcome-card">
-    <div class="card-body" style="padding:24px;">
-        <div style="display:flex; align-items:center; gap:20px;">
-            <div style="width:64px; height:64px; border-radius:50%;
-                        background:linear-gradient(135deg,#0F4CDB,#1a5feb);
-                        display:flex; align-items:center; justify-content:center;
-                        color:#fff; font-weight:800; font-size:26px; flex-shrink:0;">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-            </div>
-            <div>
-                <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
-                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 
+    <div class="card-body">
+        <div class="dtc-welcome-layout">
+            @include('portal.partials.dashboard-avatar')
+            <div class="dtc-welcome-copy">
+                <h4 class="dtc-welcome-title">
+                    Hello, {{ auth()->user()->name }}
                 </h4>
                 @if($studentProfile && ($studentProfile->graduation_year || $studentProfile->program))
-                <p style="font-size:12px; margin:0 0 4px; color:var(--dtc-muted, #6c757d);">
+                <p class="dtc-welcome-meta">
                     🎓
                     @if($studentProfile->program){{ $studentProfile->program->name }}@endif
                     @if($studentProfile->graduation_year) · Batch {{ $studentProfile->graduation_year }}@endif
                 </p>
                 @endif
-                <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
+                <p class="dtc-welcome-text">
                     Welcome back! Request transcripts, diplomas, and other documents anytime.
                 </p>
             </div>
@@ -154,7 +160,7 @@
 
         {{-- Next Appointment --}}
         @if($nextAppointment)
-        <div class="card u-primary-gradient-btn"
+        <div class="card dtc-upcoming-appointment-card"
              >
             <div class="card-body p-3">
                 <div style="font-size:11px; font-weight:600; opacity:0.75; margin-bottom:8px;
@@ -191,4 +197,18 @@
     </div>
 </div>
 
+</div>
+
+@include('portal.partials.dashboard-avatar-modals')
+
+@endsection
+
+@section('css')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@endsection
+
+@section('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="{{ asset('js/dashboard-avatar.js') }}"></script>
 @endsection

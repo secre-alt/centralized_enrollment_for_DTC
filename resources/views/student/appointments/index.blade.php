@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold u-text">My Appointments</h4>
-            <p class="mb-0 u-text-secondary-sm">Track your document requests and appointment bookings</p>
+            <p class="mb-0 u-text-secondary-sm">Track your appointment schedule and payment status</p>
         </div>
         <a href="{{ route('portal.appointments.create') }}" class="btn btn-primary btn-sm dtc-header-btn">
             <i data-lucide="plus" class="mr-1"></i>
@@ -18,6 +18,7 @@
 
 @section('content')
 
+<div class="dtc-portal-dashboard dtc-appointments-page">
 @if ($appointments->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
@@ -482,6 +483,7 @@
         @endforeach
     </div>
 @endif
+</div>
 
 @endsection
 

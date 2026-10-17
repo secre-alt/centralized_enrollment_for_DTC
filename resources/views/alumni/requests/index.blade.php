@@ -4,14 +4,14 @@
 @section('title', 'My Document Requests')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
+    <div class="d-flex justify-content-between align-items-center dtc-document-page-heading">
+        <div class="dtc-document-page-title">
             <h4 class="mb-0 font-weight-bold u-text" >My Document Requests</h4>
             <p class="mb-0 u-text-secondary-sm" >
                 Track your document requests and pickup status
             </p>
         </div>
-        <a href="{{ route('portal.documents.create') }}" class="btn btn-primary btn-sm">
+        <a href="{{ route('portal.documents.create') }}" class="btn btn-primary btn-sm dtc-document-page-action">
             <i data-lucide="plus" class="mr-1"></i> Request Document
         </a>
     </div>
@@ -20,42 +20,33 @@
 @section('content')
 
 
-{{-- STAT CARDS --}}
-<div class="row mb-3">
-    <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-blue">
-            <div class="stat-icon"><i data-lucide="folder"></i></div>
-            <div class="stat-value">{{ $totalRequests }}</div>
-            <div class="stat-label">Total Requests</div>
-            <div class="stat-footer">This Year</div>
-        </div>
+<div class="dtc-portal-dashboard">
+<div class="dtc-dashboard-overview dtc-dashboard-overview--four mb-3" aria-label="Document request summary">
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Total requests</span>
+        <strong>{{ $totalRequests }}</strong>
+        <a href="{{ $totalRequests ? '#request-history' : route('portal.documents.create') }}">{{ $totalRequests ? 'View request history' : 'Start a request' }}</a>
     </div>
-    <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-purple">
-            <div class="stat-icon"><i data-lucide="package-open"></i></div>
-            <div class="stat-value">{{ $readyRequests }}</div>
-            <div class="stat-label">Ready for Pickup</div>
-            <div class="stat-footer">Documents Available</div>
-        </div>
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Ready for pickup</span>
+        <strong>{{ $readyRequests }}</strong>
+        @if($readyRequests > 0)
+            <a href="#request-history">View ready requests</a>
+        @else
+            <span class="dtc-overview-note">No documents awaiting pickup</span>
+        @endif
     </div>
-    <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-green">
-            <div class="stat-icon"><i data-lucide="check-check"></i></div>
-            <div class="stat-value">{{ $releasedDocs }}</div>
-            <div class="stat-label">Released</div>
-            <div class="stat-footer">This Year</div>
-        </div>
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Released</span>
+        <strong>{{ $releasedDocs }}</strong>
+        <span class="dtc-overview-note">Completed document requests</span>
     </div>
-    <div class="col-lg-3 col-6 mb-3">
-        <div class="card stat-card stat-yellow">
-            <div class="stat-icon"><i data-lucide="philippine-peso"></i></div>
-            <div class="stat-value" style="font-size:20px;">₱{{ number_format($totalFees, 2) }}</div>
-            <div class="stat-label">Total Fees</div>
-            <div class="stat-footer">All Requests</div>
-        </div>
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Total fees</span>
+        <strong>₱{{ number_format($totalFees, 2) }}</strong>
+        <span class="dtc-overview-note">Across all requests</span>
     </div>
 </div>
-
 @if ($requests->isEmpty())
     <div class="card">
         <div class="card-body text-center py-5">
@@ -73,14 +64,13 @@
     {{-- Request Timeline --}}
     <div class="row">
         <div class="col-lg-8 mb-3">
-            <div class="card">
+            <div class="card" id="request-history">
                 <div class="card-header font-weight-bold u-text" >
                     Request History
                 </div>
                 <div class="card-body p-0">
                     @foreach ($requests as $req)
-                    <div style="padding:18px 20px; border-bottom:1px solid var(--dtc-border-soft);
-                                display:flex; align-items:center; gap:16px;">
+                    <div class="dtc-document-request-row">
 
                         {{-- Status dot --}}
                         @php
@@ -94,8 +84,8 @@
                                            ($req->status === 'processing' ? 'loader' : 'clock')) }}" style="font-size:16px;"></i>
                         </div>
 
-                        <div  class="u-flex-1">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="dtc-document-request-main">
+                            <div class="dtc-document-request-heading">
                                 <div style="font-size:14px; font-weight:600; color:var(--dtc-text);">
                                     {{ $req->document_label }}
                                 </div>
@@ -105,7 +95,7 @@
                                     {{ ucfirst($req->status) }}
                                 </span>
                             </div>
-                            <div style="font-size:12px; color:var(--dtc-text-secondary); margin-top:4px;">
+                            <div class="dtc-document-request-meta">
                                 {{ $req->copies }} cop{{ $req->copies > 1 ? 'ies' : 'y' }} •
                                 Fee: ₱{{ number_format($req->fee, 2) }} •
                                 {{ $req->created_at->format('M d, Y') }}
@@ -150,5 +140,7 @@
         </div>
     </div>
 @endif
+
+</div>
 
 @endsection

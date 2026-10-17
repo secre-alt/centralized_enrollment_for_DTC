@@ -39,53 +39,66 @@
     $appStatusLabel = $application
         ? ($applicationBadges[$application->status]['label'] ?? ucwords(str_replace('_',' ',$application->status)))
         : 'Not Found';
+
+    if (!$enrollment || $enrollment->status !== 'approved') {
+        $paymentStatusLabel = 'Not Required';
+    } elseif ($enrollment->is_paid) {
+        $paymentStatusLabel = 'Confirmed';
+    } elseif ($enrollment->payment && $enrollment->payment->status === 'pending') {
+        $paymentStatusLabel = 'Awaiting Verification';
+    } elseif ($enrollment->payment && $enrollment->payment->status === 'rejected') {
+        $paymentStatusLabel = 'Proof Rejected';
+    } else {
+        $paymentStatusLabel = 'Awaiting Payment';
+    }
 @endphp
 
-<!-- TOP STAT CARDS -->
-<div class="row mb-3">
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="file-text" color="primary"
-            label="Pre-Enrollment Application" value="{{ $appStatusLabel }}"
-            href="{{ route('portal.application.show') }}" link-text="View Application" />
+<div class="dtc-portal-dashboard">
+<div class="dtc-dashboard-overview mb-3" aria-label="Application and enrollment overview">
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Pre-enrollment application</span>
+        <strong>{{ $appStatusLabel }}</strong>
+        @if($application)
+            <a href="{{ route('portal.application.show') }}">View application</a>
+        @else
+            <span class="dtc-overview-note">No application is linked to this account</span>
+        @endif
     </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="graduation-cap" color="warning"
-            label="Official Enrollment" value="{{ $enrollmentLabel }}"
-            href="{{ route('portal.enrollment.index') }}" link-text="View Details" />
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">Official enrollment</span>
+        <strong>{{ $enrollmentLabel }}</strong>
+        @if($enrollment)
+            <a href="{{ route('portal.enrollment.index') }}">View enrollment</a>
+        @else
+            <span class="dtc-overview-note">Available after application approval</span>
+        @endif
     </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="book" color="success"
-            label="Approved Program" value="{{ $application->program->name ?? 'Not provided' }}" />
-    </div>
-
-    <div class="col-lg-3 col-sm-6 col-12 mb-3">
-        <x-dtc.stat-card
-            icon="bell" color="info" :badge="$unreadCount"
-            label="Notifications" value="{{ $unreadCount }} New"
-            href="{{ route('notifications.index') }}" />
+    <div class="dtc-overview-item">
+        <span class="dtc-overview-label">{{ $enrollment && $enrollment->status === 'approved' ? 'Payment' : 'Next step' }}</span>
+        <strong>{{ $enrollment && $enrollment->status === 'approved' ? $paymentStatusLabel : $nextStep['label'] }}</strong>
+        @if($enrollment && $enrollment->status === 'approved' && !$enrollment->is_paid)
+            <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}">Payment details</a>
+        @elseif(!empty($nextStep['url']))
+            <a href="{{ $nextStep['url'] }}">Continue</a>
+        @else
+            <span class="dtc-overview-note">See the Registrar for guidance</span>
+        @endif
     </div>
 </div>
 
 {{-- ══ WELCOME CARD ════════════════════════════════════════════════════ --}}
 <div class="card mb-3 dtc-welcome-card">
-    <div class="card-body" style="padding:24px;">
-        <div style="display:flex; align-items:center; gap:20px;">
-            <div style="width:64px; height:64px; border-radius:50%;
-                        background:linear-gradient(135deg,#0F4CDB,#1a5feb);
-                        display:flex; align-items:center; justify-content:center;
-                        color:#fff; font-weight:800; font-size:26px; flex-shrink:0;">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-            </div>
-            <div>
-                <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
-                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 
+    <div class="card-body">
+        <div class="dtc-welcome-layout">
+            @include('portal.partials.dashboard-avatar')
+            <div class="dtc-welcome-copy">
+                <h4 class="dtc-welcome-title">
+                    Hello, {{ auth()->user()->name }}
                 </h4>
-                <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
+                @if($application && $application->program)
+                <p class="dtc-welcome-meta">{{ $application->program->name }}</p>
+                @endif
+                <p class="dtc-welcome-text">
                     @if($application && $application->status === 'approved')
                         Your pre-enrollment application has been approved.
                         @if(!$enrollment)
@@ -305,6 +318,19 @@
     </div>
 </div>
 
-@include('student.enrollment._payment-modal')
+</div>
 
+@include('student.enrollment._payment-modal')
+@include('portal.partials.dashboard-avatar-modals')
+
+@endsection
+
+@section('css')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@endsection
+
+@section('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="{{ asset('js/dashboard-avatar.js') }}"></script>
 @endsection

@@ -3457,19 +3457,141 @@ body.dtc-dark .navbar-menu-divider {
 }
 
 .dtc-welcome-card {
-    background: linear-gradient(135deg,#EEF2FF,#E0E7FF) !important;
-    border: 1.5px solid #C7D2FE !important;
-    border-radius: 16px !important;
+    background: var(--dtc-surface) !important;
+    border: 1px solid var(--dtc-border) !important;
+    border-radius: var(--dtc-radius-md) !important;
 }
 .dtc-welcome-title { color: #1E293B; }
-.dtc-welcome-text { color: #334155; }
+.dtc-welcome-text,
+.dtc-welcome-meta { color: var(--dtc-text-secondary); }
+.dtc-welcome-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; }
+.dtc-welcome-text, .dtc-welcome-meta { font-size: 12px; line-height: 1.55; margin: 0; }
+.dtc-welcome-meta { margin-bottom: 4px; }
 
 body.dtc-dark .dtc-welcome-card {
-    background: linear-gradient(135deg,#1E293B,#1E3A8A) !important;
-    border-color: #334155 !important;
+    background: var(--dtc-surface) !important;
+    border-color: var(--dtc-border) !important;
 }
 body.dtc-dark .dtc-welcome-title { color: #F8FAFC; }
 body.dtc-dark .dtc-welcome-text { color: #CBD5E1; }
+
+.dtc-dashboard-overview {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    background: var(--dtc-surface);
+    border: 1px solid var(--dtc-border);
+    border-radius: var(--dtc-radius-md);
+}
+.dtc-dashboard-overview--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.dtc-portal-dashboard .card:not(.alert):not(.dtc-upcoming-appointment-card) {
+    background: var(--dtc-surface);
+    border: 1px solid var(--dtc-border) !important;
+    border-radius: var(--dtc-radius-md) !important;
+    box-shadow: none !important;
+    color: var(--dtc-text);
+}
+.dtc-portal-dashboard .card:not(.alert):not(.dtc-upcoming-appointment-card):hover {
+    border-color: var(--dtc-text-muted) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .05) !important;
+}
+.dtc-portal-dashboard .card-header {
+    padding: 13px 16px !important;
+    border-bottom-color: var(--dtc-border) !important;
+    border-radius: var(--dtc-radius-md) var(--dtc-radius-md) 0 0 !important;
+    background: var(--dtc-surface-soft) !important;
+    color: var(--dtc-text) !important;
+    font-size: 13px;
+}
+.dtc-portal-dashboard .card.alert {
+    border: 1px solid var(--dtc-border) !important;
+    border-radius: var(--dtc-radius-md) !important;
+    box-shadow: none !important;
+}
+.dtc-upcoming-appointment-card {
+    background: var(--dtc-primary) !important;
+    border: 1px solid var(--dtc-primary) !important;
+    border-radius: var(--dtc-radius-md) !important;
+    box-shadow: none !important;
+    color: #fff !important;
+}
+.dtc-upcoming-appointment-card .u-text-sm-bold { color: #fff; }
+.dtc-document-page-title { min-width: 0; }
+.dtc-document-page-heading { gap: 14px; }
+.dtc-document-page-action { flex: 0 0 auto; }
+.dtc-document-request-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--dtc-border-soft);
+}
+.dtc-document-request-main { flex: 1 1 auto; min-width: 0; }
+.dtc-document-request-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dtc-document-request-heading > div { min-width: 0; overflow-wrap: anywhere; }
+.dtc-document-request-heading .dtc-status-badge { flex: 0 0 auto; }
+.dtc-document-request-meta,
+.dtc-document-request-main > div { overflow-wrap: anywhere; }
+body.dtc-dark .dtc-upcoming-appointment-card {
+    background: #1E3A8A !important;
+    border-color: #334155 !important;
+}
+body.dtc-dark .dtc-portal-dashboard .card-header {
+    background: var(--dtc-surface-soft) !important;
+    border-bottom-color: var(--dtc-border) !important;
+    color: var(--dtc-text) !important;
+}
+.dtc-overview-item { min-width: 0; padding: 14px 18px; }
+.dtc-overview-item + .dtc-overview-item { border-left: 1px solid var(--dtc-border); }
+.dtc-overview-label { display: block; color: var(--dtc-text-muted); font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.dtc-overview-item strong { display: block; margin: 3px 0; color: var(--dtc-text); font-size: 13px; overflow-wrap: anywhere; }
+.dtc-overview-item a, .dtc-overview-note { color: var(--dtc-text-secondary); font-size: 11px; }
+.dtc-overview-item a:hover { color: var(--dtc-primary); text-decoration: underline; }
+
+.dtc-welcome-layout { display: flex; align-items: center; gap: 16px; }
+.dtc-welcome-avatar-wrap { position: relative; flex: 0 0 56px; width: 56px; height: 56px; }
+.dtc-welcome-avatar-link { display: block; width: 100%; height: 100%; border-radius: 50%; line-height: 0; }
+.dtc-welcome-avatar-image, .dtc-welcome-avatar-initials { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.dtc-welcome-avatar-initials { display: flex; align-items: center; justify-content: center; color: #fff; background: var(--dtc-primary); font-size: 22px; font-weight: 700; }
+.dtc-welcome-copy { flex: 1 1 0; min-width: 0; }
+.dtc-notification-copy { min-width: 0; overflow-wrap: anywhere; }
+.dtc-avatar-camera-badge { position: absolute; right: -3px; bottom: -3px; width: 23px; height: 23px; display: inline-flex; align-items: center; justify-content: center; color: var(--dtc-text-secondary); background: var(--dtc-surface-soft); border: 2px solid var(--dtc-surface); border-radius: 50%; padding: 0; cursor: pointer; line-height: 1; }
+.dtc-avatar-camera-badge:hover { color: var(--dtc-primary); }
+
+.dtc-enrollment-steps { display: flex; align-items: flex-start; justify-content: space-between; position: relative; padding: 0 10px; }
+.dtc-enrollment-track, .dtc-enrollment-track-progress { position: absolute; top: 18px; left: 10%; height: 3px; z-index: 0; }
+.dtc-enrollment-track { right: 10%; background: var(--dtc-border); }
+.dtc-enrollment-track-progress { z-index: 1; background: var(--dtc-primary); }
+.dtc-enrollment-step { position: relative; z-index: 2; display: flex; flex: 1; flex-direction: column; align-items: center; min-width: 0; text-align: center; }
+body.dtc-dark [data-step-state="active"] { background: rgba(255, 199, 44, .16) !important; }
+
+@media (max-width: 767.98px) {
+    .dtc-dashboard-overview { grid-template-columns: 1fr; }
+    .dtc-dashboard-overview--four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dtc-overview-item { padding: 10px 14px; }
+    .dtc-overview-item + .dtc-overview-item { border-left: 0; border-top: 1px solid var(--dtc-border); }
+    .dtc-portal-dashboard .card-header { flex-wrap: wrap; gap: 8px; padding: 12px 14px !important; }
+    .dtc-enrollment-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 8px; padding: 0; }
+    .dtc-enrollment-track, .dtc-enrollment-track-progress { display: none; }
+    .dtc-enrollment-step { flex-direction: row; align-items: flex-start; gap: 9px; text-align: left; }
+    .dtc-enrollment-step [data-step-state] { flex: 0 0 36px; margin: 0 !important; }
+    .dtc-enrollment-step > div:not([data-step-state]) { text-align: left; }
+    .dtc-avatar-confirm-dialog { margin: .5rem; }
+    .dtc-avatar-confirm-actions { flex-direction: column-reverse; }
+    .dtc-avatar-confirm-actions .btn { width: 100%; }
+}
+@media (max-width: 420px) {
+    .dtc-dashboard-overview--four { grid-template-columns: 1fr; }
+    .dtc-document-page-heading { align-items: flex-start !important; flex-wrap: wrap; }
+    .dtc-document-page-action { width: 100%; }
+    .dtc-document-request-row { gap: 10px; padding: 14px; }
+    .dtc-document-request-row > [data-doc-status] { width: 36px !important; height: 36px !important; }
+    .dtc-document-request-heading { align-items: flex-start; flex-wrap: wrap; gap: 6px; }
+    .dtc-welcome-layout { align-items: flex-start; gap: 12px; }
+    .dtc-welcome-avatar-wrap { flex-basis: 48px; width: 48px; height: 48px; }
+    .dtc-welcome-title { font-size: 1.05rem; }
+    .dtc-enrollment-step { gap: 7px; }
+    .dtc-enrollment-step [data-step-state] { flex-basis: 30px; width: 30px !important; height: 30px !important; }
+}
 
 body.dtc-dark .dtc-empty-icon,
 body.dtc-dark .dtc-upload-icon,
