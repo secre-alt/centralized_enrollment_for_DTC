@@ -6,6 +6,7 @@ use App\Mail\ApplicationApproved;
 use App\Models\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 
@@ -30,6 +31,11 @@ class PasswordSetupController extends Controller
             'email'       => $email,
             'linkExpired' => $linkExpired,
         ]);
+    }
+
+    public function requestForm()
+    {
+        return view('auth.request-activation');
     }
 
     /**
@@ -94,7 +100,13 @@ class PasswordSetupController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        $this->attemptResend($validated['email']);
+        try {
+            $this->attemptResend($validated['email']);
+        } catch (\Throwable $exception) {
+            Log::warning('Activation link resend failed.', [
+                'email_hash' => hash_hmac('sha256', strtolower(trim($validated['email'])), (string) config('app.key')),
+            ]);
+        }
 
         return back()->with(
             'success',

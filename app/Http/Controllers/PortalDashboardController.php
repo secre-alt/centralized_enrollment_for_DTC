@@ -179,9 +179,10 @@ class PortalDashboardController extends Controller
                 ],
                 [
                     'label'    => 'Registrar Review',
-                    'sublabel' => 'Await approval',
-                    'done'     => in_array($latestEnrollment->status, ['approved', 'rejected']),
+                    'sublabel' => $latestEnrollment->status === 'rejected' ? 'Decision: rejected' : 'Await approval',
+                    'done'     => $latestEnrollment->status === 'approved',
                     'active'   => $latestEnrollment->status === 'pending',
+                    'rejected' => $latestEnrollment->status === 'rejected',
                 ],
                 [
                     'label'    => 'Approval',
@@ -234,6 +235,13 @@ class PortalDashboardController extends Controller
             return [
                 ['icon' => 'hourglass',  'label' => 'Await Registrar Review', 'desc' => 'Your enrollment is being reviewed.',           'url' => route('portal.enrollment.index'), 'active' => true],
                 ['icon' => 'bell',       'label' => 'Check Notifications',    'desc' => 'You will be notified once approved.',          'url' => route('notifications.index'), 'active' => false],
+            ];
+        }
+
+        if ($enrollment->status === 'rejected') {
+            return [
+                ['icon' => 'rotate-ccw', 'label' => 'Correct and Resubmit', 'desc' => 'Review the Registrar’s feedback, update your enrollment, and submit it again.', 'url' => route('portal.enrollment.create'), 'active' => true],
+                ['icon' => 'file-text', 'label' => 'Review Enrollment History', 'desc' => 'See the decision and feedback for this submission.', 'url' => route('portal.enrollment.index'), 'active' => false],
             ];
         }
 

@@ -33,7 +33,7 @@
     <div class="col-lg-3 col-sm-6 col-12 mb-3">
         <x-dtc.stat-card
             icon="file-text" color="primary"
-            label="Application Status" value="{{ $appStatusLabel }}"
+            label="Enrollment Status" value="{{ $appStatusLabel }}"
             href="{{ route('portal.enrollment.index') }}" link-text="View Details" />
     </div>
 
@@ -72,7 +72,7 @@
             </div>
             <div>
                 <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
-                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
+                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 
                 </h4>
                 @if($studentProfile && $studentProfile->enrolled_ay)
                 <p style="font-size:12px; margin:0 0 4px; color:var(--dtc-muted, #6c757d);">
@@ -91,6 +91,8 @@
                         Your enrollment is approved! Please proceed to the Cashier to pay ₱{{ number_format($fee, 2) }}.
                     @elseif($latestEnrollment->status === 'pending')
                         Your enrollment is under review. Please wait for the Registrar's approval.
+                    @elseif($latestEnrollment->status === 'rejected')
+                        Your enrollment was rejected. Review the Registrar's feedback in the progress section and use the resubmission option below.
                     @else
                         Your enrollment was not approved. Please contact the Registrar.
                     @endif
@@ -127,22 +129,24 @@
                     @foreach ($timeline as $i => $step)
                     <div style="display:flex; flex-direction:column; align-items:center;
                                 z-index:2; flex:1; text-align:center;">
-                        <div data-step-state="{{ $step['done'] ? 'done' : ($step['active'] ? 'active' : 'pending') }}"
+                        <div data-step-state="{{ ($step['rejected'] ?? false) ? 'rejected' : ($step['done'] ? 'done' : ($step['active'] ? 'active' : 'pending')) }}"
                              style="width:36px; height:36px; border-radius:50%;
-                                    border:3px solid {{ $step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-accent)' : 'var(--dtc-border)') }};
-                                    background:{{ $step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-primary-soft)' : 'var(--dtc-surface)') }};
+                                    border:3px solid {{ ($step['rejected'] ?? false) ? 'var(--dtc-danger, #dc3545)' : ($step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-accent)' : 'var(--dtc-border)')) }};
+                                    background:{{ ($step['rejected'] ?? false) ? 'var(--dtc-danger, #dc3545)' : ($step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-primary-soft)' : 'var(--dtc-surface)')) }};
                                     display:flex; align-items:center; justify-content:center;
                                     font-size:12px; font-weight:700;
-                                    color:{{ $step['done'] ? '#fff' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)') }};
+                                    color:{{ (($step['rejected'] ?? false) || $step['done']) ? '#fff' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)') }};
                                     margin-bottom:8px;">
-                            @if($step['done'])
+                            @if($step['rejected'] ?? false)
+                                <i data-lucide="x" class="u-text-xxs"></i>
+                            @elseif($step['done'])
                                 <i data-lucide="check" class="u-text-xxs"></i>
                             @else
                                 {{ $i + 1 }}
                             @endif
                         </div>
                         <div style="font-size:11px; font-weight:{{ $step['done'] || $step['active'] ? '700' : '500' }};
-                                    color:{{ $step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)') }};">
+                                    color:{{ ($step['rejected'] ?? false) ? 'var(--dtc-danger, #dc3545)' : ($step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)')) }};">
                             {{ $step['label'] }}
                         </div>
                         <div style="font-size:10px; color:var(--dtc-text-muted); margin-top:2px;">
@@ -173,6 +177,13 @@
                     <i data-lucide="check-circle"></i>
                     <div style="font-size:13px; font-weight:600;">
                         All steps completed! You are officially enrolled.
+                    </div>
+                </div>
+                @elseif($latestEnrollment && $latestEnrollment->status === 'rejected')
+                <div class="alert alert-danger" style="margin-top:20px; border-radius:12px; padding:12px 16px;">
+                    <div style="font-size:13px; font-weight:700;">Enrollment rejected</div>
+                    <div style="font-size:12px; margin-top:4px;">
+                        {{ $latestEnrollment->remarks ?: 'No additional feedback was provided. Review the available next steps or contact the Registrar for guidance.' }}
                     </div>
                 </div>
                 @endif
@@ -235,6 +246,10 @@
                                         <span class="dtc-status-badge is-warning" style="font-size:10.5px;">
                                             <i data-lucide="clock" style="width:10px;height:10px;"></i> Pending
                                         </span>
+                                    @elseif($latestEnrollment && $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid)
+                                        <span class="dtc-status-badge is-warning" style="font-size:10.5px;">Awaiting Payment</span>
+                                    @elseif($latestEnrollment && $latestEnrollment->status === 'rejected')
+                                        <span class="dtc-status-badge is-danger" style="font-size:10.5px;">Rejected</span>
                                     @else
                                         <span class="dtc-status-badge is-neutral" style="font-size:10.5px;">—</span>
                                     @endif

@@ -2,6 +2,11 @@
 
 return [
 
+    'application_status_lookup' => [
+        'per_ip' => 20,
+        'per_identity' => 5,
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

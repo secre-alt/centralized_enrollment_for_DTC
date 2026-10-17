@@ -18,7 +18,7 @@
     <div class="card-body p-3">
         <form method="GET" action="{{ route('registrar.applications.index') }}" id="applications-filter-form">
             <div class="row" style="gap:0; align-items:flex-end;">
-                <div class="col-md-5 mb-2 mb-md-0">
+                <div class="col-12 col-md-6 col-lg-4 mb-2">
                     <div class="dtc-input-icon-group">
                         <i data-lucide="search" class="dtc-input-icon"></i>
                         <input type="text" name="search" class="form-control dtc-input-with-icon"
@@ -26,8 +26,8 @@
                                value="{{ request('search') }}">
                     </div>
                 </div>
-                <div class="col-md-3 mb-2 mb-md-0">
-                    <select name="type" class="form-control" style="font-size:13px;">
+                <div class="col-12 col-md-6 col-lg-2 mb-2">
+                    <select name="type" class="form-control" style="font-size:13px;" aria-label="Applicant type">
                         <option value="">All Types</option>
                         @foreach([
                             'new_student'    => 'New Student / First Year',
@@ -42,8 +42,18 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2 mb-2 mb-md-0">
-                    <select name="status" class="form-control" style="font-size:13px;">
+                <div class="col-12 col-md-6 col-lg-3 mb-2">
+                    <select name="program_id" class="form-control" style="font-size:13px;" aria-label="Academic program">
+                        <option value="">All Programs</option>
+                        @foreach($programs as $program)
+                            <option value="{{ $program->id }}" {{ (string) request('program_id') === (string) $program->id ? 'selected' : '' }}>
+                                {{ $program->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-lg-2 mb-2">
+                    <select name="status" class="form-control" style="font-size:13px;" aria-label="Application status">
                         <option value="">All Statuses</option>
                         @foreach([
                             'submitted'         => 'Submitted',
@@ -58,11 +68,11 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-12 col-md-2 d-flex" style="gap:6px;">
+                <div class="col-lg-1 col-12 mb-2 d-flex" style="gap:6px;">
                     <button type="submit" class="btn btn-primary btn-sm flex-fill">
                         <i data-lucide="filter" style="width:13px;height:13px;margin-right:3px;"></i>Filter
                     </button>
-                    @if(request()->hasAny(['search','type','status']))
+                    @if(request()->anyFilled(['search','type','status','program_id']))
                         <a href="{{ route('registrar.applications.index') }}" class="btn btn-secondary btn-sm">
                             <i data-lucide="x" style="width:13px;height:13px;"></i>
                         </a>
@@ -140,7 +150,7 @@
                         @empty
                         <tr>
                             <td colspan="8" class="text-center text-muted py-4">
-                                @if(request()->hasAny(['search','type','status']))
+                                @if(request()->anyFilled(['search','type','status','program_id']))
                                     No applications match your filters.
                                 @else
                                     No applications found.
@@ -194,7 +204,7 @@
             </div>
             @empty
             <div class="text-center text-muted py-5">
-                @if(request()->hasAny(['search','type','status']))
+                @if(request()->anyFilled(['search','type','status','program_id']))
                     No applications match your filters.
                 @else
                     No applications found.
@@ -232,6 +242,7 @@
     var searchInput  = document.querySelector('input[name="search"]');
     var typeSelect   = document.querySelector('select[name="type"]');
     var statusSelect = document.querySelector('select[name="status"]');
+    var programSelect = document.querySelector('select[name="program_id"]');
     var wrapper      = document.getElementById('applications-table-wrapper');
     var countEl      = document.getElementById('applications-count');
     var baseUrl      = '{{ route("registrar.applications.index") }}';
@@ -273,6 +284,7 @@
         p.set('search', searchInput.value.trim());
         p.set('type',   typeSelect.value);
         p.set('status', statusSelect.value);
+        p.set('program_id', programSelect.value);
         return baseUrl + '?' + p.toString();
     }
 
@@ -287,6 +299,7 @@
     // Dropdowns - instant
     typeSelect.addEventListener('change',   fetchResults);
     statusSelect.addEventListener('change', fetchResults);
+    programSelect.addEventListener('change', fetchResults);
 
     // Form submit (Enter / Filter button)
     searchInput.closest('form').addEventListener('submit', function (e) {

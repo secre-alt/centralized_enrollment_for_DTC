@@ -88,9 +88,16 @@
                     </a>
                 @endif
                 <div class="dtc-sidebar-profile-divider"></div>
-                <form method="POST" action="{{ route('logout') }}">
+                <form id="logout-form" method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="dtc-sidebar-profile-link is-danger">
+                    <button type="button"
+                            class="dtc-sidebar-profile-link is-danger"
+                            data-dtc-confirm
+                            data-dtc-confirm-title="Log Out?"
+                            data-dtc-confirm-message="Are you sure you want to log out of your account?"
+                            data-dtc-confirm-ok="Log Out"
+                            data-dtc-confirm-type="warning"
+                            data-dtc-confirm-form="#logout-form">
                         <i data-lucide="log-out"></i>
                         <span>Logout</span>
                     </button>

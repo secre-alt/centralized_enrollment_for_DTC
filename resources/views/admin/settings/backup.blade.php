@@ -64,45 +64,10 @@
             <div class="card-body">
                 <div class="backup-warning">
                     <i data-lucide="alert-triangle" class="mr-2"></i>
-                    <strong>Warning:</strong> Restoring will overwrite all current data.
-                    Make sure you have a recent backup before proceeding.
+                    Uploaded SQL files are not restored by this application. For recovery,
+                    use a reviewed backup through the restricted offline database recovery
+                    process, after verifying its source and integrity.
                 </div>
-
-                <form method="POST" action="{{ route('admin.settings.backup.restore') }}"
-                      enctype="multipart/form-data">
-                    @csrf
-
-                    <div class="form-group">
-                        <label class="u-gray-bold-sm">
-                            Upload .sql File
-                        </label>
-                        <div class="backup-drop-zone" id="drop-zone"
-                             onclick="document.getElementById('sql-file').click()">
-                            <i data-lucide="file-code" class="backup-drop-icon"></i>
-                            <div class="backup-drop-title">Click to select file</div>
-                            <div class="backup-drop-sub" id="file-name">.sql files only, max 50MB</div>
-                        </div>
-                        <input type="file" name="sql_file" id="sql-file"
-                               accept=".sql,.txt" class="u-hidden"
-                               onchange="updateFileName(this)">
-                    </div>
-
-                    @if($errors->has('sql_file'))
-                        <div class="dtc-field-error" style="font-size:12px; margin-bottom:12px;">
-                            {{ $errors->first('sql_file') }}
-                        </div>
-                    @endif
-
-                    <button type="button"
-                            class="btn btn-warning btn-block"
-                            data-dtc-confirm
-                            data-dtc-confirm-title="Restore Database?"
-                            data-dtc-confirm-message="This will OVERWRITE all current data with the uploaded file. This action cannot be undone. Are you absolutely sure?"
-                            data-dtc-confirm-ok="Yes, Restore"
-                            data-dtc-confirm-type="danger">
-                        <i data-lucide="undo-2" class="mr-2"></i> Restore Database
-                    </button>
-                </form>
             </div>
         </div>
 

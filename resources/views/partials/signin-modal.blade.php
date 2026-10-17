@@ -28,6 +28,7 @@
                     <p class="dtc-modal-brand-name">DTC EMS</p>
                     <p class="dtc-modal-brand-sub">Danao Technological College</p>
                 </div>
+
                 <button
                     class="dtc-modal-close"
                     type="button"
@@ -129,6 +130,12 @@
                     </label>
                     <a href="{{ route('password.request') }}" class="dtc-modal-forgot">
                         Forgot password?
+                    </a>
+                </div>
+
+                <div style="text-align:right; margin-top:-8px; margin-bottom:16px;">
+                    <a href="{{ route('password.activation.request') }}" class="dtc-modal-forgot">
+                        Need an activation link?
                     </a>
                 </div>
 

@@ -59,6 +59,7 @@ use App\Http\Controllers\Portal\ProfileController;
     // these routes must work independently of any auth session state.
     Route::get('/set-password/{token}', [PasswordSetupController::class, 'showForm'])->name('password.setup.show');
     Route::post('/set-password', [PasswordSetupController::class, 'store'])->name('password.setup.store');
+    Route::get('/request-activation', [PasswordSetupController::class, 'requestForm'])->name('password.activation.request');
 
     // Resend a fresh activation link when the original has expired.
     // Throttled per-IP via Laravel's built-in 'throttle' middleware — this
@@ -75,9 +76,9 @@ use App\Http\Controllers\Portal\ProfileController;
     Route::prefix('apply')->name('public.application.')->group(function () {
         Route::get('/', [ApplicationController::class, 'create'])->name('create');
         Route::post('/', [ApplicationController::class, 'store'])->name('store');
-        Route::get('/success/{application}', [ApplicationController::class, 'success'])->name('success');
+        Route::get('/success', [ApplicationController::class, 'success'])->name('success');
         Route::get('/status', [ApplicationController::class, 'statusForm'])->name('status.form');
-        Route::post('/status', [ApplicationController::class, 'status'])->name('status');
+        Route::post('/status', [ApplicationController::class, 'status'])->middleware('throttle:application-status-lookup')->name('status');
     });
     
     // ── NOTIFICATIONS & SEARCH (all roles) ───────────────────────────────────────

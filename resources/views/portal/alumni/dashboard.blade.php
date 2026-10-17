@@ -64,7 +64,7 @@
             </div>
             <div>
                 <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
-                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
+                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 
                 </h4>
                 @if($studentProfile && ($studentProfile->graduation_year || $studentProfile->program))
                 <p style="font-size:12px; margin:0 0 4px; color:var(--dtc-muted, #6c757d);">

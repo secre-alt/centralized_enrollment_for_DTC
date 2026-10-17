@@ -83,7 +83,7 @@
             </div>
             <div>
                 <h4 class="dtc-welcome-title" style="font-weight:800; margin:0 0 4px;">
-                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 👋
+                    Hello, {{ explode(' ', auth()->user()->name)[0] }}! 
                 </h4>
                 <p class="dtc-welcome-text" style="font-size:13px; margin:0;">
                     @if($application && $application->status === 'approved')

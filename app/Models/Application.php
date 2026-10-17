@@ -8,6 +8,8 @@ class Application extends Model
 {
     protected $fillable = [
         'reference_no',
+        'confirmation_token_hash',
+        'confirmation_token_expires_at',
         'program_id',
         'first_name',
         'last_name',
@@ -50,6 +52,7 @@ class Application extends Model
     protected $casts = [
         'birthdate'   => 'date',
         'reviewed_at' => 'datetime',
+        'confirmation_token_expires_at' => 'datetime',
     ];
 
     /**

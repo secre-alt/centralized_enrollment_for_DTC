@@ -2398,6 +2398,22 @@ body.dtc-dark .page-item .page-link {
    position:fixed (AdminLTE core), so this anchors to its
    bottom edge regardless of scroll position or sidebar
    collapsed/mini/mobile-overlay state. */
+.main-sidebar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 132px;
+    z-index: 1029;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--dtc-sidebar-bg, #fff));
+}
+
+body.dtc-dark .main-sidebar::after {
+    --dtc-sidebar-bg: #0f172a;
+}
+
 .main-sidebar .dtc-sidebar-user-panel {
     position: absolute;
     left: 10px;

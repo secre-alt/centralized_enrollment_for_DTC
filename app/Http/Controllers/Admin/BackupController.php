@@ -115,51 +115,16 @@ class BackupController extends Controller
 
     public function restore(Request $request)
     {
-        $request->validate([
-            'sql_file' => ['required', 'file', 'mimes:sql,txt', 'max:51200'], // 50MB max
+        \App\Models\AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'backup.restore_rejected',
+            'description' => 'Web-based backup restore was rejected; uploaded files are not accepted.',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
         ]);
 
-        try {
-            $file    = $request->file('sql_file');
-            $content = file_get_contents($file->getRealPath());
-
-            // Safety check
-            if (empty(trim($content))) {
-                return redirect()->route('admin.settings.backup')
-                    ->with('error', 'The uploaded file is empty.');
-            }
-
-            // Split SQL into individual statements
-            DB::unprepared('SET FOREIGN_KEY_CHECKS=0;');
-
-            $statements = array_filter(
-                array_map('trim', explode(";\n", $content)),
-                fn($s) => !empty($s) && !str_starts_with($s, '--')
-            );
-
-            foreach ($statements as $statement) {
-                if (!empty(trim($statement))) {
-                    DB::unprepared($statement);
-                }
-            }
-
-            DB::unprepared('SET FOREIGN_KEY_CHECKS=1;');
-
-            \App\Models\AuditLog::create([
-                'user_id'     => Auth::id(),
-                'action'      => 'backup.restored',
-                'description' => 'Restored database from uploaded file "' . $file->getClientOriginalName() . '".',
-                'ip_address'  => $request->ip(),
-                'user_agent'  => $request->userAgent(),
-            ]);
-
-            return redirect()->route('admin.settings.backup')
-                ->with('success', 'Database restored successfully from ' . $file->getClientOriginalName() . '.');
-
-        } catch (\Exception $e) {
-            return redirect()->route('admin.settings.backup')
-                ->with('error', 'Restore failed: ' . $e->getMessage());
-        }
+        return redirect()->route('admin.settings.backup')
+            ->with('error', 'Uploaded backup files cannot be restored from the web interface. Use the approved offline recovery procedure.');
     }
 
     public function deleteBackup(BackupLog $backup)

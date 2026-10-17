@@ -242,6 +242,11 @@
                         <i data-lucide="plus" class="me-2"></i>
                         Submit Another Application
                         </a>
+                        <a
+                        href="{{ route('password.activation.request') }}"
+                        class="btn btn-outline-secondary px-4">
+                        Request Account Activation Link
+                        </a>
 
                     </div>
 

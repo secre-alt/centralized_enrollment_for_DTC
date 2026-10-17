@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ApplicationSubmitted;
 use App\Models\Application;
 use App\Models\ApplicationDocument;
 use App\Models\Program;
@@ -10,6 +11,8 @@ use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -386,8 +389,11 @@ class ApplicationController extends Controller
                 $referenceNo,
                 $allowedDocuments
             ) {
+                $confirmationToken = bin2hex(random_bytes(32));
                 $application = Application::create([
                     'reference_no' => $referenceNo,
+                    'confirmation_token_hash' => hash('sha256', $confirmationToken),
+                    'confirmation_token_expires_at' => now()->addDays(7),
 
                     'program_id' => $validated['program_id'],
 
@@ -481,8 +487,9 @@ class ApplicationController extends Controller
                     ]);
                 }
 
-                return $application;
+                return [$application, $confirmationToken];
             });
+            [$application, $confirmationToken] = $application;
 
             /*
              * Notify existing Registrar users.
@@ -512,8 +519,18 @@ class ApplicationController extends Controller
                  */
             }
 
+            try {
+                Mail::to($application->email)->send(new ApplicationSubmitted($application));
+            } catch (\Throwable $mailException) {
+                Log::warning('Application reference email could not be sent.', [
+                    'application_id' => $application->id,
+                ]);
+            }
+
+            $request->session()->put('application_confirmation_token', $confirmationToken);
+
             return redirect()
-                ->route('public.application.success', $application)
+                ->route('public.application.success')
                 ->with('success', 'Your application has been submitted successfully.');
 
         } catch (\Throwable $exception) {
@@ -533,8 +550,15 @@ class ApplicationController extends Controller
     /**
      * Display the application success/reference page.
      */
-    public function success(Application $application)
+    public function success(Request $request)
     {
+        $token = $request->session()->get('application_confirmation_token');
+        abort_unless(is_string($token) && preg_match('/^[a-f0-9]{64}$/', $token), 404);
+
+        $application = Application::where('confirmation_token_hash', hash('sha256', $token))
+            ->where('confirmation_token_expires_at', '>', now())
+            ->firstOrFail();
+
         return view('public.application.success', [
             'application' => $application,
             'physicalRequirements' =>

@@ -331,11 +331,8 @@ class SettingsController extends Controller
     /** POST /admin/settings/restore */
     public function restore(Request $request)
     {
-        $request->validate(['backup_file' => ['required', 'file']]);
-        $request->file('backup_file')->storeAs('backups', 'restore_upload.sql');
-
         return redirect()->route('admin.settings.backup')
-            ->with('status', 'Restore file uploaded. Please run the restore process manually.');
+            ->with('error', 'Uploaded backup files are not accepted. Use the approved offline recovery procedure.');
     }
 
     /** DELETE /admin/settings/backup/delete */
