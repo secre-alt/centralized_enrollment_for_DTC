@@ -86,7 +86,9 @@
                         >
                     </div>
                     @error('email')
-                        <p class="dtc-modal-field-error">{{ $message }}</p>
+                        @if ($message !== $errors->first())
+                            <p class="dtc-modal-field-error">{{ $message }}</p>
+                        @endif
                     @enderror
                 </div>
 

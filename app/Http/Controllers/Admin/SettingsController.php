@@ -183,19 +183,27 @@ class SettingsController extends Controller
     {
         $request->validate([
             'enrollment_fee'   => ['required', 'numeric', 'min:0'],
+            'document_fee_tor' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'document_fee_diploma' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'document_fee_certification' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'document_fee_true_copy' => ['required', 'numeric', 'min:0', 'max:999999.99'],
             'gcash_number'     => ['nullable', 'string', 'max:11'],
             'gcash_name'       => ['nullable', 'string', 'max:255'],
             'payment_deadline' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        foreach (['enrollment_fee', 'gcash_number', 'gcash_name', 'payment_deadline'] as $key) {
+        foreach ([
+            'enrollment_fee', 'gcash_number', 'gcash_name', 'payment_deadline',
+            'document_fee_tor', 'document_fee_diploma',
+            'document_fee_certification', 'document_fee_true_copy',
+        ] as $key) {
             Setting::updateOrCreate(['key' => $key], ['value' => $request->input($key, '')]);
         }
 
         \App\Models\AuditLog::create([
             'user_id'     => auth()->id(),
             'action'      => 'settings.payment.updated',
-            'description' => 'Updated payment settings (enrollment fee, GCash details, payment deadline).',
+            'description' => 'Updated payment settings (enrollment fee, document fees, GCash details, payment deadline).',
             'ip_address'  => $request->ip(),
             'user_agent'  => $request->userAgent(),
         ]);

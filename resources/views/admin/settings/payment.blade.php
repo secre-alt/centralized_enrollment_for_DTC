@@ -59,6 +59,24 @@
                                        required>
                             </div>
 
+                            <hr>
+                            <h5 class="font-weight-bold mb-3">Document Request Fees</h5>
+                            <p class="u-text-secondary-sm">Set the fee per copy. These rates apply to new requests; existing requests keep their recorded fees.</p>
+                            @foreach ([
+                                'tor' => ['Transcript of Records', 50],
+                                'diploma' => ['Diploma', 100],
+                                'certification' => ['Certification', 30],
+                                'true_copy' => ['True Copy of Records', 50],
+                            ] as $type => [$label, $defaultFee])
+                                <div class="form-group">
+                                    <label for="document_fee_{{ $type }}">{{ $label }} fee (&#8369; per copy)</label>
+                                    <input id="document_fee_{{ $type }}" type="number" name="document_fee_{{ $type }}"
+                                           step="0.01" min="0" max="999999.99"
+                                           value="{{ old('document_fee_' . $type, $settings->{'document_fee_' . $type} ?? $defaultFee) }}"
+                                           class="form-control" required>
+                                </div>
+                            @endforeach
+
                             <div class="form-group">
                                 <label>GCash Account Name</label>
                                 <input type="text"

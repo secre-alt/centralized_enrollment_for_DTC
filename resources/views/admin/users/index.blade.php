@@ -127,12 +127,20 @@
                     data-status="{{ strtolower($user->status) }}">
                     <td>
                         <div  class="u-flex-center-gap-12">
-                            <div style="width:38px; height:38px; border-radius:50%;
-                                        background:linear-gradient(135deg,var(--dtc-primary),#1a5feb);
-                                        display:flex; align-items:center; justify-content:center;
-                                        color:#fff; font-weight:700; font-size:14px; flex-shrink:0;">
-                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                            </div>
+                            @if ($user->avatar)
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($user->avatar) }}"
+                                     alt="{{ $user->name }} profile photo"
+                                     loading="lazy"
+                                     style="width:38px; height:38px; border-radius:50%; object-fit:cover;
+                                            flex-shrink:0; border:1px solid var(--dtc-border);">
+                            @else
+                                <div style="width:38px; height:38px; border-radius:50%;
+                                            background:linear-gradient(135deg,var(--dtc-primary),#1a5feb);
+                                            display:flex; align-items:center; justify-content:center;
+                                            color:#fff; font-weight:700; font-size:14px; flex-shrink:0;">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </div>
+                            @endif
 
                             <div  class="u-text-sm-bold-primary">
                                 {{ $user->name }}

@@ -64,12 +64,13 @@ The committed `.env.example` is a local template. At minimum configure:
 
 | Setting | Purpose |
 | --- | --- |
-| `APP_ENV`, `APP_DEBUG`, `APP_URL`, `APP_KEY` | Environment, error display, canonical URL, encryption key. Generate a unique key; keep it secret and stable for the life of the installation. |
+| `APP_ENV`, `APP_DEBUG`, `APP_URL`, `APP_KEY`, `APP_TRUSTED_HOSTS` | Environment, error display, canonical URL, encryption key, and comma-separated exact hostnames accepted by the web app. Generate a unique key; keep it secret and stable for the life of the installation. The APP_URL hostname is trusted automatically; add every production alias to APP_TRUSTED_HOSTS. |
 | `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | MySQL/MariaDB connection. Use a dedicated least-privilege database user outside local development. |
 | `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Outbound email used by application review and account activation. Configure and verify a real mail provider in production. |
-| `SESSION_DRIVER`, `SESSION_LIFETIME`, `SESSION_SECURE_COOKIE` | Session storage and cookie lifetime/security. Local HTTP can use an unset/false secure-cookie setting; production HTTPS must use secure cookies. `http_only` is enabled and SameSite is `lax` in `config/session.php`. |
+| `SESSION_DRIVER`, `SESSION_LIFETIME`, `SESSION_SECURE_COOKIE` | Session storage and cookie lifetime/security. Local HTTP can use false; production HTTPS must use `SESSION_SECURE_COOKIE=true`. `http_only` is enabled and SameSite is `lax` in `config/session.php`. |
 | `CACHE_DRIVER`, `QUEUE_CONNECTION`, `FILESYSTEM_DISK`, `LOG_CHANNEL`, `LOG_LEVEL` | Cache, queue, uploaded-file storage, and logs. The shipped defaults are suitable only for simple local use. |
-| `RECAPTCHA_ENABLED`, `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY` | Optional application-form CAPTCHA when enabled by the application configuration. Keep the secret key private. |
+| `RECAPTCHA_ENABLED`, `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY` | Login CAPTCHA configuration. Local/testing may explicitly disable it; production requires it and fails closed when disabled, misconfigured, or unavailable. Keep the secret key private. |
+| `LOGIN_RATE_LIMIT_PER_IDENTITY`, `LOGIN_RATE_LIMIT_PER_IP`, `LOGIN_RATE_LIMIT_DECAY_SECONDS` | Optional login throttling overrides. Defaults are 5 attempts per normalized email+IP and 300 attempts per IP per 5 minutes to allow shared campus networks. Use a shared production cache backend so limits apply across application workers. |
 
 `APP_KEY` must not be regenerated on an existing installation: doing so can invalidate encrypted data and sessions. Do not commit `.env`, credentials, uploaded files, or generated backups.
 
@@ -109,12 +110,15 @@ These are deployment requirements, not steps verified against a live server:
 
 - Deploy a reviewed release and install Composer dependencies (`composer install --no-dev --optimize-autoloader`). This repository has no npm lockfile, so frontend builds currently use `npm install` followed by `npm run build`; add and review a lockfile before relying on reproducible `npm ci` builds.
 - Set `APP_ENV=production`, `APP_DEBUG=false`, the correct HTTPS `APP_URL`, and a protected, persistent `APP_KEY`. Do not expose `.env`, source files, logs, SQL dumps, or private uploads through the web root.
+- Set `APP_TRUSTED_HOSTS` to a comma-separated list of exact production hostnames (including any aliases). `TrustHosts` also accepts the host in `APP_URL`; it rejects other Host headers. Keep `APP_URL` set to the canonical HTTPS hostname.
 - Terminate HTTPS correctly and set `SESSION_SECURE_COOKIE=true`. Use a suitable production session/cache backend and restrict cookie domain/path as needed. Keep HTTP-only and SameSite protections enabled.
+- Set `RECAPTCHA_ENABLED=true` and configure both the matching site and secret keys. Login deliberately fails closed if CAPTCHA is disabled, unconfigured, rejected, or Google cannot be reached. Test a valid login and an invalid Host header in staging.
 - Use a dedicated least-privilege database account, strong unique credentials, network restrictions, and regular tested backups.
 - Configure real outbound email and verify application/activation delivery. Configure a durable queue worker only if changing `QUEUE_CONNECTION` from `sync`; supervise and monitor that worker.
 - Set writable ownership/permissions only for Laravel's `storage/` and `bootstrap/cache/` as required by the web/PHP process. Do not make the whole project writable or world-writable.
 - Configure log retention/monitoring and alert on mail, database, storage, and backup failures.
-- From the release directory, run database migrations with `php artisan migrate --force` after backup. Then run `php artisan config:cache`, `php artisan route:cache`, and `php artisan view:cache`. If deployment changes code/config, clear/rebuild the relevant caches. Confirm the application's custom routes can be cached before relying on route caching in the target release.
+- From the release directory, after environment changes run `php artisan config:clear`, verify the deployment environment values, and then run `php artisan config:cache`; restart long-running PHP workers so they load the new configuration. Run database migrations with `php artisan migrate --force` after backup. Then run `php artisan route:cache` and `php artisan view:cache`. Confirm custom routes can be cached before relying on route caching in the target release.
+- Verify Host filtering in staging: requests with each listed hostname and the `APP_URL` host should work; a request sent with an unrelated `Host` header should be rejected by the application/web stack.
 - Verify the web root points to `public/`, built assets exist under `public/build`, and all application URLs use HTTPS.
 - Provision administrator accounts securely; do not use the seeded local default administrator in production.
 - Test login, role access, application email, enrollment, Cashier verification, COR access, private upload access, and restore procedure in a staging environment before release.

@@ -34,10 +34,10 @@
                         <label>Document Type</label>
                         <div class="row">
                             @foreach([
-                                ['value' => 'tor',          'label' => 'Transcript of Records', 'icon' => 'file-text',       'fee' => '₱50/copy'],
-                                ['value' => 'diploma',      'label' => 'Diploma',               'icon' => 'graduation-cap', 'fee' => '₱100/copy'],
-                                ['value' => 'certification','label' => 'Certification',          'icon' => 'certificate',    'fee' => '₱30/copy'],
-                                ['value' => 'true_copy',    'label' => 'True Copy of Records',  'icon' => 'copy',           'fee' => '₱50/copy'],
+                                ['value' => 'tor', 'label' => 'Transcript of Records', 'icon' => 'file-text'],
+                                ['value' => 'diploma', 'label' => 'Diploma', 'icon' => 'graduation-cap'],
+                                ['value' => 'certification', 'label' => 'Certification', 'icon' => 'certificate'],
+                                ['value' => 'true_copy', 'label' => 'True Copy of Records', 'icon' => 'copy'],
                             ] as $doc)
                             <div class="col-6 mb-2">
                                 <label style="cursor:pointer; width:100%;">
@@ -55,7 +55,7 @@
                                             {{ $doc['label'] }}
                                         </div>
                                         <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:4px;">
-                                            {{ $doc['fee'] }}
+                                            &#8369;{{ number_format($documentFees[$doc['value']], 2) }}/copy
                                         </div>
                                     </div>
                                 </label>
@@ -194,15 +194,15 @@
             </div>
             <div class="card-body p-0">
                 @foreach([
-                    ['label' => 'Transcript of Records', 'fee' => '₱50.00 per copy'],
-                    ['label' => 'Diploma',               'fee' => '₱100.00 per copy'],
-                    ['label' => 'Certification',          'fee' => '₱30.00 per copy'],
-                    ['label' => 'True Copy of Records',  'fee' => '₱50.00 per copy'],
+                    ['type' => 'tor', 'label' => 'Transcript of Records'],
+                    ['type' => 'diploma', 'label' => 'Diploma'],
+                    ['type' => 'certification', 'label' => 'Certification'],
+                    ['type' => 'true_copy', 'label' => 'True Copy of Records'],
                 ] as $item)
                 <div style="padding:12px 20px; border-bottom:1px solid var(--dtc-border-soft);
                             display:flex; justify-content:space-between; align-items:center;">
                     <span  class="u-text-sm-secondary-primary">{{ $item['label'] }}</span>
-                    <span style="font-size:13px; font-weight:700; color:var(--dtc-primary);">{{ $item['fee'] }}</span>
+                    <span style="font-size:13px; font-weight:700; color:var(--dtc-primary);">&#8369;{{ number_format($documentFees[$item['type']], 2) }} per copy</span>
                 </div>
                 @endforeach
             </div>
@@ -213,7 +213,7 @@
 
 @section('js')
 <script>
-const fees = { tor: 50, diploma: 100, certification: 30, true_copy: 50 };
+const fees = @json($documentFees);
 const labels = {
     tor: 'Transcript of Records',
     diploma: 'Diploma',

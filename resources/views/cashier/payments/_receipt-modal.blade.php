@@ -56,16 +56,8 @@
                     $modalContent.html(errorMarkup);
                 }
             },
-            error: function (xhr) {
-                var message = (xhr.responseJSON && xhr.responseJSON.message)
-                    ? xhr.responseJSON.message
-                    : "Couldn't load this receipt. Please try again.";
-                $modalContent.html(
-                    '<div class="dtc-review-loading">' +
-                        '<i data-lucide="alert-triangle" class="u-danger-lg"></i>' +
-                        '<p class="text-danger mb-0">' + message + '</p>' +
-                    '</div>'
-                );
+            error: function () {
+                $modalContent.html(errorMarkup);
                 if (window.lucide) lucide.createIcons({ nodes: $modalContent[0].querySelectorAll('[data-lucide]') });
             }
         });

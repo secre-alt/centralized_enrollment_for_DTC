@@ -8,6 +8,7 @@ use App\Models\AppointmentSlot;
 use App\Models\Appointment;
 use App\Services\NotificationService;
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,7 +40,14 @@ class DocumentRequestController extends Controller
             ->filter(fn($slot) => $slot->isAvailable())
             ->values();
 
-        return view('alumni.requests.create', compact('slots'));
+        $documentFees = [
+            'tor' => (float) Setting::get('document_fee_tor', 50),
+            'diploma' => (float) Setting::get('document_fee_diploma', 100),
+            'certification' => (float) Setting::get('document_fee_certification', 30),
+            'true_copy' => (float) Setting::get('document_fee_true_copy', 50),
+        ];
+
+        return view('alumni.requests.create', compact('slots', 'documentFees'));
     }
 
     public function store(Request $request)
@@ -51,14 +59,13 @@ class DocumentRequestController extends Controller
             'appointment_slot_id' => ['nullable', 'exists:appointment_slots,id'],
         ]);
 
-        // Calculate fee based on document type and copies
-        $baseFee = match($validated['document_type']) {
-            'tor'          => 50.00,
-            'diploma'      => 100.00,
-            'certification'=> 30.00,
-            'true_copy'    => 50.00,
-            default        => 50.00,
-        };
+        // Read the authoritative current fee; each request keeps this amount thereafter.
+        $baseFee = (float) Setting::get('document_fee_' . $validated['document_type'], match ($validated['document_type']) {
+            'tor' => 50,
+            'diploma' => 100,
+            'certification' => 30,
+            'true_copy' => 50,
+        });
 
         $fee = $baseFee * $validated['copies'];
 

@@ -82,7 +82,7 @@
                 <p class="dtc-welcome-meta">
                     🎓
                     @if($studentProfile->program){{ $studentProfile->program->name }} · @endif
-                    Academic Year {{ $studentProfile->enrolled_ay }}
+                    Enrolled AY {{ $studentProfile->enrolled_ay }}
                 </p>
                 @endif
                 <p class="dtc-welcome-text">

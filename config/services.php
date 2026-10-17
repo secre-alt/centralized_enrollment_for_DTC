@@ -19,9 +19,17 @@ return [
     |
     */
     'recaptcha' => [
-        'enabled'    => env('RECAPTCHA_ENABLED', true),
+        // Enabled by default in production; local and testing stay usable
+        // without external CAPTCHA credentials unless explicitly enabled.
+        'enabled'    => env('RECAPTCHA_ENABLED', env('APP_ENV') === 'production'),
         'site_key'   => env('RECAPTCHA_SITE_KEY'),
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+    ],
+
+    'login_rate_limit' => [
+        'per_identity_attempts' => env('LOGIN_RATE_LIMIT_PER_IDENTITY', 5),
+        'per_ip_attempts' => env('LOGIN_RATE_LIMIT_PER_IP', 300),
+        'decay_seconds' => env('LOGIN_RATE_LIMIT_DECAY_SECONDS', 300),
     ],
         
     'mailgun' => [
