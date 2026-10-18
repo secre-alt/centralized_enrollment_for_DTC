@@ -9,8 +9,10 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Registrar\DashboardController as RegistrarDashboardController;
 use App\Http\Controllers\Registrar\EnrollmentController as RegistrarEnrollmentController;
 use App\Http\Controllers\Registrar\AppointmentController as RegistrarAppointmentController;
+use App\Http\Controllers\Registrar\AppointmentScheduleController;
 use App\Http\Controllers\Cashier\DashboardController as CashierDashboardController;
 use App\Http\Controllers\Cashier\PaymentController as CashierPaymentController;
+use App\Http\Controllers\Cashier\DocumentPaymentController as CashierDocumentPaymentController;
 use App\Http\Controllers\Student\EnrollmentController;
 use App\Http\Controllers\Student\AppointmentController as StudentAppointmentController;
 use App\Http\Controllers\Alumni\DocumentRequestController as AlumniDocumentController;
@@ -166,6 +168,13 @@ use App\Http\Controllers\Portal\ProfileController;
     Route::post('/appointments/slots', [RegistrarAppointmentController::class, 'storeSlot'])->name('appointments.slots.store');
     Route::put('/appointments/slots/{slot}', [RegistrarAppointmentController::class, 'updateSlot'])->name('appointments.slots.update');
     Route::delete('/appointments/slots/{slot}', [RegistrarAppointmentController::class, 'deleteSlot'])->name('appointments.slots.delete');
+    Route::put('/appointments/slots/{slot}/status', [RegistrarAppointmentController::class, 'setSlotStatus'])->name('appointments.slots.status');
+    Route::get('/appointments/schedule', [AppointmentScheduleController::class, 'index'])->name('appointments.schedule');
+    Route::put('/appointments/schedule', [AppointmentScheduleController::class, 'update'])->name('appointments.schedule.update');
+    Route::post('/appointments/schedule/generate', [AppointmentScheduleController::class, 'generate'])->name('appointments.schedule.generate');
+    Route::get('/appointments/closures/impact', [AppointmentScheduleController::class, 'previewClosureImpact'])->name('appointments.closures.impact');
+    Route::post('/appointments/closures', [AppointmentScheduleController::class, 'storeClosure'])->name('appointments.closures.store');
+    Route::post('/appointments/closures/{closure}/deactivate', [AppointmentScheduleController::class, 'deactivate'])->name('appointments.closures.deactivate');
     Route::get('/appointments', [RegistrarAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments/{appointment}/confirm', [RegistrarAppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::post('/appointments/{appointment}/cancel', [RegistrarAppointmentController::class, 'cancel'])->name('appointments.cancel');
@@ -196,6 +205,13 @@ use App\Http\Controllers\Portal\ProfileController;
 
     Route::post('/payments/{payment}/verify', [CashierPaymentController::class, 'verify'])->name('payments.verify');
     Route::post('/payments/{payment}/reject', [CashierPaymentController::class, 'reject'])->name('payments.reject');
+
+    Route::get('/document-payments', [CashierDocumentPaymentController::class, 'index'])->name('document-payments.index');
+    Route::get('/document-payments/{documentRequest}', [CashierDocumentPaymentController::class, 'show'])->name('document-payments.show');
+    Route::get('/document-payments/{documentRequest}/proof', [CashierDocumentPaymentController::class, 'viewProof'])->name('document-payments.proof');
+    Route::post('/document-payments/{documentRequest}/verify-walk-in', [CashierDocumentPaymentController::class, 'verifyWalkIn'])->name('document-payments.verify-walk-in');
+    Route::post('/document-payments/{documentRequest}/verify-gcash', [CashierDocumentPaymentController::class, 'verifyGcash'])->name('document-payments.verify-gcash');
+    Route::post('/document-payments/{documentRequest}/reject', [CashierDocumentPaymentController::class, 'reject'])->name('document-payments.reject');
     });
 
     // ── PORTAL (Student / Alumni / New Applicant) ─────────────────────────────────
@@ -223,9 +239,14 @@ use App\Http\Controllers\Portal\ProfileController;
     Route::get('/appointments/payment/proof/{payment}', [StudentAppointmentController::class, 'viewProof'])->name('appointments.payment.proof');
     Route::get('/appointments/payment/gcash-qr', [StudentAppointmentController::class, 'showGcashQr'])->name('appointments.gcash.qr');
 
-    Route::get('/documents', [AlumniDocumentController::class, 'index'])->name('documents.index');
-    Route::get('/documents/create', [AlumniDocumentController::class, 'create'])->name('documents.create');
-    Route::post('/documents', [AlumniDocumentController::class, 'store'])->name('documents.store');
+    Route::middleware('role:alumni')->group(function () {
+        Route::get('/documents', [AlumniDocumentController::class, 'index'])->name('documents.index');
+        Route::get('/documents/create', [AlumniDocumentController::class, 'create'])->name('documents.create');
+        Route::post('/documents', [AlumniDocumentController::class, 'store'])->name('documents.store');
+        Route::post('/documents/{documentRequest}/payment', [AlumniDocumentController::class, 'submitPayment'])->name('documents.payment.submit');
+        Route::get('/documents/{documentRequest}/proof', [AlumniDocumentController::class, 'viewProof'])->name('documents.payment.proof');
+        Route::get('/documents/gcash-qr', [AlumniDocumentController::class, 'showGcashQr'])->name('documents.gcash.qr');
+    });
 
     Route::get('/cor', [PortalCorController::class, 'show'])->name('cor.show');
     Route::get('/cor/download', [PortalCorController::class, 'download'])->name('cor.download');

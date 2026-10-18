@@ -28,6 +28,18 @@
         $dashboardNextStep = 'Pick up a ready document';
         $dashboardNextStepNote = $readyRequests . ' request' . ($readyRequests === 1 ? ' is' : 's are') . ' ready for pickup.';
         $dashboardNextStepUrl = route('portal.documents.index');
+    } elseif ($latestRequest && $latestRequest->payment_status === 'rejected') {
+        $dashboardNextStep = 'Resubmit payment proof';
+        $dashboardNextStepNote = 'The Cashier could not verify payment for ' . $latestRequest->document_label . '.';
+        $dashboardNextStepUrl = route('portal.documents.index');
+    } elseif ($latestRequest && $latestRequest->payment_status === 'pending_verification') {
+        $dashboardNextStep = 'Payment under review';
+        $dashboardNextStepNote = 'The Cashier is checking payment for ' . $latestRequest->document_label . '.';
+        $dashboardNextStepUrl = route('portal.documents.index');
+    } elseif ($latestRequest && $latestRequest->payment_status === 'unpaid') {
+        $dashboardNextStep = 'Pay at the Cashier’s Office';
+        $dashboardNextStepNote = 'Pay the fee for ' . $latestRequest->document_label . ' to continue processing.';
+        $dashboardNextStepUrl = route('portal.documents.index');
     } elseif ($latestRequest) {
         $dashboardNextStep = 'Check your latest request';
         $dashboardNextStepNote = ucfirst(str_replace('_', ' ', $latestRequest->status)) . ' · ' . $latestRequest->document_label;
@@ -118,9 +130,11 @@
                             </div>
                         </div>
                     </div>
-                    <span class="dtc-status-badge is-{{ $statusTones[$req->status] ?? 'neutral' }}" style="font-weight:700;">
-                        {{ ucfirst($req->status) }}
-                    </span>
+                    <div class="d-flex flex-column align-items-end" style="gap:5px;">
+                        <span class="dtc-status-badge is-{{ $statusTones[$req->status] ?? 'neutral' }}" style="font-weight:700;">{{ ucfirst($req->status) }}</span>
+                        @php $paymentTone = ['unpaid' => 'warning', 'pending_verification' => 'info', 'verified' => 'success', 'rejected' => 'danger'][$req->payment_status] ?? 'neutral'; @endphp
+                        <span class="dtc-status-badge is-{{ $paymentTone }}">{{ ucwords(str_replace('_', ' ', $req->payment_status)) }}</span>
+                    </div>
                 </div>
                 @empty
                 <div class="text-center py-4 u-muted" >

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AppointmentSlot extends Model
 {
     use HasFactory;
-    protected $fillable = ['date', 'start_time', 'end_time', 'max_bookings'];
+    protected $fillable = ['date', 'start_time', 'end_time', 'max_bookings', 'source', 'status'];
 
     public function appointments()
     {
@@ -18,12 +18,12 @@ class AppointmentSlot extends Model
     public function availableSlots(): int
     {
         return $this->max_bookings - $this->appointments()
-            ->whereNotIn('status', ['cancelled'])
+            ->whereIn('status', ['pending', 'confirmed'])
             ->count();
     }
 
     public function isAvailable(): bool
     {
-        return $this->availableSlots() > 0;
+        return ($this->status ?? 'open') === 'open' && $this->availableSlots() > 0;
     }
 }

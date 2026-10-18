@@ -278,6 +278,9 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
             'status' => 'ready',
             'fee' => 100,
             'is_paid' => true,
+            'payment_method' => 'walk_in',
+            'payment_status' => 'verified',
+            'amount_received' => 100,
         ]);
 
         $this->actingAs($alumnus)->get(route('portal.dashboard'))

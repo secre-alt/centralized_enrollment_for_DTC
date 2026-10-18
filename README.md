@@ -163,3 +163,28 @@ php artisan migrate:status
 php artisan test
 npm run build
 ```
+
+## Appointment schedule generation
+
+Configure operating weekdays, Registrar's office hours, breaks, slot duration, capacity, and booking window from **Registrar → Appointments → Office Schedule & Closures**. Class suspensions do not close appointment availability; only a confirmed office closure does. The generator does not create slots until a valid schedule is saved.
+
+After deploying this feature, back up the database and apply the additive migration:
+
+```sh
+php artisan migrate --force
+```
+
+Generate slots immediately or inspect the configured scheduler:
+
+```sh
+php artisan appointments:generate-slots
+php artisan schedule:list
+```
+
+The Laravel scheduler generates upcoming slots daily at 00:10 in `Asia/Manila`. Production must invoke Laravel's scheduler every minute, for example:
+
+```cron
+* * * * * cd /path/to/dtc-ems && php artisan schedule:run >> /dev/null 2>&1
+```
+
+On Windows local development, run `php artisan schedule:work` in a dedicated terminal. The generator is safe to rerun and leaves existing/manual slots and appointment history intact. Review pending appointments after recording a closure; affected students are notified, and their bookings/payment records are not automatically cancelled or refunded.

@@ -12,6 +12,9 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use App\Services\AppointmentScheduleService;
 
 class AppointmentController extends Controller
 {
@@ -26,7 +29,7 @@ class AppointmentController extends Controller
             ->orderBy('date')
             ->orderBy('start_time')
             ->get()
-            ->filter(fn($slot) => $slot->isAvailable())
+            ->filter(fn($slot) => $slot->isAvailable() && !app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s')))
             ->values();
 
         return view('student.appointments.index', compact('appointments', 'slots'));
@@ -38,7 +41,7 @@ class AppointmentController extends Controller
             ->orderBy('date')
             ->orderBy('start_time')
             ->get()
-            ->filter(fn($slot) => $slot->isAvailable())
+            ->filter(fn($slot) => $slot->isAvailable() && !app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s')))
             ->values();
 
         $gcashNumber  = Setting::get('gcash_number');
@@ -62,32 +65,17 @@ class AppointmentController extends Controller
             'proof_of_payment'    => ['required_if:payment_method,gcash', 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ]);
 
-        $slot = AppointmentSlot::findOrFail($validated['appointment_slot_id']);
-
-        if (! $slot->isAvailable()) {
-            return back()->withErrors([
-                'appointment_slot_id' => 'This slot is no longer available. Please select another.',
-            ])->withInput();
-        }
-
-        $existing = Appointment::where('user_id', Auth::id())
-            ->where('appointment_slot_id', $validated['appointment_slot_id'])
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->exists();
-
-        if ($existing) {
-            return back()->withErrors([
-                'appointment_slot_id' => 'You already have a booking for this slot.',
-            ])->withInput();
-        }
-
-        $appointment = Appointment::create([
-            'user_id'             => Auth::id(),
-            'appointment_slot_id' => $validated['appointment_slot_id'],
-            'document_type'       => $validated['document_type'],
-            'purpose'             => $validated['purpose'],
-            'status'              => 'pending',
-        ]);
+        $appointment = DB::transaction(function () use ($validated) {
+            $slot = AppointmentSlot::whereKey($validated['appointment_slot_id'])->lockForUpdate()->firstOrFail();
+            $closed = app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time);
+            if (! $slot->isAvailable() || $closed || $slot->date < today()->toDateString() || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
+                throw ValidationException::withMessages(['appointment_slot_id' => 'This slot is no longer available. Please select another.']);
+            }
+            $existing = Appointment::where('user_id', Auth::id())->where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->exists();
+            if ($existing) throw ValidationException::withMessages(['appointment_slot_id' => 'You already have a booking for this slot.']);
+            return Appointment::create(['user_id' => Auth::id(), 'appointment_slot_id' => $slot->id, 'document_type' => $validated['document_type'], 'purpose' => $validated['purpose'], 'status' => 'pending']);
+        });
+        $slot = $appointment->slot;
 
         // Record payment if applicable
         $fee = (float) Setting::get('appointment_processing_fee', 0);
@@ -140,7 +128,7 @@ class AppointmentController extends Controller
             ->orderBy('date')
             ->orderBy('start_time')
             ->get()
-            ->filter(fn($slot) => $slot->id === $appointment->appointment_slot_id || $slot->isAvailable())
+            ->filter(fn($slot) => $slot->id === $appointment->appointment_slot_id || ($slot->isAvailable() && !app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s'))))
             ->values();
 
         return view('student.appointments.edit', compact('appointment', 'slots'));
@@ -161,31 +149,29 @@ class AppointmentController extends Controller
             'purpose'             => ['required', 'string', 'max:500'],
         ]);
 
-        // If slot changed, verify the new slot is available
-        if ($validated['appointment_slot_id'] != $appointment->appointment_slot_id) {
-            $slot = AppointmentSlot::findOrFail($validated['appointment_slot_id']);
-
-            if (! $slot->isAvailable()) {
-                return back()->withErrors([
-                    'appointment_slot_id' => 'This slot is no longer available. Please select another.',
-                ])->withInput();
-            }
-        }
-
+        $original = $appointment->getOriginal();
         $changes = [];
-        if ($appointment->document_type !== $validated['document_type']) {
-            $changes[] = 'document type changed to ' . ucfirst($validated['document_type']);
+        if ($original['document_type'] !== $validated['document_type']) $changes[] = 'document type changed to ' . ucfirst($validated['document_type']);
+        if ($original['appointment_slot_id'] != $validated['appointment_slot_id']) {
+            $newSlot = AppointmentSlot::findOrFail($validated['appointment_slot_id']);
+            $changes[] = 'schedule changed to ' . \Carbon\Carbon::parse($newSlot->date)->format('M d, Y') . ' at ' . \Carbon\Carbon::parse($newSlot->start_time)->format('h:i A');
         }
-        if ($appointment->appointment_slot_id != $validated['appointment_slot_id']) {
-            $newSlot = AppointmentSlot::find($validated['appointment_slot_id']);
-            $changes[] = 'schedule changed to ' . \Carbon\Carbon::parse($newSlot->date)->format('M d, Y')
-                . ' at ' . \Carbon\Carbon::parse($newSlot->start_time)->format('h:i A');
-        }
-        if ($appointment->purpose !== $validated['purpose']) {
-            $changes[] = 'purpose updated';
+        if ($original['purpose'] !== $validated['purpose']) $changes[] = 'purpose updated';
+
+        if ($validated['appointment_slot_id'] != $appointment->appointment_slot_id) {
+            DB::transaction(function () use ($validated, $appointment) {
+                $slot = AppointmentSlot::whereKey($validated['appointment_slot_id'])->lockForUpdate()->firstOrFail();
+                if (! $slot->isAvailable() || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) || $slot->date < today()->toDateString() || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
+                    throw ValidationException::withMessages(['appointment_slot_id' => 'This slot is no longer available. Please select another.']);
+                }
+                if (Appointment::where('user_id', Auth::id())->where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->exists()) {
+                    throw ValidationException::withMessages(['appointment_slot_id' => 'You already have a booking for this slot.']);
+                }
+                $appointment->update($validated);
+            });
         }
 
-        $appointment->update($validated);
+        if ($validated['appointment_slot_id'] == $appointment->appointment_slot_id) $appointment->update($validated);
 
         // Notify registrars of the update
         $slot = AppointmentSlot::find($appointment->appointment_slot_id);

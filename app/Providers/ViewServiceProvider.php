@@ -79,6 +79,7 @@ class ViewServiceProvider extends ServiceProvider
                         ['header' => 'CASHIER'],
                         ['text' => 'Cashier Dashboard', 'url' => route('cashier.dashboard'),      'icon' => 'gauge'],
                         ['text' => 'Process Payments',  'url' => route('cashier.payments.index'), 'icon' => 'banknote'],
+                        ['text' => 'Document Fees',    'url' => route('cashier.document-payments.index'), 'icon' => 'file-check'],
 
                         ['header' => 'SYSTEM'],
                         $notifItem,
@@ -108,6 +109,7 @@ class ViewServiceProvider extends ServiceProvider
                     ['header' => 'CASHIER PANEL'],
                     ['text' => 'Dashboard',       'url' => route('cashier.dashboard'),      'icon' => 'gauge'],
                     ['text' => 'Process Payments','url' => route('cashier.payments.index'), 'icon' => 'banknote'],
+                    ['text' => 'Document Fees',  'url' => route('cashier.document-payments.index'), 'icon' => 'file-check'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];

@@ -10,6 +10,7 @@
             <p class="mb-0 u-text-secondary-sm">Set available dates and times for student appointments</p>
         </div>
         <div class="d-flex flex-wrap u-gap-8">
+            <a href="{{ route('registrar.appointments.schedule') }}" class="btn btn-secondary btn-sm"><i data-lucide="calendar-cog" class="mr-1"></i> Office Schedule & Closures</a>
             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addSlotModal">
                 <i data-lucide="plus" class="mr-1"></i> Add Slot
             </button>
@@ -22,11 +23,19 @@
 
 @section('content')
 
+@if($errors->any() && !old('date'))
+<div class="alert alert-danger">{{ $errors->first() }}</div>
+@endif
+
+@if(!$appointmentSchedule)
+<div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap" style="gap:10px">
+    <span>Automatic slots are not configured yet. Set the Registrar's office hours and capacity first.</span>
+    <a href="{{ route('registrar.appointments.schedule') }}" class="btn btn-sm btn-primary">Configure Office Schedule</a>
+</div>
+@endif
+
 @php
-    $totalSlots     = $slots->total();
-    $availableCount = $slots->getCollection()->filter(fn($s) => $s->availableSlots() > 0 && \Carbon\Carbon::parse($s->date)->isFuture())->count();
-    $fullCount      = $slots->getCollection()->filter(fn($s) => $s->availableSlots() <= 0)->count();
-    $pastCount      = $slots->getCollection()->filter(fn($s) => \Carbon\Carbon::parse($s->date)->isPast())->count();
+    $totalSlots = $slots->total();
 @endphp
 
 {{-- ── Summary Stats ──────────────────────────────────────────────────── --}}
@@ -84,8 +93,10 @@
             $available   = $slot->availableSlots();
             $booked      = $slot->appointments_count;
             $max         = $slot->max_bookings;
-            $isPast      = \Carbon\Carbon::parse($slot->date)->isPast();
+            $isPast      = $slot->date < today()->toDateString() || ($slot->date === today()->toDateString() && $slot->end_time <= now()->format('H:i:s'));
             $isFull      = $available <= 0;
+            $isClosure   = app(\App\Services\AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time);
+            $isClosed    = ($slot->status ?? 'open') === 'closed' || $isClosure;
             $isNearlyFull = !$isFull && ($available / max($max,1)) <= 0.3;
             $pct         = $max > 0 ? round(($booked / $max) * 100) : 0;
             $barColor    = $isFull ? 'var(--dtc-danger)' : ($isNearlyFull ? 'var(--dtc-accent)' : 'var(--dtc-success)');
@@ -135,7 +146,10 @@
 
             {{-- Status --}}
             <div class="dtc-slot-status-block">
-                @if($isPast)
+                <x-dtc.status-badge :status="$slot->source === 'automatic' ? 'Automatic' : 'Manual'" :variant="$slot->source === 'automatic' ? 'primary' : 'secondary'" />
+                @if($isClosed)
+                    <x-dtc.status-badge :status="$isClosure ? 'Office Closed' : 'Closed'" variant="secondary" />
+                @elseif($isPast)
                     <x-dtc.status-badge status="Past" variant="secondary" />
                 @elseif($isFull)
                     <x-dtc.status-badge status="Full" variant="danger" />
@@ -148,6 +162,11 @@
 
             {{-- Actions --}}
             <div class="dtc-slot-actions-block">
+                <form method="POST" action="{{ route('registrar.appointments.slots.status', $slot) }}" onsubmit="return confirm('Changing this slot status affects future bookings. Existing appointments remain on record and may need follow-up. Continue?')">
+                    @csrf @method('PUT')
+                    <input type="hidden" name="status" value="{{ ($slot->status ?? 'open') === 'open' ? 'closed' : 'open' }}">
+                    <button class="dtc-icon-btn" type="submit" title="{{ ($slot->status ?? 'open') === 'open' ? 'Close slot' : 'Reopen slot' }}"><i data-lucide="{{ ($slot->status ?? 'open') === 'open' ? 'lock' : 'lock-open' }}"></i></button>
+                </form>
                 {{-- Edit --}}
                 <button type="button"
                         class="dtc-icon-btn dtc-slot-edit-btn"
@@ -173,7 +192,7 @@
                             title="Delete slot"
                             data-dtc-confirm
                             data-dtc-confirm-title="Delete Appointment Slot?"
-                            data-dtc-confirm-message="Are you sure you want to delete this slot? Students who have booked it will be affected."
+                            data-dtc-confirm-message="Delete this unused slot? Slots with appointment history are protected from deletion."
                             data-dtc-confirm-ok="Delete Slot"
                             data-dtc-confirm-form="#del-slot-{{ $slot->id }}">
                         <i data-lucide="trash-2"></i>
@@ -228,7 +247,7 @@
                     </button>
                 </div>
                 <div class="modal-body px-4 py-3">
-                    @if ($errors->any() && (old('date') || old('start_time')))
+                    @if ($errors->any() && !old('edit_slot_id') && (old('date') || old('start_time')))
                         <div class="alert alert-danger py-2 px-3" style="font-size:13px;">{{ $errors->first() }}</div>
                     @endif
 
@@ -292,7 +311,7 @@
                     </button>
                 </div>
                 <div class="modal-body px-4 py-3">
-                    <div id="editSlotErrors" class="alert alert-danger py-2 px-3 mb-3" style="font-size:13px; display:none;"></div>
+                    <div id="editSlotErrors" class="alert alert-danger py-2 px-3 mb-3" style="font-size:13px; display:none;">{{ $errors->first() }}</div>
 
                     <div class="form-group">
                         <label class="dtc-slot-label">Date</label>
@@ -332,12 +351,23 @@
 
 @endsection
 
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/registrar-slots.css') }}">
+@endsection
+
 @section('js')
 <script>
 (function () {
     // Re-open add modal on validation error
     @if($errors->any() && (old('date') || old('start_time') || old('max_bookings')))
+    @if(old('edit_slot_id'))
+    $(document).ready(function () {
+        var button = document.querySelector('.dtc-slot-edit-btn[data-slot-id="{{ old('edit_slot_id') }}"]');
+        if (button) { button.click(); document.getElementById('edit_date').value = @json(old('date')); document.getElementById('edit_start_time').value = @json(old('start_time')); document.getElementById('edit_end_time').value = @json(old('end_time')); document.getElementById('edit_max_bookings').value = @json(old('max_bookings')); document.getElementById('editSlotErrors').style.display = 'block'; }
+    });
+    @else
     $(document).ready(function () { $('#addSlotModal').modal('show'); });
+    @endif
     @endif
 
     // Edit slot modal: populate fields and fix focus

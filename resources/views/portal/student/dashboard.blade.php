@@ -117,80 +117,65 @@
 
         {{-- Enrollment Progress Stepper --}}
         @if($timeline)
-        <div class="card mb-3">
-            <div class="card-header font-weight-bold">
-                Enrollment Progress
-            </div>
-            <div class="card-body">
-                {{-- Stepper --}}
-                <div class="dtc-enrollment-steps">
-
-                    {{-- Progress line --}}
-                    <div class="dtc-enrollment-track"></div>
-                    <div class="dtc-enrollment-track-progress" style="width:{{ $completedSteps > 0 ? (($completedSteps - 1) / (count($timeline) - 1)) * 80 : 0 }}%;"></div>
-
-                    @foreach ($timeline as $i => $step)
-                    <div class="dtc-enrollment-step">
-                        <div data-step-state="{{ ($step['rejected'] ?? false) ? 'rejected' : ($step['done'] ? 'done' : ($step['active'] ? 'active' : 'pending')) }}"
-                             style="width:36px; height:36px; border-radius:50%;
-                                    border:3px solid {{ ($step['rejected'] ?? false) ? 'var(--dtc-danger, #dc3545)' : ($step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-accent)' : 'var(--dtc-border)')) }};
-                                    background:{{ ($step['rejected'] ?? false) ? 'var(--dtc-danger, #dc3545)' : ($step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-primary-soft)' : 'var(--dtc-surface)')) }};
-                                    display:flex; align-items:center; justify-content:center;
-                                    font-size:12px; font-weight:700;
-                                    color:{{ (($step['rejected'] ?? false) || $step['done']) ? '#fff' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)') }};
-                                    margin-bottom:8px;">
-                            @if($step['rejected'] ?? false)
-                                <i data-lucide="x" class="u-text-xxs"></i>
-                            @elseif($step['done'])
-                                <i data-lucide="check" class="u-text-xxs"></i>
-                            @else
-                                {{ $i + 1 }}
-                            @endif
-                        </div>
-                        <div style="font-size:11px; font-weight:{{ $step['done'] || $step['active'] ? '700' : '500' }};
-                                    color:{{ ($step['rejected'] ?? false) ? 'var(--dtc-danger, #dc3545)' : ($step['done'] ? 'var(--dtc-primary)' : ($step['active'] ? 'var(--dtc-warning)' : 'var(--dtc-text-muted)')) }};">
-                            {{ $step['label'] }}
-                        </div>
-                        <div style="font-size:10px; color:var(--dtc-text-muted); margin-top:2px;">
-                            {{ $step['sublabel'] }}
-                        </div>
-                    </div>
-                    @endforeach
+        @php
+            $timelineCount = max(count($timeline), 2);
+            $timelineProgress = $completedSteps > 0
+                ? (($completedSteps - 1) / ($timelineCount - 1)) * 80
+                : 0;
+        @endphp
+        <section class="card mb-3 dtc-enrollment-card" aria-labelledby="enrollment-progress-title">
+            <div class="card-header dtc-enrollment-card-header">
+                <div>
+                    <h2 id="enrollment-progress-title">Enrollment journey</h2>
+                    <p>Track each step from application to enrollment.</p>
                 </div>
+                <span class="dtc-enrollment-status">{{ $appStatusLabel }}</span>
+            </div>
+            <div class="card-body dtc-enrollment-card-body">
+                <ol class="dtc-enrollment-steps" style="--enrollment-progress: {{ $timelineProgress }}%; --enrollment-step-count: {{ count($timeline) }};">
+                    <li class="dtc-enrollment-track" aria-hidden="true"><span></span></li>
+                    @foreach ($timeline as $i => $step)
+                        @php
+                            $stepState = ($step['rejected'] ?? false) ? 'rejected' : ($step['done'] ? 'done' : ($step['active'] ? 'active' : 'pending'));
+                        @endphp
+                        <li class="dtc-enrollment-step" data-step-state="{{ $stepState }}" aria-current="{{ $step['active'] ? 'step' : 'false' }}">
+                            <span class="dtc-enrollment-marker" aria-hidden="true">
+                                @if($stepState === 'rejected')
+                                    <i data-lucide="x"></i>
+                                @elseif($step['done'])
+                                    <i data-lucide="check"></i>
+                                @else
+                                    {{ $i + 1 }}
+                                @endif
+                            </span>
+                            <span class="dtc-enrollment-step-copy">
+                                <strong>{{ $step['label'] }}</strong>
+                                <span>{{ $step['sublabel'] }}</span>
+                            </span>
+                        </li>
+                    @endforeach
+                </ol>
 
                 {{-- Current step info --}}
                 @php $activeStep = collect($timeline)->firstWhere('active', true); @endphp
                 @if($activeStep)
-                <div class="alert alert-warning" style="margin-top:20px; border-radius:12px;
-                            padding:12px 16px; display:flex; align-items:center; gap:12px;">
-                    <i data-lucide="arrow-right"></i>
-                    <div>
-                        <div style="font-size:13px; font-weight:600;">
-                            Current Step: {{ $activeStep['label'] }}
-                        </div>
-                        <div style="font-size:12px; opacity:0.85;">
-                            {{ $activeStep['sublabel'] }}
-                        </div>
-                    </div>
+                <div class="dtc-enrollment-notice is-active" role="status">
+                    <i data-lucide="arrow-right" aria-hidden="true"></i>
+                    <div><strong>Up next: {{ $activeStep['label'] }}</strong><span>{{ $activeStep['sublabel'] }}</span></div>
                 </div>
                 @elseif($latestEnrollment && $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
-                <div class="alert alert-success" style="margin-top:20px; border-radius:12px;
-                            padding:12px 16px; display:flex; align-items:center; gap:12px;">
-                    <i data-lucide="check-circle"></i>
-                    <div style="font-size:13px; font-weight:600;">
-                        All steps completed! You are officially enrolled.
-                    </div>
+                <div class="dtc-enrollment-notice is-complete" role="status">
+                    <i data-lucide="circle-check" aria-hidden="true"></i>
+                    <div><strong>Enrollment complete</strong><span>Your payment is confirmed and you are officially enrolled.</span></div>
                 </div>
                 @elseif($latestEnrollment && $latestEnrollment->status === 'rejected')
-                <div class="alert alert-danger" style="margin-top:20px; border-radius:12px; padding:12px 16px;">
-                    <div style="font-size:13px; font-weight:700;">Enrollment rejected</div>
-                    <div style="font-size:12px; margin-top:4px;">
-                        {{ $latestEnrollment->remarks ?: 'No additional feedback was provided. Review the available next steps or contact the Registrar for guidance.' }}
-                    </div>
+                <div class="dtc-enrollment-notice is-rejected" role="alert">
+                    <i data-lucide="circle-alert" aria-hidden="true"></i>
+                    <div><strong>Enrollment needs attention</strong><span>{{ $latestEnrollment->remarks ?: 'No additional feedback was provided. Review the available next steps or contact the Registrar for guidance.' }}</span></div>
                 </div>
                 @endif
             </div>
-        </div>
+        </section>
         @endif
 
         {{-- Enrolled Subjects — COR-style table --}}
@@ -487,6 +472,7 @@
 @section('css')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+<link rel="stylesheet" href="{{ asset('css/student-dashboard.css') }}">
 @endsection
 
 @section('js')

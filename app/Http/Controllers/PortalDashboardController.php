@@ -162,7 +162,7 @@ class PortalDashboardController extends Controller
             ->latest()->get();
 
         $totalRequests = $requests->count();
-        $readyRequests = $requests->where('status', 'ready')->count();
+        $readyRequests = $requests->filter(fn ($item) => $item->status === 'ready' && $item->is_paid && $item->payment_status === 'verified')->count();
         $releasedDocs  = $requests->where('status', 'released')->count();
         $totalFees     = $requests->sum('fee');
 

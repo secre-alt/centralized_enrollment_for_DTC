@@ -1,265 +1,278 @@
 @extends('adminlte::page')
 @include('partials.navbar')
 
-@section('title', 'Request Document')
+@section('title', 'Request a Document')
 
 @section('content_header')
-    <div>
-        <h4 class="mb-0 font-weight-bold u-text" >Request a Document</h4>
-        <p class="mb-0 u-text-secondary-sm" >
-            Submit a document request to the Registrar's Office
-        </p>
+    <div class="dr dr-head">
+        <div>
+            <a href="{{ route('portal.documents.index') }}" class="dr-back">
+                <i data-lucide="chevron-left" aria-hidden="true"></i> My requests
+            </a>
+            <h1>Request a document</h1>
+            <p>Pick what you need and how you’ll pay. The Registrar prepares it, and you collect it on campus.</p>
+        </div>
     </div>
 @endsection
 
+@php
+    $documentOptions = [
+        'tor'           => ['label' => 'Transcript of Records', 'desc' => 'Official academic transcript'],
+        'diploma'       => ['label' => 'Diploma',               'desc' => 'Replacement or authentication'],
+        'certification' => ['label' => 'Certification',         'desc' => 'Certificate of enrollment or graduation'],
+        'true_copy'     => ['label' => 'True Copy of Records',   'desc' => 'Certified true copy of your records'],
+    ];
+    $oldPayment = old('payment_method', 'walk_in');
+    $gcashChosen = $gcashQrReady && $oldPayment === 'gcash_qr';
+    $slotGroups = $slots->groupBy(fn ($slot) => \Carbon\Carbon::parse($slot->date)->format('Y-m-d'));
+    $oldSlot = $slots->firstWhere('id', old('appointment_slot_id'));
+    $selectedPickupDate = old('pickup_date', $oldSlot
+        ? \Carbon\Carbon::parse($oldSlot->date)->format('Y-m-d')
+        : '');
+@endphp
+
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header font-weight-bold u-text" >
-                <i data-lucide="folder-plus" class="mr-2 u-link"></i>
-                Document Request Form
-            </div>
-            <div class="card-body">
+<div class="dr dr-create">
+    @if ($errors->any())
+        <div class="dr-alert dr-alert--error" role="alert">
+            <i data-lucide="circle-alert" aria-hidden="true"></i>
+            <div>{{ $errors->first() }}</div>
+        </div>
+    @endif
 
-                @if ($errors->any())
-                    <div class="alert alert-danger">{{ $errors->first() }}</div>
-                @endif
+    <form method="POST" action="{{ route('portal.documents.store') }}" enctype="multipart/form-data"
+          id="drForm" class="dr-grid"
+          data-fees='@json($documentFees)'
+          data-max-copies="10">
+        @csrf
 
-                <form method="POST" action="{{ route('portal.documents.store') }}">
-                    @csrf
+        <div class="dr-form">
+            <div class="dr-sheet">
 
-                    {{-- Document Type --}}
-                    <div class="form-group">
-                        <label>Document Type</label>
-                        <div class="row">
-                            @foreach([
-                                ['value' => 'tor', 'label' => 'Transcript of Records', 'icon' => 'file-text'],
-                                ['value' => 'diploma', 'label' => 'Diploma', 'icon' => 'graduation-cap'],
-                                ['value' => 'certification', 'label' => 'Certification', 'icon' => 'certificate'],
-                                ['value' => 'true_copy', 'label' => 'True Copy of Records', 'icon' => 'copy'],
-                            ] as $doc)
-                            <div class="col-6 mb-2">
-                                <label style="cursor:pointer; width:100%;">
-                                    <input type="radio" name="document_type"
-                                           value="{{ $doc['value'] }}"
-                                           
-                                           class="doc-radio u-hidden"
-                                           {{ old('document_type') === $doc['value'] ? 'checked' : '' }}>
-                                    <div class="doc-option"
-                                         style="border:2px solid var(--dtc-border); border-radius:12px;
-                                                padding:14px; text-align:center; transition:all 0.2s;
-                                                background:var(--dtc-surface-soft);">
-                                        <i data-lucide="{{ $doc['icon'] }}" style="font-size:22px; color:var(--dtc-text-muted); margin-bottom:8px; display:block;"></i>
-                                        <div style="font-size:12px; font-weight:600; color:var(--dtc-text-secondary);">
-                                            {{ $doc['label'] }}
-                                        </div>
-                                        <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:4px;">
-                                            &#8369;{{ number_format($documentFees[$doc['value']], 2) }}/copy
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                            @endforeach
+                {{-- Document --}}
+                <fieldset class="dr-sec" aria-describedby="drTypeError">
+                    <legend class="dr-sec-title">What do you need?</legend>
+                    <p class="dr-sec-hint">Fees are charged per copy.</p>
+                    <div class="dr-opts" id="drTypeGroup" role="radiogroup" aria-label="Document type">
+                        @foreach ($documentOptions as $value => $doc)
+                            <label class="dr-opt">
+                                <input type="radio" name="document_type" value="{{ $value }}"
+                                       class="dr-opt-input dr-visually-hidden"
+                                       data-label="{{ $doc['label'] }}" required
+                                       {{ old('document_type') === $value ? 'checked' : '' }}>
+                                <span class="dr-opt-mark" aria-hidden="true"></span>
+                                <span class="dr-opt-text">
+                                    <span class="dr-opt-name">{{ $doc['label'] }}</span>
+                                    <span class="dr-opt-desc">{{ $doc['desc'] }}</span>
+                                </span>
+                                <span class="dr-opt-price">&#8369;{{ number_format($documentFees[$value], 2) }}<small>per copy</small></span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <p class="dr-error" id="drTypeError" role="alert">Choose the document you need to continue.</p>
+                </fieldset>
+
+                {{-- Copies and purpose --}}
+                <div class="dr-sec">
+                    <div class="dr-field">
+                        <label class="dr-label" for="copies">Copies</label>
+                        <div class="dr-stepper">
+                            <button type="button" id="drCopiesMinus" aria-label="Fewer copies">&minus;</button>
+                            <input type="number" name="copies" id="copies" value="{{ old('copies', 1) }}"
+                                   min="1" max="10" inputmode="numeric" required aria-describedby="copies-help">
+                            <button type="button" id="drCopiesPlus" aria-label="More copies">+</button>
                         </div>
+                        <p class="dr-help" id="copies-help">Up to 10 copies per request.</p>
                     </div>
-
-                    {{-- Number of Copies --}}
-                    <div class="form-group">
-                        <label>Number of Copies</label>
-                        <div  class="u-flex-center-gap-12">
-                            <button type="button" onclick="adjustCopies(-1)"
-                                    style="width:36px; height:36px; border-radius:10px;
-                                           background:var(--dtc-surface-soft); border:1.5px solid var(--dtc-border); color:var(--dtc-text);
-                                           font-size:18px; cursor:pointer; display:flex;
-                                           align-items:center; justify-content:center;">−</button>
-                            <input type="number" name="copies" id="copies"
-                                   class="form-control" value="{{ old('copies', 1) }}"
-                                   min="1" max="10" required
-                                   style="width:80px; text-align:center;">
-                            <button type="button" onclick="adjustCopies(1)"
-                                    style="width:36px; height:36px; border-radius:10px;
-                                           background:var(--dtc-surface-soft); border:1.5px solid var(--dtc-border); color:var(--dtc-text);
-                                           font-size:18px; cursor:pointer; display:flex;
-                                           align-items:center; justify-content:center;">+</button>
-                        </div>
+                    <div class="dr-field">
+                        <label class="dr-label" for="document-purpose">Purpose <span>(optional)</span></label>
+                        <textarea id="document-purpose" name="purpose" class="dr-textarea" rows="3"
+                                  placeholder="Employment, board exam, scholarship…">{{ old('purpose') }}</textarea>
                     </div>
+                </div>
 
-                    {{-- Purpose --}}
-                    <div class="form-group">
-                        <label>Purpose <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span></label>
-                        <textarea name="purpose" class="form-control" rows="3"
-                                  placeholder="e.g. For employment, board exam, scholarship...">{{ old('purpose') }}</textarea>
-                    </div>
-
-                    {{-- Appointment Slot (optional) --}}
-                    <div class="form-group">
-                        <label>
-                            Schedule Pickup Appointment
-                            <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span>
-                        </label>
-                        <select name="appointment_slot_id" class="form-control">
-                            <option value="">— I will schedule later —</option>
-                            @foreach ($slots as $slot)
-                                <option value="{{ $slot->id }}"
-                                    {{ old('appointment_slot_id') == $slot->id ? 'selected' : '' }}>
-                                    {{ \Carbon\Carbon::parse($slot->date)->format('M d, Y') }}
-                                    {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }} —
-                                    {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
-                                    ({{ $slot->availableSlots() }} slot/s left)
+                {{-- Pickup --}}
+                <div class="dr-sec">
+                    <div class="dr-field">
+                        <label class="dr-label" for="pickup-date">Pickup date <span>(optional)</span></label>
+                        <select id="pickup-date" name="pickup_date" class="dr-select">
+                            <option value="" {{ $selectedPickupDate === '' ? 'selected' : '' }}>I’ll book a pickup time later</option>
+                            @foreach ($slotGroups as $date => $dateSlots)
+                                <option value="{{ $date }}" {{ $selectedPickupDate === $date ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::parse($date)->format('l, F j') }} · {{ $dateSlots->count() }} {{ $dateSlots->count() === 1 ? 'time' : 'times' }}
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-
-                    {{-- Fee Summary --}}
-                    <div style="background:var(--dtc-primary-soft); border-radius:12px; padding:16px;
-                                margin-bottom:20px; border:1.5px solid var(--dtc-primary-soft);">
-                        <div style="font-size:12px; font-weight:600; color:var(--dtc-primary);
-                                    text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
-                            Fee Summary
+                        <label class="dr-label dr-pickup-time-label">Available times <span>(optional)</span></label>
+                        <select id="appointment-slot-fallback" class="dr-select" hidden disabled>
+                            <option value="" data-label="Book later">I’ll book a pickup time later</option>
+                            @foreach ($slots as $slot)
+                                @php
+                                    $slotDate = \Carbon\Carbon::parse($slot->date);
+                                    $slotText = $slotDate->format('D, M j').', '
+                                        .\Carbon\Carbon::parse($slot->start_time)->format('g:i A').' to '
+                                        .\Carbon\Carbon::parse($slot->end_time)->format('g:i A');
+                                @endphp
+                                <option value="{{ $slot->id }}" data-date="{{ \Carbon\Carbon::parse($slot->date)->format('Y-m-d') }}" data-label="{{ $slotText }}"
+                                    {{ old('appointment_slot_id') == $slot->id ? 'selected' : '' }}>
+                                    {{ $slotText }} ({{ $slot->availableSlots() }} left)
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="dr-opts dr-time-grid" role="radiogroup" aria-label="Pickup time">
+                            <label class="dr-opt dr-time-opt dr-opt--stack" data-slot-date-panel="">
+                                <input type="radio" name="appointment_slot_id" value="" class="dr-opt-input dr-visually-hidden"
+                                       data-label="Book later" {{ old('appointment_slot_id') ? '' : 'checked' }}>
+                                <span class="dr-opt-mark" aria-hidden="true"></span>
+                                <span class="dr-opt-text">
+                                    <span class="dr-opt-name">I’ll book later</span>
+                                    <span class="dr-opt-desc">Pickup appointment is optional.</span>
+                                </span>
+                            </label>
+                            @foreach ($slots as $slot)
+                                @php
+                                    $slotDate = \Carbon\Carbon::parse($slot->date);
+                                    $slotTime = \Carbon\Carbon::parse($slot->start_time)->format('g:i A').' to '
+                                        .\Carbon\Carbon::parse($slot->end_time)->format('g:i A');
+                                    $slotText = $slotDate->format('D, M j').', '.$slotTime;
+                                    $left = $slot->availableSlots();
+                                @endphp
+                                <label class="dr-opt dr-time-opt" data-slot-date-panel="{{ $slotDate->format('Y-m-d') }}" {{ $selectedPickupDate !== $slotDate->format('Y-m-d') ? 'hidden' : '' }}>
+                                    <input type="radio" name="appointment_slot_id" value="{{ $slot->id }}"
+                                           class="dr-opt-input dr-visually-hidden" data-label="{{ $slotText }}"
+                                           {{ old('appointment_slot_id') == $slot->id ? 'checked' : '' }}>
+                                    <span class="dr-opt-mark" aria-hidden="true"></span>
+                                    <span class="dr-opt-text"><span class="dr-opt-name">{{ $slotTime }}</span></span>
+                                    <span class="dr-opt-price {{ $left <= 2 ? 'is-low' : '' }}">{{ $left }} {{ $left === 1 ? 'spot' : 'spots' }} left</span>
+                                </label>
+                            @endforeach
                         </div>
-                        <div  class="u-text-secondary-sm">
-                            Select a document type to see the estimated fee.
-                        </div>
-                        <div id="fee-summary" style="display:none; margin-top:8px;">
-                            <div style="display:flex; justify-content:space-between; font-size:13px;">
-                                <span  class="u-text-secondary">Document Type:</span>
-                                <span id="fee-doc-label" style="font-weight:600; color:var(--dtc-text);"></span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:4px;">
-                                <span  class="u-text-secondary">Copies:</span>
-                                <span id="fee-copies-label" style="font-weight:600; color:var(--dtc-text);"></span>
-                            </div>
-                            <div style="border-top:1px solid var(--dtc-border); margin:8px 0;"></div>
-                            <div style="display:flex; justify-content:space-between;">
-                                <span  class="u-text-secondary-sm">Estimated Total:</span>
-                                <span id="fee-total" style="font-size:16px; font-weight:800; color:var(--dtc-primary);"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i data-lucide="send" class="mr-1"></i> Submit Request
-                    </button>
-                    <a href="{{ route('portal.documents.index') }}" class="btn btn-secondary btn-block mt-2">
-                        Cancel
-                    </a>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- Info Panel --}}
-    <div class="col-lg-5">
-        <div class="card u-primary-gradient-btn"
-             >
-            <div class="card-body p-4">
-                <h5 style="font-weight:700; margin-bottom:16px; color:#fff;">
-                    <i data-lucide="info" class="mr-2"></i> How It Works
-                </h5>
-                <div style="font-size:13px; line-height:1.8; opacity:0.9;">
-                    <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
-                        <div style="background:rgba(255,199,44,0.2); border-radius:50%; width:28px;
-                                    height:28px; display:flex; align-items:center; justify-content:center;
-                                    flex-shrink:0; font-weight:700; color:#FFC72C; font-size:12px;">1</div>
-                        <div>Submit your document request with the required details.</div>
-                    </div>
-                    <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
-                        <div style="background:rgba(255,199,44,0.2); border-radius:50%; width:28px;
-                                    height:28px; display:flex; align-items:center; justify-content:center;
-                                    flex-shrink:0; font-weight:700; color:#FFC72C; font-size:12px;">2</div>
-                        <div>The Registrar will review and process your request.</div>
-                    </div>
-                    <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
-                        <div style="background:rgba(255,199,44,0.2); border-radius:50%; width:28px;
-                                    height:28px; display:flex; align-items:center; justify-content:center;
-                                    flex-shrink:0; font-weight:700; color:#FFC72C; font-size:12px;">3</div>
-                        <div>You'll be notified when your document is ready for pickup.</div>
-                    </div>
-                    <div style="display:flex; gap:12px; align-items:flex-start;">
-                        <div style="background:rgba(255,199,44,0.2); border-radius:50%; width:28px;
-                                    height:28px; display:flex; align-items:center; justify-content:center;
-                                    flex-shrink:0; font-weight:700; color:#FFC72C; font-size:12px;">4</div>
-                        <div>Pay the fee at the Cashier's Office and claim your document.</div>
+                        @if ($slots->isEmpty())
+                            <p class="dr-help">No pickup times are open right now. Submit your request, then book from My Appointments.</p>
+                        @else
+                            <p class="dr-help">Slots can fill up before you submit. If one is gone, you’ll be asked to pick another.</p>
+                        @endif
                     </div>
                 </div>
+
+                {{-- Payment --}}
+                <fieldset class="dr-sec">
+                    <legend class="dr-sec-title">How will you pay?</legend>
+                    <p class="dr-sec-hint">Either way, the Cashier checks your payment before the document is released.</p>
+                    <div class="dr-opts">
+                        <label class="dr-opt dr-opt--stack">
+                            <input type="radio" name="payment_method" id="paymentWalkIn" value="walk_in"
+                                   class="dr-opt-input dr-visually-hidden"
+                                   data-label="Cashier’s Office"
+                                   {{ ! $gcashChosen ? 'checked' : '' }}>
+                            <span class="dr-opt-mark" aria-hidden="true"></span>
+                            <span class="dr-opt-text">
+                                <span class="dr-opt-name">Pay at the Cashier’s Office</span>
+                                <span class="dr-opt-desc">Your request stays unpaid until the Cashier records your payment.</span>
+                            </span>
+                        </label>
+
+                        @if ($gcashQrReady)
+                            <label class="dr-opt dr-opt--stack">
+                                <input type="radio" name="payment_method" id="paymentGcash" value="gcash_qr"
+                                       class="dr-opt-input dr-visually-hidden"
+                                       data-label="GCash QR"
+                                       aria-controls="gcashPaymentDetails"
+                                       {{ $gcashChosen ? 'checked' : '' }}>
+                                <span class="dr-opt-mark" aria-hidden="true"></span>
+                                <span class="dr-opt-text">
+                                    <span class="dr-opt-name">Pay with the official GCash QR</span>
+                                    <span class="dr-opt-desc">Scan, pay the exact total, then upload your receipt. The Cashier still verifies it.</span>
+                                </span>
+                            </label>
+                        @endif
+                    </div>
+
+                    @if ($gcashQrReady)
+                        <div id="gcashPaymentDetails" class="dr-gcash {{ $gcashChosen ? 'is-open' : '' }}">
+                            <div class="dr-gcash-qr">
+                                <img src="{{ route('portal.documents.gcash.qr') }}" alt="Official DTC GCash QR code" loading="lazy">
+                            </div>
+                            <div class="dr-gcash-fields">
+                                <p class="dr-gcash-note">Send exactly <strong data-dr-total-text>the total shown</strong>. Uploading proof doesn’t confirm payment on its own.</p>
+                                <div class="dr-field">
+                                    <label class="dr-label" for="documentPaymentReference">GCash reference number</label>
+                                    <input id="documentPaymentReference" type="text" name="reference_number" class="dr-input"
+                                           maxlength="100" value="{{ old('reference_number') }}" autocomplete="off" inputmode="numeric">
+                                </div>
+                                <div class="dr-field">
+                                    <span class="dr-label" id="proofLabel">Receipt screenshot</span>
+                                    <label class="dr-file" for="documentPaymentProof">
+                                        <input id="documentPaymentProof" type="file" name="proof_of_payment"
+                                               class="dr-visually-hidden" accept="image/jpeg,image/png,application/pdf"
+                                               aria-labelledby="proofLabel">
+                                        <span class="dr-file-btn">Choose file</span>
+                                        <span class="dr-file-name" data-dr-file-name>JPG, PNG or PDF, up to 5 MB</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <p class="dr-help" style="margin-top:12px;">GCash payment isn’t available right now. Please pay at the Cashier’s Office.</p>
+                    @endif
+                </fieldset>
             </div>
+
+            {{-- Mobile spacing before the fixed bar; keeps the last section clear --}}
         </div>
 
-        {{-- Fee Reference --}}
-        <div class="card mt-3">
-            <div class="card-header font-weight-bold u-text" >
-                Fee Reference
-            </div>
-            <div class="card-body p-0">
-                @foreach([
-                    ['type' => 'tor', 'label' => 'Transcript of Records'],
-                    ['type' => 'diploma', 'label' => 'Diploma'],
-                    ['type' => 'certification', 'label' => 'Certification'],
-                    ['type' => 'true_copy', 'label' => 'True Copy of Records'],
-                ] as $item)
-                <div style="padding:12px 20px; border-bottom:1px solid var(--dtc-border-soft);
-                            display:flex; justify-content:space-between; align-items:center;">
-                    <span  class="u-text-sm-secondary-primary">{{ $item['label'] }}</span>
-                    <span style="font-size:13px; font-weight:700; color:var(--dtc-primary);">&#8369;{{ number_format($documentFees[$item['type']], 2) }} per copy</span>
+        <aside class="dr-aside" aria-label="Request summary">
+            <div class="dr-slip">
+                <div class="dr-slip-body">
+                    <h2 class="dr-slip-title">Your request</h2>
+                    <dl class="dr-slip-rows">
+                        <div class="dr-slip-row">
+                            <dt>Document</dt>
+                            <dd data-slip-doc class="is-empty">Not chosen yet</dd>
+                        </div>
+                        <div class="dr-slip-row">
+                            <dt>Copies</dt>
+                            <dd data-slip-qty>1</dd>
+                        </div>
+                        <div class="dr-slip-row">
+                            <dt>Pickup</dt>
+                            <dd data-slip-pickup>Book later</dd>
+                        </div>
+                        <div class="dr-slip-row">
+                            <dt>Payment</dt>
+                            <dd data-slip-pay>Cashier’s Office</dd>
+                        </div>
+                    </dl>
                 </div>
-                @endforeach
+                <div class="dr-slip-tear" aria-hidden="true"></div>
+                <div class="dr-slip-total" aria-live="polite">
+                    <span class="dr-slip-total-label">Total</span>
+                    <span class="dr-slip-total-amount is-empty" data-slip-total>&#8369;0.00</span>
+                </div>
+                <div class="dr-slip-foot">
+                    <button type="submit" class="dr-btn dr-btn--gold" id="drSubmit" data-loading-text="Submitting…">Submit request</button>
+                    <p class="dr-slip-note">Your total is saved with this request. Later fee changes won’t affect it.</p>
+                    <a href="{{ route('portal.documents.index') }}" class="dr-slip-cancel">Cancel</a>
+                </div>
             </div>
-        </div>
-    </div>
+
+            <details class="dr-next" id="drNext">
+                <summary>What happens after you submit</summary>
+                <ul class="dr-next-list">
+                    <li><strong>The Registrar prepares it</strong>You’ll get a notification each time the status changes.</li>
+                    <li><strong>The Cashier confirms payment</strong>They record walk-in payments or verify your GCash receipt. A screenshot isn’t an official receipt.</li>
+                    <li><strong>You pick it up</strong>Bring your receipt and a valid ID once it’s ready and paid.</li>
+                </ul>
+            </details>
+        </aside>
+    </form>
 </div>
 @endsection
 
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/document-request-flow.css') }}">
+@endsection
+
 @section('js')
-<script>
-const fees = @json($documentFees);
-const labels = {
-    tor: 'Transcript of Records',
-    diploma: 'Diploma',
-    certification: 'Certification',
-    true_copy: 'True Copy of Records'
-};
-
-function updateFee() {
-    const selected = document.querySelector('.doc-radio:checked');
-    const copies = parseInt(document.getElementById('copies').value) || 1;
-
-    if (selected) {
-        const type = selected.value;
-        const total = fees[type] * copies;
-        document.getElementById('fee-doc-label').textContent = labels[type];
-        document.getElementById('fee-copies-label').textContent = copies;
-        document.getElementById('fee-total').textContent = '₱' + total.toFixed(2);
-        document.getElementById('fee-summary').style.display = 'block';
-    }
-}
-
-// Document type selection
-document.querySelectorAll('.doc-radio').forEach(radio => {
-    radio.addEventListener('change', function () {
-        document.querySelectorAll('.doc-option').forEach(opt => {
-            opt.style.borderColor = 'var(--dtc-border)';
-            opt.style.background = 'var(--dtc-surface-soft)';
-            opt.querySelector('i').style.color = 'var(--dtc-text-muted)';
-        });
-        const selected = this.nextElementSibling;
-        selected.style.borderColor = 'var(--dtc-primary)';
-        selected.style.background = 'var(--dtc-primary-soft)';
-        selected.querySelector('i').style.color = 'var(--dtc-primary)';
-        updateFee();
-    });
-    if (this.checked) this.dispatchEvent(new Event('change'));
-});
-
-// Copies input
-document.getElementById('copies').addEventListener('input', updateFee);
-
-function adjustCopies(delta) {
-    const input = document.getElementById('copies');
-    const val = Math.min(10, Math.max(1, parseInt(input.value || 1) + delta));
-    input.value = val;
-    updateFee();
-}
-</script>
+    <script src="{{ asset('js/document-request.js') }}" defer></script>
 @endsection

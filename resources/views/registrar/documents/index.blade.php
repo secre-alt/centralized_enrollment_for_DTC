@@ -7,13 +7,19 @@
     <div>
         <h4 class="mb-0 font-weight-bold u-text" >Document Requests</h4>
         <p class="mb-0 u-text-secondary-sm" >
-            Manage alumni document requests
+            Manage alumni requests. Admin-managed rates are saved with each request; payment verification is handled by the Cashier.
         </p>
     </div>
 @endsection
 
 @section('content')
 
+@if (session('success'))
+    <div class="alert alert-success" role="status">{{ session('success') }}</div>
+@endif
+@if ($errors->any())
+    <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+@endif
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -30,6 +36,7 @@
                         <th>Document</th>
                         <th>Copies</th>
                         <th>Fee</th>
+                        <th>Payment</th>
                         <th>Purpose</th>
                         <th>Status</th>
                         <th>Date</th>
@@ -67,6 +74,12 @@
                         </td>
                         <td style="font-size:13px; font-weight:600; color:var(--dtc-success);">
                             ₱{{ number_format($req->fee, 2) }}
+                        </td>
+                        <td>
+                            @php $paymentTone = ['unpaid' => 'warning', 'pending_verification' => 'info', 'verified' => 'success', 'rejected' => 'danger'][$req->payment_status] ?? 'neutral'; @endphp
+                            <span class="dtc-status-badge is-{{ $paymentTone }}" style="white-space:nowrap;">
+                                {{ ['unpaid' => 'Unpaid', 'pending_verification' => 'Pending verification', 'verified' => 'Verified', 'rejected' => 'Rejected'][$req->payment_status] ?? ucfirst($req->payment_status) }}
+                            </span>
                         </td>
                         <td style="font-size:12px; color:var(--dtc-text-secondary); max-width:150px;">
                             {{ $req->purpose ?? '—' }}
@@ -110,7 +123,8 @@
                                                     <select name="status" class="form-control" required>
                                                         @foreach(['submitted','processing','ready','released'] as $s)
                                                             <option value="{{ $s }}"
-                                                                {{ $req->status === $s ? 'selected' : '' }}>
+                                                                {{ $req->status === $s ? 'selected' : '' }}
+                                                                {{ $s === 'released' && (! $req->is_paid || $req->payment_status !== 'verified') ? 'disabled' : '' }}>
                                                                 {{ ucfirst($s) }}
                                                             </option>
                                                         @endforeach
@@ -137,7 +151,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5" style="color:var(--dtc-text-muted); font-size:13px;">
+                        <td colspan="9" class="text-center py-5" style="color:var(--dtc-text-muted); font-size:13px;">
                             No document requests yet.
                         </td>
                     </tr>

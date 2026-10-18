@@ -61,7 +61,7 @@
 
                             <hr>
                             <h5 class="font-weight-bold mb-3">Document Request Fees</h5>
-                            <p class="u-text-secondary-sm">Set the fee per copy. These rates apply to new requests; existing requests keep their recorded fees.</p>
+                            <p class="u-text-secondary-sm">Set the fee per copy. These Admin-managed rates apply to new alumni requests; existing requests keep their recorded fees. The Cashier records payment and the Registrar manages document status.</p>
                             @foreach ([
                                 'tor' => ['Transcript of Records', 50],
                                 'diploma' => ['Diploma', 100],
