@@ -1,4 +1,30 @@
 /* Student dashboard enrollment journey */
+.dtc-current-term { border-color: var(--dtc-border) !important; }
+.dtc-current-term > .card-body { padding: 18px 20px !important; }
+.dtc-current-term-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.dtc-current-term-kicker { color: var(--dtc-text-muted); font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.dtc-current-term-heading h2 { margin: 3px 0 2px; color: var(--dtc-text); font-size: 16px; font-weight: 700; }
+.dtc-current-term-heading p { margin: 0; color: var(--dtc-text-secondary); font-size: 12px; }
+.dtc-term-badge { flex: 0 0 auto; padding: 6px 10px; border: 1px solid var(--dtc-border); border-radius: 999px; background: var(--dtc-surface-soft); color: var(--dtc-text-secondary); font-size: 11px; font-weight: 700; }
+.dtc-term-badge.is-in_progress { border-color: rgba(22, 163, 74, .25); background: rgba(22, 163, 74, .10); color: #15803d; }
+.dtc-term-badge.is-upcoming { border-color: rgba(37, 99, 235, .22); background: rgba(37, 99, 235, .09); color: var(--dtc-primary); }
+.dtc-term-badge.is-ended { border-color: var(--dtc-border); color: var(--dtc-text-muted); }
+.dtc-current-term-dates { display: flex; align-items: center; gap: 7px; margin: 14px 0; color: var(--dtc-text-secondary); font-size: 12px; }
+.dtc-current-term-dates svg { width: 15px; height: 15px; color: var(--dtc-primary); }
+.dtc-current-term-enrollment { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding-top: 12px; border-top: 1px solid var(--dtc-border); }
+.dtc-current-term-enrollment > span { color: var(--dtc-text-muted); font-size: 11px; }
+.dtc-current-term-enrollment strong { color: var(--dtc-text); font-size: 12px; }
+.dtc-current-term-enrollment strong.is-pending { color: #b45309; }
+.dtc-current-term-enrollment strong.is-complete { color: #15803d; }
+.dtc-current-term-enrollment strong.is-rejected { color: var(--dtc-danger, #dc3545); }
+.dtc-current-term-enrollment a { margin-left: auto; color: var(--dtc-primary); font-size: 11px; font-weight: 600; }
+body.dtc-dark .dtc-term-badge.is-in_progress,
+body.dtc-dark .dtc-current-term-enrollment strong.is-complete { color: #86efac; }
+body.dtc-dark .dtc-term-badge.is-in_progress { border-color: rgba(34, 197, 94, .3); background: rgba(34, 197, 94, .12); }
+body.dtc-dark .dtc-term-badge.is-upcoming,
+body.dtc-dark .dtc-current-term-enrollment strong.is-pending { color: #93c5fd; }
+body.dtc-dark .dtc-term-badge.is-upcoming { border-color: rgba(96, 165, 250, .3); background: rgba(96, 165, 250, .12); }
+
 .dtc-enrollment-card {
     overflow: hidden;
     border-color: var(--dtc-border) !important;
@@ -128,6 +154,8 @@
 .dtc-enrollment-notice.is-rejected > svg { color: var(--dtc-danger, #dc3545); }
 
 @media (max-width: 767.98px) {
+    .dtc-current-term > .card-body { padding: 16px !important; }
+    .dtc-current-term-enrollment a { margin-left: 0; }
     .dtc-enrollment-card-header { align-items: flex-start; padding: 14px 16px !important; }
     .dtc-enrollment-card-body { padding: 16px !important; }
     .dtc-enrollment-steps { display: flex; flex-direction: column; gap: 0; }

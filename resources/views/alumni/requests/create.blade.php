@@ -181,7 +181,7 @@
                                        {{ $gcashChosen ? 'checked' : '' }}>
                                 <span class="dr-opt-mark" aria-hidden="true"></span>
                                 <span class="dr-opt-text">
-                                    <span class="dr-opt-name">Pay with the official GCash QR</span>
+                                    <span class="dr-opt-name">Pay online using the official GCash QR</span>
                                     <span class="dr-opt-desc">Scan, pay the exact total, then upload your receipt. The Cashier still verifies it.</span>
                                 </span>
                             </label>

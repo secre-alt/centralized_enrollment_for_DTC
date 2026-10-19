@@ -146,12 +146,16 @@ class SettingsController extends Controller
         $request->validate([
             'current_school_year' => ['required', 'string', 'max:20'],
             'current_semester'    => ['required', 'in:1st,2nd,Summer'],
+            'semester_starts_on'  => ['nullable', 'required_with:semester_ends_on', 'date'],
+            'semester_ends_on'    => ['nullable', 'required_with:semester_starts_on', 'date', 'after_or_equal:semester_starts_on'],
             'enrollment_open'     => ['nullable'],
             'registrar_name'      => ['nullable', 'string', 'max:255'],
         ]);
 
         Setting::updateOrCreate(['key' => 'current_school_year'], ['value' => $request->current_school_year]);
         Setting::updateOrCreate(['key' => 'current_semester'],    ['value' => $request->current_semester]);
+        Setting::updateOrCreate(['key' => 'semester_starts_on'],  ['value' => $request->input('semester_starts_on')]);
+        Setting::updateOrCreate(['key' => 'semester_ends_on'],    ['value' => $request->input('semester_ends_on')]);
         Setting::updateOrCreate(['key' => 'enrollment_open'],     ['value' => $request->boolean('enrollment_open') ? '1' : '0']);
         Setting::updateOrCreate(['key' => 'registrar_name'],      ['value' => $request->registrar_name]);
 

@@ -75,6 +75,22 @@
                                     <option value="Summer" {{ $currentSem === 'Summer' ? 'selected' : '' }}>Summer</option>
                                 </select>
                             </div>
+
+                            <div class="form-row mt-3">
+                                <div class="form-group col-md-6">
+                                    <label for="semester_starts_on">Semester starts</label>
+                                    <input type="date" id="semester_starts_on" name="semester_starts_on" class="form-control"
+                                           value="{{ old('semester_starts_on', $settings->semester_starts_on ?? '') }}">
+                                </div>
+                                <div class="form-group col-md-6 mb-0">
+                                    <label for="semester_ends_on">Semester ends</label>
+                                    <input type="date" id="semester_ends_on" name="semester_ends_on" class="form-control"
+                                           value="{{ old('semester_ends_on', $settings->semester_ends_on ?? '') }}">
+                                </div>
+                            </div>
+                            <small class="form-text" style="color:var(--dtc-text-muted);">
+                                Set both dates so the portal can show whether this term is upcoming, in progress, or ended. The end date includes the full day.
+                            </small>
                         </div>
                     </div>
                 </div>

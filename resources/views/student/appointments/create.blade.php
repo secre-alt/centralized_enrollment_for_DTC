@@ -27,10 +27,15 @@
     $gcashOk = ! empty($gcashQrReady);
     $gcashChosen = $gcashOk && $oldPay === 'gcash';
     $slotGroups = $slots->groupBy(fn ($s) => \Carbon\Carbon::parse($s->date)->format('Y-m-d'));
+    $slotLeft = $slots->mapWithKeys(fn ($s) => [$s->id => max(0, (int) $s->availableSlots())]);
+    $openByDay = $slotGroups->map(fn ($g) => $g->filter(fn ($s) => $slotLeft[$s->id] > 0)->count());
+    $firstOpenDay = $openByDay->filter(fn ($n) => $n > 0)->keys()->first() ?? ($slotGroups->keys()->first() ?? '');
     $oldSlot = $slots->firstWhere('id', old('appointment_slot_id'));
-    $selectedPickupDate = old('pickup_date', $oldSlot
-        ? \Carbon\Carbon::parse($oldSlot->date)->format('Y-m-d')
-        : ($slotGroups->keys()->first() ?? ''));
+    // Only ever trust a date that is actually in the list the server built.
+    $pickedDay = old('pickup_date', $oldSlot ? \Carbon\Carbon::parse($oldSlot->date)->format('Y-m-d') : $firstOpenDay);
+    $selectedPickupDate = $slotGroups->has($pickedDay) ? $pickedDay : $firstOpenDay;
+    $todayKey = now()->format('Y-m-d');
+    $dayParts = ['Morning' => [0, 12], 'Afternoon' => [12, 17], 'Evening' => [17, 24]];
     $feeText = $processingFee > 0 ? '₱'.number_format($processingFee, 2) : 'No fee';
 @endphp
 
@@ -89,50 +94,90 @@
                 <fieldset class="dr-sec" data-step-panel="2" hidden>
                     <legend class="dr-sec-title">When can you come in?</legend>
                     <p class="dr-sec-hint">These are the Registrar’s open times. Bring a valid ID.</p>
-                    @forelse ($slotGroups as $day => $daySlots)
-                        @if ($loop->first)
-                            <div class="dr-field dr-date-field">
-                                <label class="dr-label" for="pickup-date">Available date</label>
-                                <select id="pickup-date" name="pickup_date" class="dr-select" aria-controls="pickup-time-options">
+                    @if ($slotGroups->isNotEmpty())
+                        <div class="dp" data-picker>
+                            <div class="dp-dates">
+                                <div class="dp-head">
+                                    <span class="dp-label" id="pickup-date-label">Choose a day</span>
+                                    <div class="dp-nav" data-rail-nav hidden>
+                                        <button type="button" data-rail-prev aria-label="Earlier days"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+                                        <button type="button" data-rail-next aria-label="Later days"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+                                    </div>
+                                </div>
+                                <div class="dp-rail" role="radiogroup" aria-labelledby="pickup-date-label" aria-controls="pickup-time-options" data-date-rail>
                                     @foreach ($slotGroups as $date => $dateSlots)
-                                        <option value="{{ $date }}" {{ $selectedPickupDate === $date ? 'selected' : '' }}>
-                                            {{ \Carbon\Carbon::parse($date)->format('l, F j') }} · {{ $dateSlots->count() }} {{ $dateSlots->count() === 1 ? 'time' : 'times' }}
-                                        </option>
+                                        @php
+                                            $d = \Carbon\Carbon::parse($date);
+                                            $openN = $openByDay[$date];
+                                        @endphp
+                                        <label class="dp-day {{ $openN === 0 ? 'is-full' : '' }}">
+                                            <input type="radio" name="pickup_date" value="{{ $date }}"
+                                                   class="dp-input dr-visually-hidden"
+                                                   aria-label="{{ $d->format('l, F j') }}, {{ $openN === 0 ? 'no open times' : $openN.' open '.($openN === 1 ? 'time' : 'times') }}"
+                                                   {{ $selectedPickupDate === $date ? 'checked' : '' }} {{ $openN === 0 ? 'disabled' : '' }}>
+                                            <span class="dp-day-wd">{{ $date === $todayKey ? 'Today' : $d->format('D') }}</span>
+                                            <span class="dp-day-num">{{ $d->format('j') }}</span>
+                                            <span class="dp-day-mo">{{ $d->format('M') }}</span>
+                                            <span class="dp-day-count">{{ $openN === 0 ? 'Full' : $openN.' open' }}</span>
+                                        </label>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
-                            <div id="pickup-time-options" class="dr-time-days" aria-live="polite">
-                        @endif
-                        <div class="dr-day" data-slot-date-panel="{{ $day }}" {{ $selectedPickupDate !== $day ? 'hidden' : '' }}>
-                            <h3 class="dr-day-title">{{ \Carbon\Carbon::parse($day)->format('l, F j') }}</h3>
-                            <div class="dr-opts dr-time-grid">
-                                @foreach ($daySlots as $slot)
-                                    @php
-                                        $left = $slot->availableSlots();
-                                        $time = \Carbon\Carbon::parse($slot->start_time)->format('g:i A').' to '.\Carbon\Carbon::parse($slot->end_time)->format('g:i A');
-                                    @endphp
-                                    <label class="dr-opt dr-time-opt">
-                                        <input type="radio" name="appointment_slot_id" value="{{ $slot->id }}"
-                                               class="dr-opt-input dr-visually-hidden"
-                                               data-date="{{ \Carbon\Carbon::parse($slot->date)->format('D, M j, Y') }}"
-                                               data-time="{{ $time }}"
-                                               {{ old('appointment_slot_id') == $slot->id ? 'checked' : '' }}>
-                                        <span class="dr-opt-mark" aria-hidden="true"></span>
-                                        <span class="dr-opt-text"><span class="dr-opt-name">{{ $time }}</span></span>
-                                        <span class="dr-opt-price {{ $left <= 2 ? 'is-low' : '' }}">{{ $left }} {{ $left === 1 ? 'spot' : 'spots' }} left</span>
-                                    </label>
+
+                            <div id="pickup-time-options" class="dp-times" aria-live="polite">
+                                @foreach ($slotGroups as $day => $daySlots)
+                                    <div class="dp-panel" data-slot-date-panel="{{ $day }}" {{ $selectedPickupDate !== $day ? 'hidden' : '' }}>
+                                        <h3 class="dp-panel-title">
+                                            {{ \Carbon\Carbon::parse($day)->format('l, F j') }}
+                                            <span class="dp-count">{{ $openByDay[$day] }} open {{ $openByDay[$day] === 1 ? 'time' : 'times' }}</span>
+                                        </h3>
+                                        @foreach ($dayParts as $period => [$from, $to])
+                                            @php
+                                                $list = $daySlots->filter(function ($s) use ($from, $to) {
+                                                    $h = (int) \Carbon\Carbon::parse($s->start_time)->format('G');
+                                                    return $h >= $from && $h < $to;
+                                                });
+                                            @endphp
+                                            @if ($list->isNotEmpty())
+                                                <div class="dp-period" role="group" aria-label="{{ $period }}">
+                                                    <h4 class="dp-period-title">{{ $period }}</h4>
+                                                    <div class="dp-grid">
+                                                        @foreach ($list as $slot)
+                                                            @php
+                                                                $left = $slotLeft[$slot->id];
+                                                                $start = \Carbon\Carbon::parse($slot->start_time)->format('g:i A');
+                                                                $end = \Carbon\Carbon::parse($slot->end_time)->format('g:i A');
+                                                            @endphp
+                                                            <label class="dp-time {{ $left === 0 ? 'is-full' : '' }}">
+                                                                <input type="radio" name="appointment_slot_id" value="{{ $slot->id }}"
+                                                                       class="dp-input dr-visually-hidden"
+                                                                       data-date="{{ \Carbon\Carbon::parse($slot->date)->format('D, M j, Y') }}"
+                                                                       data-time="{{ $start }} to {{ $end }}"
+                                                                       {{ old('appointment_slot_id') == $slot->id ? 'checked' : '' }} {{ $left === 0 ? 'disabled' : '' }}>
+                                                                <span class="dp-time-start">{{ $start }}</span>
+                                                                <span class="dp-time-end">to {{ $end }}</span>
+                                                                <span class="dp-time-flag {{ $left === 0 ? 'is-full' : ($left <= 2 ? 'is-low' : '') }}">
+                                                                    {{ $left === 0 ? 'Full' : ($left === 1 ? '1 spot left' : $left.' spots left') }}
+                                                                </span>
+                                                                <span class="dp-time-check" aria-hidden="true"></span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 @endforeach
                             </div>
+
+                            <p class="dp-picked" data-picked aria-live="polite">No time chosen yet.</p>
                         </div>
-                        @if ($loop->last)
-                            </div>
-                        @endif
-                    @empty
+                    @else
                         <div class="dr-empty dr-empty--inline">
                             <h2>No times are open right now</h2>
                             <p>The Registrar hasn’t opened any pickup times. Check back later or contact the Registrar’s Office.</p>
                         </div>
-                    @endforelse
+                    @endif
                     <p class="dr-error" data-step-error="2" role="alert">Choose a pickup time to continue.</p>
                 </fieldset>
 
@@ -274,6 +319,7 @@
 
 @section('css')
     <link rel="stylesheet" href="{{ asset('css/document-request-flow.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pickup-picker.css') }}">
 @endsection
 
 @section('js')

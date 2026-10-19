@@ -47,6 +47,31 @@
         </div>
     @endif
 
+    <div class="dtc-dashboard-overview dtc-dashboard-overview--four mb-3" aria-label="Document request summary">
+        <div class="dtc-overview-item">
+            <span class="dtc-overview-label">Total requests</span>
+            <strong>{{ $totalRequests }}</strong>
+            <span class="dtc-overview-note">All document requests</span>
+        </div>
+        <div class="dtc-overview-item">
+            <span class="dtc-overview-label">Ready for pickup</span>
+            <strong>{{ $readyRequests }}</strong>
+            <span class="dtc-overview-note">Payment verified</span>
+        </div>
+        <div class="dtc-overview-item">
+            <span class="dtc-overview-label">Released</span>
+            <strong>{{ $releasedDocs }}</strong>
+            <span class="dtc-overview-note">Collected documents</span>
+        </div>
+        <div class="dtc-overview-item">
+            <span class="dtc-overview-label">Total fees</span>
+            <strong>&#8369;{{ number_format($totalFees, 2) }}</strong>
+            <span class="dtc-overview-note">Across all requests</span>
+        </div>
+    </div>
+
+    <h2 class="dr-section-title">Request History</h2>
+
     @if ($items->isEmpty())
         <div class="dr-empty">
             <h2>No requests yet</h2>

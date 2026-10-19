@@ -19,6 +19,15 @@
 
 @section('content')
 
+@if (session('success'))
+    <div class="alert alert-success" role="status"><i data-lucide="circle-check" class="mr-2"></i>{{ session('success') }}</div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger" role="alert"><i data-lucide="circle-alert" class="mr-2"></i>{{ session('error') }}</div>
+@endif
+@if ($errors->any())
+    <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+@endif
 
 @if ($enrollments->isEmpty())
     <div class="card">
@@ -45,7 +54,8 @@
 
                 {{-- Status Icon --}}
                 @php
-                    $tone = $enrollment->is_paid ? 'success' : ($enrollment->status === 'approved' ? 'warning' : ($enrollment->status === 'pending' ? 'info' : 'danger'));
+                    $payment = $enrollment->payment;
+                    $tone = $enrollment->is_paid ? 'success' : ($enrollment->status === 'rejected' || ($payment && $payment->status === 'rejected') ? 'danger' : ($enrollment->status === 'approved' ? 'warning' : 'info'));
                 @endphp
                 <div class="col-auto">
                     <div class="dtc-icon-swatch is-{{ $tone }}" style="width:52px; height:52px; border-radius:14px;">
@@ -73,6 +83,14 @@
                         <span class="dtc-status-badge is-success" style="font-size:12px; font-weight:700; padding:6px 14px;">
                             <i data-lucide="check-circle" class="mr-1"></i> Enrolled
                         </span>
+                    @elseif($enrollment->status === 'approved' && $payment && $payment->status === 'pending')
+                        <span class="dtc-status-badge is-info" style="font-size:12px; font-weight:700; padding:6px 14px;">
+                            <i data-lucide="hourglass" class="mr-1"></i> Payment Under Review
+                        </span>
+                    @elseif($enrollment->status === 'approved' && $payment && $payment->status === 'rejected')
+                        <span class="dtc-status-badge is-danger" style="font-size:12px; font-weight:700; padding:6px 14px;">
+                            <i data-lucide="circle-alert" class="mr-1"></i> Payment Proof Rejected
+                        </span>
                     @elseif($enrollment->status === 'approved')
                         <span class="dtc-status-badge is-warning" style="font-size:12px; font-weight:700; padding:6px 14px;">
                             <i data-lucide="clock" class="mr-1"></i> Awaiting Payment
@@ -90,10 +108,10 @@
 
                 {{-- Action --}}
                 <div class="col-auto">
-                    @if($enrollment->status === 'approved' && !$enrollment->is_paid)
+                    @if($enrollment->status === 'approved' && !$enrollment->is_paid && (!$payment || $payment->status === 'rejected'))
                         <button type="button" class="btn btn-warning btn-sm dtc-payment-btn"
                                 data-url="{{ route('portal.enrollment.payment-info', $enrollment) }}">
-                            Pay Now →
+                            {{ $payment && $payment->status === 'rejected' ? 'Review and Resubmit Proof' : 'Payment Details' }} →
                         </button>
                     @endif
                 </div>
@@ -105,6 +123,33 @@
                 <i data-lucide="alert-circle" class="mr-2"></i>
                 <strong>Reason:</strong> {{ $enrollment->remarks }}
             </div>
+            @endif
+
+            @if($enrollment->status === 'pending')
+                <div class="alert alert-info" role="status" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                    <strong>Next step:</strong> The Registrar is reviewing your enrollment. We’ll notify you when there’s an update.
+                </div>
+            @elseif($enrollment->status === 'rejected')
+                <div class="alert alert-warning" role="status" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                    <strong>Next step:</strong> Review the Registrar’s reason above, then contact the Registrar or submit a corrected enrollment.
+                    <a href="{{ route('portal.enrollment.create') }}" class="alert-link ml-1">Start a corrected enrollment</a>.
+                </div>
+            @elseif($enrollment->status === 'approved' && !$enrollment->is_paid && $payment && $payment->status === 'pending')
+                <div class="alert alert-info" role="status" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                    <strong>Next step:</strong> The Cashier is verifying your payment proof. Please wait for the result before submitting again.
+                    @if($payment->proof_of_payment)
+                        <a href="{{ route('portal.enrollment.payment.proof', $payment) }}" target="_blank" rel="noopener" class="alert-link ml-1">View submitted proof</a>.
+                    @endif
+                </div>
+            @elseif($enrollment->status === 'approved' && !$enrollment->is_paid && $payment && $payment->status === 'rejected')
+                <div class="alert alert-warning" role="alert" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                    <strong>Payment proof needs correction:</strong> {{ $payment->rejection_reason ?: 'The Cashier could not verify the proof. Review your details and contact the Cashier if you need help.' }}
+                    <div class="mt-1"><strong>Next step:</strong> Open Payment Details and submit corrected proof.</div>
+                </div>
+            @elseif($enrollment->status === 'approved' && !$enrollment->is_paid)
+                <div class="alert alert-warning" role="status" style="margin-top:14px; padding:12px 16px; font-size:13px;">
+                    <strong>Next step:</strong> Pay the approved enrollment fee at the Cashier or open Payment Details to submit GCash proof.
+                </div>
             @endif
 
             {{-- Payment Success --}}

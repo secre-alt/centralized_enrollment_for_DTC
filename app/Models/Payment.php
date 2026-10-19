@@ -15,6 +15,7 @@ class Payment extends Model
         'reference_number',
         'proof_of_payment',
         'status',
+        'rejection_reason',
         'processed_by',
         'verified_by',
         'verified_at',

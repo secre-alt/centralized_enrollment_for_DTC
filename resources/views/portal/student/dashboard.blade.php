@@ -43,6 +43,12 @@
 @endphp
 
 <div class="dtc-portal-dashboard">
+@if (session('success'))
+    <div class="alert alert-success" role="status"><i data-lucide="circle-check" class="mr-2"></i>{{ session('success') }}</div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger" role="alert"><i data-lucide="circle-alert" class="mr-2"></i>{{ session('error') }}</div>
+@endif
 <div class="dtc-dashboard-overview mb-3" aria-label="Enrollment overview">
     <div class="dtc-overview-item">
         <span class="dtc-overview-label">Enrollment</span>
@@ -115,6 +121,54 @@
     {{-- LEFT: Enrollment Progress + Subjects --}}
     <div class="col-lg-8">
 
+        <section class="card mb-3 dtc-current-term" aria-labelledby="current-term-title">
+            <div class="card-body">
+                <div class="dtc-current-term-heading">
+                    <div>
+                        <span class="dtc-current-term-kicker">Academic calendar</span>
+                        <h2 id="current-term-title">Current semester</h2>
+                        <p>{{ $currentSemester ?: 'Semester not set' }}{{ $currentSchoolYear ? ' · AY '.$currentSchoolYear : '' }}</p>
+                    </div>
+                    <span class="dtc-term-badge is-{{ $termStatus }}">
+                        @if($termStatus === 'in_progress') In progress
+                        @elseif($termStatus === 'upcoming') Upcoming
+                        @elseif($termStatus === 'ended') Term ended
+                        @else Dates not set
+                        @endif
+                    </span>
+                </div>
+
+                @if($semesterStartsOn && $semesterEndsOn)
+                    <p class="dtc-current-term-dates">
+                        <i data-lucide="calendar-days" aria-hidden="true"></i>
+                        {{ \Carbon\Carbon::parse($semesterStartsOn)->format('M j, Y') }} – {{ \Carbon\Carbon::parse($semesterEndsOn)->format('M j, Y') }}
+                    </p>
+                @else
+                    <p class="dtc-current-term-dates">The Registrar has not published the semester dates yet.</p>
+                @endif
+
+                <div class="dtc-current-term-enrollment">
+                    <span>Your enrollment</span>
+                    @if(!$currentTermEnrollment)
+                        <strong>No enrollment record for this term</strong>
+                    @elseif($currentTermEnrollment->status === 'rejected')
+                        <strong class="is-rejected">Returned for correction</strong>
+                    @elseif($currentTermEnrollment->status === 'pending')
+                        <strong class="is-pending">Awaiting Registrar review</strong>
+                    @elseif($currentTermEnrollment->status === 'approved' && $currentTermEnrollment->is_paid)
+                        <strong class="is-complete">Enrollment confirmed</strong>
+                    @elseif($currentTermEnrollment->status === 'approved' && $currentTermEnrollment->payment && $currentTermEnrollment->payment->status === 'pending')
+                        <strong class="is-pending">Payment awaiting verification</strong>
+                    @elseif($currentTermEnrollment->status === 'approved' && $currentTermEnrollment->payment && $currentTermEnrollment->payment->status === 'rejected')
+                        <strong class="is-rejected">Payment proof rejected</strong>
+                    @else
+                        <strong class="is-pending">Awaiting payment</strong>
+                    @endif
+                    <a href="{{ route('portal.enrollment.index') }}">Enrollment history</a>
+                </div>
+            </div>
+        </section>
+
         {{-- Enrollment Progress Stepper --}}
         @if($timeline)
         @php
@@ -126,8 +180,8 @@
         <section class="card mb-3 dtc-enrollment-card" aria-labelledby="enrollment-progress-title">
             <div class="card-header dtc-enrollment-card-header">
                 <div>
-                    <h2 id="enrollment-progress-title">Enrollment journey</h2>
-                    <p>Track each step from application to enrollment.</p>
+                    <h2 id="enrollment-progress-title">First enrollment progress</h2>
+                    <p>Your admission and first enrollment milestones.</p>
                 </div>
                 <span class="dtc-enrollment-status">{{ $appStatusLabel }}</span>
             </div>
@@ -161,12 +215,12 @@
                 @if($activeStep)
                 <div class="dtc-enrollment-notice is-active" role="status">
                     <i data-lucide="arrow-right" aria-hidden="true"></i>
-                    <div><strong>Up next: {{ $activeStep['label'] }}</strong><span>{{ $activeStep['sublabel'] }}</span></div>
+                    <div><strong>Current Step: {{ $activeStep['label'] }}</strong><span>{{ $activeStep['sublabel'] }}</span></div>
                 </div>
                 @elseif($latestEnrollment && $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
                 <div class="dtc-enrollment-notice is-complete" role="status">
                     <i data-lucide="circle-check" aria-hidden="true"></i>
-                    <div><strong>Enrollment complete</strong><span>Your payment is confirmed and you are officially enrolled.</span></div>
+                    <div><strong>Enrollment complete</strong><span>All steps completed! You are officially enrolled.</span></div>
                 </div>
                 @elseif($latestEnrollment && $latestEnrollment->status === 'rejected')
                 <div class="dtc-enrollment-notice is-rejected" role="alert">

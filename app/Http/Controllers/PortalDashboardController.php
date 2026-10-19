@@ -10,6 +10,7 @@ use App\Models\Enrollment;
 use App\Models\Setting;
 use App\Models\UserNotification;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class PortalDashboardController extends Controller
 {
@@ -215,6 +216,34 @@ class PortalDashboardController extends Controller
             ->latest()->first();
 
         $fee = Setting::get('enrollment_fee', 500);
+        $currentSchoolYear = Setting::get('current_school_year');
+        $currentSemester = Setting::get('current_semester');
+        $semesterNumbers = ['1st' => 1, '2nd' => 2, 'Summer' => 3];
+        $timezone = Setting::get('default_timezone', config('app.timezone', 'Asia/Manila'));
+        $semesterStartsOn = Setting::get('semester_starts_on');
+        $semesterEndsOn = Setting::get('semester_ends_on');
+        $termStatus = 'dates_missing';
+
+        if ($semesterStartsOn && $semesterEndsOn) {
+            $today = Carbon::today($timezone);
+            if ($today->lt(Carbon::parse($semesterStartsOn, $timezone)->startOfDay())) {
+                $termStatus = 'upcoming';
+            } elseif ($today->gt(Carbon::parse($semesterEndsOn, $timezone)->endOfDay())) {
+                $termStatus = 'ended';
+            } else {
+                $termStatus = 'in_progress';
+            }
+        }
+
+        $currentTermEnrollment = null;
+        if ($currentSchoolYear && isset($semesterNumbers[$currentSemester])) {
+            $currentTermEnrollment = Enrollment::where('user_id', $user->id)
+                ->where('school_year', $currentSchoolYear)
+                ->where('semester', $semesterNumbers[$currentSemester])
+                ->with('payment')
+                ->latest()
+                ->first();
+        }
         $timeline = [];
         $completedSteps = 0;
         if ($latestEnrollment) {
@@ -278,7 +307,8 @@ class PortalDashboardController extends Controller
             'latestEnrollment', 'totalEnrollments', 'approvedCount',
             'paidCount', 'unreadCount', 'subjects', 'nextAppointment',
             'timeline', 'completedSteps', 'announcements', 'nextSteps', 'fee',
-            'studentProfile'
+            'studentProfile', 'currentSchoolYear', 'currentSemester', 'semesterStartsOn',
+            'semesterEndsOn', 'termStatus', 'currentTermEnrollment'
         ));
     }
 

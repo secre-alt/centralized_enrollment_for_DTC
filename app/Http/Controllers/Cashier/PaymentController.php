@@ -158,12 +158,13 @@ class PaymentController extends Controller
                 ->with('error', 'This payment has already been processed.');
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'remarks' => ['required', 'string', 'max:1000'],
         ]);
 
         $payment->update([
             'status'       => 'rejected',
+            'rejection_reason' => $validated['remarks'],
             'verified_by'  => Auth::id(),
             'verified_at'  => now(),
             'processed_by' => Auth::id(),
@@ -174,7 +175,7 @@ class PaymentController extends Controller
         NotificationService::send(
             $enrollment->user,
             'GCash Payment Rejected',
-            "Your GCash payment proof was rejected. Reason: {$request->remarks}. Please resubmit with a valid proof.",
+            "Your GCash payment proof was rejected. Reason: {$validated['remarks']}. Please resubmit with a valid proof.",
             'danger',
             route('portal.enrollment.payment-info', $enrollment)
         );

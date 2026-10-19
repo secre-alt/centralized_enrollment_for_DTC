@@ -57,6 +57,14 @@
                     </div>
                 </div>
             </div>
+            @if ($statusKey === 'rejected')
+                <div class="alert alert-danger mt-3" role="alert">
+                    <strong>Cashier’s note:</strong> {{ $latestPayment->rejection_reason ?: 'The Cashier could not verify this proof. Check your payment details before submitting a corrected proof.' }}
+                    <div class="mt-1"><strong>Next step:</strong> Submit corrected proof below. If you paid in person, contact the Cashier instead of uploading another proof.</div>
+                </div>
+            @elseif ($statusKey === 'pending')
+                <p class="u-text-sm-secondary mt-2" role="status">Next step: wait for the Cashier to verify this proof. You don’t need to submit it again.</p>
+            @endif
         @endif
 
         @if (! $enrollment->is_paid)

@@ -12,7 +12,9 @@
     var note = document.getElementById('bkNote');
     var stepsEl = form.querySelector('.dr-steps');
     var panels = form.querySelectorAll('[data-step-panel]');
-    var pickupDate = document.getElementById('pickup-date');
+    var rail = form.querySelector('[data-date-rail]');
+    var picked = form.querySelector('[data-picked]');
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var labels = { 1: 'Next: Pickup time', 2: 'Next: Payment', 3: 'Review booking', 4: 'Confirm booking' };
 
     var $ = function (sel, root) { return (root || form).querySelector(sel); };
@@ -43,19 +45,51 @@
         setText('[data-review="pay"]', pay ? (pay.value === 'gcash' ? 'GCash (receipt will be verified)' : 'Cashier’s Office') : '—');
         setText('[data-review="purpose"]', purpose && purpose.value.trim() ? purpose.value.trim() : '—');
 
+        if (picked) {
+            picked.textContent = slot
+                ? slot.getAttribute('data-date') + ', ' + slot.getAttribute('data-time')
+                : 'No time chosen yet.';
+            picked.classList.toggle('has-value', !!slot);
+        }
+
         var gcash = document.getElementById('gcash-details');
         var useGcash = !!(pay && pay.value === 'gcash');
         if (gcash) gcash.classList.toggle('is-open', useGcash);
     };
 
+    /* ---------- pickup day strip ---------- */
+    var selectedDay = function () {
+        var r = rail && rail.querySelector('input[name="pickup_date"]:checked');
+        return r ? r.value : '';
+    };
+
+    var centerDay = function (instant) {
+        var r = rail && rail.querySelector('input[name="pickup_date"]:checked');
+        var chip = r && r.closest('.dp-day');
+        if (!chip) return;
+        // Scroll the strip itself, never the page.
+        var left = chip.offsetLeft - (rail.clientWidth - chip.offsetWidth) / 2;
+        rail.scrollTo({ left: Math.max(0, left), behavior: instant || reduceMotion ? 'auto' : 'smooth' });
+    };
+
+    var syncRailNav = function () {
+        var nav = form.querySelector('[data-rail-nav]');
+        if (!rail || !nav) return;
+        var max = rail.scrollWidth - rail.clientWidth;
+        nav.hidden = max <= 2;
+        var prev = nav.querySelector('[data-rail-prev]'), next = nav.querySelector('[data-rail-next]');
+        if (prev) prev.disabled = rail.scrollLeft <= 2;
+        if (next) next.disabled = rail.scrollLeft >= max - 2;
+    };
+
     var showPickupDate = function () {
-        if (!pickupDate) return;
-        var selectedDay = pickupDate.value;
-        form.querySelectorAll('[data-slot-date-panel]').forEach(function (day) {
-            var active = day.getAttribute('data-slot-date-panel') === selectedDay;
-            day.hidden = !active;
+        var day = selectedDay();
+        // Compare attribute values directly; nothing from the page is ever put into a selector.
+        form.querySelectorAll('[data-slot-date-panel]').forEach(function (panel) {
+            var active = panel.getAttribute('data-slot-date-panel') === day;
+            panel.hidden = !active;
             if (!active) {
-                var checkedTime = day.querySelector('input[name="appointment_slot_id"]:checked');
+                var checkedTime = panel.querySelector('input[name="appointment_slot_id"]:checked');
                 if (checkedTime) checkedTime.checked = false;
             }
         });
@@ -119,6 +153,8 @@
         note.textContent = 'Step ' + n + ' of 4';
         refresh();
 
+        if (n === 2) { showPickupDate(); syncRailNav(); centerDay(true); }
+
         if (!opts || !opts.silent) {
             var legend = $('[data-step-panel="' + n + '"] legend');
             if (legend) { legend.setAttribute('tabindex', '-1'); legend.focus({ preventScroll: true }); }
@@ -127,6 +163,7 @@
     };
 
     var advance = function () {
+        if (nextBtn.classList.contains('is-busy')) return; // already submitting: ignore repeat taps and Enter
         if (step < 4) {
             if (validate(step)) go(step + 1);
             return;
@@ -162,7 +199,17 @@
         if (e.target.matches('input[type="radio"]')) { clearErrors(); }
         refresh();
     });
-    if (pickupDate) pickupDate.addEventListener('change', showPickupDate);
+    if (rail) {
+        rail.addEventListener('change', function (e) {
+            if (e.target.name === 'pickup_date') { showPickupDate(); centerDay(); }
+        });
+        rail.addEventListener('scroll', syncRailNav, { passive: true });
+        window.addEventListener('resize', syncRailNav);
+        var step_ = function () { return Math.max(160, rail.clientWidth * 0.8); };
+        var prevBtn = form.querySelector('[data-rail-prev]'), nextRail = form.querySelector('[data-rail-next]');
+        if (prevBtn) prevBtn.addEventListener('click', function () { rail.scrollBy({ left: -step_(), behavior: reduceMotion ? 'auto' : 'smooth' }); });
+        if (nextRail) nextRail.addEventListener('click', function () { rail.scrollBy({ left: step_(), behavior: reduceMotion ? 'auto' : 'smooth' }); });
+    }
     form.addEventListener('input', function (e) {
         if (e.target.matches('[name="purpose"], #gcash-ref')) {
             e.target.classList.remove('is-invalid');
