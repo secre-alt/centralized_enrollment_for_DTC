@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const maritalStatus            = document.getElementById('marital_status');
     const disability               = document.getElementById('disability');
     const documentSections         = document.querySelectorAll('.document-section');
+    const educationSections        = document.querySelectorAll('.education-section');
     const noDocumentNotice         = document.getElementById('noDocumentNotice');
     const marriageDocument         = document.getElementById('marriageDocument');
     const spouseField              = document.getElementById('spouseField');
@@ -108,6 +109,8 @@ document.addEventListener('DOMContentLoaded', function () {
             s.classList.remove('active', 'completed');
             if (i + 1 === current) s.classList.add('active');
             if (i + 1 <  current) s.classList.add('completed');
+            if (i + 1 === current) s.setAttribute('aria-current', 'step');
+            else s.removeAttribute('aria-current');
         });
         connectors.forEach(function (c, i) { c.classList.toggle('completed', i + 1 < current); });
 
@@ -151,7 +154,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (window.lucide) lucide.createIcons();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const heading = document.querySelector('#step-' + current + ' .wiz-panel-title');
+        if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); }
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
     }
 
 
@@ -219,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     /* ── Submit guard: single combined consent checkbox ── */
+    let submissionInProgress = false;
     document.getElementById('applicationForm').addEventListener('submit', function (e) {
         const chk    = document.getElementById('ack_enrollment');
         const ackErr = document.getElementById('ackError');
@@ -243,6 +250,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (chk.checked) { hidAck.value = '1'; ackErr.classList.add('d-none'); }
             }, { once: true });
         } else {
+            if (submissionInProgress) { e.preventDefault(); return; }
+            submissionInProgress = true;
+            btnSubmit.disabled = true;
+            btnSubmit.setAttribute('aria-busy', 'true');
             hidAck.value = '1';
             try { localStorage.removeItem(STORAGE_KEY); } catch (ex) {}
         }
@@ -286,6 +297,12 @@ document.addEventListener('DOMContentLoaded', function () {
             confirmSubmit.addEventListener('click', function () {
                 const form = document.getElementById('applicationForm');
                 if (form) {
+                    if (confirmSubmit.disabled) return;
+                    confirmSubmit.disabled = true;
+                    confirmSubmit.textContent = 'Submitting…';
+                    btnSubmit.disabled = true;
+                    btnSubmit.setAttribute('aria-busy', 'true');
+                    try { localStorage.removeItem(STORAGE_KEY); } catch (ex) {}
                     form.submit();
                 }
             });
@@ -457,15 +474,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateApplicantType() {
         const t = applicantType.value;
-        documentSections.forEach(function (s) { s.classList.toggle('d-none', s.getAttribute('data-type') !== t); });
+        documentSections.forEach(function (s) {
+            const visible = s.getAttribute('data-type') === t;
+            s.classList.toggle('d-none', !visible);
+            s.querySelectorAll('input[type="file"]').forEach(function (field) { field.disabled = !visible; });
+        });
         noDocumentNotice.classList.toggle('d-none', !!t);
         crossEnrolleeNotice.classList.toggle('d-none', t !== 'cross_enrollee');
+        educationSections.forEach(function (section) {
+            const types = (section.getAttribute('data-education-for') || '').split(',').map(function (value) { return value.trim(); });
+            const visible = types.indexOf(t) !== -1;
+            section.classList.toggle('d-none', !visible);
+            section.querySelectorAll('input, select, textarea').forEach(function (field) {
+                field.disabled = !visible;
+            });
+        });
         buildChecklist(t);
     }
     function updateMaritalStatus() {
         const m = maritalStatus.value === 'married';
         spouseField.classList.toggle('d-none', !m);
         marriageDocument.classList.toggle('d-none', !m);
+        marriageDocument.querySelectorAll('input[type="file"]').forEach(function (field) { field.disabled = !m; });
         if (!m) document.getElementById('spouse_name').value = '';
     }
     function updateDisability() {
@@ -1096,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         /* Section builder */
-        function section(title, icon, rows) {
+        function section(title, icon, rows, step) {
             const filled = rows.filter(function(r){ return r[1] && r[1] !== '—'; });
             const html = rows.map(function(r) {
                 const empty = !r[1] || r[1] === '—';
@@ -1110,6 +1140,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     '<i data-lucide="' + icon + '"></i>' +
                     '<span>' + title + '</span>' +
                     '<span class="rev-badge">' + filled.length + ' / ' + rows.length + '</span>' +
+                    '<button type="button" class="rev-edit" data-edit-step="' + step + '" aria-label="Edit ' + escHtml(title) + '">Edit</button>' +
                 '</div>' +
                 '<div class="rev-section-body">' + html + '</div>' +
             '</div>';
@@ -1141,11 +1172,37 @@ document.addEventListener('DOMContentLoaded', function () {
             return [honorific, name, suffix].filter(Boolean).join(' ') || '—';
         }
 
+        const educationRows = [
+            ['Education level', val('education_level')],
+            ['Completion status', val('education_status')],
+            ['Most recent school', val('most_recent_school')],
+            ['School year completed or last attended', val('school_year_completed')],
+            ['School location', val('school_location')],
+        ];
+        if (rawType === 'new_student') educationRows.push(['Senior High School strand', val('shs_strand')]);
+        if (['transferee', 'shiftee', 'returnee'].indexOf(rawType) !== -1) {
+            educationRows.push(['Previous or current program', val('previous_program')]);
+            educationRows.push(['Last year level or semester attended', val('last_year_level')]);
+        }
+        if (rawType === 'cross_enrollee') {
+            educationRows.push(['Home institution', val('home_institution')]);
+            educationRows.push(['Current course or program', val('home_program')]);
+            educationRows.push(['Last year level or semester attended', val('last_year_level')]);
+        }
+
+        const documentRows = [];
+        form.querySelectorAll('input[type="file"]').forEach(function (input) {
+            if (input.disabled || !input.files || !input.files.length) return;
+            const label = input.closest('.document-input')?.querySelector('label[for="' + input.id + '"]');
+            documentRows.push([label ? label.textContent.trim() : 'Supporting document', input.files[0].name]);
+        });
+        if (!documentRows.length) documentRows.push(['Supporting documents', 'No files selected']);
+
         const html =
-            section('Program & Applicant Type', 'graduation-cap', [
+            section('Admission Details', 'graduation-cap', [
                 ['Applicant Type',   typeLabel],
                 ['Intended Program', programName()],
-            ]) +
+            ], 1) +
             section('Personal Information', 'user', [
                 ['Full Name',      fullName()],
                 ['Gender',         val('gender')],
@@ -1166,12 +1223,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 ['LRN',            val('lrn')],
                 ['Marital Status', val('marital_status')],
                 ['Spouse Name',    val('spouse_name')],
-            ]) +
+            ], 2) +
             section('Contact & Address', 'map-pin', [
                 ['Email',    val('email')],
                 ['Phone',    val('phone')],
                 ['Address',  fullAddress()],
-            ]) +
+            ], 3) +
+            section('Educational Background', 'school', educationRows, 4) +
             section('Family Information', 'users', [
                 ["Father's Name",       val('father_name')],
                 ["Father's Occupation", val('father_occupation')],
@@ -1182,11 +1240,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 ['Occupation',          val('occupation')],
                 ['Disability',          val('disability')],
                 ['PWD ID',              val('pwd_id')],
-            ]);
+            ], 5) +
+            section('Supporting Documents', 'files', documentRows, 5);
 
         const container = document.getElementById('reviewSummary');
         if (container) {
             container.innerHTML = html;
+            container.querySelectorAll('[data-edit-step]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    goTo(Number(button.getAttribute('data-edit-step')), true);
+                });
+            });
             if (window.lucide) lucide.createIcons({ nodes: [container] });
         }
     }

@@ -102,6 +102,10 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="alert alert-light border mb-0" role="status">
+                    <strong>Next step:</strong> {{ $nextStep }}
+                </div>
             </div>
         </div>
 
@@ -114,7 +118,7 @@
             </div>
             <div class="card-body">
                 @php
-                    $timeline = $application->getProgressTimeline();
+                    $timeline = $progressTimeline;
                 @endphp
 
                 <div class="application-timeline">

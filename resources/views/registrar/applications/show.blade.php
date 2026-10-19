@@ -64,6 +64,10 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 mb-2">
+                        <div class="text-muted small">Honorific</div>
+                        <div>{{ $application->honorific ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-2">
                         <div class="text-muted small">Last Name</div>
                         <div>{{ $application->last_name }}</div>
                     </div>
@@ -74,6 +78,10 @@
                     <div class="col-md-4 mb-2">
                         <div class="text-muted small">Middle Name</div>
                         <div>{{ $application->middle_name ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <div class="text-muted small">Suffix</div>
+                        <div>{{ $application->suffix ?: '—' }}</div>
                     </div>
 
                     <div class="col-md-4 mb-2">
@@ -143,12 +151,20 @@
                         <div>{{ $application->current_address ?: '—' }}</div>
                     </div>
                     <div class="col-md-3 mb-2">
+                        <div class="text-muted small">Barangay</div>
+                        <div>{{ $application->barangay ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-3 mb-2">
                         <div class="text-muted small">City / Municipality</div>
                         <div>{{ $application->city ?: '—' }}</div>
                     </div>
                     <div class="col-md-3 mb-2">
                         <div class="text-muted small">Province</div>
                         <div>{{ $application->province ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <div class="text-muted small">Region</div>
+                        <div>{{ $application->region ?: '—' }}</div>
                     </div>
 
                     <div class="col-md-6 mb-2">
@@ -159,6 +175,79 @@
                         <div class="text-muted small">Country</div>
                         <div>{{ $application->country ?: '—' }}</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span class="font-weight-bold">Applicant Acknowledgment</span></div>
+            <div class="card-body">
+                @if($application->acknowledged_at)
+                    Applicant confirmed the information, Terms, and Privacy Policy on
+                    {{ $application->acknowledged_at->format('M d, Y h:i A') }}.
+                @else
+                    No acknowledgment timestamp is recorded for this application.
+                @endif
+            </div>
+        </div>
+
+        {{-- ===================================================== --}}
+        {{-- EDUCATIONAL BACKGROUND                                --}}
+        {{-- ===================================================== --}}
+        <div class="card">
+            <div class="card-header">
+                <span class="font-weight-bold">Educational Background</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Education level</div>
+                        <div>{{ $application->education_level ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Completion status</div>
+                        <div>{{ $application->education_status ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Most recent school attended</div>
+                        <div>{{ $application->most_recent_school ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">School year completed or last attended</div>
+                        <div>{{ $application->school_year_completed ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">School location</div>
+                        <div>{{ $application->school_location ?: '—' }}</div>
+                    </div>
+                    @if($application->academic_status === 'new_student')
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Senior High School strand</div>
+                        <div>{{ $application->shs_strand ?: '—' }}</div>
+                    </div>
+                    @endif
+                    @if(in_array($application->academic_status, ['transferee', 'shiftee', 'returnee'], true))
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Previous or current program</div>
+                        <div>{{ $application->previous_program ?: '—' }}</div>
+                    </div>
+                    @endif
+                    @if(in_array($application->academic_status, ['transferee', 'shiftee', 'returnee', 'cross_enrollee'], true))
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Last year level or semester attended</div>
+                        <div>{{ $application->last_year_level ?: '—' }}</div>
+                    </div>
+                    @endif
+                    @if($application->academic_status === 'cross_enrollee')
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Home institution</div>
+                        <div>{{ $application->home_institution ?: '—' }}</div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="text-muted small">Current course or program</div>
+                        <div>{{ $application->home_program ?: '—' }}</div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

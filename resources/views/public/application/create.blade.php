@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Pre-Enrollment Application')
+@section('title', 'Online Admission Application')
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/application-wizard.css') }}">
@@ -16,19 +16,26 @@
             <i data-lucide="arrow-left"></i>
         </a>
         <div class="app-wizard-brand">
-            <span class="app-wizard-brand-label">DTC EMS</span>
-            <span class="app-wizard-brand-title">Pre-Enrollment Application</span>
+            <span class="app-wizard-brand-copy">
+                <span class="app-wizard-brand-label">Admissions</span>
+                <span class="app-wizard-brand-title">Application form</span>
+            </span>
         </div>
         <div class="app-wizard-progress-label">
             Step <span id="wizCurrentStep">1</span> of <span id="wizTotalSteps">6</span>
         </div>
     </div>
 
+    <header class="app-wizard-intro">
+        <h1>Start your application</h1>
+        <p>Complete each section, then review your details before sending them to the Registrar.</p>
+    </header>
+
     {{-- ── Step Tracker ─────────────────────────────────────────── --}}
     <div class="app-wizard-tracker" id="wizardTracker" role="list">
         <div class="wiz-step active" data-step="1" role="listitem" tabindex="0">
             <div class="wiz-step-dot"><i data-lucide="graduation-cap"></i></div>
-            <span class="wiz-step-label">Program</span>
+            <span class="wiz-step-label">Admission</span>
         </div>
         <div class="wiz-connector"></div>
         <div class="wiz-step" data-step="2" role="listitem" tabindex="0">
@@ -42,13 +49,13 @@
         </div>
         <div class="wiz-connector"></div>
         <div class="wiz-step" data-step="4" role="listitem" tabindex="0">
-            <div class="wiz-step-dot"><i data-lucide="users"></i></div>
-            <span class="wiz-step-label">Family</span>
+            <div class="wiz-step-dot"><i data-lucide="school"></i></div>
+            <span class="wiz-step-label">Education</span>
         </div>
         <div class="wiz-connector"></div>
         <div class="wiz-step" data-step="5" role="listitem" tabindex="0">
-            <div class="wiz-step-dot"><i data-lucide="file-up"></i></div>
-            <span class="wiz-step-label">Documents</span>
+            <div class="wiz-step-dot"><i data-lucide="users"></i></div>
+            <span class="wiz-step-label">Family &amp; Docs</span>
         </div>
         <div class="wiz-connector"></div>
         <div class="wiz-step" data-step="6" role="listitem" tabindex="0">
@@ -64,7 +71,7 @@
 
     {{-- ── Server-side Validation Errors ───────────────────────── --}}
     @if ($errors->any())
-        <div class="wiz-server-errors" id="serverErrors">
+        <div class="wiz-server-errors" id="serverErrors" role="alert" tabindex="-1">
             <div class="wiz-server-errors-icon"><i data-lucide="alert-triangle"></i></div>
             <div class="wiz-server-errors-body">
                 <p class="wiz-server-errors-title">Your application couldn't be submitted</p>
@@ -98,6 +105,7 @@
         autocomplete="on"
     >
         @csrf
+        <input type="hidden" name="submission_token" value="{{ $submissionToken }}">
 
         {{-- ╔══════════════════════════════════════════════════╗
              ║  STEP 1 — APPLICANT TYPE & PROGRAM              ║
@@ -453,7 +461,7 @@
                         <span class="wiz-hint">Auto-filled when you select a city or barangay — you can edit it.</span>
                     </div>
                     <div class="wiz-field" style="max-width:220px">
-                        <label for="country">Country</label>
+                        <label for="country">Country <span class="opt">(Optional)</span></label>
                         <input type="text" name="country" id="country" placeholder="Philippines"
                             class="wiz-input" value="{{ old('country', 'Philippines') }}"
                             autocomplete="country-name">
@@ -471,29 +479,122 @@
 
 
         {{-- ╔══════════════════════════════════════════════════╗
-             ║  STEP 4 — FAMILY & OTHER INFORMATION            ║
+             ║  STEP 4 — EDUCATIONAL BACKGROUND            ║
              ╚══════════════════════════════════════════════════╝ --}}
         <div class="wiz-panel" id="step-4">
             <div class="wiz-panel-header">
-                <div class="wiz-panel-icon"><i data-lucide="users"></i></div>
+                <div class="wiz-panel-icon"><i data-lucide="school" aria-hidden="true"></i></div>
                 <div>
-                    <h2 class="wiz-panel-title">Family &amp; Other Information</h2>
-                    <p class="wiz-panel-sub">Optional — kept for the Registrar's records.</p>
+                    <h2 class="wiz-panel-title">Educational Background</h2>
+                    <p class="wiz-panel-sub">Share your recent school history. These details are optional and help the Registrar understand your application.</p>
                 </div>
             </div>
             <div class="wiz-panel-body">
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="education_level">Highest or current education level <span class="opt">(Optional)</span></label>
+                        <select name="education_level" id="education_level" class="wiz-input">
+                            <option value="">Select education level</option>
+                            <option value="Junior High School" {{ old('education_level') === 'Junior High School' ? 'selected' : '' }}>Junior High School</option>
+                            <option value="Senior High School" {{ old('education_level') === 'Senior High School' ? 'selected' : '' }}>Senior High School</option>
+                            <option value="College" {{ old('education_level') === 'College' ? 'selected' : '' }}>College</option>
+                            <option value="Other" {{ old('education_level') === 'Other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                    </div>
+                    <div class="wiz-field">
+                        <label for="education_status">Completion status <span class="opt">(Optional)</span></label>
+                        <select name="education_status" id="education_status" class="wiz-input">
+                            <option value="">Select status</option>
+                            <option value="Graduated" {{ old('education_status') === 'Graduated' ? 'selected' : '' }}>Graduated</option>
+                            <option value="Currently attending" {{ old('education_status') === 'Currently attending' ? 'selected' : '' }}>Currently attending</option>
+                            <option value="Not completed" {{ old('education_status') === 'Not completed' ? 'selected' : '' }}>Not completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="wiz-row wiz-row--2">
+                    <div class="wiz-field">
+                        <label for="most_recent_school">Most recent school attended <span class="opt">(Optional)</span></label>
+                        <input type="text" name="most_recent_school" id="most_recent_school" class="wiz-input" value="{{ old('most_recent_school') }}" maxlength="255" autocomplete="organization">
+                    </div>
+                    <div class="wiz-field">
+                        <label for="school_year_completed">School year completed or last attended <span class="opt">(Optional)</span></label>
+                        <input type="text" name="school_year_completed" id="school_year_completed" class="wiz-input" value="{{ old('school_year_completed') }}" maxlength="30" placeholder="e.g. 2024–2025" inputmode="text">
+                    </div>
+                </div>
+                <div class="wiz-field">
+                    <label for="school_location">School location <span class="opt">(Optional)</span></label>
+                    <input type="text" name="school_location" id="school_location" class="wiz-input" value="{{ old('school_location') }}" maxlength="255" placeholder="City or municipality, province">
+                </div>
+                <div class="education-section d-none" data-education-for="new_student">
+                    <div class="wiz-divider"></div>
+                    <div class="wiz-field">
+                        <label for="shs_strand">Senior High School strand <span class="opt">(Optional)</span></label>
+                        <input type="text" name="shs_strand" id="shs_strand" class="wiz-input" value="{{ old('shs_strand') }}" maxlength="100" placeholder="e.g. HUMSS, STEM, TVL">
+                    </div>
+                </div>
+                <div class="education-section d-none" data-education-for="transferee,shiftee,returnee">
+                    <div class="wiz-divider"></div>
+                    <p class="wiz-group-label"><i data-lucide="book-open" aria-hidden="true"></i> Previous college information <span class="opt">(Optional)</span></p>
+                    <div class="wiz-field">
+                        <label for="previous_program">Previous or current program <span class="opt">(Optional)</span></label>
+                        <input type="text" name="previous_program" id="previous_program" class="wiz-input" value="{{ old('previous_program') }}" maxlength="255">
+                    </div>
+                </div>
+                <div class="education-section d-none" data-education-for="cross_enrollee">
+                    <div class="wiz-divider"></div>
+                    <p class="wiz-group-label"><i data-lucide="building-2" aria-hidden="true"></i> Home institution <span class="opt">(Optional)</span></p>
+                    <div class="wiz-row wiz-row--2">
+                        <div class="wiz-field">
+                            <label for="home_institution">School or institution <span class="opt">(Optional)</span></label>
+                            <input type="text" name="home_institution" id="home_institution" class="wiz-input" value="{{ old('home_institution') }}" maxlength="255">
+                        </div>
+                        <div class="wiz-field">
+                            <label for="home_program">Current course or program <span class="opt">(Optional)</span></label>
+                            <input type="text" name="home_program" id="home_program" class="wiz-input" value="{{ old('home_program') }}" maxlength="255">
+                        </div>
+                    </div>
+                </div>
+                <div class="education-section d-none" data-education-for="transferee,shiftee,returnee,cross_enrollee">
+                    <div class="wiz-field">
+                        <label for="last_year_level">Last year level or semester attended <span class="opt">(Optional)</span></label>
+                        <input type="text" name="last_year_level" id="last_year_level" class="wiz-input" value="{{ old('last_year_level') }}" maxlength="100" placeholder="e.g. 2nd year, 1st semester">
+                    </div>
+                </div>
+                <p class="wiz-hint">No educational details are required for submission. The Registrar may contact you if clarification is needed.</p>
+            </div>
+        </div>
+
+
+
+
+        {{-- ╔══════════════════════════════════════════════════╗
+             ║  STEP 5 — FAMILY & SUPPORTING DOCUMENTS           ║
+             ╚══════════════════════════════════════════════════╝ --}}
+        <div class="wiz-panel" id="step-5">
+            <div class="wiz-panel-header">
+                <div class="wiz-panel-icon"><i data-lucide="file-up"></i></div>
+                <div>
+                    <h2 class="wiz-panel-title">Family &amp; Supporting Documents</h2>
+                    <p class="wiz-panel-sub">Add optional family details and preliminary document uploads.</p>
+                </div>
+            </div>
+            <div class="wiz-panel-body">
+
+                {{-- ── Tab Navigation ─────────────────────────────── --}}
+                <section class="wiz-family-section" aria-labelledby="family-section-title">
+                    <h3 id="family-section-title" class="wiz-subsection-title">Family information <span class="opt">(Optional)</span></h3>
 
                 <p class="wiz-group-label"><i data-lucide="heart"></i> Parent / Guardian</p>
 
                 <div class="wiz-row wiz-row--2">
                     <div class="wiz-field">
-                        <label for="father_name">Father's Name</label>
+                        <label for="father_name">Father's Name <span class="opt">(Optional)</span></label>
                         <input type="text" name="father_name" id="father_name"
                             placeholder="Father's full name" class="wiz-input"
                             value="{{ old('father_name') }}" autocomplete="off">
                     </div>
                     <div class="wiz-field">
-                        <label for="father_occupation">Father's Occupation</label>
+                        <label for="father_occupation">Father's Occupation <span class="opt">(Optional)</span></label>
                         <input type="text" name="father_occupation" id="father_occupation"
                             placeholder="e.g. Driver, Farmer, OFW" class="wiz-input"
                             value="{{ old('father_occupation') }}" autocomplete="off">
@@ -502,13 +603,13 @@
 
                 <div class="wiz-row wiz-row--2">
                     <div class="wiz-field">
-                        <label for="mother_name">Mother's Name</label>
+                        <label for="mother_name">Mother's Name <span class="opt">(Optional)</span></label>
                         <input type="text" name="mother_name" id="mother_name"
                             placeholder="Mother's full name" class="wiz-input"
                             value="{{ old('mother_name') }}" autocomplete="off">
                     </div>
                     <div class="wiz-field">
-                        <label for="mother_occupation">Mother's Occupation</label>
+                        <label for="mother_occupation">Mother's Occupation <span class="opt">(Optional)</span></label>
                         <input type="text" name="mother_occupation" id="mother_occupation"
                             placeholder="e.g. Housewife, Teacher, OFW" class="wiz-input"
                             value="{{ old('mother_occupation') }}" autocomplete="off">
@@ -517,13 +618,13 @@
 
                 <div class="wiz-row wiz-row--2">
                     <div class="wiz-field">
-                        <label for="parent_address">Parent's Address</label>
+                        <label for="parent_address">Parent's Address <span class="opt">(Optional)</span></label>
                         <input type="text" name="parent_address" id="parent_address"
                             placeholder="Same as current address, if applicable" class="wiz-input"
                             value="{{ old('parent_address') }}" autocomplete="off">
                     </div>
                     <div class="wiz-field">
-                        <label for="parent_contact">Parent's Contact</label>
+                        <label for="parent_contact">Parent's Contact <span class="opt">(Optional)</span></label>
                         <input type="text" name="parent_contact" id="parent_contact"
                             placeholder="09XXXXXXXXX" class="wiz-input"
                             value="{{ old('parent_contact') }}" autocomplete="off">
@@ -555,25 +656,10 @@
                         value="{{ old('pwd_id') }}" autocomplete="off">
                 </div>
 
-            </div>
-        </div>
-
-
-        {{-- ╔══════════════════════════════════════════════════╗
-             ║  STEP 5 — DOCUMENTS + REVIEW + SUBMIT           ║
-             ╚══════════════════════════════════════════════════╝ --}}
-        <div class="wiz-panel" id="step-5">
-            <div class="wiz-panel-header">
-                <div class="wiz-panel-icon"><i data-lucide="file-up"></i></div>
-                <div>
-                    <h2 class="wiz-panel-title">Supporting Documents &amp; Submit</h2>
-                    <p class="wiz-panel-sub">Optional digital uploads for preliminary screening. Review everything before submitting.</p>
-                </div>
-            </div>
-            <div class="wiz-panel-body">
-
-                {{-- ── Tab Navigation ─────────────────────────────── --}}
-                <div class="doc-tabs" role="tablist">
+                </section>
+                <div class="wiz-divider"></div>
+                <h3 class="wiz-subsection-title">Supporting documents <span class="opt">(Optional)</span></h3>
+<div class="doc-tabs" role="tablist">
                     <button type="button" class="doc-tab-btn active"
                         data-tab="uploads" role="tab" aria-selected="true">
                         <i data-lucide="upload-cloud"></i> Upload Documents
@@ -702,16 +788,12 @@
                 <div class="simple-ack-bar">
                     <label class="simple-ack-label" for="ack_enrollment">
                         <input type="checkbox" id="ack_enrollment" name="ack_enrollment"
-                            class="consent-chk" required>
+                            class="consent-chk" value="1" required {{ old('ack_enrollment') ? 'checked' : '' }}>
                         <span class="consent-check-box"></span>
                         <span class="simple-ack-text">
-                            By clicking "Submit Application", you agree to our <a href="#" class="simple-ack-link" id="openTermsModal">Terms</a> and have read our <a href="#" class="simple-ack-link" id="openPrivacyModal">Privacy Policy</a>.
+                            I confirm that the information I provided is accurate to the best of my knowledge, agree to the <a href="#" class="simple-ack-link" id="openTermsModal">Terms</a>, and acknowledge that I have read the <a href="#" class="simple-ack-link" id="openPrivacyModal">Privacy Policy</a>. I understand this is an application for review and does not confirm admission.
                         </span>
                     </label>
-
-                    {{-- Single hidden ack field for server --}}
-                    <input type="hidden" name="ack_privacy" id="ack_privacy" value="1">
-                    <input type="hidden" name="acknowledgement" id="acknowledgement" value="">
 
                     <div class="wiz-err-msg d-none" id="ackError" style="margin-top:10px">
                         <i data-lucide="alert-circle"></i> You must agree to the terms and privacy policy before submitting.
@@ -839,6 +921,17 @@
 
 @section('scripts')
 <script src="{{ asset('js/application-wizard.js') }}" defer></script>
+@php
+    $firstErrorKey = $errors->keys()[0] ?? '';
+    $errorStep = match (true) {
+        in_array($firstErrorKey, ['academic_status', 'program_id'], true) => 1,
+        in_array($firstErrorKey, ['first_name', 'last_name', 'middle_name', 'honorific', 'suffix', 'gender', 'birthdate', 'birth_place', 'religion', 'nationality', 'lrn', 'marital_status', 'spouse_name'], true) => 2,
+        in_array($firstErrorKey, ['email', 'phone', 'current_address', 'region', 'province', 'city', 'barangay', 'postal_code', 'country'], true) => 3,
+        in_array($firstErrorKey, ['education_level', 'education_status', 'most_recent_school', 'school_year_completed', 'school_location', 'shs_strand', 'previous_program', 'last_year_level', 'home_institution', 'home_program'], true) => 4,
+        $firstErrorKey === 'documents' || str_starts_with($firstErrorKey, 'documents.') || in_array($firstErrorKey, ['father_name', 'father_occupation', 'mother_name', 'mother_occupation', 'parent_address', 'parent_contact', 'occupation', 'disability', 'pwd_id', 'ack_enrollment'], true) => in_array($firstErrorKey, ['ack_enrollment'], true) ? 6 : 5,
+        default => 1,
+    };
+@endphp
 <script>
     /* Tell the wizard which step to open first.
        Runs after application-wizard.js because it is defer-loaded
@@ -846,7 +939,22 @@
     document.addEventListener('DOMContentLoaded', function () {
         if (window._wizGoTo) {
             @if ($errors->any())
-                window._wizGoTo(5, true);
+                window._wizGoTo({{ $errorStep ?? 1 }}, true);
+                setTimeout(function () {
+                    var keys = @json($errors->keys());
+                    var form = document.getElementById('applicationForm');
+                    var firstField = null;
+                    keys.some(function (key) {
+                        var field = form && form.elements.namedItem(key);
+                        if (!field && key.indexOf('documents.') === 0) {
+                            field = form && form.elements.namedItem('documents[' + key.substring(10) + ']');
+                        }
+                        if (field && typeof field.focus === 'function') { firstField = field; return true; }
+                        return false;
+                    });
+                    if (firstField) firstField.focus();
+                    else document.getElementById('serverErrors')?.focus();
+                }, 0);
             @else
                 window._wizGoTo(1, true);
             @endif

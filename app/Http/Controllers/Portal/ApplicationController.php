@@ -19,7 +19,7 @@ class ApplicationController extends Controller
     public function show()
     {
         $application = Application::where('user_id', Auth::id())
-            ->with(['program', 'documents', 'reviewer'])
+            ->with(['program', 'documents', 'reviewer', 'user.studentProfile', 'user.enrollments.payment'])
             ->latest()
             ->first();
 
@@ -27,8 +27,13 @@ class ApplicationController extends Controller
             abort(404, 'No application found for your account.');
         }
 
+        $enrollment = $application->getEnrollmentForProgress();
+
         return view('portal.application.show', [
             'application' => $application,
+            'enrollment' => $enrollment,
+            'progressTimeline' => $application->getProgressTimeline($enrollment),
+            'nextStep' => $application->getStatusNextStep($enrollment),
         ]);
     }
 }

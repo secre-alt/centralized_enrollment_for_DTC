@@ -88,14 +88,17 @@ class SecurityAuditRemediationTest extends TestCase
     {
         Mail::fake();
         $program = Program::factory()->create();
+        $this->get(route('public.application.create'))->assertOk();
         $response = $this->post(route('public.application.store'), [
             'academic_status' => 'new_student',
             'program_id' => $program->id,
+            'submission_token' => $this->app['session.store']->get('public_application_submission_token'),
             'first_name' => 'New',
             'last_name' => 'Applicant',
             'gender' => 'female',
             'birthdate' => '2005-01-01',
             'email' => 'new-applicant@example.test',
+            'ack_enrollment' => 'on',
         ]);
 
         $application = Application::where('email', 'new-applicant@example.test')->firstOrFail();

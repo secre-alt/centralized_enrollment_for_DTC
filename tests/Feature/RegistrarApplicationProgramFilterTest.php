@@ -160,6 +160,38 @@ class RegistrarApplicationProgramFilterTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_registrar_application_details_show_saved_applicant_type_education(): void
+    {
+        $registrar = $this->makeUserWithRole('registrar');
+        $program = Program::factory()->create();
+        $application = $this->makeApplication($program, [
+            'academic_status' => 'transferee',
+            'honorific' => 'Dr.',
+            'suffix' => 'Jr.',
+            'region' => 'Central Visayas',
+            'barangay' => 'Poblacion',
+            'acknowledged_at' => now(),
+            'education_level' => 'College',
+            'education_status' => 'Not completed',
+            'most_recent_school' => 'Danao Community College',
+            'school_year_completed' => '2024-2025',
+            'previous_program' => 'BS Information Systems',
+            'last_year_level' => '2nd year, 1st semester',
+        ]);
+
+        $this->actingAs($registrar)
+            ->get(route('registrar.applications.show', $application))
+            ->assertOk()
+            ->assertSee('Educational Background')
+            ->assertSee('Danao Community College')
+            ->assertSee('BS Information Systems')
+            ->assertSee('Central Visayas')
+            ->assertSee('Poblacion')
+            ->assertSee('Applicant Acknowledgment')
+            ->assertSee('confirmed the information, Terms, and Privacy Policy')
+            ->assertSee('2nd year, 1st semester');
+    }
+
     private function makeApplication(Program $program, array $attributes = []): Application
     {
         static $sequence = 0;

@@ -52,6 +52,49 @@
                     </div>
                 </div>
 
+                <div class="px-4 pb-4">
+                    <div class="border rounded-3 p-3">
+                        <h3 class="h6 fw-bold mb-3">Educational background submitted</h3>
+                        <div class="row g-3 small">
+                            <div class="col-sm-6">
+                                <div class="text-muted">Education level</div>
+                                <div>{{ $application->education_level ?: 'Not provided' }}</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted">Most recent school</div>
+                                <div>{{ $application->most_recent_school ?: 'Not provided' }}</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted">Completion status</div>
+                                <div>{{ $application->education_status ?: 'Not provided' }}</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted">School year</div>
+                                <div>{{ $application->school_year_completed ?: 'Not provided' }}</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted">School location</div>
+                                <div>{{ $application->school_location ?: 'Not provided' }}</div>
+                            </div>
+                            @if($application->academic_status === 'new_student' && $application->shs_strand)
+                                <div class="col-sm-6"><div class="text-muted">SHS strand</div><div>{{ $application->shs_strand }}</div></div>
+                            @endif
+                            @if($application->previous_program)
+                                <div class="col-sm-6"><div class="text-muted">Previous or current program</div><div>{{ $application->previous_program }}</div></div>
+                            @endif
+                            @if($application->last_year_level)
+                                <div class="col-sm-6"><div class="text-muted">Last year level or semester attended</div><div>{{ $application->last_year_level }}</div></div>
+                            @endif
+                            @if($application->home_institution)
+                                <div class="col-sm-6"><div class="text-muted">Home institution</div><div>{{ $application->home_institution }}</div></div>
+                            @endif
+                            @if($application->home_program)
+                                <div class="col-sm-6"><div class="text-muted">Home program</div><div>{{ $application->home_program }}</div></div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Important Notice --}}
                 <div class="px-4 pb-4">
 

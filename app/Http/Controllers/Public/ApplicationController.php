@@ -82,14 +82,17 @@ class ApplicationController extends Controller
     /**
      * Display the public application form.
      */
-    public function create()
+    public function create(Request $request)
     {
         $programs = Program::orderBy('name')->get();
+        $submissionToken = bin2hex(random_bytes(32));
+        $request->session()->put('public_application_submission_token', $submissionToken);
 
         return view('public.application.create', [
             'programs' => $programs,
             'documentRequirements' => self::DOCUMENTS_BY_TYPE,
             'physicalRequirements' => self::PHYSICAL_REQUIREMENTS,
+            'submissionToken' => $submissionToken,
         ]);
     }
 
@@ -98,7 +101,20 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $submissionToken = $request->input('submission_token');
+        $sessionSubmissionToken = $request->session()->get('public_application_submission_token');
+        if (
+            !is_string($submissionToken)
+            || !is_string($sessionSubmissionToken)
+            || !hash_equals($sessionSubmissionToken, $submissionToken)
+        ) {
+            return back()->withInput()->withErrors([
+                'application' => 'This form has expired or was already submitted. Please review the application status or start a new application.',
+            ]);
+        }
+
+        $rules = [
+            'submission_token' => ['required', 'string', 'regex:/^[a-f0-9]{64}$/'],
             'academic_status' => [
                 'required',
                 Rule::in([
@@ -134,6 +150,9 @@ class ApplicationController extends Controller
                 'max:255',
             ],
 
+            'honorific' => ['nullable', 'string', Rule::in(['Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Prof.', 'Engr.', 'Atty.'])],
+            'suffix' => ['nullable', 'string', Rule::in(['Jr.', 'Sr.', 'II', 'III', 'IV'])],
+
             'gender' => [
                 'required',
                 Rule::in(['male', 'female']),
@@ -142,6 +161,7 @@ class ApplicationController extends Controller
             'birthdate' => [
                 'required',
                 'date',
+                'before_or_equal:today',
             ],
 
             'birth_place' => [
@@ -207,6 +227,9 @@ class ApplicationController extends Controller
                 'string',
                 'max:255',
             ],
+
+            'region' => ['nullable', 'string', 'max:255'],
+            'barangay' => ['nullable', 'string', 'max:255'],
 
             'postal_code' => [
                 'nullable',
@@ -280,6 +303,13 @@ class ApplicationController extends Controller
                 'max:255',
             ],
 
+            'ack_enrollment' => ['required', 'accepted'],
+            'education_level' => ['nullable', 'string', Rule::in(['Junior High School', 'Senior High School', 'College', 'Other'])],
+            'education_status' => ['nullable', 'string', Rule::in(['Graduated', 'Currently attending', 'Not completed'])],
+            'most_recent_school' => ['nullable', 'string', 'max:255'],
+            'school_year_completed' => ['nullable', 'string', 'max:30'],
+            'school_location' => ['nullable', 'string', 'max:255'],
+
             // -------------------------------------------------------------
             // Digital documents
             //
@@ -333,6 +363,25 @@ class ApplicationController extends Controller
                 'mimes:pdf,jpg,jpeg,png',
                 'max:5120',
             ],
+        ];
+
+        $educationFieldsByType = [
+            'shs_strand' => ['new_student'],
+            'previous_program' => ['transferee', 'shiftee', 'returnee'],
+            'last_year_level' => ['transferee', 'shiftee', 'returnee', 'cross_enrollee'],
+            'home_institution' => ['cross_enrollee'],
+            'home_program' => ['cross_enrollee'],
+        ];
+        $academicStatus = $request->input('academic_status');
+        foreach ($educationFieldsByType as $field => $applicantTypes) {
+            $maxLength = in_array($field, ['shs_strand', 'last_year_level'], true) ? 100 : 255;
+            $rules[$field] = in_array($academicStatus, $applicantTypes, true)
+                ? ['nullable', 'string', 'max:' . $maxLength]
+                : ['exclude'];
+        }
+
+        $validated = $request->validate($rules, [
+            'birthdate.before_or_equal' => 'Enter a date of birth that is today or earlier.',
         ]);
 
         /*
@@ -392,6 +441,7 @@ class ApplicationController extends Controller
                 $confirmationToken = bin2hex(random_bytes(32));
                 $application = Application::create([
                     'reference_no' => $referenceNo,
+                    'submission_token_hash' => hash('sha256', $validated['submission_token']),
                     'confirmation_token_hash' => hash('sha256', $confirmationToken),
                     'confirmation_token_expires_at' => now()->addDays(7),
 
@@ -402,6 +452,8 @@ class ApplicationController extends Controller
                     'first_name' => $validated['first_name'],
                     'last_name' => $validated['last_name'],
                     'middle_name' => $validated['middle_name'] ?? null,
+                    'honorific' => $validated['honorific'] ?? null,
+                    'suffix' => $validated['suffix'] ?? null,
 
                     'gender' => $validated['gender'],
                     'birthdate' => $validated['birthdate'],
@@ -423,6 +475,8 @@ class ApplicationController extends Controller
                     'current_address' => $validated['current_address'] ?? null,
                     'city' => $validated['city'] ?? null,
                     'province' => $validated['province'] ?? null,
+                    'region' => $validated['region'] ?? null,
+                    'barangay' => $validated['barangay'] ?? null,
                     'postal_code' => $validated['postal_code'] ?? null,
                     'country' => $validated['country'] ?? 'Philippines',
 
@@ -438,6 +492,18 @@ class ApplicationController extends Controller
                     'occupation' => $validated['occupation'] ?? null,
                     'disability' => $validated['disability'] ?? null,
                     'pwd_id' => $validated['pwd_id'] ?? null,
+
+                    'education_level' => $validated['education_level'] ?? null,
+                    'education_status' => $validated['education_status'] ?? null,
+                    'most_recent_school' => $validated['most_recent_school'] ?? null,
+                    'school_year_completed' => $validated['school_year_completed'] ?? null,
+                    'school_location' => $validated['school_location'] ?? null,
+                    'shs_strand' => $validated['shs_strand'] ?? null,
+                    'previous_program' => $validated['previous_program'] ?? null,
+                    'last_year_level' => $validated['last_year_level'] ?? null,
+                    'home_institution' => $validated['home_institution'] ?? null,
+                    'home_program' => $validated['home_program'] ?? null,
+                    'acknowledged_at' => now(),
 
                     'status' => 'submitted',
                 ]);
@@ -490,6 +556,7 @@ class ApplicationController extends Controller
                 return [$application, $confirmationToken];
             });
             [$application, $confirmationToken] = $application;
+            $request->session()->forget('public_application_submission_token');
 
             /*
              * Notify existing Registrar users.
@@ -596,6 +663,8 @@ class ApplicationController extends Controller
         $application = Application::with([
             'program',
             'documents',
+            'user.studentProfile',
+            'user.enrollments.payment',
         ])
             ->where('reference_no', $validated['reference_no'])
             ->where('email', $validated['email'])
@@ -610,10 +679,16 @@ class ApplicationController extends Controller
                 ]);
         }
 
+        $enrollment = $application->getEnrollmentForProgress();
+
         return view('public.application.status', [
             'application' => $application,
+            'enrollment' => $enrollment,
+            'progressTimeline' => $application->getProgressTimeline($enrollment),
+            'nextStep' => $application->getStatusNextStep($enrollment),
             'physicalRequirements' =>
                 self::PHYSICAL_REQUIREMENTS[$application->academic_status] ?? [],
         ]);
     }
+
 }

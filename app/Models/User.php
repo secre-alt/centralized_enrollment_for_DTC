@@ -38,6 +38,11 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\StudentProfile::class);
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(\App\Models\Enrollment::class);
+    }
+
     /**
     * Get all applications submitted by this user.
     */
