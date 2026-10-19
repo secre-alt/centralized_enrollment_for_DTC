@@ -358,6 +358,46 @@ class AppointmentFlowTest extends TestCase
     }
 
     /** @test */
+    public function registrar_cannot_verify_pending_gcash_for_a_cancelled_appointment()
+    {
+        $registrar = $this->makeUserWithRole('registrar');
+        $appointment = Appointment::factory()->create(['status' => 'cancelled']);
+        $payment = AppointmentPayment::factory()->create([
+            'appointment_id' => $appointment->id,
+            'payment_method' => 'gcash',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($registrar)
+            ->post(route('registrar.appointments.payments.verify', $payment))
+            ->assertStatus(422);
+
+        $this->assertSame('pending', $payment->fresh()->status);
+        $this->assertSame('cancelled', $appointment->fresh()->status);
+        $this->assertSame(1, AppointmentPayment::where('appointment_id', $appointment->id)->count());
+    }
+
+    /** @test */
+    public function registrar_cannot_verify_a_second_payment_for_an_appointment()
+    {
+        $registrar = $this->makeUserWithRole('registrar');
+        $appointment = Appointment::factory()->create(['status' => 'pending']);
+        AppointmentPayment::factory()->verified()->create(['appointment_id' => $appointment->id]);
+        $pending = AppointmentPayment::factory()->create([
+            'appointment_id' => $appointment->id,
+            'payment_method' => 'gcash',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($registrar)
+            ->post(route('registrar.appointments.payments.verify', $pending))
+            ->assertStatus(422);
+
+        $this->assertSame('pending', $pending->fresh()->status);
+        $this->assertSame(1, AppointmentPayment::where('appointment_id', $appointment->id)->where('status', 'verified')->count());
+    }
+
+    /** @test */
     public function registrar_can_reject_a_pending_gcash_payment_with_a_reason()
     {
         $registrar = $this->makeUserWithRole('registrar');

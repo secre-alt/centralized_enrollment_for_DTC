@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\CourseSubject;
 use App\Models\Enrollment;
 use App\Models\Program;
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\SeedsRoles;
 use Tests\TestCase;
@@ -27,6 +28,8 @@ class DoubleEnrollmentTest extends TestCase
     {
         parent::setUp();
         $this->seedRoles();
+        Setting::set('current_school_year', '2026-2027');
+        Setting::set('current_semester', '1st');
     }
 
     // ── helpers ───────────────────────────────────────────────────────────
@@ -70,6 +73,8 @@ class DoubleEnrollmentTest extends TestCase
         Enrollment::factory()->pending()->create([
             'user_id'    => $student->id,
             'program_id' => $program->id,
+            'school_year' => '2026-2027',
+            'semester' => 1,
         ]);
 
         $response = $this->actingAs($student)
@@ -100,6 +105,8 @@ class DoubleEnrollmentTest extends TestCase
             'user_id'    => $student->id,
             'program_id' => $program->id,
             'status'     => 'approved',
+            'school_year' => '2026-2027',
+            'semester' => 1,
         ]);
 
         $response = $this->actingAs($student)
@@ -125,6 +132,8 @@ class DoubleEnrollmentTest extends TestCase
         Enrollment::factory()->paid()->create([
             'user_id'    => $student->id,
             'program_id' => $program->id,
+            'school_year' => '2026-2027',
+            'semester' => 1,
         ]);
 
         $response = $this->actingAs($student)
@@ -187,7 +196,56 @@ class DoubleEnrollmentTest extends TestCase
         $this->assertDatabaseHas('enrollments', [
             'user_id' => $student->id,
             'status'  => 'pending',
+            'school_year' => '2026-2027',
+            'semester' => 1,
         ]);
+    }
+
+    /** @test */
+    public function an_approved_enrollment_from_a_previous_term_does_not_block_the_current_term()
+    {
+        $student = $this->makeUserWithRole('student');
+        $program = Program::factory()->create();
+        $subject = $this->makeSubject($program);
+        Enrollment::factory()->create([
+            'user_id' => $student->id,
+            'program_id' => $program->id,
+            'status' => 'approved',
+            'school_year' => '2025-2026',
+            'semester' => 2,
+        ]);
+
+        $this->actingAs($student)
+            ->post(route('portal.enrollment.store'), $this->storePayload($program, $subject))
+            ->assertRedirect(route('portal.enrollment.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('enrollments', [
+            'user_id' => $student->id,
+            'school_year' => '2026-2027',
+            'semester' => 1,
+            'status' => 'pending',
+        ]);
+    }
+
+    /** @test */
+    public function client_semester_cannot_bypass_same_term_duplicate_guard_or_change_saved_term()
+    {
+        $student = $this->makeUserWithRole('student');
+        $program = Program::factory()->create();
+        $subject = $this->makeSubject($program);
+        Enrollment::factory()->pending()->create([
+            'user_id' => $student->id,
+            'program_id' => $program->id,
+            'school_year' => '2026-2027',
+            'semester' => 1,
+        ]);
+
+        $this->actingAs($student)
+            ->post(route('portal.enrollment.store'), array_merge($this->storePayload($program, $subject), ['semester' => 3]))
+            ->assertSessionHas('error');
+
+        $this->assertSame(1, Enrollment::where('user_id', $student->id)->count());
     }
 
     // ── create() — double-enrollment guard (student branch) ───────────────
@@ -235,6 +293,8 @@ class DoubleEnrollmentTest extends TestCase
         Enrollment::factory()->pending()->create([
             'user_id'    => $applicant->id,
             'program_id' => $program->id,
+            'school_year' => '2026-2027',
+            'semester' => 1,
         ]);
 
         $response = $this->actingAs($applicant)

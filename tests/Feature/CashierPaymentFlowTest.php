@@ -50,11 +50,45 @@ class CashierPaymentFlowTest extends TestCase
         $response = $this->actingAs($cashier)
             ->post(route('cashier.payments.store', $enrollment));
 
-        $response->assertRedirect();
-        $response->assertSessionHas('error');
+        $response->assertSessionHasErrors('payment');
 
         // Still only the one payment row — no duplicate was created.
         $this->assertSame(1, Payment::where('enrollment_id', $enrollment->id)->count());
+    }
+
+    /** @test */
+    public function walk_in_payment_is_rejected_until_enrollment_is_approved()
+    {
+        $cashier = $this->makeUserWithRole('cashier');
+        $enrollment = Enrollment::factory()->pending()->create(['is_paid' => false]);
+
+        $this->actingAs($cashier)
+            ->post(route('cashier.payments.store', $enrollment))
+            ->assertSessionHasErrors('payment');
+
+        $this->assertSame(0, Payment::where('enrollment_id', $enrollment->id)->count());
+        $this->assertFalse($enrollment->fresh()->is_paid);
+    }
+
+    /** @test */
+    public function a_pending_gcash_attempt_blocks_walk_in_but_a_rejected_attempt_does_not()
+    {
+        $cashier = $this->makeUserWithRole('cashier');
+        $enrollment = Enrollment::factory()->create(['status' => 'approved', 'is_paid' => false]);
+        $pending = Payment::factory()->gcashPending()->create(['enrollment_id' => $enrollment->id]);
+
+        $this->actingAs($cashier)
+            ->post(route('cashier.payments.store', $enrollment))
+            ->assertSessionHasErrors('payment');
+        $this->assertSame(1, Payment::where('enrollment_id', $enrollment->id)->count());
+
+        $pending->update(['status' => 'rejected']);
+        $this->actingAs($cashier)
+            ->post(route('cashier.payments.store', $enrollment))
+            ->assertRedirect(route('cashier.payments.receipt', $enrollment));
+
+        $this->assertSame(2, Payment::where('enrollment_id', $enrollment->id)->count());
+        $this->assertTrue($enrollment->fresh()->is_paid);
     }
 
     /** @test */

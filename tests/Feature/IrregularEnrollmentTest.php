@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CourseSubject;
 use App\Models\Program;
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\SeedsRoles;
 use Tests\TestCase;
@@ -16,6 +17,8 @@ class IrregularEnrollmentTest extends TestCase
     {
         parent::setUp();
         $this->seedRoles();
+        Setting::set('current_school_year', '2026-2027');
+        Setting::set('current_semester', '1st');
     }
 
     private function makeCurriculum(Program $program): array

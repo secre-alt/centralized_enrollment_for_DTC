@@ -117,6 +117,26 @@ class StudentGcashPaymentTest extends TestCase
     }
 
     /** @test */
+    public function a_rejected_gcash_attempt_can_be_resubmitted()
+    {
+        $student = $this->makeUserWithRole('new_applicant');
+        $enrollment = Enrollment::factory()->create([
+            'user_id' => $student->id,
+            'status' => 'approved',
+            'is_paid' => false,
+        ]);
+        Payment::factory()->rejected()->create(['enrollment_id' => $enrollment->id]);
+
+        $this->actingAs($student)->post(route('portal.enrollment.payment.gcash', $enrollment), [
+            'reference_number' => '1234567890',
+            'proof_of_payment' => UploadedFile::fake()->image('retry.jpg'),
+        ])->assertSessionHas('success');
+
+        $this->assertSame(2, Payment::where('enrollment_id', $enrollment->id)->count());
+        $this->assertSame('pending', Payment::where('enrollment_id', $enrollment->id)->latest('id')->first()->status);
+    }
+
+    /** @test */
     public function gcash_submission_requires_a_reference_number_and_a_valid_proof_file()
     {
         $student    = $this->makeUserWithRole('new_applicant');

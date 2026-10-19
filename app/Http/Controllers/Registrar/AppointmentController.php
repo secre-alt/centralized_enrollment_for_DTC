@@ -9,6 +9,7 @@ use App\Models\AppointmentSlot;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class AppointmentController extends Controller
@@ -177,10 +178,26 @@ class AppointmentController extends Controller
             'remarks' => ['required', 'string', 'max:500'],
         ]);
 
-        $appointment->update([
-            'status'  => 'cancelled',
-            'remarks' => $validated['remarks'],
-        ]);
+        $result = DB::transaction(function () use ($appointment, $validated) {
+            $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+            $hasVerifiedPayment = AppointmentPayment::where('appointment_id', $lockedAppointment->id)
+                ->where('status', 'verified')
+                ->lockForUpdate()
+                ->exists();
+            if ($hasVerifiedPayment) {
+                return false;
+            }
+
+            $lockedAppointment->update([
+                'status'  => 'cancelled',
+                'remarks' => $validated['remarks'],
+            ]);
+            return true;
+        });
+
+        if (! $result) {
+            return back()->with('error', 'This appointment has a verified payment. Resolve it with the Cashier before cancellation.');
+        }
 
         NotificationService::send(
             $appointment->user,
@@ -198,13 +215,29 @@ class AppointmentController extends Controller
 
     public function verifyPayment(AppointmentPayment $payment)
     {
-        abort_if($payment->status !== 'pending', 422, 'Payment is not pending.');
+        DB::transaction(function () use ($payment) {
+            $appointment = Appointment::whereKey($payment->appointment_id)->lockForUpdate()->firstOrFail();
+            $lockedPayment = AppointmentPayment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
 
-        $payment->update([
-            'status'      => 'verified',
-            'verified_by' => Auth::id(),
-            'verified_at' => now(),
-        ]);
+            abort_if($lockedPayment->status !== 'pending' || $lockedPayment->payment_method !== 'gcash', 422, 'Payment is not pending.');
+            abort_if($appointment->status === 'cancelled', 422, 'Payment cannot be verified for a cancelled appointment.');
+            abort_if(
+                AppointmentPayment::where('appointment_id', $appointment->id)
+                    ->where('status', 'verified')
+                    ->where('id', '!=', $lockedPayment->id)
+                    ->exists(),
+                422,
+                'A verified payment already exists for this appointment.'
+            );
+
+            $lockedPayment->update([
+                'status'      => 'verified',
+                'verified_by' => Auth::id(),
+                'verified_at' => now(),
+            ]);
+        });
+
+        $payment = $payment->fresh();
 
         NotificationService::send(
             $payment->appointment->user,
@@ -222,18 +255,24 @@ class AppointmentController extends Controller
 
     public function rejectPayment(Request $request, AppointmentPayment $payment)
     {
-        abort_if($payment->status !== 'pending', 422, 'Payment is not pending.');
-
         $validated = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        $payment->update([
-            'status'           => 'rejected',
-            'rejection_reason' => $validated['rejection_reason'],
-            'verified_by'      => Auth::id(),
-            'verified_at'      => now(),
-        ]);
+        DB::transaction(function () use ($payment, $validated) {
+            Appointment::whereKey($payment->appointment_id)->lockForUpdate()->firstOrFail();
+            $lockedPayment = AppointmentPayment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
+            abort_if($lockedPayment->status !== 'pending' || $lockedPayment->payment_method !== 'gcash', 422, 'Payment is not pending.');
+
+            $lockedPayment->update([
+                'status'           => 'rejected',
+                'rejection_reason' => $validated['rejection_reason'],
+                'verified_by'      => Auth::id(),
+                'verified_at'      => now(),
+            ]);
+        });
+
+        $payment = $payment->fresh();
 
         NotificationService::send(
             $payment->appointment->user,

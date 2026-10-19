@@ -61,5 +61,11 @@ class RouteServiceProvider extends ServiceProvider
                     ->by('application-status-identity:' . $identity),
             ];
         });
+
+        // Limits POST /apply across refreshed forms using only the client IP.
+        RateLimiter::for('application-submission', function (Request $request) {
+            return Limit::perHour((int) config('services.application_submission.per_ip_per_hour', 5))
+                ->by('public-application-ip:' . hash('sha256', (string) $request->ip()));
+        });
     }
 }

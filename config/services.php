@@ -26,6 +26,12 @@ return [
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
     ],
 
+    // Five POST /apply attempts per source IP per hour. Applicants behind
+    // a shared campus NAT share this allowance.
+    'application_submission' => [
+        'per_ip_per_hour' => env('APPLICATION_SUBMISSION_LIMIT_PER_IP', 5),
+    ],
+
     'login_rate_limit' => [
         'per_identity_attempts' => env('LOGIN_RATE_LIMIT_PER_IDENTITY', 5),
         'per_ip_attempts' => env('LOGIN_RATE_LIMIT_PER_IP', 300),

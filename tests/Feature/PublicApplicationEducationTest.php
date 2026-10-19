@@ -17,6 +17,7 @@ class PublicApplicationEducationTest extends TestCase
     {
         parent::setUp();
         $this->seedRoles();
+        config(['services.application_submission.per_ip_per_hour' => 100]);
         Mail::fake();
     }
 

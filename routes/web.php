@@ -77,7 +77,7 @@ use App\Http\Controllers\Portal\ProfileController;
     // ── PUBLIC APPLICATION / PRE-ENROLLMENT ─────────────────────────────────────
     Route::prefix('apply')->name('public.application.')->group(function () {
         Route::get('/', [ApplicationController::class, 'create'])->name('create');
-        Route::post('/', [ApplicationController::class, 'store'])->name('store');
+        Route::post('/', [ApplicationController::class, 'store'])->middleware('throttle:application-submission')->name('store');
         Route::get('/success', [ApplicationController::class, 'success'])->name('success');
         Route::get('/status', [ApplicationController::class, 'statusForm'])->name('status.form');
         Route::post('/status', [ApplicationController::class, 'status'])->middleware('throttle:application-status-lookup')->name('status');

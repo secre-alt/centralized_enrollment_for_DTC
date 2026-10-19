@@ -198,11 +198,29 @@ class AppointmentController extends Controller
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
 
-        if ($appointment->status !== 'pending') {
+        $result = DB::transaction(function () use ($appointment) {
+            $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+            if ($lockedAppointment->status !== 'pending') {
+                return 'not_pending';
+            }
+
+            $payments = AppointmentPayment::where('appointment_id', $lockedAppointment->id)
+                ->lockForUpdate()
+                ->get();
+            if ($payments->contains('status', 'verified')) {
+                return 'paid';
+            }
+
+            $lockedAppointment->update(['status' => 'cancelled']);
+            return 'cancelled';
+        });
+
+        if ($result === 'not_pending') {
             return back()->withErrors(['error' => 'Only pending appointments can be cancelled.']);
         }
-
-        $appointment->update(['status' => 'cancelled']);
+        if ($result === 'paid') {
+            return back()->withErrors(['error' => 'This appointment has a verified payment. Contact the Registrar to resolve it before cancellation.']);
+        }
 
         $notifyUsers = User::role(['registrar', 'admin'])->get();
         foreach ($notifyUsers as $staff) {
@@ -228,28 +246,51 @@ class AppointmentController extends Controller
             return back()->with('error', 'Cannot submit payment for a cancelled appointment.');
         }
 
-        $pendingExists = $appointment->payments()->where('status', 'pending')->exists();
-        if ($pendingExists) {
-            return back()->with('error', 'You already have a payment pending verification.');
-        }
-
-        $request->validate([
+        $validated = $request->validate([
             'reference_number' => ['required', 'string', 'max:50'],
             'proof_of_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ]);
-
-        $path = $request->file('proof_of_payment')->store('appointment-proofs', 'local');
-
         $fee = (float) Setting::get('appointment_processing_fee', 0);
 
-        AppointmentPayment::create([
-            'appointment_id'   => $appointment->id,
-            'payment_method'   => 'gcash',
-            'reference_number' => $request->reference_number,
-            'proof_of_payment' => $path,
-            'amount'           => $fee,
-            'status'           => 'pending',
-        ]);
+        $result = DB::transaction(function () use ($appointment, $request, $validated, $fee) {
+            $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+            if ($lockedAppointment->status === 'cancelled') {
+                return 'cancelled';
+            }
+
+            $payments = AppointmentPayment::where('appointment_id', $lockedAppointment->id)
+                ->lockForUpdate()
+                ->get();
+
+            if ($payments->contains('status', 'pending')) {
+                return 'pending';
+            }
+            if ($payments->contains('status', 'verified')) {
+                return 'verified';
+            }
+
+            $path = $request->file('proof_of_payment')->store('appointment-proofs', 'local');
+            AppointmentPayment::create([
+                'appointment_id'   => $lockedAppointment->id,
+                'payment_method'   => 'gcash',
+                'reference_number' => $validated['reference_number'],
+                'proof_of_payment' => $path,
+                'amount'           => $fee,
+                'status'           => 'pending',
+            ]);
+
+            return 'created';
+        });
+
+        if ($result !== 'created') {
+            $message = [
+                'cancelled' => 'Cannot submit payment for a cancelled appointment.',
+                'pending' => 'You already have a payment pending verification.',
+                'verified' => 'This appointment already has a verified payment.',
+            ][$result];
+
+            return back()->with('error', $message);
+        }
 
         return back()->with('success', 'GCash payment proof submitted. The Cashier will verify your payment shortly.');
     }

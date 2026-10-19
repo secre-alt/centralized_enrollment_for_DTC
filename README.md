@@ -71,6 +71,7 @@ The committed `.env.example` is a local template. At minimum configure:
 | `CACHE_DRIVER`, `QUEUE_CONNECTION`, `FILESYSTEM_DISK`, `LOG_CHANNEL`, `LOG_LEVEL` | Cache, queue, uploaded-file storage, and logs. The shipped defaults are suitable only for simple local use. |
 | `RECAPTCHA_ENABLED`, `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY` | Login CAPTCHA configuration. Local/testing may explicitly disable it; production requires it and fails closed when disabled, misconfigured, or unavailable. Keep the secret key private. |
 | `LOGIN_RATE_LIMIT_PER_IDENTITY`, `LOGIN_RATE_LIMIT_PER_IP`, `LOGIN_RATE_LIMIT_DECAY_SECONDS` | Optional login throttling overrides. Defaults are 5 attempts per normalized email+IP and 300 attempts per IP per 5 minutes to allow shared campus networks. Use a shared production cache backend so limits apply across application workers. |
+| `APPLICATION_SUBMISSION_LIMIT_PER_IP` | Public `POST /apply` attempt limit per source IP per hour (default 5; failed validation requests count too). Refreshing the form does not reset this limit. Applicants behind a shared campus/NAT address share the allowance; distributed requests from different IPs are not covered by this per-IP control. Use a shared production cache backend across application workers. |
 
 `APP_KEY` must not be regenerated on an existing installation: doing so can invalidate encrypted data and sessions. Do not commit `.env`, credentials, uploaded files, or generated backups.
 

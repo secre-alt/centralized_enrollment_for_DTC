@@ -35,9 +35,13 @@ class EnrollmentController extends Controller
                     ->with('error', 'You do not have an approved application. Please contact the Registrar.');
             }
 
-            // Guard: block re-enrollment if an active enrollment already exists
+            // An earlier term's approved enrollment must not block this term.
+            $term = $this->configuredAcademicTerm();
             $existingEnrollment = Enrollment::where('user_id', $user->id)
                 ->whereIn('status', ['pending', 'approved'])
+                ->when($term, fn ($query) => $query
+                    ->where('school_year', $term['school_year'])
+                    ->where('semester', $term['semester']))
                 ->first();
 
             if ($existingEnrollment) {
@@ -97,6 +101,12 @@ class EnrollmentController extends Controller
         ]);
 
         $isIrregular = $request->boolean('is_irregular');
+        $term = $this->configuredAcademicTerm();
+        if (! $term) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'semester' => 'The current academic year and semester are not configured. Please contact the Registrar.',
+            ]);
+        }
 
         // ── Reject duplicate subject submissions outright.
         if (count($validated['subject_ids']) !== count(array_unique($validated['subject_ids']))) {
@@ -129,26 +139,37 @@ class EnrollmentController extends Controller
         }
 
         // ── Guard: no duplicate active enrollments
-        $existingEnrollment = Enrollment::where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
-            ->first();
+        $enrollment = DB::transaction(function () use ($user, $validated, $isIrregular, $term) {
+            \App\Models\User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
-        if ($existingEnrollment) {
+            $existingEnrollment = Enrollment::where('user_id', $user->id)
+                ->where('school_year', $term['school_year'])
+                ->where('semester', $term['semester'])
+                ->whereIn('status', ['pending', 'approved'])
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingEnrollment) {
+                return null;
+            }
+
+            return Enrollment::create([
+                'user_id'      => $user->id,
+                'program_id'   => $validated['program_id'],
+                'year_level'   => $validated['year_level'],
+                'semester'    => $term['semester'],
+                'school_year'  => $term['school_year'],
+                'is_irregular' => $isIrregular,
+                'subject_ids'  => $validated['subject_ids'],
+                'status'       => 'pending',
+                'is_paid'      => false,
+            ]);
+        });
+
+        if (! $enrollment) {
             return redirect()->route('portal.dashboard')
-                ->with('error', 'You already have an active enrollment.');
+                ->with('error', 'You already have an active enrollment for the current academic term.');
         }
-
-        $enrollment = Enrollment::create([
-            'user_id'     => $user->id,
-            'program_id'  => $validated['program_id'],
-            'year_level'  => $validated['year_level'],
-            'semester'    => $validated['semester'],
-            'school_year' => \App\Models\Setting::get('current_school_year'),
-            'is_irregular' => $isIrregular,
-            'subject_ids' => $validated['subject_ids'],
-            'status'      => 'pending',
-            'is_paid'     => false,
-        ]);
 
         // Notify all registrars of the new enrollment submission
         $registrars = \App\Models\User::role(['registrar', 'admin'])->get();
@@ -165,6 +186,23 @@ class EnrollmentController extends Controller
         return redirect()->route('portal.enrollment.index')->with('success', 'Enrollment submitted successfully. Await Registrar approval.');
     }
 
+    /** Resolve the active term from Registrar-managed academic settings. */
+    private function configuredAcademicTerm(): ?array
+    {
+        $schoolYear = trim((string) Setting::get('current_school_year', ''));
+        $semester = [
+            '1st' => 1,
+            '2nd' => 2,
+            'Summer' => 3,
+        ][(string) Setting::get('current_semester', '')] ?? null;
+
+        if ($schoolYear === '' || $semester === null) {
+            return null;
+        }
+
+        return ['school_year' => $schoolYear, 'semester' => $semester];
+    }
+
     // ── submitGcash() — NEW ────────────────────────────────────────
 
     public function submitGcash(Request $request, Enrollment $enrollment)
@@ -172,25 +210,6 @@ class EnrollmentController extends Controller
         // Ownership check
         if ($enrollment->user_id !== Auth::id()) {
             abort(403);
-        }
-
-        // Enrollment must be approved before payment is accepted
-        if ($enrollment->status !== 'approved') {
-            return back()->with('error', 'Your enrollment must be approved before submitting payment.');
-        }
-
-        // Already paid
-        if ($enrollment->is_paid) {
-            return back()->with('error', 'This enrollment has already been paid.');
-        }
-
-        // Block duplicate pending submission
-        $pendingExists = Payment::where('enrollment_id', $enrollment->id)
-            ->where('status', 'pending')
-            ->exists();
-
-        if ($pendingExists) {
-            return back()->with('error', 'You already have a payment pending verification. Please wait for the Cashier to review it.');
         }
 
         $validated = $request->validate([
@@ -203,25 +222,64 @@ class EnrollmentController extends Controller
             ],
         ]);
 
-        // Store proof privately — same pattern as ApplicationDocument
-        $path = $request->file('proof_of_payment')
-            ->store('payment-proofs', 'local');
+        // Lock the enrollment so GCash and walk-in submissions serialize against
+        // the same authoritative payment state. A rejected attempt may be retried.
+        $proofPath = null;
+        try {
+            $result = DB::transaction(function () use ($enrollment, $request, $validated, &$proofPath) {
+                $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
 
-        $amount = Setting::get('enrollment_fee', 500);
+                if ($lockedEnrollment->status !== 'approved') {
+                    return 'not_approved';
+                }
+                if ($lockedEnrollment->is_paid) {
+                    return 'paid';
+                }
 
-        Payment::create([
-            'enrollment_id'    => $enrollment->id,
-            'payment_method'   => 'gcash',
-            'reference_number' => $validated['reference_number'],
-            'proof_of_payment' => $path,
-            'status'           => 'pending',   // hardcoded — never trusted from client
-            'processed_by'     => null,
-            'verified_by'      => null,
-            'verified_at'      => null,
-            'amount'           => $amount,
-            'receipt_no'       => null,        // assigned only at verification
-            'paid_at'          => null,        // assigned only at verification
-        ]);
+                $attempts = Payment::where('enrollment_id', $lockedEnrollment->id)
+                    ->lockForUpdate()
+                    ->get();
+                if ($attempts->contains('status', 'verified')) {
+                    return 'verified';
+                }
+                if ($attempts->contains('status', 'pending')) {
+                    return 'pending';
+                }
+
+                $proofPath = $request->file('proof_of_payment')->store('payment-proofs', 'local');
+                Payment::create([
+                    'enrollment_id'    => $lockedEnrollment->id,
+                    'payment_method'   => 'gcash',
+                    'reference_number' => $validated['reference_number'],
+                    'proof_of_payment' => $proofPath,
+                    'status'           => 'pending',
+                    'processed_by'     => null,
+                    'verified_by'      => null,
+                    'verified_at'      => null,
+                    'amount'           => Setting::get('enrollment_fee', 500),
+                    'receipt_no'       => null,
+                    'paid_at'          => null,
+                ]);
+
+                return 'created';
+            });
+        } catch (\Throwable $exception) {
+            if ($proofPath) {
+                Storage::disk('local')->delete($proofPath);
+            }
+            throw $exception;
+        }
+
+        if ($result !== 'created') {
+            $message = [
+                'not_approved' => 'Your enrollment must be approved before submitting payment.',
+                'paid' => 'This enrollment has already been paid.',
+                'verified' => 'A verified payment already exists for this enrollment. Contact the Cashier if the records do not match.',
+                'pending' => 'You already have a payment pending verification. Please wait for the Cashier to review it.',
+            ][$result];
+
+            return back()->with('error', $message);
+        }
 
     foreach (\App\Models\User::role('cashier')->get() as $cashier) {
         \App\Services\NotificationService::send(
