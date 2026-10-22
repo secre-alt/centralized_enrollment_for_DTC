@@ -36,7 +36,6 @@
     <link rel="stylesheet" href="{{ asset('css/signin-modal.css') }}">
     {{-- DTC Theme (dark mode support) --}}
     <link rel="stylesheet" href="{{ asset('css/dtc-theme.css') }}">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script src="{{ asset('js/signin-modal.js') }}" defer></script>
     {{-- Page-specific styles --}}
     @yield('styles')
@@ -77,6 +76,7 @@
     </footer>
 
 
+    <script src="{{ asset('js/session-feedback.js') }}" defer></script>
     <script src="{{ asset('js/dtc-app.js') }}" defer></script>
     <script src="{{ asset('js/dtc-feedback.js') }}" defer></script>
 

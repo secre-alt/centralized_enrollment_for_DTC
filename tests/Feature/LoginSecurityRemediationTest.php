@@ -5,10 +5,7 @@ namespace Tests\Feature;
 use App\Http\Middleware\TrustHosts;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\SeedsRoles;
 use Tests\TestCase;
@@ -21,163 +18,16 @@ class LoginSecurityRemediationTest extends TestCase
     {
         parent::setUp();
         $this->seedRoles();
-        config(['services.recaptcha.enabled' => false]);
     }
 
-    public function test_valid_captcha_allows_login_and_uses_configured_secret(): void
+    public function test_login_succeeds_without_an_external_challenge(): void
     {
-        $user = $this->makeStudent('valid-captcha@example.test');
-        config([
-            'services.recaptcha.enabled' => true,
-            'services.recaptcha.site_key' => 'test-site-key',
-            'services.recaptcha.secret_key' => 'test-secret-key',
-        ]);
-        Http::fake([
-            'www.google.com/recaptcha/api/siteverify' => Http::response(['success' => true], 200),
-        ]);
-
-        $response = $this->post(route('login'), $this->loginData($user->email) + [
-            'g-recaptcha-response' => 'valid-test-token',
-        ]);
-
-        $response->assertRedirect(route('portal.dashboard'));
-        $this->assertAuthenticatedAs($user);
-        Http::assertSent(function (ClientRequest $request) {
-            return $request->url() === 'https://www.google.com/recaptcha/api/siteverify'
-                && $request['secret'] === 'test-secret-key'
-                && $request['response'] === 'valid-test-token';
-        });
-    }
-
-    public function test_invalid_captcha_does_not_authenticate(): void
-    {
-        config([
-            'services.recaptcha.enabled' => true,
-            'services.recaptcha.site_key' => 'test-site-key',
-            'services.recaptcha.secret_key' => 'test-secret-key',
-        ]);
-        Http::fake([
-            'www.google.com/recaptcha/api/siteverify' => Http::response(['success' => false], 200),
-        ]);
-
-        $response = $this->from(route('login'))->post(route('login'), $this->loginData() + [
-            'g-recaptcha-response' => 'invalid-test-token',
-        ]);
-
-        $response->assertRedirect(route('login'))->assertSessionHasErrors('captcha');
-        $this->assertGuest();
-    }
-
-    public function test_captcha_provider_http_failure_fails_closed(): void
-    {
-        config([
-            'services.recaptcha.enabled' => true,
-            'services.recaptcha.site_key' => 'test-site-key',
-            'services.recaptcha.secret_key' => 'test-secret-key',
-        ]);
-        Http::fake([
-            'www.google.com/recaptcha/api/siteverify' => Http::response(['error' => 'private detail'], 503),
-        ]);
-
-        $response = $this->from(route('login'))->post(route('login'), $this->loginData() + [
-            'g-recaptcha-response' => 'test-token',
-        ]);
-
-        $response->assertRedirect(route('login'))
-            ->assertSessionHasErrors('captcha')
-            ->assertDontSee('private detail');
-        $this->assertGuest();
-    }
-
-    public function test_malformed_captcha_provider_response_fails_closed(): void
-    {
-        config([
-            'services.recaptcha.enabled' => true,
-            'services.recaptcha.site_key' => 'test-site-key',
-            'services.recaptcha.secret_key' => 'test-secret-key',
-        ]);
-        Http::fake([
-            'www.google.com/recaptcha/api/siteverify' => Http::response('not-json', 200),
-        ]);
-
-        $response = $this->from(route('login'))->post(route('login'), $this->loginData() + [
-            'g-recaptcha-response' => 'test-token',
-        ]);
-
-        $response->assertRedirect(route('login'))->assertSessionHasErrors('captcha');
-        $this->assertGuest();
-    }
-
-    public function test_captcha_timeout_or_connection_exception_fails_closed(): void
-    {
-        config([
-            'services.recaptcha.enabled' => true,
-            'services.recaptcha.site_key' => 'test-site-key',
-            'services.recaptcha.secret_key' => 'test-secret-key',
-        ]);
-        Http::fake(function () {
-            throw new ConnectionException('simulated provider timeout');
-        });
-
-        $response = $this->from(route('login'))->post(route('login'), $this->loginData() + [
-            'g-recaptcha-response' => 'test-token',
-        ]);
-
-        $response->assertRedirect(route('login'))->assertSessionHasErrors('captcha');
-        $this->assertGuest();
-    }
-
-    public function test_missing_captcha_configuration_fails_closed_without_http_request(): void
-    {
-        config([
-            'services.recaptcha.enabled' => true,
-            'services.recaptcha.site_key' => 'test-site-key',
-            'services.recaptcha.secret_key' => null,
-        ]);
-        Http::fake();
-
-        $response = $this->from(route('login'))->post(route('login'), $this->loginData() + [
-            'g-recaptcha-response' => 'test-token',
-        ]);
-
-        $response->assertRedirect(route('login'))->assertSessionHasErrors('captcha');
-        $this->assertGuest();
-        Http::assertNothingSent();
-    }
-
-    public function test_captcha_disabled_in_testing_allows_login_without_provider_call(): void
-    {
-        $user = $this->makeStudent('local-login@example.test');
-        config([
-            'app.env' => 'testing',
-            'services.recaptcha.enabled' => false,
-        ]);
-        Http::fake();
+        $user = $this->makeStudent('login-without-challenge@example.test');
 
         $response = $this->post(route('login'), $this->loginData($user->email));
 
         $response->assertRedirect(route('portal.dashboard'));
         $this->assertAuthenticatedAs($user);
-        Http::assertNothingSent();
-    }
-
-    public function test_captcha_cannot_be_disabled_in_production(): void
-    {
-        $this->app['env'] = 'production';
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-        config([
-            'app.env' => 'production',
-            'services.recaptcha.enabled' => false,
-        ]);
-        Http::fake();
-
-        $response = $this->from(route('login'))->post(route('login'), $this->loginData() + [
-            'g-recaptcha-response' => 'test-token',
-        ]);
-
-        $response->assertRedirect(route('login'))->assertSessionHasErrors('captcha');
-        $this->assertGuest();
-        Http::assertNothingSent();
     }
 
     public function test_login_limits_normalized_identity_and_ip_without_disclosing_account_existence(): void

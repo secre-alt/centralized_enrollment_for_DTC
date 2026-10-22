@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
@@ -38,7 +35,7 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
-        // Count attempts before CAPTCHA so provider failures cannot disable the limit.
+        // Count every submitted credential attempt before authentication.
         RateLimiter::hit($ipLimiterKey, $decaySeconds);
         RateLimiter::hit($identityLimiterKey, $decaySeconds);
 
@@ -47,76 +44,6 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
         $credentials['email'] = $email;
-
-        $captchaEnabled = (bool) config('services.recaptcha.enabled', true);
-        $nonProductionEnvironment = app()->environment(['local', 'testing']);
-
-        // A disabled CAPTCHA is accepted only in local/testing. Production fails closed.
-        if (! $captchaEnabled && ! $nonProductionEnvironment) {
-            Log::error('Login CAPTCHA is disabled outside local/testing.');
-
-            return $this->captchaRetryResponse();
-        }
-
-        if ($captchaEnabled) {
-            $captchaToken = trim((string) $request->input('g-recaptcha-response', ''));
-            $siteKey = trim((string) config('services.recaptcha.site_key', ''));
-            $secretKey = trim((string) config('services.recaptcha.secret_key', ''));
-
-            if ($captchaToken === '') {
-                return back()
-                    ->withErrors(['captcha' => 'Please complete the CAPTCHA and try again.'])
-                    ->onlyInput('email');
-            }
-
-            if ($siteKey === '' || $secretKey === '') {
-                Log::error('Login CAPTCHA is enabled but its site or secret key is missing.');
-
-                return $this->captchaRetryResponse();
-            }
-
-            try {
-                $verify = Http::connectTimeout(3)
-                    ->timeout(5)
-                    ->asForm()
-                    ->post('https://www.google.com/recaptcha/api/siteverify', [
-                        'secret' => $secretKey,
-                        'response' => $captchaToken,
-                        'remoteip' => $ip,
-                    ]);
-            } catch (ConnectionException $exception) {
-                Log::warning('Login CAPTCHA provider connection failed.');
-
-                return $this->captchaRetryResponse();
-            } catch (\Throwable $exception) {
-                Log::error('Login CAPTCHA verification raised an unexpected error.');
-
-                return $this->captchaRetryResponse();
-            }
-
-            if (! $verify->successful()) {
-                Log::warning('Login CAPTCHA provider returned an unsuccessful HTTP status.', [
-                    'status' => $verify->status(),
-                ]);
-
-                return $this->captchaRetryResponse();
-            }
-
-            $captchaResult = $verify->json();
-            if (! is_array($captchaResult) || ! array_key_exists('success', $captchaResult)) {
-                Log::warning('Login CAPTCHA provider returned a malformed response.');
-
-                return $this->captchaRetryResponse();
-            }
-
-            if ($captchaResult['success'] !== true) {
-                Log::notice('Login CAPTCHA token was rejected.');
-
-                return back()
-                    ->withErrors(['captcha' => 'CAPTCHA verification failed. Please try again.'])
-                    ->onlyInput('email');
-            }
-        }
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()
@@ -143,11 +70,13 @@ class AuthController extends Controller
         return redirect()->intended($this->redirectPath($user));
     }
 
-    private function captchaRetryResponse()
+    public function confirmLogout()
     {
-        return back()
-            ->withErrors(['captcha' => 'CAPTCHA verification is temporarily unavailable. Please try again shortly.'])
-            ->onlyInput('email');
+        if (! Auth::check()) {
+            return redirect()->route('landing');
+        }
+
+        return response()->view('auth.confirm-logout')->header('Cache-Control', 'no-store, private');
     }
 
     public function logout(Request $request)

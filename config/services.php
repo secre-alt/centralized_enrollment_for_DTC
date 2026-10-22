@@ -18,14 +18,6 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
-    'recaptcha' => [
-        // Enabled by default in production; local and testing stay usable
-        // without external CAPTCHA credentials unless explicitly enabled.
-        'enabled'    => env('RECAPTCHA_ENABLED', env('APP_ENV') === 'production'),
-        'site_key'   => env('RECAPTCHA_SITE_KEY'),
-        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
-    ],
-
     // Five POST /apply attempts per source IP per hour. Applicants behind
     // a shared campus NAT share this allowance.
     'application_submission' => [

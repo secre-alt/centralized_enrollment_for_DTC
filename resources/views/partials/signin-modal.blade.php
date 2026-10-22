@@ -141,14 +141,6 @@
                     </a>
                 </div>
 
-                @if(config('services.recaptcha.enabled', true))
-                    <div class="dtc-modal-recaptcha-wrap">
-                        <div class="g-recaptcha"
-                             data-sitekey="{{ config('services.recaptcha.site_key') }}">
-                        </div>
-                    </div>
-                @endif
-
                 <button type="submit" class="dtc-modal-submit" data-loading-text="Signing in…">
                     Sign in
                 </button>

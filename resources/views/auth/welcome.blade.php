@@ -13,7 +13,6 @@
     {{-- DTC Theme (dark mode support) --}}
     <link rel="stylesheet" href="{{ asset('css/dtc-theme.css') }}">
     <script src="{{ asset('js/signin-modal.js') }}" defer></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     {{-- DTC EMS theme preload: prevents light-mode flash on saved dark theme --}}
     <script>

@@ -1257,15 +1257,6 @@ body.dtc-dark .feature-pill {
     color: var(--blue-800);
 }
 
-.recaptcha-wrap {
-    display: flex;
-
-    justify-content: center;
-
-    margin-bottom: 18px;
-}
-
-
 /* ==========================================================================
    LOGIN ERROR
    ========================================================================== */
