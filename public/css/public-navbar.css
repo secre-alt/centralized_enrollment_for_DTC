@@ -306,7 +306,13 @@ body.dtc-dark .public-navbar-toggle:hover {
 }
 
 body.dtc-dark .public-mobile-nav a {
-  color: var(--dtc-text-secondary) 
+  color: var(--dtc-text-secondary);
+}
+
+body.dtc-dark .public-mobile-nav a:hover,
+body.dtc-dark .public-mobile-nav a.active {
+  background: var(--dtc-primary-soft);
+  color: #93c5fd;
 }
 
 /* ============================================================

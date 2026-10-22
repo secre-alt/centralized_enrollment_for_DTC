@@ -82,6 +82,7 @@
 
     {{-- DTC toast container (flash messages → toasts) --}}
     <x-dtc.toast />
+    <x-dtc.confirm-modal />
 
     {{-- Page-specific scripts --}}
     @yield('scripts')

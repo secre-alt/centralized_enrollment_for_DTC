@@ -173,80 +173,142 @@
      *   data-dtc-confirm-form     (CSS selector of <form> to submit on confirm)
      *   data-dtc-confirm-href     (URL to navigate to on confirm)
      */
+    var confirmState = { trigger: null, action: null, open: false, underlyingModal: null };
+    var confirmModal = document.getElementById('dtcConfirmModal');
+
+    function closeConfirmModal() {
+        if (!confirmModal || !confirmState.open) return;
+        confirmModal.classList.remove('show');
+        confirmModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('dtc-confirm-open');
+        var backdrop = document.querySelector('.dtc-confirm-backdrop');
+        if (backdrop) backdrop.remove();
+        confirmState.open = false;
+        var trigger = confirmState.trigger;
+        var underlyingModal = confirmState.underlyingModal;
+        confirmState.action = null;
+        confirmState.underlyingModal = null;
+        window.setTimeout(function () {
+            confirmModal.style.display = 'none';
+            if (trigger && typeof trigger.focus === 'function') trigger.focus();
+            if (underlyingModal && window.jQuery) {
+                var bootstrapModal = window.jQuery(underlyingModal).data('bs.modal');
+                if (bootstrapModal && typeof bootstrapModal._enforceFocus === 'function') bootstrapModal._enforceFocus();
+            }
+        }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180);
+    }
+
+    function renderConfirmMessage(message, subject) {
+        var messageEl = confirmModal.querySelector('#dtcConfirmMessage');
+        messageEl.textContent = message;
+        if (subject) {
+            messageEl.appendChild(document.createTextNode(' '));
+            var strong = document.createElement('strong');
+            strong.textContent = subject;
+            messageEl.appendChild(strong);
+        }
+    }
+
+    function openConfirmModal(options) {
+        if (!confirmModal) return false;
+        options = options || {};
+        var tone = ['success', 'danger', 'neutral'].indexOf(options.tone) >= 0 ? options.tone : 'neutral';
+        var iconNames = { success: 'user-check', danger: 'x-circle', neutral: 'help-circle' };
+        confirmState.trigger = options.trigger || document.activeElement;
+        confirmState.underlyingModal = confirmState.trigger && confirmState.trigger.closest ? confirmState.trigger.closest('.modal.show') : null;
+        confirmState.action = options.onConfirm || null;
+        confirmState.open = true;
+
+        confirmModal.className = 'modal dtc-confirm-modal is-' + tone;
+        confirmModal.querySelector('#dtcConfirmTitle').textContent = options.title || 'Confirm action?';
+        renderConfirmMessage(options.message || 'Please confirm that you want to continue.', options.subject || '');
+        var ok = confirmModal.querySelector('#dtcConfirmOk');
+        var cancel = confirmModal.querySelector('#dtcConfirmCancel');
+        ok.textContent = options.okLabel || 'Confirm';
+        ok.disabled = false;
+        cancel.textContent = options.cancelLabel || 'Cancel';
+        var icon = confirmModal.querySelector('#dtcConfirmIcon');
+        icon.setAttribute('data-lucide', options.icon || iconNames[tone]);
+        if (window.lucide) window.lucide.createIcons({ nodes: [icon] });
+
+        confirmModal.style.display = 'block';
+        confirmModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('dtc-confirm-open');
+        var backdrop = document.createElement('div');
+        backdrop.className = 'dtc-confirm-backdrop';
+        backdrop.addEventListener('click', closeConfirmModal);
+        document.body.appendChild(backdrop);
+        if (window.jQuery) window.jQuery(document).off('focusin.bs.modal');
+        window.requestAnimationFrame(function () { confirmModal.classList.add('show'); });
+        (tone === 'danger' ? cancel : ok).focus();
+        return true;
+    }
+
+    window.dtcConfirm = { open: openConfirmModal, close: closeConfirmModal };
+
     document.addEventListener('click', function (e) {
         var trigger = e.target.closest('[data-dtc-confirm]');
         if (!trigger) return;
-
-        // Don't double-fire from forms that also have data-dtc-confirm on a submit button
-        // (the form's submit event is handled separately when needed)
-
-        var modal = document.getElementById('dtcConfirmModal');
-        if (!modal) return;
-
+        var formSel = trigger.dataset.dtcConfirmForm;
+        var form = formSel ? document.querySelector(formSel) : trigger.form;
+        if (form && !form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
         e.preventDefault();
         e.stopPropagation();
-
-        var type    = trigger.dataset.dtcConfirmType    || 'danger';
-        var title   = trigger.dataset.dtcConfirmTitle   || 'Are you sure?';
-        var message = trigger.dataset.dtcConfirmMessage || 'This action cannot be undone.';
-        var okLabel = trigger.dataset.dtcConfirmOk      || 'Confirm';
-        var cancelLabel = trigger.dataset.dtcConfirmCancel || 'Cancel';
-        var formSel = trigger.dataset.dtcConfirmForm;
-        var href    = trigger.dataset.dtcConfirmHref;
-
-        // Update modal content
-        modal.className = 'modal fade dtc-confirm-modal is-' + type;
-
-        var iconName = type === 'warning' ? 'alert-triangle' : 'alert-circle';
-        var iconEl   = modal.querySelector('#dtcConfirmIcon');
-        if (iconEl) {
-            iconEl.setAttribute('data-lucide', iconName);
-            if (window.lucide) lucide.createIcons({ nodes: [iconEl] });
-        }
-
-        var titleEl = modal.querySelector('#dtcConfirmTitle');
-        if (titleEl) titleEl.textContent = title;
-
-        var msgEl = modal.querySelector('#dtcConfirmMessage');
-        if (msgEl) msgEl.textContent = message;
-
-        var okBtn = modal.querySelector('#dtcConfirmOk');
-        if (okBtn) okBtn.textContent = okLabel;
-
-        var cancelBtn = modal.querySelector('#dtcConfirmCancel');
-        if (cancelBtn) cancelBtn.textContent = cancelLabel;
-
-        // Wire the OK button
-        var newOkBtn = okBtn.cloneNode(true); // remove old listeners
-        okBtn.parentNode.replaceChild(newOkBtn, okBtn);
-
-        newOkBtn.textContent = okLabel;
-        newOkBtn.addEventListener('click', function () {
-            // Close modal first
-            if (window.jQuery) {
-                jQuery('#dtcConfirmModal').modal('hide');
-            }
-
-            if (formSel) {
-                var form = document.querySelector(formSel);
+        var legacyType = trigger.dataset.dtcConfirmType;
+        var tone = trigger.dataset.dtcConfirmTone || (legacyType === 'success' ? 'success' : (legacyType === 'danger' ? 'danger' : 'neutral'));
+        openConfirmModal({
+            trigger: trigger,
+            tone: tone,
+            title: trigger.dataset.dtcConfirmTitle,
+            message: trigger.dataset.dtcConfirmMessage,
+            subject: trigger.dataset.dtcConfirmSubject,
+            okLabel: trigger.dataset.dtcConfirmOk,
+            cancelLabel: trigger.dataset.dtcConfirmCancel,
+            icon: trigger.dataset.dtcConfirmIcon,
+            onConfirm: function () {
                 if (form) {
-                    // Mark as confirmed so native delete-form listener doesn't re-confirm
                     form.dataset.confirmed = 'true';
-                    form.submit();
+                    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+                    else form.submit();
+                } else if (trigger.dataset.dtcConfirmHref) {
+                    window.location.href = trigger.dataset.dtcConfirmHref;
                 }
-            } else if (href) {
-                window.location.href = href;
-            } else if (trigger.form) {
-                trigger.form.dataset.confirmed = 'true';
-                trigger.form.submit();
             }
         });
-
-        // Show modal (Bootstrap jQuery API)
-        if (window.jQuery) {
-            jQuery('#dtcConfirmModal').modal('show');
-        }
     }, true);
+
+    if (confirmModal) {
+        confirmModal.querySelector('#dtcConfirmClose').addEventListener('click', closeConfirmModal);
+        confirmModal.querySelector('#dtcConfirmCancel').addEventListener('click', closeConfirmModal);
+        confirmModal.querySelector('#dtcConfirmOk').addEventListener('click', function () {
+            if (this.disabled) return;
+            this.disabled = true;
+            var action = confirmState.action;
+            closeConfirmModal();
+            if (action) action();
+        });
+        confirmModal.addEventListener('click', function (event) {
+            if (event.target === confirmModal) closeConfirmModal();
+        });
+        document.addEventListener('keydown', function (event) {
+            if (!confirmState.open) return;
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeConfirmModal();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            var focusable = Array.prototype.slice.call(confirmModal.querySelectorAll('button:not([disabled])'));
+            if (!focusable.length) return;
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        });
+    }
 
 
     // ── 3. AXIOS / FETCH RESPONSE HELPER ─────────────────────────────────

@@ -31,8 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const panels     = document.querySelectorAll('.wiz-panel');
     const steps      = document.querySelectorAll('.wiz-step');
     const connectors = document.querySelectorAll('.wiz-connector');
-    const bar        = document.getElementById('wizardBar');
-    const labelCur   = document.getElementById('wizCurrentStep');
     const btnPrev    = document.getElementById('wizPrev');
     const btnNext    = document.getElementById('wizNext');
     const btnSubmit  = document.getElementById('wizSubmit');
@@ -100,11 +98,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (i + 1 <  current) s.classList.add('completed');
             if (i + 1 === current) s.setAttribute('aria-current', 'step');
             else s.removeAttribute('aria-current');
+            s.disabled = i + 1 > current + 1;
         });
         connectors.forEach(function (c, i) { c.classList.toggle('completed', i + 1 < current); });
 
-        bar.style.width = ((current / TOTAL) * 100) + '%';
-        labelCur.textContent = current;
         btnPrev.style.visibility = current === 1 ? 'hidden' : 'visible';
 
         if (current === TOTAL) {
@@ -116,30 +113,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (current === 6) buildReview();
 
-        /* Swap completed step icons to a plain check before Lucide re-renders.
-           Lucide replaces <i data-lucide="..."> with <svg> each time createIcons()
-           runs, so we must reset the icon attribute first. */
+        /* Rebuild each icon before Lucide renders it. Reusing a rendered SVG can
+           leave the previous checkmark paths in place when returning to a step. */
         steps.forEach(function (s) {
             var dot = s.querySelector('.wiz-step-dot');
             if (!dot) return;
-            var existing = dot.querySelector('svg') || dot.querySelector('i');
-            if (s.classList.contains('completed')) {
-                /* Replace with check icon */
-                if (existing) existing.remove();
-                var checkEl = document.createElement('i');
-                checkEl.setAttribute('data-lucide', 'check');
-                dot.appendChild(checkEl);
-            } else {
-                /* Restore original icon (stored on the step element) */
-                var origIcon = s.getAttribute('data-original-icon');
-                if (origIcon && existing) {
-                    existing.setAttribute('data-lucide', origIcon);
-                } else if (origIcon && !existing) {
-                    var origEl = document.createElement('i');
-                    origEl.setAttribute('data-lucide', origIcon);
-                    dot.appendChild(origEl);
-                }
-            }
+            var iconEl = document.createElement('i');
+            var iconName = s.classList.contains('completed')
+                ? 'check'
+                : s.getAttribute('data-original-icon');
+            if (!iconName) return;
+            iconEl.setAttribute('data-lucide', iconName);
+            iconEl.setAttribute('aria-hidden', 'true');
+            dot.replaceChildren(iconEl);
         });
 
         if (window.lucide) lucide.createIcons();
@@ -204,14 +190,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     steps.forEach(function (s, i) {
         /* Store the original icon name so goTo() can restore it when going back */
-        var origI = s.querySelector('.wiz-step-dot i');
+        var origI = s.querySelector('.wiz-step-dot [data-lucide]');
         if (origI) s.setAttribute('data-original-icon', origI.getAttribute('data-lucide'));
 
-        s.addEventListener('click', function () { if (s.classList.contains('completed')) goTo(i + 1, true); });
-        s.addEventListener('keydown', function (e) {
-            if ((e.key === 'Enter' || e.key === ' ') && s.classList.contains('completed')) { e.preventDefault(); goTo(i + 1, true); }
+        s.addEventListener('click', function () {
+            const target = i + 1;
+            if (target === current || target > current + 1) return;
+            goTo(target, target < current);
         });
     });
+
+    const screeningToggle = document.getElementById('screeningNoticeToggle');
+    const screeningContent = document.getElementById('screeningNoticeContent');
+    if (screeningToggle && screeningContent) {
+        screeningToggle.addEventListener('click', function () {
+            const expanded = screeningToggle.getAttribute('aria-expanded') === 'true';
+            screeningToggle.setAttribute('aria-expanded', String(!expanded));
+            screeningContent.hidden = expanded;
+        });
+    }
+
+    const personalDetailsToggle = document.getElementById('personalDetailsToggle');
+    const personalDetailsContent = document.getElementById('personalDetailsContent');
+    function setPersonalDetailsExpanded(expanded) {
+        if (!personalDetailsToggle || !personalDetailsContent) return;
+        personalDetailsToggle.setAttribute('aria-expanded', String(expanded));
+        personalDetailsContent.hidden = !expanded;
+    }
+    if (personalDetailsToggle && personalDetailsContent) {
+        personalDetailsToggle.addEventListener('click', function () {
+            setPersonalDetailsExpanded(personalDetailsToggle.getAttribute('aria-expanded') !== 'true');
+        });
+    }
 
     /* ── Submit guard: single combined consent checkbox ── */
     let submissionInProgress = false;
@@ -249,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     /* ── Submit confirmation modal ── */
-    const confirmModal = document.getElementById('confirmModal');
+    const confirmModal = document.getElementById('dtcConfirmModal');
     const confirmSubmit = document.getElementById('confirmSubmit');
     const confirmCancel = document.getElementById('confirmCancel');
 
@@ -279,7 +289,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            confirmModal.classList.add('active');
+            if (window.dtcConfirm) {
+                window.dtcConfirm.open({
+                    trigger: btnSubmit,
+                    tone: 'neutral',
+                    title: 'Submit application?',
+                    message: 'Review your information before submitting. Submitted applications cannot be edited unless revision is requested.',
+                    okLabel: 'Submit Application',
+                    onConfirm: function () {
+                        const form = document.getElementById('applicationForm');
+                        if (!form) return;
+                        btnSubmit.disabled = true;
+                        btnSubmit.setAttribute('aria-busy', 'true');
+                        try { localStorage.removeItem(STORAGE_KEY); } catch (ex) {}
+                        form.submit();
+                    }
+                });
+            }
         });
 
         if (confirmSubmit) {
@@ -492,23 +518,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     applicantType.addEventListener('change', function () { updateApplicantType(); saveField(applicantType); });
-    maritalStatus.addEventListener('change', function () { updateMaritalStatus(); saveField(maritalStatus); suggestHonorific(); });
+    maritalStatus.addEventListener('change', function () { updateMaritalStatus(); saveField(maritalStatus); });
     disability.addEventListener('input',    function () { updateDisability();    saveField(disability); });
 
-    /* Auto-suggest honorific based on gender + marital status */
-    function suggestHonorific() {
-        const honorifSel = document.getElementById('honorific');
-        if (!honorifSel || honorifSel.value) return; /* don't override user choice */
-        const g = document.getElementById('gender')        ? document.getElementById('gender').value        : '';
-        const m = document.getElementById('marital_status')? document.getElementById('marital_status').value: '';
-        if (g === 'male')   { honorifSel.value = 'Mr.'; }
-        else if (g === 'female') {
-            honorifSel.value = (m === 'married') ? 'Mrs.' : 'Ms.';
-        }
-        if (honorifSel.value) saveField(honorifSel);
-    }
-    document.getElementById('gender')        && document.getElementById('gender').addEventListener('change',        function () { suggestHonorific(); saveField(document.getElementById('gender')); });
-    document.getElementById('marital_status')&& document.getElementById('marital_status').addEventListener('change', suggestHonorific);
+    document.getElementById('gender') && document.getElementById('gender').addEventListener('change', function () { saveField(document.getElementById('gender')); });
 
 
     /* ════════════════════════════════════════════════════════════
@@ -801,7 +814,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!Object.keys(draft).length) return;
         document.querySelectorAll(PERSIST_SELECTOR).forEach(function (el) {
             if (LOC_NAMES.indexOf(el.name) !== -1) return;   /* handled by cascade */
-            if (!el.name || el.value !== '') return;
+            // Preserve server-returned optional values, including an intentional blank.
+            if (personalDetailsContent && personalDetailsContent.contains(el)
+                && personalDetailsContent.dataset.hasOldInput === 'true') return;
+            if (!el.name || (el.value !== '' && el.value !== el.dataset.draftDefault)) return;
             if (draft[el.name] !== undefined) el.value = draft[el.name];
         });
     }
@@ -815,8 +831,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     restoreDraft();
-    const NAME_FIELDS = ['first_name', 'middle_name', 'last_name', 'father_name', 'mother_name', 'spouse_name'];
-    NAME_FIELDS.forEach(function (name) {
+    const TITLE_CASE_FIELD_SET = new Set(window.dtcApplicationTitleCaseFields || []);
+    TITLE_CASE_FIELD_SET.forEach(function (name) {
         const input = document.querySelector('[name="' + name + '"]');
         if (!input) return;
         input.addEventListener('blur', function () {
@@ -827,6 +843,14 @@ document.addEventListener('DOMContentLoaded', function () {
     updateApplicantType();
     updateMaritalStatus();
     updateDisability();
+
+    if (personalDetailsContent) {
+        const hasPersonalDetails = Array.from(personalDetailsContent.querySelectorAll('input, select')).some(function (field) {
+            const value = field.value.trim();
+            return value !== '' && (field.name !== 'nationality' || value.toLowerCase() !== 'filipino');
+        });
+        if (hasPersonalDetails) setPersonalDetailsExpanded(true);
+    }
 
     window._wizGoTo = goTo;
 
@@ -855,7 +879,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const opt = el.options[el.selectedIndex];
                 return (opt && opt.text && opt.value) ? opt.text : '—';
             }
-            return el.value.trim() || '—';
+            const value = el.value.trim();
+            if (!value) return '—';
+            return TITLE_CASE_FIELD_SET.has(name) ? normalizeName(value) : value;
         }
 
         function nameVal(name) {

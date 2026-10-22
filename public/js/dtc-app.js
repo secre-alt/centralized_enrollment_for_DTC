@@ -96,6 +96,8 @@ document.addEventListener('click', function (event) {
 // ── Progressive UX helpers ─────────────────────────────────────────────────
 document.addEventListener('submit', function (event) {
     const form = event.target;
+    const spoofedMethod = form.querySelector('input[name="_method"]');
+    if (spoofedMethod && spoofedMethod.value.toUpperCase() === 'DELETE' && form.dataset.confirmed !== 'true') return;
     const submit = form.querySelector('[data-loading-text], .dtc-loading-button');
     if (!submit || form.dataset.submitting === 'true') return;
     form.dataset.submitting = 'true';
@@ -117,36 +119,19 @@ document.addEventListener('submit', function (event) {
     event.preventDefault();
     event.stopPropagation();
 
-    const modal = document.getElementById('dtcConfirmModal');
-    if (modal && window.jQuery) {
-        // Populate modal
-        modal.className = 'modal fade dtc-confirm-modal is-danger';
-        const titleEl = modal.querySelector('#dtcConfirmTitle');
-        const msgEl   = modal.querySelector('#dtcConfirmMessage');
-        const okBtn   = modal.querySelector('#dtcConfirmOk');
-        if (titleEl) titleEl.textContent = form.dataset.confirmTitle  || 'Delete item?';
-        if (msgEl)   msgEl.textContent   = form.dataset.confirmMessage|| 'This action cannot be undone.';
-        if (okBtn)   okBtn.textContent   = form.dataset.confirmOk     || 'Delete';
-
-        // Clone to remove stale listeners
-        const newOk = okBtn.cloneNode(true);
-        okBtn.parentNode.replaceChild(newOk, okBtn);
-
-        newOk.textContent = form.dataset.confirmOk || 'Delete';
-        newOk.addEventListener('click', function () {
-            jQuery('#dtcConfirmModal').modal('hide');
+    if (!window.dtcConfirm) return;
+    window.dtcConfirm.open({
+        trigger: form.querySelector('[type="submit"]') || form,
+        tone: 'danger',
+        title: form.dataset.confirmTitle || 'Delete item?',
+        message: form.dataset.confirmMessage || 'This action cannot be undone.',
+        okLabel: form.dataset.confirmOk || 'Delete',
+        onConfirm: function () {
             form.dataset.confirmed = 'true';
-            form.submit();
-        });
-
-        jQuery('#dtcConfirmModal').modal('show');
-    } else {
-        // Fallback for pages without the modal component
-        if (window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
-            form.dataset.confirmed = 'true';
-            form.submit();
+            if (typeof form.requestSubmit === 'function') form.requestSubmit();
+            else form.submit();
         }
-    }
+    });
 }, true);
 
 // data-confirm legacy attribute: route to modal or native confirm
@@ -155,11 +140,23 @@ document.addEventListener('click', function (event) {
     if (!trigger) return;
     // Skip elements that also have data-dtc-confirm (handled by dtc-feedback.js)
     if (trigger.hasAttribute('data-dtc-confirm')) return;
-    const message = trigger.getAttribute('data-confirm') || 'Are you sure?';
-    if (!window.confirm(message)) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
+    if (!window.dtcConfirm) return;
+    event.preventDefault();
+    event.stopPropagation();
+    window.dtcConfirm.open({
+        trigger: trigger,
+        tone: trigger.dataset.confirmTone || 'neutral',
+        title: trigger.dataset.confirmTitle || 'Confirm action?',
+        message: trigger.getAttribute('data-confirm') || 'Please confirm that you want to continue.',
+        okLabel: trigger.dataset.confirmOk || 'Confirm',
+        onConfirm: function () {
+            if (trigger.form) {
+                trigger.form.dataset.confirmed = 'true';
+                if (typeof trigger.form.requestSubmit === 'function') trigger.form.requestSubmit();
+                else trigger.form.submit();
+            } else if (trigger.href) window.location.href = trigger.href;
+        }
+    });
 }, true);
 
 document.addEventListener('change', function (event) {

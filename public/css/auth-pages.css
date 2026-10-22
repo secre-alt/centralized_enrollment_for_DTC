@@ -195,7 +195,7 @@ body {
     padding: 0 42px 0 38px;
     border: 1.5px solid #E2E8F0;
     border-radius: 10px;
-    background: #F8FAFC;
+    background: #FFFFFF;
     font-size: 13.5px;
     font-family: 'Poppins', sans-serif;
     color: #1E293B;
@@ -297,4 +297,167 @@ body {
     font-size: 10.5px;
     color: #94A3B8;
     margin: 0;
+}
+
+/* Floating labels for the standalone forgot/reset/set-password pages. */
+.auth-field { position: relative; }
+
+.auth-field .auth-label {
+    position: absolute;
+    z-index: 2;
+    top: 22px;
+    left: 13px;
+    margin: 0;
+    padding: 0 4px;
+    background: #fff;
+    color: #94a3b8;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.2;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transform-origin: left center;
+    transition: top 200ms cubic-bezier(.4, 0, .2, 1),
+                left 200ms cubic-bezier(.4, 0, .2, 1),
+                color 200ms cubic-bezier(.4, 0, .2, 1),
+                font-size 200ms cubic-bezier(.4, 0, .2, 1),
+                background-color 200ms cubic-bezier(.4, 0, .2, 1),
+                transform 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.auth-field:has(> .auth-input-wrap) > .auth-label { left: 38px; }
+
+.auth-field .auth-input::placeholder {
+    color: transparent;
+    transition: color 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.auth-field .auth-input:focus::placeholder { color: #94a3b8; }
+
+.auth-field:has(.auth-input:focus) > .auth-label,
+.auth-field:has(.auth-input:not(:placeholder-shown)) > .auth-label,
+.auth-field:has(.auth-input:-webkit-autofill) > .auth-label,
+.auth-field:has(.auth-input:autofill) > .auth-label {
+    top: 0;
+    left: 12px;
+    background: linear-gradient(
+        to bottom,
+        transparent calc(50% - 2px),
+        #fff calc(50% - 2px),
+        #fff calc(50% + 2px),
+        transparent calc(50% + 2px)
+    );
+    color: #0f4cdb;
+    font-size: 11px;
+    font-weight: 600;
+    transform: translateY(-50%) scale(.96);
+}
+
+.auth-input.auth-input--error {
+    border-color: #ef4444;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .1);
+}
+
+.auth-field:has(.auth-input.auth-input--error) > .auth-label {
+    background: linear-gradient(
+        to bottom,
+        transparent calc(50% - 2px),
+        #fff calc(50% - 2px),
+        #fff calc(50% + 2px),
+        transparent calc(50% + 2px)
+    );
+    color: #dc2626;
+}
+
+.auth-field:has(.auth-input:disabled) > .auth-label {
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.auth-field:has(.auth-input:disabled:not(:placeholder-shown)) > .auth-label {
+    background: linear-gradient(
+        to bottom,
+        transparent calc(50% - 2px),
+        #fff calc(50% - 2px),
+        #fff calc(50% + 2px),
+        transparent calc(50% + 2px)
+    );
+}
+
+body.dtc-dark .auth-card { background: #111827; }
+body.dtc-dark .auth-card-body { background: #111827; }
+body.dtc-dark .auth-card-title { color: #f8fafc; }
+body.dtc-dark .auth-card-subtitle,
+body.dtc-dark .auth-back { color: #94a3b8; }
+body.dtc-dark .auth-card-footer { border-top-color: #1e293b; }
+body.dtc-dark .auth-input {
+    border-color: #334155;
+    background: #111827;
+    color: #f8fafc;
+}
+body.dtc-dark .auth-input:focus {
+    border-color: #6c9bff;
+    background: #111827;
+    box-shadow: 0 0 0 3px rgba(108, 155, 255, .18);
+}
+body.dtc-dark .auth-field .auth-label {
+    background: #111827;
+    color: #94a3b8;
+}
+body.dtc-dark .auth-field:has(.auth-input:focus) > .auth-label,
+body.dtc-dark .auth-field:has(.auth-input:not(:placeholder-shown)) > .auth-label,
+body.dtc-dark .auth-field:has(.auth-input:-webkit-autofill) > .auth-label,
+body.dtc-dark .auth-field:has(.auth-input:autofill) > .auth-label {
+    background: linear-gradient(
+        to bottom,
+        transparent calc(50% - 2px),
+        #111827 calc(50% - 2px),
+        #111827 calc(50% + 2px),
+        transparent calc(50% + 2px)
+    );
+    color: #93c5fd;
+}
+body.dtc-dark .auth-input.auth-input--error {
+    border-color: #ef4444;
+    background: #111827;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .18);
+}
+body.dtc-dark .auth-field:has(.auth-input.auth-input--error) > .auth-label {
+    background: linear-gradient(
+        to bottom,
+        transparent calc(50% - 2px),
+        #111827 calc(50% - 2px),
+        #111827 calc(50% + 2px),
+        transparent calc(50% + 2px)
+    );
+    color: #fca5a5;
+}
+body.dtc-dark .auth-input:disabled { background: #172033; color: #94a3b8; }
+body.dtc-dark .auth-field:has(.auth-input:disabled) > .auth-label {
+    background: #172033;
+    color: #94a3b8;
+}
+body.dtc-dark .auth-field:has(.auth-input:disabled:not(:placeholder-shown)) > .auth-label {
+    background: linear-gradient(
+        to bottom,
+        transparent calc(50% - 2px),
+        #111827 calc(50% - 2px),
+        #111827 calc(50% + 2px),
+        transparent calc(50% + 2px)
+    );
+}
+
+body.dtc-dark .auth-input:-webkit-autofill,
+body.dtc-dark .auth-input:-webkit-autofill:hover,
+body.dtc-dark .auth-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #111827 inset !important;
+    box-shadow: 0 0 0 1000px #111827 inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    caret-color: #f8fafc;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-field .auth-label,
+    .auth-field .auth-input::placeholder { transition: none; }
 }
