@@ -25,7 +25,7 @@ class AuthController extends Controller
         $ipLimiterKey = 'login:ip:' . hash('sha256', $ip);
         $identityLimiterKey = 'login:identity:' . hash('sha256', $email . '|' . $ip);
         $ipLimit = (int) config('services.login_rate_limit.per_ip_attempts', 300);
-        $identityLimit = (int) config('services.login_rate_limit.per_identity_attempts', 5);
+        $identityLimit = \App\Support\SecuritySettings::loginAttempts();
         $decaySeconds = (int) config('services.login_rate_limit.decay_seconds', 300);
 
         if (RateLimiter::tooManyAttempts($ipLimiterKey, $ipLimit)
