@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!e.target.closest('.dtc-sidebar-user-panel')) {
                 closeMenu(toggle, menu);
             }
-        });
+        }, true);
 
         // Close on Escape
         document.addEventListener('keydown', function (e) {
