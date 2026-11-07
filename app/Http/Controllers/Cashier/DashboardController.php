@@ -10,11 +10,16 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $todayCollection   = Payment::whereDate('paid_at', today())->sum('amount');
-        $pendingPayments   = Enrollment::where('status', 'approved')->where('is_paid', false)->count();
+        $todayCollection   = Payment::where('status', 'verified')->whereDate('paid_at', today())->sum('amount')
+            - Payment::where('refund_status', 'refunded')->whereDate('refunded_at', today())->sum('refund_amount');
+        $pendingPayments   = Enrollment::whereIn('status', ['pending', 'approved'])
+            ->where('is_paid', false)
+            ->whereDoesntHave('payment', fn ($query) => $query->where('status', 'verified'))
+            ->count();
         $paidThisMonth     = Payment::whereMonth('paid_at', now()->month)->count();
         $walkinPayments    = Payment::whereMonth('paid_at', now()->month)->count();
-        $totalRevenue      = Payment::sum('amount');
+        $totalRevenue      = Payment::where('status', 'verified')->sum('amount')
+            - Payment::where('refund_status', 'refunded')->sum('refund_amount');
         $totalPaid         = Payment::count();
         $totalTransactions = Payment::count();
 

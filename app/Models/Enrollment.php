@@ -74,4 +74,9 @@ class Enrollment extends Model
         // rejected payments, and subsequent resubmissions.
         return $this->hasOne(Payment::class)->latestOfMany();
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

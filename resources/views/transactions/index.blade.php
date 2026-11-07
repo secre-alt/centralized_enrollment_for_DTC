@@ -128,7 +128,14 @@
                         @if($isStaff)<td class="ph-payer">{{ $item->payer }}</td>@endif
                         <td class="ph-related">{{ $item->related }}</td>
                         <td class="ph-amount dtc-payment-amount">₱{{ number_format((float) $item->amount, 2) }}</td>
-                        <td class="ph-status"><span class="dtc-status-badge is-{{ $tone }}">{{ $label }}</span></td>
+                        <td class="ph-status">
+                            <span class="dtc-status-badge is-{{ $tone }}">{{ $label }}</span>
+                            @if($item->refund_status === 'pending')
+                                <span class="ph-sub">Refund pending</span>
+                            @elseif($item->refund_status === 'refunded')
+                                <span class="ph-sub">Refund confirmed</span>
+                            @endif
+                        </td>
                         <td class="ph-date">{{ $date ? $date->format('M j, Y') : '—' }}</td>
                         <td class="ph-action"><a class="ph-view" href="{{ $href }}" aria-label="View details for {{ $item->transaction_key }}"><i data-lucide="chevron-right" aria-hidden="true"></i></a></td>
                     </tr>

@@ -11,6 +11,7 @@ use Tests\TestCase;
 
 class ApplicationLocationPickerTest extends TestCase
 {
+    use \Tests\AdmissionTestPayload;
     use RefreshDatabase, SeedsRoles;
 
     protected function setUp(): void
@@ -89,13 +90,30 @@ class ApplicationLocationPickerTest extends TestCase
         ], 'city_code');
     }
 
+    public function test_barangays_are_filtered_and_canonicalized_with_manual_fallback(): void
+    {
+        $rows = $this->getJson(route('public.application.locations.barangays', ['city' => '0701218000']))->assertOk()->json();
+        $this->assertNotEmpty($rows);
+        $this->assertContains('Remedios', array_column($rows, 'name'));
+        $this->getJson(route('public.application.locations.barangays', ['city' => '9999999999']))->assertNotFound();
+        $manila = $this->getJson(route('public.application.locations.barangays', ['city' => '1380600000']))->assertOk()->json();
+        $this->assertCount(897, $manila);
+        $location = ['region_code' => '0700000000', 'province_code' => '0701200000', 'city_code' => '0701218000'];
+        $saved = $this->submitLocation($location + ['barangay_code' => $rows[0]['code'], 'barangay' => 'Incorrect label'], 'barangay-match@example.test');
+        $this->assertSame($rows[0]['name'], $saved->barangay);
+        $this->assertLocationRejected($location + ['barangay_code' => $manila[0]['code']], 'barangay_code');
+        $this->assertLocationRejected(['barangay_code' => $rows[0]['code']], 'barangay_code');
+        $manual = $this->submitLocation($location + ['barangay' => 'Manual Barangay'], 'barangay-manual@example.test');
+        $this->assertSame('Manual Barangay', $manual->barangay);
+    }
+
     public function test_location_is_optional_and_form_contains_labeled_manual_address_and_draft_fields(): void
     {
         $this->get(route('public.application.create'))
             ->assertOk()
             ->assertSee('<label for="region_text">Region</label>', false)
             ->assertSee('name="region" id="region_text"', false)
-            ->assertSee('<label for="province_text">Province</label>', false)
+            ->assertSee('<label for="province_text">Province / Independent City</label>', false)
             ->assertSee('name="province" id="province_text"', false)
             ->assertSee('<label for="city_text">City / Municipality</label>', false)
             ->assertSee('name="city" id="city_text"', false)
@@ -112,7 +130,7 @@ class ApplicationLocationPickerTest extends TestCase
         $this->assertNull($application->city_code);
     }
 
-    public function test_submitted_labels_without_verified_codes_are_not_saved_for_philippine_addresses(): void
+    public function test_manual_philippine_address_labels_are_preserved_without_catalog_codes(): void
     {
         $application = $this->submitLocation([
             'region' => 'Forged region',
@@ -120,9 +138,9 @@ class ApplicationLocationPickerTest extends TestCase
             'city' => 'Forged city',
         ], 'unverified-labels@example.test');
 
-        $this->assertNull($application->region);
-        $this->assertNull($application->province);
-        $this->assertNull($application->city);
+        $this->assertSame('Forged Region', $application->region);
+        $this->assertSame('Forged Province', $application->province);
+        $this->assertSame('Forged City', $application->city);
     }
 
     public function test_international_applicants_can_provide_a_manual_city_or_province(): void
@@ -142,6 +160,19 @@ class ApplicationLocationPickerTest extends TestCase
         $this->assertNull($application->city_code);
     }
 
+    public function test_country_suggestions_are_canonical_and_unknown_names_are_rejected(): void
+    {
+        $this->get(route('public.application.create'))->assertOk()
+            ->assertSee('list="countryOptions"', false)
+            ->assertSee('<option value="Philippines">', false)
+            ->assertSee('<option value="Japan">', false);
+        foreach (['japan' => 'Japan', 'United States of America' => 'United States', 'UK' => 'United Kingdom'] as $input => $expected) {
+            $application = $this->submitLocation(['country' => $input], 'country-' . md5($input) . '@example.test');
+            $this->assertSame($expected, $application->country);
+        }
+        $this->assertLocationRejected(['country' => 'Not a country'], 'country');
+    }
+
     private function submitLocation(array $location, string $email): Application
     {
         $program = Program::factory()->create();
@@ -159,7 +190,7 @@ class ApplicationLocationPickerTest extends TestCase
             'country' => 'Philippines',
         ], $location);
 
-        $this->post(route('public.application.store'), $payload)
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.success'));
 
         return Application::where('email', $email)->firstOrFail();
@@ -170,7 +201,7 @@ class ApplicationLocationPickerTest extends TestCase
         $program = Program::factory()->create();
         $email = uniqid('bad-location-', true) . '@example.test';
         $this->get(route('public.application.create'));
-        $this->from(route('public.application.create'))->post(route('public.application.store'), array_merge([
+        $this->from(route('public.application.create'))->post(route('public.application.store'), $this->admissionPayload(array_merge([
             'academic_status' => 'new_student',
             'program_id' => $program->id,
             'submission_token' => $this->app['session.store']->get('public_application_submission_token'),
@@ -180,7 +211,7 @@ class ApplicationLocationPickerTest extends TestCase
             'birthdate' => '2005-01-01',
             'email' => $email,
             'ack_enrollment' => 'on',
-        ], $location))->assertRedirect(route('public.application.create'))->assertSessionHasErrors($error);
+        ], $location)))->assertRedirect(route('public.application.create'))->assertSessionHasErrors($error);
         $this->assertDatabaseMissing('applications', ['email' => $email]);
     }
 }

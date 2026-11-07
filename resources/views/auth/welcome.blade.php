@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.pwa-head')
     <meta charset="UTF-8">
@@ -58,24 +58,24 @@
 
                 <a href="{{ route('landing') }}"
                 class="nav-link {{ request()->routeIs('landing') ? 'active' : '' }}">
-                    Home
+                    {{ __('ui.navigation.home') }}
                 </a>
 
                 <a href="{{ route('public.application.create') }}"
                 class="nav-link {{ request()->routeIs('public.application.create') ? 'active' : '' }}">
-                    Admissions
+                    {{ __('ui.navigation.admissions') }}
                 </a>
 
                 <a href="#services" class="nav-link">
-                    Services
+                    {{ __('ui.navigation.services') }}
                 </a>
 
                 <a href="#process" class="nav-link">
-                    How It Works
+                    {{ __('ui.navigation.how_it_works') }}
                 </a>
 
                 <a href="#faqs" class="nav-link">
-                    FAQs
+                    {{ __('ui.navigation.faqs') }}
                 </a>
 
             </div>
@@ -86,15 +86,15 @@
                     type="button"
                     id="darkModeToggle"
                     class="theme-toggle-btn"
-                    aria-label="Enable dark mode"
+                    aria-label="{{ __('ui.navigation.enable_dark_mode') }}"
                     aria-pressed="false"
-                    title="Enable dark mode">
+                    title="{{ __('ui.navigation.enable_dark_mode') }}">
                     <i data-lucide="moon" id="darkModeIcon" aria-hidden="true"></i>
                 </button>
             </div>
 
             <button type="button" class="public-signin" data-signin-modal="trigger">
-                <i data-lucide="arrow-right"></i> Sign in
+                <i data-lucide="arrow-right"></i> {{ __('ui.navigation.sign_in') }}
             </button>
 
 
@@ -102,7 +102,7 @@
             type="button"
             class="public-navbar-toggle"
             id="welcomeNavbarToggle"
-            aria-label="Open navigation menu"
+            aria-label="{{ __('ui.navigation.toggle_navigation') }}"
             aria-expanded="false"
             aria-controls="welcomeMobileNav"
         >
@@ -116,28 +116,28 @@
 
         <a href="{{ route('landing') }}"
            class="nav-link {{ request()->routeIs('landing') ? 'active' : '' }}">
-            Home
+            {{ __('ui.navigation.home') }}
         </a>
 
         <a href="{{ route('public.application.create') }}"
            class="nav-link {{ request()->routeIs('public.application.create') ? 'active' : '' }}">
-            Admissions
+            {{ __('ui.navigation.admissions') }}
         </a>
 
         <a href="#services" class="nav-link">
-            Services
+            {{ __('ui.navigation.services') }}
         </a>
 
         <a href="#process" class="nav-link">
-            How It Works
+            {{ __('ui.navigation.how_it_works') }}
         </a>
 
         <a href="#faqs" class="nav-link">
-            FAQs
+            {{ __('ui.navigation.faqs') }}
         </a>
 
         <button type="button" class="public-signin" data-signin-modal="trigger">
-            <i data-lucide="arrow-right"></i> Sign in
+            <i data-lucide="arrow-right"></i> {{ __('ui.navigation.sign_in') }}
         </button>
 
     </div>
@@ -148,27 +148,24 @@
             <div class="container">
                 <div class="hero-left">
                     <div class="hero-eyebrow">DTC EMS</div>
-                    <h1>Your DTC Services.<br><span>One Convenient Portal.</span></h1>
-                    <p class="hero-desc">
-                        Manage your enrollment, certificate requests, appointments, and
-                        payments through one secure and centralized online platform.
-                    </p>
+                    <h1>{{ __('home.hero_title') }}<br><span>{{ __('home.hero_subtitle') }}</span></h1>
+                    <p class="hero-desc">{{ __('home.hero_description') }}</p>
                     <p class="hero-support">
-                        Enroll. Request. Schedule. Pay. Everything you need, connected in one system.
+                        {{ __('home.hero_support') }}
                     </p>
 
                     <div class="hero-cta-group">
                         <a href="{{ route('public.application.create') }}" class="btn-primary-cta">
-                            Apply for Admission <i data-lucide="arrow-right"></i>
+                            {{ __('home.apply') }} <i data-lucide="arrow-right"></i>
                         </a>
 
                         <button type="button" class="btn-secondary-cta" data-signin-modal="trigger">
-                            Sign in to your account
+                            {{ __('home.sign_in_account') }}
                         </button>
                     </div>
 
                     <p class="hero-explore-link">
-                        New here? <a href="#services">Explore our services</a>
+                        {{ __('home.new_here') }} <a href="#services">{{ __('home.explore_services') }}</a>
                     </p>
 
                     <!-- <div class="hero-features">
@@ -225,9 +222,9 @@
         <section class="services" id="services">
             <div class="container">
                 <div class="section-heading reveal">
-                    <div class="eyebrow">Services</div>
-                    <h2>Everything, connected in one system</h2>
-                    <p>One portal for every DTC service — from enrollment to certificates, appointments, and payments.</p>
+                    <div class="eyebrow">{{ __('home.services') }}</div>
+                    <h2>{{ __('home.services_title') }}</h2>
+                    <p>{{ __('home.services_description') }}</p>
                 </div>
 
                 <div class="services-carousel reveal reveal-scale">
@@ -236,47 +233,47 @@
                         type="button"
                         class="carousel-arrow carousel-arrow-prev"
                         id="servicesPrev"
-                        aria-label="Previous service"
+                        aria-label="{{ __('home.previous_service') }}"
                     >
                         <i data-lucide="chevron-left"></i>
                     </button>
 
-                    <div class="carousel-viewport" id="servicesViewport" tabindex="0" aria-roledescription="carousel" aria-label="DTC EMS services">
+                    <div class="carousel-viewport" id="servicesViewport" tabindex="0" aria-roledescription="carousel" aria-label="{{ __('home.services_carousel') }}">
                         <div class="carousel-track" id="servicesTrack">
 
                             <div class="service-card" data-service-id="enrollment">
                                 <div class="icon-box"><i data-lucide="graduation-cap"></i></div>
-                                <h3>Online Enrollment</h3>
-                                <p>Enroll and manage your student records from anywhere, anytime.</p>
-                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
+                                <h3>{{ __('home.online_enrollment') }}</h3>
+                                <p>{{ __('home.online_enrollment_description') }}</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> {{ __('home.service_hint') }}</span>
                             </div>
 
                             <div class="service-card" data-service-id="certificates">
                                 <div class="icon-box"><i data-lucide="file-text"></i></div>
-                                <h3>Certificate Requests</h3>
-                                <p>Request official certificates and track their status in real time.</p>
-                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
+                                <h3>{{ __('home.certificate_requests') }}</h3>
+                                <p>{{ __('home.certificate_requests_description') }}</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> {{ __('home.service_hint') }}</span>
                             </div>
 
                             <div class="service-card" data-service-id="appointments">
                                 <div class="icon-box"><i data-lucide="calendar-check"></i></div>
-                                <h3>Appointment Scheduling</h3>
-                                <p>Book a pickup or claiming schedule that works for you.</p>
-                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
+                                <h3>{{ __('home.appointment_scheduling') }}</h3>
+                                <p>{{ __('home.appointment_scheduling_description') }}</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> {{ __('home.service_hint') }}</span>
                             </div>
 
                             <div class="service-card" data-service-id="payments">
                                 <div class="icon-box"><i data-lucide="banknote"></i></div>
-                                <h3>Payment Processing</h3>
-                                <p>Pay online via GCash, or walk in and pay directly at the Cashier.</p>
-                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
+                                <h3>{{ __('home.payment_processing') }}</h3>
+                                <p>{{ __('home.payment_processing_description') }}</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> {{ __('home.service_hint') }}</span>
                             </div>
 
                             <div class="service-card" data-service-id="access">
                                 <div class="icon-box"><i data-lucide="shield"></i></div>
-                                <h3>Role-Based Access</h3>
-                                <p>Students, alumni, registrars, cashiers, and admins each get their own dashboard.</p>
-                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> Click to learn more</span>
+                                <h3>{{ __('home.role_based_access') }}</h3>
+                                <p>{{ __('home.role_based_access_description') }}</p>
+                                <span class="card-hint"><i data-lucide="mouse-pointer-click"></i> {{ __('home.service_hint') }}</span>
                             </div>
                         </div>
                     </div>
@@ -285,44 +282,44 @@
                         type="button"
                         class="carousel-arrow carousel-arrow-next"
                         id="servicesNext"
-                        aria-label="Next service"
+                        aria-label="{{ __('home.next_service') }}"
                     >
                         <i data-lucide="chevron-right"></i>
                     </button>
 
                 </div>
 
-                <div class="carousel-dots" id="servicesDots" role="tablist" aria-label="Services slides"></div>
+                <div class="carousel-dots" id="servicesDots" role="tablist" aria-label="{{ __('home.services') }}"></div>
             </div>
         </section>
 
         <section class="process" id="process">
             <div class="container">
                 <div class="section-heading reveal">
-                    <div class="eyebrow">How It Works</div>
-                    <h2>Four simple steps</h2>
+                    <div class="eyebrow">{{ __('home.how_it_works') }}</div>
+                    <h2>{{ __('home.four_steps') }}</h2>
                 </div>
 
                 <div class="process-steps reveal">
                     <div class="process-step">
                         <div class="num">1</div>
-                        <h4>Enroll</h4>
-                        <p>Complete your enrollment online.</p>
+                        <h4>{{ __('home.enroll') }}</h4>
+                        <p>{{ __('home.enroll_description') }}</p>
                     </div>
                     <div class="process-step">
                         <div class="num">2</div>
-                        <h4>Request</h4>
-                        <p>Submit a certificate request.</p>
+                        <h4>{{ __('home.request') }}</h4>
+                        <p>{{ __('home.request_description') }}</p>
                     </div>
                     <div class="process-step">
                         <div class="num">3</div>
-                        <h4>Schedule</h4>
-                        <p>Pick an appointment slot.</p>
+                        <h4>{{ __('home.schedule') }}</h4>
+                        <p>{{ __('home.schedule_description') }}</p>
                     </div>
                     <div class="process-step">
                         <div class="num">4</div>
-                        <h4>Pay</h4>
-                        <p>Pay via GCash QR code or walk-in.</p>
+                        <h4>{{ __('home.pay') }}</h4>
+                        <p>{{ __('home.pay_description') }}</p>
                     </div>
                 </div>
             </div>
@@ -331,74 +328,74 @@
         <section class="faqs" id="faqs">
             <div class="container">
                 <div class="section-heading reveal">
-                    <div class="eyebrow">FAQs</div>
-                    <h2>Frequently asked questions</h2>
-                    <p>Quick answers about enrollment, certificates, appointments, and payments.</p>
+                    <div class="eyebrow">{{ __('home.faqs') }}</div>
+                    <h2>{{ __('home.faq_title') }}</h2>
+                    <p>{{ __('home.faq_description') }}</p>
                 </div>
 
                 <div class="faq-list reveal">
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
-                            <span>How do I enroll through DTC EMS?</span>
+                            <span>{{ __('home.faq_enroll_question') }}</span>
                             <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
-                            <p>Sign in to the portal with your student account, go to the Enrollment section, and follow the on-screen steps to submit your enrollment for the current term.</p>
+                            <p>{{ __('home.faq_enroll_answer') }}</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
-                            <span>How do I request a certificate?</span>
+                            <span>{{ __('home.faq_certificate_question') }}</span>
                             <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
-                            <p>From your dashboard, open Certificate Requests, choose the document you need, and submit the request. You can track its status in real time until it's ready for pickup.</p>
+                            <p>{{ __('home.faq_certificate_answer') }}</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
-                            <span>How does appointment scheduling work?</span>
+                            <span>{{ __('home.faq_appointment_question') }}</span>
                             <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
-                            <p>After your request is approved, you'll be able to pick an available date and time slot for claiming your certificate or completing enrollment steps in person.</p>
+                            <p>{{ __('home.faq_appointment_answer') }}</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
-                            <span>What payment options are available?</span>
+                            <span>{{ __('home.faq_payment_question') }}</span>
                             <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
-                            <p>You can pay online through GCash via QR code, or pay in person as a walk-in, with the Cashier recording your payment directly in the system.</p>
+                            <p>{{ __('home.faq_payment_answer') }}</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button type="button" class="faq-question" onclick="toggleFaq(this)">
-                            <span>I forgot my password. What do I do?</span>
+                            <span>{{ __('home.faq_password_question') }}</span>
                             <i data-lucide="chevron-down"></i>
                         </button>
                         <div class="faq-answer">
-                            <p>Click "Sign In," then use the Forgot Password link on the sign-in form to reset it through your registered email address.</p>
+                            <p>{{ __('home.faq_password_answer') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <footer class="site-footer reveal">
-            © {{ date('Y') }} Danao Technological College — Enrollment Management System. All rights reserved.
+        <footer class="site-footer">
+            {{ __('ui.public.footer', ['year' => date('Y')]) }}
         </footer>
 
         <button
             type="button"
             class="back-to-top"
             id="backToTop"
-            aria-label="Back to top"
+            aria-label="{{ __('home.back_to_top') }}"
         >
             <i data-lucide="arrow-up"></i>
         </button>

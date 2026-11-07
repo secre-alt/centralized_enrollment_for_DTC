@@ -8,8 +8,39 @@
         <p class="portal-payment-description">{{ $enrollment->program->name }}</p>
         <p class="portal-payment-description">Year {{ $enrollment->year_level }} &middot; {{ $enrollment->semester }} Semester</p>
     </header>
+    @if($enrollment->status === 'rejected' && $enrollment->is_paid)
+        <div class="alert alert-warning" role="alert">
+            @if ($refundFullyConfirmed)
+                The Cashier recorded confirmation of the full refund. You may submit a fresh enrollment request for this term.
+            @else
+                The Registrar rejected this enrollment after payment was verified. Contact the Cashier to arrange and confirm a full refund before paying again.
+            @endif
+        </div>
+    @endif
     {{-- ── Body ───────────────────────────────────────────────────────── --}}
     <div class="portal-payment-body">
+
+        @if ($outstandingTermPayments->isNotEmpty())
+            <div class="alert alert-warning" role="alert">
+                <strong>Payment is blocked pending reconciliation.</strong>
+                <p class="mb-2">A separate payment record exists for you in this academic term. Do not pay again until the Cashier resolves it.</p>
+                @foreach ($outstandingTermPayments as $outstandingPayment)
+                    <div class="border-top pt-2 mt-2">
+                        Enrollment #{{ $outstandingPayment->enrollment_id }} · Receipt {{ $outstandingPayment->receipt_no ?: 'not issued' }} ·
+                        @if ($outstandingPayment->refundIsPending())
+                            Refund pending Cashier confirmation
+                        @elseif ($outstandingPayment->refundIsComplete())
+                            Refund confirmed
+                        @elseif ($outstandingPayment->isPending())
+                            Payment proof awaiting Cashier verification
+                        @else
+                            Verified payment requires Cashier reconciliation
+                        @endif
+                    </div>
+                @endforeach
+                <p class="mt-2 mb-0">For a rejected paid enrollment, the Cashier must confirm the external refund and record its reference before you submit another payment.</p>
+            </div>
+        @endif
 
         {{-- Payment Status Block --}}
         @if($enrollment->is_paid && !$latestPayment)
@@ -26,27 +57,61 @@
                 $s = $statusToneMap[$statusKey];
             @endphp
             <div class="portal-payment-section" data-pay-status="{{ $statusKey }}">
-                <section class="portal-payment-card portal-payment-status">
-                    <h2>{{ $s['label'] }}</h2>
-                    @if($latestPayment->isVerified())
-                        <p>Receipt: {{ $latestPayment->receipt_no }} &middot; ₱{{ number_format($latestPayment->amount, 2) }}</p>
-                    @endif
-                    @if($latestPayment->proof_of_payment)
-                        <a href="{{ route('portal.enrollment.payment.proof', $latestPayment) }}" target="_blank" rel="noopener">View submitted proof</a>
-                    @endif
-                </section>
+                @if ($statusKey === 'pending')
+                    <div class="dtc-enrollment-callout is-info" role="status">
+                        <span class="dtc-icon-swatch dtc-enrollment-callout-icon" aria-hidden="true">
+                            <i data-lucide="clock-3"></i>
+                        </span>
+                        <div class="dtc-enrollment-callout-copy">
+                            <strong>{{ $s['label'] }}</strong>
+                            <span>The Cashier is checking your payment. No action is needed while it is under review.</span>
+                        </div>
+                        @if($latestPayment->proof_of_payment)
+                            <a href="{{ route('portal.enrollment.payment.proof', $latestPayment) }}" target="_blank" rel="noopener" class="dtc-enrollment-proof-link">
+                                <i data-lucide="file-image" aria-hidden="true"></i>
+                                View submitted proof
+                                <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                                <span class="sr-only"> (opens in a new tab)</span>
+                            </a>
+                        @endif
+                    </div>
+                @elseif ($statusKey === 'verified')
+                    <div class="dtc-enrollment-callout is-success" role="status">
+                        <span class="dtc-icon-swatch dtc-enrollment-callout-icon" aria-hidden="true">
+                            <i data-lucide="check-circle-2"></i>
+                        </span>
+                        <div class="dtc-enrollment-callout-copy">
+                            <strong>{{ $s['label'] }}</strong>
+                            <span>The Cashier confirmed your enrollment payment.</span>
+                            <span>Receipt: {{ $latestPayment->receipt_no ?: 'Not available' }} &middot; ₱{{ number_format($latestPayment->amount, 2) }}</span>
+                        </div>
+                        @if($latestPayment->proof_of_payment)
+                            <a href="{{ route('portal.enrollment.payment.proof', $latestPayment) }}" target="_blank" rel="noopener" class="dtc-enrollment-proof-link">
+                                <i data-lucide="file-image" aria-hidden="true"></i>
+                                View submitted proof
+                                <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                                <span class="sr-only"> (opens in a new tab)</span>
+                            </a>
+                        @endif
+                    </div>
+                @else
+                    <section class="portal-payment-card portal-payment-status">
+                        <h2>{{ $s['label'] }}</h2>
+                        @if($latestPayment->proof_of_payment)
+                            <a href="{{ route('portal.enrollment.payment.proof', $latestPayment) }}" target="_blank" rel="noopener">View submitted proof</a>
+                        @endif
+                    </section>
+                @endif
             </div>
             @if ($statusKey === 'rejected')
                 <div class="alert alert-danger mt-3" role="alert">
                     <strong>Cashier’s note:</strong> {{ $latestPayment->rejection_reason ?: 'The Cashier could not verify this proof. Check your payment details before submitting a corrected proof.' }}
                     <div class="mt-1"><strong>Next step:</strong> Submit corrected proof below. If you paid in person, contact the Cashier instead of uploading another proof.</div>
                 </div>
-            @elseif ($statusKey === 'pending')
-                <p class="u-text-sm-secondary mt-2" role="status">Next step: wait for the Cashier to verify this proof. You don’t need to submit it again.</p>
             @endif
         @endif
 
-        @if (! $enrollment->is_paid && ! ($latestPayment && ($latestPayment->isVerified() || $latestPayment->isPending())))
+        @if (in_array($enrollment->status, ['pending', 'approved'], true) && ! $enrollment->is_paid && $outstandingTermPayments->isEmpty() && ! ($latestPayment && ($latestPayment->isVerified() || $latestPayment->isPending())))
         {{-- Payment Options --}}
         <div class="portal-payment-section">
             <div class="portal-payment-total">
@@ -144,23 +209,26 @@
                                 <form method="POST" action="{{ route('portal.enrollment.payment.gcash', $enrollment) }}" enctype="multipart/form-data">
                                     @csrf
                                     <div class="form-group">
-                                        <label style="font-size:12px; font-weight:600; color:var(--dtc-text);">GCash Reference Number</label>
-                                        <input type="text" name="reference_number" value="{{ old('reference_number') }}"
+                                        <label for="enrollment-gcash-reference" style="font-size:12px; font-weight:600; color:var(--dtc-text);">GCash Reference Number</label>
+                                        <input id="enrollment-gcash-reference" type="text" name="reference_number" value="{{ old('reference_number') }}"
                                             class="form-control @error('reference_number') is-invalid @enderror"
                                             placeholder="e.g. 1234567890" required>
                                         @error('reference_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
-                                    <div class="form-group mb-2">
-                                        <label style="font-size:12px; font-weight:600; color:var(--dtc-text);">
+                                    <div class="form-group enrollment-proof-group">
+                                        <label for="enrollment-payment-proof" style="font-size:12px; font-weight:600; color:var(--dtc-text);">
                                             Proof of Payment (screenshot / PDF, max 5 MB)
                                         </label>
-                                        <label class="dtc-file-label @error('proof_of_payment') is-invalid @enderror">
-                                            <i data-lucide="upload" style="width:15px;height:15px;margin-right:6px;flex-shrink:0;"></i>
-                                            <span class="dtc-file-text">Choose file…</span>
-                                            <input type="file" name="proof_of_payment" accept=".jpg,.jpeg,.png,.pdf"
+                                        <label class="dtc-file-label enrollment-proof-picker @error('proof_of_payment') is-invalid @enderror">
+                                            <span class="enrollment-proof-picker-action">
+                                                <i data-lucide="upload" aria-hidden="true"></i>
+                                                Choose file
+                                            </span>
+                                            <span class="dtc-file-text enrollment-proof-file-name" aria-live="polite">No file chosen</span>
+                                            <input id="enrollment-payment-proof" type="file" name="proof_of_payment" accept=".jpg,.jpeg,.png,.pdf"
                                                 class="dtc-file-input @error('proof_of_payment') is-invalid @enderror"
                                                 required
-                                                onchange="this.closest('label').querySelector('.dtc-file-text').textContent = this.files[0] ? this.files[0].name : 'Choose file…'">
+                                                onchange="this.closest('label').querySelector('.dtc-file-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
                                         </label>
                                         @error('proof_of_payment') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                     </div>

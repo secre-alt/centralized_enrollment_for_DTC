@@ -17,6 +17,37 @@
     .portal-payment-page .portal-payment-submit { width: fit-content; min-width: 140px; }
 }
 .portal-payment-page .form-group label { display: block; margin-bottom: 6px; color: var(--dtc-text, #1e293b); font-weight: 600; }
+.portal-payment-page .form-group label.enrollment-proof-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 6px 8px;
+    margin-bottom: 0;
+}
+.portal-payment-page .enrollment-proof-picker-action {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: var(--dtc-primary-soft, #eff6ff);
+    color: var(--dtc-on-primary-soft, #0f4cdb);
+    font-size: 12px;
+    font-weight: 600;
+}
+.portal-payment-page .enrollment-proof-picker-action svg { width: 14px; height: 14px; }
+.portal-payment-page .enrollment-proof-file-name {
+    min-width: 0;
+    flex: 1 1 auto;
+    font-size: 12px;
+}
+.portal-payment-page .enrollment-proof-picker:focus-within {
+    outline: 3px solid color-mix(in srgb, var(--dtc-primary, #0f4cdb) 28%, transparent);
+    outline-offset: 2px;
+}
 .portal-payment-page .form-control { min-height: 44px; border-color: var(--dtc-border, #cbd5e1); border-radius: 9px; background: var(--dtc-surface-soft, #f8fafc); color: var(--dtc-text, #1e293b); }
 .portal-payment-page .form-control:focus { border-color: var(--dtc-primary, #0f4cdb); box-shadow: 0 0 0 3px color-mix(in srgb, var(--dtc-primary, #0f4cdb) 18%, transparent); }
 .portal-payment-page input[type="file"].form-control-file { display: block; width: 100%; min-height: 44px; padding: 6px; border: 1px solid var(--dtc-border, #cbd5e1); border-radius: 9px; background: var(--dtc-surface-soft, #f8fafc); color: var(--dtc-text, #1e293b); font-size: 12px; }

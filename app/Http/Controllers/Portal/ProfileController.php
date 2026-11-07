@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Portal\UpdateProfileRequest;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -58,7 +60,33 @@ class ProfileController extends Controller
                 : $this->routePrefix($user) . '.show';
 
         return redirect()->route($redirectRoute)
-            ->with('success', 'Profile updated.');
+            ->with('success', __('ui.validation.profile_updated'));
+    }
+
+    /**
+     * Update the user's preferred interface language.
+     */
+    public function updateLanguage(Request $request)
+    {
+        $validated = $request->validate([
+            'preferred_language' => ['nullable', Rule::in(['en', 'fil'])],
+        ], [
+            'preferred_language.in' => __('language.invalid'),
+        ]);
+
+        $user = Auth::user();
+        $user->preferred_language = $validated['preferred_language'] ?? null;
+        $user->save();
+
+        $defaultLanguage = Setting::get('default_language', config('app.locale', 'en'));
+        $locale = $user->preferred_language;
+        if (! in_array($locale, ['en', 'fil'], true)) {
+            $locale = in_array($defaultLanguage, ['en', 'fil'], true) ? $defaultLanguage : 'en';
+        }
+        app()->setLocale($locale);
+
+        return redirect()->route($this->routePrefix($user) . '.show')
+            ->with('success', __('language.saved'));
     }
 
     /**
@@ -76,7 +104,7 @@ class ProfileController extends Controller
 
         if (! Hash::check($request->current_password, $user->password)) {
             return back()
-                ->withErrors(['current_password' => 'The current password is incorrect.'])
+                ->withErrors(['current_password' => __('ui.validation.current_password_incorrect')])
                 ->withInput($request->except(['current_password', 'password', 'password_confirmation']));
         }
 
@@ -85,7 +113,7 @@ class ProfileController extends Controller
         $request->session()->put('auth_session_token', $user->auth_session_token);
 
         return redirect()->route($this->routePrefix($user) . '.show')
-            ->with('success', 'Password changed.');
+            ->with('success', __('ui.validation.password_changed'));
     }
 
     /**
@@ -102,7 +130,7 @@ class ProfileController extends Controller
         $user->update(['avatar' => null]);
 
         return redirect()->route($this->routePrefix($user) . '.show')
-            ->with('success', 'Profile photo removed.');
+            ->with('success', __('ui.validation.photo_removed'));
     }
 
     /** Return the matching route namespace for portal and staff profiles. */

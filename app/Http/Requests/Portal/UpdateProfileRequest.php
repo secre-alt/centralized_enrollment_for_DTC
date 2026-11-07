@@ -31,13 +31,13 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required'  => 'Full name is required.',
-            'email.required' => 'Email address is required.',
-            'email.email'    => 'Please enter a valid email address.',
-            'email.unique'   => 'This email is already used by another account.',
-            'avatar.image'   => 'Please upload a valid image file.',
-            'avatar.mimes'   => 'Accepted formats: JPG, PNG, WebP.',
-            'avatar.max'     => 'Profile photo must not exceed 2 MB.',
+            'name.required'  => __('ui.validation.name_required'),
+            'email.required' => __('ui.validation.email_required'),
+            'email.email'    => __('ui.validation.email_invalid'),
+            'email.unique'   => __('ui.validation.email_unique'),
+            'avatar.image'   => __('ui.validation.avatar_invalid'),
+            'avatar.mimes'   => __('ui.validation.avatar_formats'),
+            'avatar.max'     => __('ui.validation.avatar_max'),
         ];
     }
 }

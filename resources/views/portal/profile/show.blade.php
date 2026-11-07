@@ -1,13 +1,13 @@
 @extends('adminlte::page')
 @include('partials.navbar')
 
-@section('title', 'Profile Settings')
+@section('title', __('ui.profile.title'))
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold u-text">Profile Settings</h4>
-            <p class="mb-0 u-text-secondary-sm">Manage your account information and password</p>
+            <h4 class="mb-0 font-weight-bold u-text">{{ __('ui.profile.title') }}</h4>
+            <p class="mb-0 u-text-secondary-sm">{{ __('ui.profile.description') }}</p>
         </div>
     </div>
 @endsection
@@ -21,8 +21,11 @@
 @if ($errors->any() && !$errors->has('current_password') && !$errors->has('password'))
 <div class="alert dtc-alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
     <i data-lucide="alert-circle" style="width:18px;height:18px;flex-shrink:0;"></i>
-    <span>Please fix the errors below before saving.</span>
+    <span>{{ __('ui.profile.fix_errors') }}</span>
 </div>
+@endif
+@if (session('success'))
+<div class="alert alert-success mb-4" role="status">{{ session('success') }}</div>
 @endif
 
 <div class="row">
@@ -40,8 +43,8 @@
             <button type="button"
                     class="ps-avatar-edit-btn"
                     onclick="document.getElementById('avatarFileInput').click()"
-                    title="Change photo"
-                    aria-label="Change profile photo">
+                    title="{{ __('ui.profile.change_photo') }}"
+                    aria-label="{{ __('ui.profile.change_photo') }}">
                 <i data-lucide="camera" style="width:14px;height:14px;"></i>
             </button>
         </div>
@@ -67,8 +70,8 @@
             <i data-lucide="user" style="width:17px;height:17px;"></i>
         </div>
         <div>
-            <div class="ps-card-title">Personal Information</div>
-            <div class="ps-card-subtitle">Update your name, email and profile photo</div>
+            <div class="ps-card-title">{{ __('ui.profile.personal_information') }}</div>
+            <div class="ps-card-subtitle">{{ __('ui.profile.personal_description') }}</div>
         </div>
     </div>
     <div class="card-body">
@@ -88,14 +91,14 @@
             <div class="row">
                 <div class="col-12 col-sm-6 mb-3">
                     <label for="name" class="ps-label">
-                        Full Name <span class="text-danger">*</span>
+                        {{ __('ui.profile.full_name') }} <span class="text-danger">*</span>
                     </label>
                     <input type="text"
                            id="name"
                            name="name"
                            class="form-control ps-input @error('name') is-invalid @enderror"
                            value="{{ old('name', $user->name) }}"
-                           placeholder="Enter your full name"
+                           placeholder="{{ __('ui.profile.enter_full_name') }}"
                            autocomplete="name"
                            required>
                     @error('name')
@@ -105,7 +108,7 @@
 
                 <div class="col-12 col-sm-6 mb-3">
                     <label for="email" class="ps-label">
-                        Email Address <span class="text-danger">*</span>
+                        {{ __('ui.profile.email') }} <span class="text-danger">*</span>
                     </label>
                     <input type="email"
                            id="email"
@@ -127,13 +130,13 @@
                      alt="Preview"
                      class="ps-avatar-preview">
                 <div>
-                    <div style="font-size:.82rem;font-weight:600;color:var(--dtc-text);">New photo selected</div>
-                    <div style="font-size:.75rem;color:var(--dtc-text-secondary);">Save changes to apply.</div>
+                    <div style="font-size:.82rem;font-weight:600;color:var(--dtc-text);">{{ __('ui.profile.new_photo') }}</div>
+                    <div style="font-size:.75rem;color:var(--dtc-text-secondary);">{{ __('ui.profile.save_to_apply') }}</div>
                 </div>
                 <button type="button"
                         id="clearAvatarBtn"
                         class="btn btn-sm btn-outline-secondary ml-auto">
-                    <i data-lucide="x" style="width:13px;height:13px;"></i> Clear
+                    <i data-lucide="x" style="width:13px;height:13px;"></i> {{ __('ui.profile.clear') }}
                 </button>
             </div>
 
@@ -156,25 +159,60 @@
         <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
             <button type="submit" form="profileForm" class="btn btn-primary">
                 <i data-lucide="save" class="mr-1" style="width:15px;height:15px;"></i>
-                Save Changes
+                {{ __('ui.profile.save_changes') }}
             </button>
 
             @if ($user->avatar)
                 <form method="POST"
                       action="{{ route($profileRoutePrefix . '.avatar.remove') }}"
-                      data-confirm-title="Remove Profile Photo"
-                      data-confirm-message="This will permanently remove your profile photo."
-                      data-confirm-ok="Remove"
+                      data-confirm-title="{{ __('ui.profile.remove_photo_title') }}"
+                      data-confirm-message="{{ __('ui.profile.remove_photo_confirm') }}"
+                      data-confirm-ok="{{ __('ui.profile.remove_photo') }}"
                       class="m-0">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-outline-danger btn-sm">
                         <i data-lucide="trash-2" class="mr-1" style="width:13px;height:13px;"></i>
-                        Remove Photo
+                        {{ __('ui.profile.remove_photo') }}
                     </button>
                 </form>
             @endif
         </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header ps-card-header">
+        <div class="ps-card-icon ps-icon-blue">
+            <i data-lucide="languages" style="width:17px;height:17px;"></i>
+        </div>
+        <div>
+            <div class="ps-card-title">{{ __('language.preference_title') }}</div>
+            <div class="ps-card-subtitle">{{ __('language.preference_description') }}</div>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ route($profileRoutePrefix . '.language.update') }}">
+            @csrf
+            <div class="form-group">
+                <label for="preferred_language">{{ __('language.field_label') }}</label>
+                <select id="preferred_language" name="preferred_language" class="form-control @error('preferred_language') is-invalid @enderror">
+                    <option value="" {{ old('preferred_language', $user->preferred_language ?? '') === '' ? 'selected' : '' }}>
+                        {{ __('language.use_system_default') }}
+                    </option>
+                    <option value="en" {{ old('preferred_language', $user->preferred_language ?? '') === 'en' ? 'selected' : '' }}>
+                        {{ __('language.english') }}
+                    </option>
+                    <option value="fil" {{ old('preferred_language', $user->preferred_language ?? '') === 'fil' ? 'selected' : '' }}>
+                        {{ __('language.tagalog') }}
+                    </option>
+                </select>
+                @error('preferred_language')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+            <button type="submit" class="btn btn-primary">{{ __('language.save') }}</button>
+        </form>
     </div>
 </div>
 
@@ -188,8 +226,8 @@
             <i data-lucide="graduation-cap" style="width:17px;height:17px;"></i>
         </div>
         <div>
-            <div class="ps-card-title">Academic Record</div>
-            <div class="ps-card-subtitle">Managed by the Registrar — contact them for corrections</div>
+            <div class="ps-card-title">{{ __('ui.profile.academic_record') }}</div>
+            <div class="ps-card-subtitle">{{ __('ui.profile.registrar_managed') }}</div>
         </div>
     </div>
     <div class="card-body p-0">
@@ -197,7 +235,7 @@
         <div class="ps-info-row">
             <div class="ps-info-icon"><i data-lucide="hash" style="width:14px;height:14px;"></i></div>
             <div>
-                <div class="ps-info-label">Student ID no.</div>
+                <div class="ps-info-label">{{ __('ui.profile.student_id') }}</div>
                 <div class="ps-info-value">{{ $studentProfile->student_number ?? '—' }}</div>
             </div>
         </div>
@@ -206,7 +244,7 @@
         <div class="ps-info-row">
             <div class="ps-info-icon"><i data-lucide="book-open" style="width:14px;height:14px;"></i></div>
             <div>
-                <div class="ps-info-label">Program / Course</div>
+                <div class="ps-info-label">{{ __('ui.profile.program') }}</div>
                 <div class="ps-info-value">{{ $studentProfile->program->name }}</div>
             </div>
         </div>
@@ -216,7 +254,7 @@
         <div class="ps-info-row">
             <div class="ps-info-icon"><i data-lucide="calendar" style="width:14px;height:14px;"></i></div>
             <div>
-                <div class="ps-info-label">Academic Year Enrolled</div>
+                <div class="ps-info-label">{{ __('ui.profile.academic_year') }}</div>
                 <div class="ps-info-value">{{ $studentProfile->enrolled_ay }}</div>
             </div>
         </div>
@@ -226,7 +264,7 @@
         <div class="ps-info-row">
             <div class="ps-info-icon"><i data-lucide="award" style="width:14px;height:14px;"></i></div>
             <div>
-                <div class="ps-info-label">Graduation Year</div>
+                <div class="ps-info-label">{{ __('ui.profile.graduation_year') }}</div>
                 <div class="ps-info-value">{{ $studentProfile->graduation_year }}</div>
             </div>
         </div>
@@ -236,7 +274,7 @@
         <div class="ps-info-row" style="border-bottom:none;">
             <div class="ps-info-icon"><i data-lucide="tag" style="width:14px;height:14px;"></i></div>
             <div>
-                <div class="ps-info-label">Admission Type</div>
+                <div class="ps-info-label">{{ __('ui.profile.admission_type') }}</div>
                 <div class="ps-info-value">{{ ucfirst(str_replace('_', ' ', $studentProfile->admission_type)) }}</div>
             </div>
         </div>
@@ -255,8 +293,8 @@
             <i data-lucide="lock" style="width:17px;height:17px;"></i>
         </div>
         <div>
-            <div class="ps-card-title">Change Password</div>
-            <div class="ps-card-subtitle">Choose a strong password — at least 8 characters</div>
+            <div class="ps-card-title">{{ __('ui.profile.change_password') }}</div>
+            <div class="ps-card-subtitle">{{ __('ui.profile.password_guidance') }}</div>
         </div>
     </div>
     <div class="card-body">
@@ -275,20 +313,20 @@
 
             <div class="mb-3">
                 <label for="current_password" class="ps-label">
-                    Current Password <span class="text-danger">*</span>
+                    {{ __('ui.profile.current_password') }} <span class="text-danger">*</span>
                 </label>
                 <div class="ps-pw-wrap">
                     <input type="password"
                            id="current_password"
                            name="current_password"
                            class="form-control ps-input ps-pw-input @error('current_password') is-invalid @enderror"
-                           placeholder="Enter current password"
+                           placeholder="{{ __('ui.profile.enter_current_password') }}"
                            autocomplete="current-password"
                            required>
                     <button type="button"
                             class="ps-pw-toggle"
                             data-target="current_password"
-                            aria-label="Toggle password visibility">
+                            aria-label="{{ __('ui.sign_in.toggle_password') }}">
                         <i data-lucide="eye" style="width:16px;height:16px;"></i>
                     </button>
                 </div>
@@ -297,14 +335,14 @@
             <div class="row">
                 <div class="col-12 col-sm-6 mb-3">
                     <label for="password" class="ps-label">
-                        New Password <span class="text-danger">*</span>
+                        {{ __('ui.auth.new_password') }} <span class="text-danger">*</span>
                     </label>
                     <div class="ps-pw-wrap">
                         <input type="password"
                                id="password"
                                name="password"
                                class="form-control ps-input ps-pw-input @error('password') is-invalid @enderror"
-                               placeholder="Min. 8 characters"
+                               placeholder="{{ __('ui.profile.minimum_8') }}"
                                autocomplete="new-password"
                                required
                                minlength="8"
@@ -312,7 +350,7 @@
                         <button type="button"
                                 class="ps-pw-toggle"
                                 data-target="password"
-                                aria-label="Toggle password visibility">
+                                aria-label="{{ __('ui.sign_in.toggle_password') }}">
                             <i data-lucide="eye" style="width:16px;height:16px;"></i>
                         </button>
                     </div>
@@ -320,21 +358,21 @@
 
                 <div class="col-12 col-sm-6 mb-3">
                     <label for="password_confirmation" class="ps-label">
-                        Confirm New Password <span class="text-danger">*</span>
+                        {{ __('ui.profile.confirm_new_password') }} <span class="text-danger">*</span>
                     </label>
                     <div class="ps-pw-wrap">
                         <input type="password"
                                id="password_confirmation"
                                name="password_confirmation"
                                class="form-control ps-input ps-pw-input"
-                               placeholder="Repeat new password"
+                               placeholder="{{ __('ui.profile.repeat_password') }}"
                                autocomplete="new-password"
                                required
                                minlength="8">
                         <button type="button"
                                 class="ps-pw-toggle"
                                 data-target="password_confirmation"
-                                aria-label="Toggle password visibility">
+                                aria-label="{{ __('ui.sign_in.toggle_password') }}">
                             <i data-lucide="eye" style="width:16px;height:16px;"></i>
                         </button>
                     </div>
@@ -343,7 +381,7 @@
 
             <button type="submit" class="btn btn-primary">
                 <i data-lucide="lock" class="mr-1" style="width:15px;height:15px;"></i>
-                Change password
+                {{ __('ui.profile.change_password_button') }}
             </button>
         </form>
     </div>
@@ -363,23 +401,23 @@
                     <div class="ps-crop-header-icon">
                         <i data-lucide="image" style="width:16px;height:16px;"></i>
                     </div>
-                    <h6 class="modal-title mb-0">Crop Profile Photo</h6>
+                    <h6 class="modal-title mb-0">{{ __('ui.profile.crop_photo') }}</h6>
                 </div>
-                <button type="button" class="close ps-crop-close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close ps-crop-close" data-dismiss="modal" aria-label="{{ __('ui.profile.close') }}">
                     <i data-lucide="x" style="width:18px;height:18px;"></i>
                 </button>
             </div>
             <div class="modal-body ps-crop-body">
                 <div class="ps-crop-hint">
                     <i data-lucide="move" style="width:13px;height:13px;"></i>
-                    Drag to reposition &bull; Scroll to zoom &bull; Drag corner to resize
+                    {{ __('ui.profile.crop_help') }}
                 </div>
                 <div class="ps-crop-container">
-                    <img id="cropImage" src="" alt="Crop preview" style="max-width:100%;display:block;">
+                    <img id="cropImage" src=""                     alt="{{ __('ui.profile.preview') }}" style="max-width:100%;display:block;">
                 </div>
             </div>
             <div class="ps-crop-preview-bar">
-                <span class="ps-crop-preview-label">Preview</span>
+                <span class="ps-crop-preview-label">{{ __('ui.profile.preview') }}</span>
                 <div class="ps-crop-previews">
                     <div class="text-center">
                         <div class="ps-preview-circle ps-preview-lg" id="previewLg"></div>
@@ -397,16 +435,16 @@
             </div>
             <div class="modal-footer ps-crop-footer">
                 <button type="button" class="btn ps-crop-btn-secondary" data-dismiss="modal">
-                    <i data-lucide="x" style="width:14px;height:14px;"></i> Cancel
+                    <i data-lucide="x" style="width:14px;height:14px;"></i> {{ __('ui.profile.cancel') }}
                 </button>
-                <button type="button" class="btn ps-crop-btn-rotate" id="cropRotateLeft" title="Rotate left">
+                <button type="button" class="btn ps-crop-btn-rotate" id="cropRotateLeft" title="{{ __('ui.profile.rotate_left') }}">
                     <i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i>
                 </button>
-                <button type="button" class="btn ps-crop-btn-rotate" id="cropRotateRight" title="Rotate right">
+                <button type="button" class="btn ps-crop-btn-rotate" id="cropRotateRight" title="{{ __('ui.profile.rotate_right') }}">
                     <i data-lucide="rotate-cw" style="width:14px;height:14px;"></i>
                 </button>
                 <button type="button" class="btn ps-crop-btn-primary" id="cropApplyBtn">
-                    <i data-lucide="check" style="width:14px;height:14px;"></i> Apply &amp; Use Photo
+                    <i data-lucide="check" style="width:14px;height:14px;"></i> {{ __('ui.profile.apply_photo') }}
                 </button>
             </div>
         </div>

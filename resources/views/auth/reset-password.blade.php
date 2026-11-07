@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.pwa-head')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password — DTC EMS</title>
+    <title>{{ __('ui.auth.reset_title') }} — DTC EMS</title>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     @include('partials.auth-appearance')
 </head>
@@ -22,7 +22,7 @@
             </div>
         </div>
         <p class="auth-card-tagline">
-            Create a new <span>password.</span>
+            {{ __('ui.auth.reset_tagline') }} <span>{{ __('ui.auth.password_word') }}</span>
         </p>
     </div>
 
@@ -36,9 +36,9 @@
             </div>
         @endif
 
-        <h1 class="auth-card-title">Reset password</h1>
+        <h1 class="auth-card-title">{{ __('ui.auth.reset_title') }}</h1>
         <p class="auth-card-subtitle">
-            Choose a new password.
+            {{ __('ui.auth.choose_new_password') }}
         </p>
         <p class="auth-account-email">{{ $email }}</p>
 
@@ -49,7 +49,7 @@
 
             {{-- New password --}}
             <div class="auth-field">
-                <label for="password" class="auth-label">New Password</label>
+                <label for="password" class="auth-label">{{ __('ui.auth.new_password') }}</label>
                 <div class="auth-input-wrap">
                     <i data-lucide="lock" class="auth-input-icon" aria-hidden="true"></i>
                     <input
@@ -57,13 +57,13 @@
                         name="password"
                         id="password"
                         class="auth-input @error('password') auth-input--error @enderror"
-                        placeholder="At least 8 characters"
+                        placeholder="{{ __('ui.auth.at_least_8') }}"
                         autocomplete="new-password"
                         minlength="8"
                         required
                         autofocus
                     >
-                    <button type="button" class="auth-eye" onclick="togglePw('password', this)" aria-label="Show password">
+                    <button type="button" class="auth-eye" onclick="togglePw('password', this)" aria-label="{{ __('ui.auth.show_password') }}">
                         <i data-lucide="eye" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -71,7 +71,7 @@
 
             {{-- Confirm password --}}
             <div class="auth-field">
-                <label for="password_confirmation" class="auth-label">Confirm Password</label>
+                <label for="password_confirmation" class="auth-label">{{ __('ui.auth.confirm_password') }}</label>
                 <div class="auth-input-wrap">
                     <i data-lucide="lock" class="auth-input-icon" aria-hidden="true"></i>
                     <input
@@ -79,26 +79,26 @@
                         name="password_confirmation"
                         id="password_confirmation"
                         class="auth-input @error('password_confirmation') auth-input--error @enderror"
-                        placeholder="Re-enter your password"
+                        placeholder="{{ __('ui.auth.reenter_password') }}"
                         autocomplete="new-password"
                         minlength="8"
                         required
                     >
-                    <button type="button" class="auth-eye" onclick="togglePw('password_confirmation', this)" aria-label="Show password">
+                    <button type="button" class="auth-eye" onclick="togglePw('password_confirmation', this)" aria-label="{{ __('ui.auth.show_password') }}">
                         <i data-lucide="eye" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
 
             <button type="submit" class="auth-btn" data-loading-text="Resetting…">
-                Reset password
+                {{ __('ui.auth.reset_button') }}
             </button>
         </form>
 
         <div style="text-align:center; margin-bottom: 4px;">
             <a href="{{ route('landing') }}" class="auth-back">
                 <i data-lucide="arrow-left"></i>
-                Back to Sign In
+                {{ __('ui.auth.back_sign_in') }}
             </a>
         </div>
 
@@ -106,7 +106,7 @@
 
     {{-- ── Footer ───────────────────────────────────────── --}}
     <div class="auth-card-footer">
-        <p class="auth-card-copyright">© {{ date('Y') }} Danao Technological College</p>
+        <p class="auth-card-copyright">{{ __('ui.auth.copyright', ['year' => date('Y')]) }}</p>
     </div>
 
 </div>
@@ -123,7 +123,7 @@ function togglePw(id, btn) {
     btn.replaceChildren(icon);
     if (window.lucide) lucide.createIcons();
     btn.setAttribute('aria-pressed', String(hidden));
-    btn.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
+    btn.setAttribute('aria-label', hidden ? @json(__('ui.auth.hide_password')) : @json(__('ui.auth.show_password')));
 }
 </script>
 

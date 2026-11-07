@@ -33,14 +33,14 @@
                     class="dtc-modal-close"
                     type="button"
                     data-signin-modal="close"
-                    aria-label="Close sign-in dialog"
+                    aria-label="{{ __('ui.navigation.close_sign_in') }}"
                 >
                     <i data-lucide="x" aria-hidden="true"></i>
                 </button>
             </div>
 
             <h2 class="dtc-modal-tagline" id="dtcModalTitle">
-                Your DTC services, <span>connected.</span>
+                {{ __('ui.sign_in.tagline') }} <span>{{ __('ui.sign_in.tagline_suffix') }}</span>
             </h2>
 
         </div>
@@ -56,7 +56,7 @@
             @endif
 
             <p class="dtc-modal-form-sub">
-                Use your <strong>DTC EMS account</strong> to continue
+                {{ __('ui.sign_in.continue') }}
             </p>
 
             <form
@@ -70,7 +70,7 @@
                 {{-- Email --}}
                 <div class="dtc-modal-field">
                     <label for="modal_email" class="dtc-modal-label">
-                        Email address
+                        {{ __('ui.sign_in.email') }}
                     </label>
                     <div class="dtc-modal-input-wrap">
                         <i data-lucide="mail" class="dtc-modal-input-icon" aria-hidden="true"></i>
@@ -95,7 +95,7 @@
                 {{-- Password --}}
                 <div class="dtc-modal-field">
                     <label for="modal_password" class="dtc-modal-label">
-                        Password
+                        {{ __('ui.sign_in.password') }}
                     </label>
                     <div class="dtc-modal-input-wrap">
                         <i data-lucide="lock" class="dtc-modal-input-icon" aria-hidden="true"></i>
@@ -111,7 +111,7 @@
                         <button
                             type="button"
                             class="dtc-modal-eye"
-                            aria-label="Toggle password visibility"
+                            aria-label="{{ __('ui.sign_in.toggle_password') }}"
                             data-signin-modal="toggle-pw"
                         >
                             <i data-lucide="eye" aria-hidden="true"></i>
@@ -128,21 +128,21 @@
                             id="modal_remember"
                             {{ old('remember') ? 'checked' : '' }}
                         >
-                        Remember me
+                        {{ __('ui.sign_in.remember') }}
                     </label>
                     <a href="{{ route('password.request') }}" class="dtc-modal-forgot">
-                        Forgot password?
+                        {{ __('ui.sign_in.forgot') }}
                     </a>
                 </div>
 
                 <div style="text-align:right; margin-top:-8px; margin-bottom:16px;">
                     <a href="{{ route('password.activation.request') }}" class="dtc-modal-forgot">
-                        Need an activation link?
+                        {{ __('ui.sign_in.activation') }}
                     </a>
                 </div>
 
-                <button type="submit" class="dtc-modal-submit" data-loading-text="Signing in…">
-                    Sign in
+                <button type="submit" class="dtc-modal-submit" data-loading-text="{{ __('ui.sign_in.loading') }}">
+                    {{ __('ui.navigation.sign_in') }}
                 </button>
 
             </form>

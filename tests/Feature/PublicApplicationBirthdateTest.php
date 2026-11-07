@@ -10,6 +10,7 @@ use Tests\TestCase;
 
 class PublicApplicationBirthdateTest extends TestCase
 {
+    use \Tests\AdmissionTestPayload;
     use RefreshDatabase, SeedsRoles;
 
     protected function setUp(): void
@@ -19,14 +20,25 @@ class PublicApplicationBirthdateTest extends TestCase
         Mail::fake();
     }
 
-    public function test_past_and_today_birthdates_are_accepted(): void
+    public function test_age_boundaries_are_accepted(): void
     {
         $program = Program::factory()->create();
 
-        foreach ([today()->subYear()->toDateString(), today()->toDateString()] as $index => $birthdate) {
+        foreach ([\App\Support\AdmissionValidation::latestBirthdate(), \App\Support\AdmissionValidation::earliestBirthdate()] as $index => $birthdate) {
             $payload = $this->validPayload($program, 'valid-birth-' . $index . '@example.test', $birthdate);
             $this->submitWithFreshToken($payload)->assertRedirect(route('public.application.success'));
             $this->assertDatabaseHas('applications', ['email' => $payload['email'], 'birthdate' => $birthdate]);
+        }
+    }
+
+    public function test_underage_and_implausibly_old_birthdates_are_rejected(): void
+    {
+        $program = Program::factory()->create();
+        $dates = [today()->toDateString(), today()->subYearsNoOverflow(15)->addDay()->toDateString(), today()->subYearsNoOverflow(101)->toDateString(), '1600-01-01', '1800-01-01'];
+        foreach ($dates as $index => $date) {
+            $payload = $this->validPayload($program, 'invalid-age-' . $index . '@example.test', $date);
+            $this->submitWithFreshToken($payload)->assertSessionHasErrors('birthdate');
+            $this->assertDatabaseMissing('applications', ['email' => $payload['email']]);
         }
     }
 
@@ -59,7 +71,7 @@ class PublicApplicationBirthdateTest extends TestCase
         $this->get(route('public.application.create'))->assertOk();
         $payload['submission_token'] = session('public_application_submission_token');
 
-        return $this->from(route('public.application.create'))->post(route('public.application.store'), $payload);
+        return $this->from(route('public.application.create'))->post(route('public.application.store'), $this->admissionPayload($payload));
     }
 
     private function validPayload(Program $program, string $email, string $birthdate): array

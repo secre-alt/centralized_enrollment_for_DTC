@@ -80,6 +80,18 @@ class PsgcLocationCatalog
         return $this->rows('regions')->firstWhere('psgc_code', $code);
     }
 
+    public function barangays(string $cityCode): array
+    {
+        return $this->rows('barangays')->where('city_code', $cityCode)
+            ->map(fn ($row) => $this->option($row, 'barangay'))
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values()->all();
+    }
+
+    public function hasCity(string $code): bool
+    {
+        return $this->rows('cities')->contains('psgc_code', $code);
+    }
+
     public function area(string $code, string $regionCode): ?array
     {
         return collect($this->areas($regionCode))->firstWhere('code', $code);

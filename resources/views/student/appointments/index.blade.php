@@ -7,7 +7,6 @@
     <div class="dr dr-head">
         <div>
             <h1>My appointments</h1>
-            <p>Track your document pickup and payment.</p>
         </div>
         <a href="{{ route('portal.appointments.create') }}" class="dr-btn dr-btn--primary">
             <i data-lucide="plus" aria-hidden="true"></i> Request a document
@@ -63,6 +62,7 @@
         <div class="dr-alert dr-alert--error" role="alert"><i data-lucide="circle-alert" aria-hidden="true"></i><div>{{ $errors->first() }}</div></div>
     @endif
 
+    @if ($items->isNotEmpty())
     <details class="dr-history-summary">
         <summary>Appointment overview <span>{{ $counts['all'] }} total &middot; {{ $confirmed }} confirmed</span></summary>
     <div class="dtc-dashboard-overview dtc-dashboard-overview--four mb-3" aria-label="Appointment summary">
@@ -89,16 +89,13 @@
     </div>
 
     </details>
-
-    <h2 class="dr-section-title">Your appointments</h2>
+    @endif
 
     @if ($items->isEmpty())
-        <div class="dr-empty">
+        <div class="dr-empty dr-appointments-empty">
+            <span class="dr-appointments-empty-icon" aria-hidden="true"><i data-lucide="calendar-days"></i></span>
             <h2>No appointments yet</h2>
-            <p>Request a Transcript, Diploma, Certification or True Copy and pick a time to collect it from the Registrar’s Office.</p>
-            <a href="{{ route('portal.appointments.create') }}" class="dr-btn dr-btn--primary">
-                <i data-lucide="plus" aria-hidden="true"></i> Request a document
-            </a>
+            <p>Request a document to schedule your pickup.</p>
         </div>
     @else
         @if ($pickupNow > 0)

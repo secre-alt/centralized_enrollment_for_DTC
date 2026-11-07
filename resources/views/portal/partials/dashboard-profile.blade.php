@@ -38,16 +38,12 @@
                 <dd>{{ $isAlumniProfile ? ($studentProfile?->student_number ?: 'Not set') : ($isApplicantProfile ? ($application?->reference_no ?: 'Not assigned') : ($profileAcademicYear ? 'AY '.$profileAcademicYear : 'Not set')) }}</dd>
             </div>
         </dl>
-        @unless($isAlumniProfile)
+        @unless($isAlumniProfile || $profileComplete)
             <div class="dtc-profile-payment is-{{ $profileTone }}" role="status">
-                <i data-lucide="{{ $profileComplete ? 'check' : 'credit-card' }}" aria-hidden="true"></i>
+                <i data-lucide="credit-card" aria-hidden="true"></i>
                 <div>
-                    @if($profileComplete)
-                        <strong>Enrollment complete.</strong> <span>Your payment is confirmed.</span>
-                    @else
-                        <strong>Payment: {{ $paymentStatusLabel }}.</strong>
-                    @endif
-                    @if($profileEnrollment && !$profileComplete && $profileEnrollment->status === 'approved')
+                    <strong>Payment: {{ $paymentStatusLabel }}.</strong>
+                    @if($profileEnrollment && $profileEnrollment->status === 'approved')
                         @if($profileEnrollment->payment?->status === 'pending')
                             <span>Your payment proof is awaiting Cashier verification.</span>
                         @elseif($profileEnrollment->payment?->status === 'rejected')

@@ -902,6 +902,17 @@ body.dtc-dark .feature-pill {
     background: var(--white);
 }
 
+#view-landing > .site-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    padding: 12px 16px;
+}
+
+#view-landing > .back-to-top {
+    bottom: 104px;
+}
+
 
 /* ==========================================================================
    LOGIN VIEW

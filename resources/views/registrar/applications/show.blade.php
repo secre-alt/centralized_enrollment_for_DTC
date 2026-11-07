@@ -136,7 +136,7 @@
                         <div>{{ $application->most_recent_school ?: '—' }}</div>
                     </div>
                     <div class="col-md-6 mb-2">
-                        <div class="text-muted small">School year completed or last attended</div>
+                        <div class="text-muted small">Last School Year Attended</div>
                         <div>{{ $application->school_year_completed ?: '—' }}</div>
                     </div>
                     <div class="col-md-6 mb-2">

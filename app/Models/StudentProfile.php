@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * student_profiles = student number, LRN, admission type, program, etc.
  *
  * New fields (migration 2026_09_01_000001):
- *   enrolled_ay      — AY the student first paid; e.g. "2025-2026".
- *                      Set once at payment confirmation, never changed.
+ *   enrolled_ay      — AY associated with the student's first enrollment.
+ *                      Set once, never changed.
  *   graduation_year  — calendar year the student graduated; e.g. 2026.
  *                      Set by Registrar on alumni promotion.
  */
@@ -80,5 +80,30 @@ class StudentProfile extends Model
             : 1;
 
         return $prefix . str_pad($seq, 5, '0', STR_PAD_LEFT);
+    }
+
+    public static function createForEnrollmentIfMissing(User $user, Enrollment $enrollment): void
+    {
+        if ($user->studentProfile()->exists()) {
+            return;
+        }
+
+        $application = Application::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->latest()
+            ->first();
+
+        static::create([
+            'user_id'        => $user->id,
+            'student_number' => static::generateStudentNumber(),
+            'lrn'            => $application?->lrn,
+            'admission_type' => $application?->academic_status ?? 'new_student',
+            'gender'         => $application?->gender,
+            'birthdate'      => $application?->birthdate,
+            'phone'          => $application?->phone,
+            'address'        => $application?->current_address ?? $application?->address,
+            'program_id'     => $enrollment->program_id,
+            'enrolled_ay'    => $enrollment->school_year,
+        ]);
     }
 }

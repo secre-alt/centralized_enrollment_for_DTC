@@ -12,9 +12,9 @@ test('validation keeps feedback outside controls, focuses the first missing fiel
             querySelector() { return this.error; },
             appendChild(error) { this.error = error; error.remove = () => { this.error = null; }; }
         };
-        return { id, value: '', disabled, field, focused: false,
+        return { id, value: '', required: true, disabled, field, focused: false,
             classList: { add() {}, remove() {} },
-            closest() { return field; },
+            closest(selector) { return selector === '.wiz-field' ? field : null; },
             setAttribute(key, value) { attributes.set(key, value); },
             getAttribute(key) { return attributes.get(key); },
             removeAttribute(key) { attributes.delete(key); },
@@ -30,7 +30,7 @@ test('validation keeps feedback outside controls, focuses the first missing fiel
         window: {}, setTimeout: fn => timers.push(fn)
     });
     vm.runInContext(source.slice(source.indexOf('    function validateStep(n)'),
-        source.indexOf("    document.querySelectorAll('.wiz-input')")), context);
+        source.indexOf("    document.querySelectorAll('.wiz-input, .document-input-file')")), context);
     assert.equal(vm.runInContext('validateStep(2)', context), false);
     timers.forEach(fn => fn());
     assert.equal(first.focused, true);

@@ -47,7 +47,7 @@
 .dtc-enrollment-chip { display:inline-flex; min-height:24px; align-items:center; padding:3px 8px; border:1px solid var(--dtc-border); border-radius:var(--dtc-radius-sm); background:var(--dtc-surface-soft); color:var(--dtc-text-secondary); font-size:10px; font-weight:500; line-height:1.4; }
 
 .dtc-enrollment-zone-label { margin:0 0 14px; color:var(--dtc-text-secondary); font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; }
-.dtc-enrollment-progress { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:0; padding:0; list-style:none; }
+.dtc-enrollment-progress { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin:0; padding:0; list-style:none; }
 .dtc-enrollment-progress-step { position:relative; display:flex; min-width:0; flex-direction:column; align-items:center; text-align:center; }
 .dtc-enrollment-progress-step:not(:last-child)::after { position:absolute; top:13px; left:calc(50% + 15px); right:calc(-50% + 15px); z-index:0; height:2px; background:var(--dtc-border); content:""; }
 .dtc-enrollment-progress-step.has-complete-connector::after { background:var(--dtc-success); }
@@ -57,8 +57,8 @@
 .dtc-enrollment-progress-step.is-current .dtc-enrollment-progress-marker { border:2px solid var(--dtc-warning); background:color-mix(in srgb,var(--dtc-warning) 12%,var(--dtc-surface)); }
 .dtc-enrollment-progress-step.is-current .dtc-enrollment-progress-marker > span { width:8px; height:8px; border-radius:50%; background:var(--dtc-warning); }
 .dtc-enrollment-progress-copy { display:grid; max-width:100%; gap:2px; margin-top:7px; }
-.dtc-enrollment-progress-copy strong { color:var(--dtc-text); font-size:11px; font-weight:600; line-height:1.4; white-space:nowrap; }
-.dtc-enrollment-progress-copy > span { color:var(--dtc-text-secondary); font-size:10px; line-height:1.4; white-space:nowrap; }
+.dtc-enrollment-progress-copy strong { color:var(--dtc-text); font-size:11px; font-weight:600; line-height:1.4; }
+.dtc-enrollment-progress-copy > span { color:var(--dtc-text-secondary); font-size:10px; line-height:1.4; }
 .dtc-enrollment-progress-step.is-upcoming .dtc-enrollment-progress-copy strong { color:var(--dtc-text-secondary); }
 
 .dtc-enrollment-callout { display:grid; grid-template-columns:32px minmax(0,1fr); align-items:center; gap:10px; padding:12px; border:1px solid var(--dtc-border); border-radius:var(--dtc-radius-md); background:var(--dtc-surface-soft); }

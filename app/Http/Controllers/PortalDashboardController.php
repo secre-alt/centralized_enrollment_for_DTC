@@ -37,8 +37,16 @@ class PortalDashboardController extends Controller
             ->latest()
             ->first();
 
+        $currentSchoolYear = Setting::get('current_school_year');
+        $currentSemester = Setting::get('current_semester');
+        $semesterNumbers = ['1st' => 1, '2nd' => 2, 'Summer' => 3];
+        $hasConfiguredTerm = $currentSchoolYear && isset($semesterNumbers[$currentSemester]);
+
         $enrollment = Enrollment::where('user_id', $user->id)
             ->with('payment')
+            ->when($hasConfiguredTerm, fn ($query) => $query
+                ->where('school_year', $currentSchoolYear)
+                ->where('semester', $semesterNumbers[$currentSemester]))
             ->latest()
             ->first();
 
@@ -103,12 +111,57 @@ class PortalDashboardController extends Controller
         }
 
         if ($enrollment->status === 'pending') {
+            if ($enrollment->is_paid) {
+                return [
+                    'label' => 'Wait for Registrar Approval',
+                    'desc'  => 'Your payment is confirmed and the Registrar is reviewing your selected subjects.',
+                    'url'   => route('portal.enrollment.index'),
+                    'icon'  => 'hourglass',
+                ];
+            }
+
+            if ($enrollment->payment && $enrollment->payment->status === 'pending') {
+                return [
+                    'label' => 'Wait for Payment Verification',
+                    'desc'  => 'The Cashier is reviewing your submitted payment proof.',
+                    'url'   => route('portal.enrollment.index'),
+                    'icon'  => 'hourglass',
+                ];
+            }
+
+            if ($enrollment->payment && $enrollment->payment->status === 'rejected') {
+                return [
+                    'label' => 'Submit Corrected Payment Proof',
+                    'desc' => 'Review the Cashier’s feedback and submit corrected proof.',
+                    'url' => route('portal.enrollment.payment-info', $enrollment),
+                    'icon' => 'rotate-ccw',
+                    'isPayment' => true,
+                ];
+            }
+
             return [
-                'label' => 'Wait for Registrar Approval',
-                'desc'  => 'Your official enrollment has been submitted and is under review.',
-                'url'   => route('portal.enrollment.index'),
-                'icon'  => 'hourglass',
+                'label' => 'Proceed to Payment',
+                'desc' => 'Pay the enrollment fee at the Cashier or submit GCash proof before Registrar review.',
+                'url' => route('portal.enrollment.payment-info', $enrollment),
+                'icon' => 'banknote',
+                'isPayment' => true,
             ];
+        }
+
+        if ($enrollment->status === 'rejected') {
+            return $enrollment->is_paid
+                ? [
+                    'label' => 'Contact Cashier for Refund',
+                    'desc' => 'The Registrar rejected this paid enrollment. Refunds are handled outside this system.',
+                    'url' => route('portal.enrollment.index'),
+                    'icon' => 'circle-alert',
+                ]
+                : [
+                    'label' => 'Correct and Resubmit',
+                    'desc' => 'Review the Registrar’s feedback and update your enrollment.',
+                    'url' => route('portal.enrollment.create'),
+                    'icon' => 'rotate-ccw',
+                ];
         }
 
         if ($enrollment->status === 'approved' && ! $enrollment->is_paid) {
@@ -257,33 +310,41 @@ class PortalDashboardController extends Controller
         if ($latestEnrollment) {
             $timeline = [
                 [
-                    'label'    => 'Submit Application',
+                    'label'    => 'Submit Enrollment',
                     'sublabel' => 'Fill enrollment form',
                     'done'     => true,
                     'active'   => false,
                 ],
                 [
-                    'label'    => 'Registrar Review',
-                    'sublabel' => $latestEnrollment->status === 'rejected' ? 'Decision: rejected' : 'Await approval',
-                    'done'     => $latestEnrollment->status === 'approved',
-                    'active'   => $latestEnrollment->status === 'pending',
-                    'rejected' => $latestEnrollment->status === 'rejected',
-                ],
-                [
-                    'label'    => 'Approval',
-                    'sublabel' => 'Get confirmed',
-                    'done'     => $latestEnrollment->status === 'approved',
-                    'active'   => false,
-                ],
-                [
                     'label'    => 'Pay Fee',
-                    'sublabel' => $latestEnrollment->payment && $latestEnrollment->payment->status === 'pending'
-                        ? 'Payment proof awaiting verification'
-                        : ($latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected'
-                            ? 'Payment proof rejected — submit a corrected proof'
-                            : '₱' . number_format($fee, 2)),
-                    'done'     => $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid,
-                    'active'   => $latestEnrollment->status === 'approved' && !$latestEnrollment->is_paid,
+                    'sublabel' => $latestEnrollment->is_paid
+                        ? 'Payment confirmed'
+                        : ($latestEnrollment->payment && $latestEnrollment->payment->status === 'pending'
+                            ? 'Payment proof awaiting Cashier verification'
+                            : ($latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected'
+                                ? 'Payment proof rejected — submit corrected proof'
+                                : 'Pay before Registrar review')),
+                    'done'     => $latestEnrollment->is_paid || $latestEnrollment->payment?->status === 'pending',
+                    'active'   => in_array($latestEnrollment->status, ['pending', 'approved'], true)
+                        && ! $latestEnrollment->is_paid
+                        && $latestEnrollment->payment?->status !== 'pending',
+                ],
+                [
+                    'label'    => 'Cashier Verification',
+                    'sublabel' => $latestEnrollment->is_paid
+                        ? 'Payment verified'
+                        : ($latestEnrollment->payment && $latestEnrollment->payment->status === 'pending'
+                            ? 'Under review'
+                            : 'After payment'),
+                    'done'     => $latestEnrollment->is_paid,
+                    'active'   => ! $latestEnrollment->is_paid && $latestEnrollment->payment?->status === 'pending',
+                ],
+                [
+                    'label'    => 'Registrar Review',
+                    'sublabel' => $latestEnrollment->status === 'rejected' ? 'Decision: rejected' : ($latestEnrollment->status === 'approved' ? 'Approved' : ($latestEnrollment->is_paid ? 'Await review' : 'After payment verification')),
+                    'done'     => $latestEnrollment->status === 'approved',
+                    'active'   => $latestEnrollment->status === 'pending' && $latestEnrollment->is_paid,
+                    'rejected' => $latestEnrollment->status === 'rejected',
                 ],
                 [
                     'label'    => 'Enrolled',
@@ -296,9 +357,9 @@ class PortalDashboardController extends Controller
         } else {
             $timeline = [
                 ['label' => 'Submit Application', 'sublabel' => 'Application not started', 'done' => false, 'active' => true],
-                ['label' => 'Registrar Review', 'sublabel' => 'Await submission', 'done' => false, 'active' => false],
-                ['label' => 'Approval', 'sublabel' => 'Await review', 'done' => false, 'active' => false],
-                ['label' => 'Pay Fee', 'sublabel' => 'After approval', 'done' => false, 'active' => false],
+                ['label' => 'Pay Fee', 'sublabel' => 'Before Registrar review', 'done' => false, 'active' => false],
+                ['label' => 'Cashier Verification', 'sublabel' => 'After payment', 'done' => false, 'active' => false],
+                ['label' => 'Registrar Review', 'sublabel' => 'After payment verification', 'done' => false, 'active' => false],
                 ['label' => 'Enrolled', 'sublabel' => 'After payment confirmation', 'done' => false, 'active' => false],
             ];
         }
@@ -355,13 +416,39 @@ class PortalDashboardController extends Controller
         }
 
         if ($enrollment->status === 'pending') {
+            if ($enrollment->is_paid) {
+                return [
+                    ['icon' => 'scan-search', 'label' => 'Await Registrar Review', 'desc' => 'Your payment is confirmed and the Registrar is reviewing your subjects.', 'url' => route('portal.enrollment.index'), 'active' => true],
+                    ['icon' => 'bell', 'label' => 'Check Notifications', 'desc' => 'You will be notified when the Registrar makes a decision.', 'url' => route('notifications.index'), 'active' => false],
+                ];
+            }
+
+            if ($enrollment->payment && $enrollment->payment->status === 'pending') {
+                return [
+                    ['icon' => 'hourglass', 'label' => 'Wait for Cashier Verification', 'desc' => 'The Cashier is checking your payment proof.', 'url' => route('portal.enrollment.index'), 'active' => true],
+                    ['icon' => 'bell', 'label' => 'Check Notifications', 'desc' => 'You will be notified when payment is verified.', 'url' => route('notifications.index'), 'active' => false],
+                ];
+            }
+
+            if ($enrollment->payment && $enrollment->payment->status === 'rejected') {
+                return [
+                    ['icon' => 'rotate-ccw', 'label' => 'Resubmit Payment Proof', 'desc' => 'Review the Cashier’s feedback and submit corrected proof.', 'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true, 'isPayment' => true],
+                ];
+            }
+
             return [
-                ['icon' => 'hourglass',  'label' => 'Await Registrar Review', 'desc' => 'Your enrollment is being reviewed.',           'url' => route('portal.enrollment.index'), 'active' => true],
-                ['icon' => 'bell',       'label' => 'Check Notifications',    'desc' => 'You will be notified once approved.',          'url' => route('notifications.index'), 'active' => false],
+                ['icon' => 'banknote', 'label' => 'Pay Enrollment Fee', 'desc' => 'Pay the fee at the Cashier or submit GCash proof before Registrar review.', 'url' => route('portal.enrollment.payment-info', $enrollment), 'active' => true, 'isPayment' => true],
             ];
         }
 
         if ($enrollment->status === 'rejected') {
+            if ($enrollment->is_paid) {
+                return [
+                    ['icon' => 'circle-alert', 'label' => 'Contact Cashier for Refund', 'desc' => 'The Registrar rejected this paid enrollment. Refunds are handled outside this system.', 'url' => route('portal.enrollment.index'), 'active' => true],
+                    ['icon' => 'file-text', 'label' => 'Review Enrollment History', 'desc' => 'See the Registrar’s decision and feedback.', 'url' => route('portal.enrollment.index'), 'active' => false],
+                ];
+            }
+
             return [
                 ['icon' => 'rotate-ccw', 'label' => 'Correct and Resubmit', 'desc' => 'Review the Registrar’s feedback, update your enrollment, and submit it again.', 'url' => route('portal.enrollment.create'), 'active' => true],
                 ['icon' => 'file-text', 'label' => 'Review Enrollment History', 'desc' => 'See the decision and feedback for this submission.', 'url' => route('portal.enrollment.index'), 'active' => false],

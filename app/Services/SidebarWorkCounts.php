@@ -15,7 +15,7 @@ class SidebarWorkCounts
         'registrar.enrollments.index' => 'enrollments awaiting review',
         'registrar.appointments.index' => 'appointments awaiting confirmation',
         'registrar.documents.index' => 'document requests awaiting processing',
-        'cashier.payments.index' => 'enrollments awaiting payment collection or verification',
+        'cashier.payments.index' => 'payments or refunds requiring Cashier follow-up',
         'cashier.document-payments.index' => 'document fees awaiting collection or verification',
     ];
 
@@ -28,13 +28,18 @@ class SidebarWorkCounts
         // Queues are shared by authorized staff, not assigned per staff account.
         if ($user->hasAnyRole(['admin', 'registrar'])) {
             $counts['registrar.applications.index'] = Application::where('status', 'submitted')->count();
-            $counts['registrar.enrollments.index'] = Enrollment::where('status', 'pending')->count();
+            $counts['registrar.enrollments.index'] = Enrollment::where('status', 'pending')
+                ->where('is_paid', true)
+                ->whereHas('payment', fn ($query) => $query->where('status', 'verified'))
+                ->count();
             $counts['registrar.appointments.index'] = Appointment::where('status', 'pending')->count();
             $counts['registrar.documents.index'] = DocumentRequest::where('status', 'submitted')->count();
         }
         if ($user->hasAnyRole(['admin', 'cashier'])) {
-            $counts['cashier.payments.index'] = Enrollment::where('status', 'approved')->where('is_paid', false)
-                ->whereDoesntHave('payment', fn ($query) => $query->where('status', 'verified'))->count();
+            $counts['cashier.payments.index'] = Enrollment::whereIn('status', ['pending', 'approved'])->where('is_paid', false)
+                ->whereDoesntHave('payment', fn ($query) => $query->where('status', 'verified'))->count()
+                + Enrollment::where('status', 'rejected')->where('is_paid', true)
+                    ->whereHas('payments', fn ($query) => $query->where('status', 'verified')->where('refund_status', 'pending'))->count();
             $counts['cashier.document-payments.index'] = DocumentRequest::whereNotIn('status', ['cancelled', 'released'])
                 ->whereIn('payment_status', ['unpaid', 'pending_verification'])->count();
         }

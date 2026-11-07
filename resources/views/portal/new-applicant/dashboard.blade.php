@@ -25,7 +25,15 @@
 
     $enrollmentLabel = 'Not Started';
     if ($enrollment) {
-        if ($enrollment->is_paid) {
+        if ($enrollment->status === 'rejected') {
+            $enrollmentLabel = 'Rejected';
+        } elseif ($enrollment->is_paid && $enrollment->status === 'pending') {
+            $enrollmentLabel = 'Awaiting Registrar Review';
+        } elseif ($enrollment->status === 'rejected' && $enrollment->is_paid) {
+            $paymentStatusLabel = 'Refund follow-up needed';
+        } elseif (!$enrollment->is_paid && $enrollment->payment && $enrollment->payment->status === 'verified') {
+            $paymentStatusLabel = 'Contact Cashier';
+        } elseif ($enrollment->is_paid) {
             $enrollmentLabel = 'Paid';
         } elseif ($enrollment->status === 'approved') {
             $enrollmentLabel = 'Approved';
@@ -40,7 +48,7 @@
         ? ($applicationBadges[$application->status]['label'] ?? ucwords(str_replace('_',' ',$application->status)))
         : 'Not Found';
 
-    if (!$enrollment || $enrollment->status !== 'approved') {
+    if (!$enrollment) {
         $paymentStatusLabel = 'Not Required';
     } elseif ($enrollment->is_paid) {
         $paymentStatusLabel = 'Confirmed';
@@ -74,9 +82,9 @@
         @endif
     </div>
     <div class="dtc-overview-item">
-        <span class="dtc-overview-label">{{ $enrollment && $enrollment->status === 'approved' ? 'Payment' : 'Next step' }}</span>
-        <strong>{{ $enrollment && $enrollment->status === 'approved' ? $paymentStatusLabel : $nextStep['label'] }}</strong>
-        @if($enrollment && $enrollment->status === 'approved' && !$enrollment->is_paid)
+        <span class="dtc-overview-label">{{ $enrollment ? 'Payment / next step' : 'Next step' }}</span>
+        <strong>{{ $enrollment ? ($enrollment->status === 'pending' && $enrollment->is_paid ? 'Awaiting Registrar Review' : $paymentStatusLabel) : $nextStep['label'] }}</strong>
+        @if($enrollment && in_array($enrollment->status, ['pending', 'approved'], true) && !$enrollment->is_paid)
             <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}">Payment details</a>
         @elseif(!empty($nextStep['url']))
             <a href="{{ $nextStep['url'] }}">Continue</a>
@@ -186,6 +194,7 @@
                 'Review Required Corrections' => 'Review Corrections',
                 'Await Registrar Review', 'Review Application Decision' => 'View Application',
                 'Wait for Registrar Approval', 'Wait for Payment Verification',
+                'Contact Cashier for Refund' => 'Review Enrollment',
                 'Enrollment Completed', 'View Enrollment Status' => 'View Enrollment',
                 default => 'View Details',
             };

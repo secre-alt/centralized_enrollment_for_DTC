@@ -35,6 +35,52 @@
             <div class="alert alert-danger">{{ $errors->first() }}</div>
         @endif
 
+        @if ($enrollment->status === 'rejected' && $enrollment->is_paid)
+            <div class="alert alert-warning" role="status">
+                <strong>Refund follow-up</strong>
+                <p class="mb-2">
+                    The original verified payment and receipt are preserved.
+                    @if ($refundFullyConfirmed)
+                        The Cashier recorded confirmation of the full external refund.
+                    @else
+                        Record a refund only after confirming the full external refund was completed.
+                    @endif
+                </p>
+                @foreach ($verifiedPayments as $verifiedPayment)
+                    <div class="border-top pt-2 mt-2">
+                        <div>Receipt {{ $verifiedPayment->receipt_no }} · ₱{{ number_format($verifiedPayment->amount, 2) }}</div>
+                        @if ($verifiedPayment->refundIsPending())
+                            <span class="d-block mb-2">Refund pending confirmation</span>
+                            <form method="POST" action="{{ route('cashier.payments.confirm-refund', $verifiedPayment) }}">
+                                @csrf
+                                <label class="dtc-form-label" for="refund-amount-{{ $verifiedPayment->id }}">Full refund amount (must match ₱{{ number_format($verifiedPayment->amount, 2) }})</label>
+                                <input id="refund-amount-{{ $verifiedPayment->id }}" class="dtc-form-control mb-2" name="refund_amount" type="number" min="0.01" step="0.01" required>
+                                <label class="dtc-form-label" for="refund-reference-{{ $verifiedPayment->id }}">External refund reference / receipt</label>
+                                <input id="refund-reference-{{ $verifiedPayment->id }}" class="dtc-form-control mb-2" name="refund_reference" maxlength="255" required>
+                                <button type="submit" class="dtc-btn dtc-btn-success">Confirm completed refund</button>
+                            </form>
+                        @elseif ($verifiedPayment->refundIsComplete())
+                            <span class="d-block">Full refund of ₱{{ number_format($verifiedPayment->refund_amount, 2) }} confirmed · {{ $verifiedPayment->refund_reference }} · {{ $verifiedPayment->refunded_at?->format('M d, Y h:i A') }} · {{ $verifiedPayment->refundConfirmer?->name ?? 'Cashier record' }}</span>
+                        @else
+                            <span class="d-block">Refund status needs reconciliation before another payment.</span>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        @if ($outstandingTermPayments->isNotEmpty() && ! ($enrollment->status === 'rejected' && $enrollment->is_paid))
+            <div class="alert alert-warning" role="alert">
+                <strong>Payment blocked pending reconciliation.</strong>
+                <p class="mb-2">Do not collect or verify another payment for this student and term until the existing record is resolved.</p>
+                @foreach ($outstandingTermPayments as $outstandingPayment)
+                    <a class="d-block" href="{{ route('cashier.payments.show', $outstandingPayment->enrollment) }}">
+                        Enrollment #{{ $outstandingPayment->enrollment_id }} · Receipt {{ $outstandingPayment->receipt_no ?: 'not issued' }} ·
+                        {{ $outstandingPayment->refundIsPending() ? 'Refund pending confirmation' : ($outstandingPayment->isPending() ? 'Payment proof pending verification' : 'Verified payment not refunded') }}
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
         <div class="dtc-review-section">
             <div class="dtc-review-info-grid">
                 <div class="dtc-review-info">
@@ -74,7 +120,7 @@
 
         @if (! $enrollment->is_paid)
             <div class="dtc-payment-info-notice">
-                <span>Confirming payment finalizes enrollment.</span>
+                <span>Cashier payment verification sends this enrollment to the Registrar for subject review.</span>
             </div>
         @endif
 
@@ -113,7 +159,7 @@
                 </form>
             </div>
 
-        @elseif (! $enrollment->is_paid && (! $latestPayment || $latestPayment->isRejected()))
+        @elseif (! $enrollment->is_paid && $outstandingTermPayments->isEmpty() && (! $latestPayment || $latestPayment->isRejected()))
             {{-- ── Walk-in Branch (also shown after a GCash rejection) ── --}}
             <form method="POST" action="{{ route('cashier.payments.store', $enrollment) }}" id="walkinForm-{{ $enrollment->id }}">
                 @csrf
@@ -150,7 +196,7 @@
                                 class="dtc-btn dtc-btn-success"
                                 data-dtc-confirm
                                 data-dtc-confirm-title="Verify GCash payment?"
-                                data-dtc-confirm-message="The GCash payment from {subject} will be verified and the enrollment will be finalized."
+                                data-dtc-confirm-message="The GCash payment from {subject} will be verified and recorded. If the enrollment is pending, it will then be sent to the Registrar for subject review."
                                 data-dtc-confirm-subject="{{ $enrollment->user->name }}"
                                 data-dtc-confirm-ok="Verify"
                                 data-dtc-confirm-tone="success"
@@ -159,13 +205,13 @@
                         </button>
                     </form>
                 </div>
-            @elseif (! $enrollment->is_paid && (! $latestPayment || $latestPayment->isRejected()))
+            @elseif (! $enrollment->is_paid && $outstandingTermPayments->isEmpty() && (! $latestPayment || $latestPayment->isRejected()))
                 <div class="dtc-review-footer-right">
                     <button type="button"
                             class="dtc-btn dtc-btn-success"
                             data-dtc-confirm
                             data-dtc-confirm-title="Confirm cash payment?"
-                            data-dtc-confirm-message="Confirm that cash payment has been received from {subject}. The enrollment will then be finalized."
+                            data-dtc-confirm-message="Confirm that cash payment has been received from {subject}. Payment will be recorded, and any pending enrollment will then be sent to the Registrar for subject review."
                             data-dtc-confirm-subject="{{ $enrollment->user->name }}"
                             data-dtc-confirm-ok="Confirm"
                             data-dtc-confirm-tone="success"

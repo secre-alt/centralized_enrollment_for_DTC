@@ -24,9 +24,11 @@ class ReportController extends Controller
        $payments = Payment::with('enrollment.user', 'enrollment.program', 'cashier', 'verifier')
         ->latest()
         ->get();
-        $totalRevenue = $payments->where('status', 'verified')->sum('amount');
+        $grossCollection = $payments->where('status', 'verified')->sum('amount');
+        $totalRefunds = $payments->where('refund_status', 'refunded')->sum('refund_amount');
+        $totalRevenue = $grossCollection - $totalRefunds;
         $verifiedCount = $payments->where('status', 'verified')->count();
-        $pdf = Pdf::loadView('admin.reports.payment', compact('payments', 'totalRevenue', 'verifiedCount'))
+        $pdf = Pdf::loadView('admin.reports.payment', compact('payments', 'grossCollection', 'totalRefunds', 'totalRevenue', 'verifiedCount'))
             ->setPaper('a4', 'landscape');
         return $pdf->download('DTC_Payment_Report_' . date('Ymd') . '.pdf');
     }

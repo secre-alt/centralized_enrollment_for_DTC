@@ -7,7 +7,7 @@
     <div>
         <h4 class="mb-0 font-weight-bold u-text" >Process Payments</h4>
         <p class="mb-0 u-text-secondary-sm" >
-            Collect fees and review enrollment payments.
+            Collect enrollment fees before Registrar review.
         </p>
     </div>
 @endsection
@@ -32,6 +32,8 @@
         'verified'      => 'Verified',
         'walk_in'       => 'Walk-in',
         'rejected'      => 'Rejected',
+        'refund_follow_up' => 'Refund follow-up',
+        'refunded'      => 'Refunded',
     ];
     $payFilterCount = ($filter && $filter !== 'all') ? 1 : 0;
 @endphp
@@ -75,7 +77,7 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold u-text" >Approved Enrollments</span>
+        <span class="font-weight-bold u-text" >Enrollment Payments and Refund Follow-up</span>
         <span class="u-text-secondary-sm" id="paymentCount" data-total="{{ $enrollments->total() }}">{{ $enrollments->total() }} total</span>
     </div>
 
@@ -133,7 +135,17 @@
                         @endif
                     </td>
                     <td>
-                        @if (! $enrollment->payment)
+                        @if ($enrollment->has_outstanding_term_payment && ! $enrollment->is_paid)
+                            <x-dtc.status-badge status="Payment Blocked" />
+                        @elseif ($enrollment->status === 'rejected' && $enrollment->has_verified_payment)
+                            @if ($enrollment->has_pending_refund)
+                                <x-dtc.status-badge status="Refund Follow-up" />
+                            @elseif ($enrollment->refunds_fully_confirmed)
+                                <x-dtc.status-badge status="Refunded" />
+                            @else
+                                <x-dtc.status-badge status="Refund Status Needed" />
+                            @endif
+                        @elseif (! $enrollment->payment)
                             <x-dtc.status-badge status="Unpaid" />
                         @elseif ($enrollment->payment->isPending())
                             <x-dtc.status-badge status="Pending" />
@@ -151,7 +163,7 @@
                             <button type="button" class="dtc-review-btn dtc-payment-btn dtc-header-btn"
                                     data-url="{{ route('cashier.payments.show', $enrollment) }}">
                                 <i data-lucide="banknote"></i>
-                                <span class="dtc-header-btn-label">{{ $enrollment->payment?->isVerified() ? 'Details' : ($enrollment->payment?->isPending() ? 'Review' : 'Process') }}</span>
+                                <span class="dtc-header-btn-label">{{ $enrollment->has_outstanding_term_payment && ! $enrollment->is_paid ? 'Resolve prior payment' : ($enrollment->status === 'rejected' ? 'Refund details' : ($enrollment->payment?->isVerified() ? 'Details' : ($enrollment->payment?->isPending() ? 'Review' : 'Process'))) }}</span>
                             </button>
                             @if ($enrollment->is_paid)
                                 <button type="button" class="dtc-review-btn dtc-receipt-btn dtc-header-btn"

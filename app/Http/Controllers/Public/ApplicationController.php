@@ -10,6 +10,7 @@ use App\Models\Program;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Support\ApplicationTextNormalizer;
+use App\Support\AdmissionValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -85,6 +86,16 @@ class ApplicationController extends Controller
      */
     public function create(Request $request)
     {
+        // Form controls are scalar. Keep validation errors without rendering
+        // malformed array/object submissions through Blade's escaped values.
+        $oldInput = $request->session()->getOldInput();
+        foreach ($oldInput as $field => $value) {
+            if (is_array($value) || is_object($value)) {
+                unset($oldInput[$field]);
+            }
+        }
+        $request->session()->put('_old_input', $oldInput);
+
         $programs = Program::orderBy('name')->get();
         $submissionToken = bin2hex(random_bytes(32));
         $request->session()->put('public_application_submission_token', $submissionToken);
@@ -118,10 +129,16 @@ class ApplicationController extends Controller
 
         // Normalize human-entered text before validation, review data, and storage.
         $request->merge(ApplicationTextNormalizer::normalizeFields($request->all()));
+        if (is_string($request->input('country'))) {
+            $canonicalCountry = AdmissionValidation::canonicalCountry($request->input('country'));
+            if ($canonicalCountry !== null) {
+                $request->merge(['country' => $canonicalCountry]);
+            }
+        }
 
         $regionCodes = array_column($locations->regions(), 'code');
-        $selectedRegion = (string) $request->input('region_code', '');
-        $selectedProvince = (string) $request->input('province_code', '');
+        $selectedRegion = is_string($request->input('region_code')) ? $request->input('region_code') : '';
+        $selectedProvince = is_string($request->input('province_code')) ? $request->input('province_code') : '';
         $provinceCodes = array_column(array_values(array_filter(
             $locations->areas($selectedRegion),
             fn ($area) => $area['type'] === 'province'
@@ -179,9 +196,18 @@ class ApplicationController extends Controller
             ],
 
             'birthdate' => [
+                'bail',
                 'required',
                 'date',
+                'date_format:Y-m-d',
                 'before_or_equal:today',
+                function ($attribute, $value, $fail) {
+                    if ($value > AdmissionValidation::latestBirthdate()) {
+                        $fail('Applicants must be at least ' . AdmissionValidation::MINIMUM_AGE . ' years old.');
+                    } elseif ($value < AdmissionValidation::earliestBirthdate()) {
+                        $fail('Enter a date of birth for an applicant aged ' . AdmissionValidation::MAXIMUM_AGE . ' or younger.');
+                    }
+                },
             ],
 
             'birth_place' => [
@@ -203,9 +229,10 @@ class ApplicationController extends Controller
             ],
 
             'lrn' => [
+                'bail',
                 'nullable',
                 'string',
-                'max:255',
+                'regex:/^[0-9]{12}$/D',
             ],
 
             'marital_status' => [
@@ -250,6 +277,12 @@ class ApplicationController extends Controller
 
             'region' => ['nullable', 'string', 'max:255'],
             'barangay' => ['nullable', 'string', 'max:255'],
+            'barangay_code' => ['bail', 'nullable', 'string', function ($attribute, $value, $fail) use ($request, $locations) {
+                $city = $request->input('city_code');
+                if (!is_string($city) || !collect($locations->barangays($city))->contains('code', $value)) {
+                    $fail('Select a barangay that belongs to the chosen city or municipality.');
+                }
+            }],
             'region_code' => ['nullable', 'string', Rule::in($regionCodes)],
             'province_code' => ['nullable', 'string', Rule::in($provinceCodes)],
             'city_code' => ['nullable', 'string', Rule::in(array_column($cityOptions, 'code'))],
@@ -263,9 +296,11 @@ class ApplicationController extends Controller
             'international_location' => ['nullable', 'string', 'max:255'],
 
             'country' => [
+                'bail',
                 'nullable',
                 'string',
                 'max:255',
+                Rule::in(array_values(AdmissionValidation::countries())),
             ],
 
             'guardian_name' => ['nullable', 'string', 'max:255'],
@@ -408,7 +443,79 @@ class ApplicationController extends Controller
                 : ['exclude'];
         }
 
+        foreach (AdmissionValidation::NAME_FIELDS as $field) {
+            $rules[$field] = array_merge(['bail'], $rules[$field], ['regex:/' . AdmissionValidation::NAME_PATTERN . '/uD']);
+        }
+        foreach (AdmissionValidation::PHONE_FIELDS as $field) {
+            $rules[$field] = ['bail', 'nullable', 'string', 'max:50', function ($attribute, $value, $fail) {
+                if (!AdmissionValidation::validPhone($value)) {
+                    $fail('Enter a valid phone number: 09XXXXXXXXX, +639XXXXXXXXX, a landline with area code, or an international number starting with +.');
+                }
+            }];
+        }
+        $country = is_string($request->input('country')) ? trim($request->input('country')) : '';
+        foreach (AdmissionValidation::REQUIRED_EDUCATION[is_string($academicStatus) ? $academicStatus : ''] ?? [] as $field) {
+            $rules[$field] = array_values(array_filter($rules[$field], fn ($rule) => $rule !== 'nullable'));
+            array_unshift($rules[$field], 'required');
+        }
+        $rules['country'] = array_merge(['required'], array_filter($rules['country'], fn ($rule) => $rule !== 'nullable'));
+        $rules['current_address'] = ['required', 'string', 'max:255'];
+        if ($country === '' || strcasecmp($country, 'Philippines') === 0) {
+            $rules['city'] = ['required_without:city_code', 'nullable', 'string', 'max:255'];
+        } else {
+            $rules['international_location'] = ['required', 'string', 'max:255'];
+        }
+        if ($request->input('marital_status') !== 'married') {
+            $rules['spouse_name'] = ['exclude'];
+        }
+        if (!is_string($request->input('disability')) || trim($request->input('disability')) === '') {
+            $rules['pwd_id'] = ['exclude'];
+        }
+        $philippines = $country === '' || strcasecmp($country, 'Philippines') === 0;
+        $rules['postal_code'] = ['bail', 'nullable', 'string', 'regex:/' . ($philippines ? AdmissionValidation::PHILIPPINE_POSTAL_PATTERN : AdmissionValidation::INTERNATIONAL_POSTAL_PATTERN) . '/D'];
+        $rules['school_year_completed'] = ['bail', $academicStatus === 'returnee' ? 'required' : 'nullable', 'string', 'max:30', function ($attribute, $value, $fail) {
+            $problem = AdmissionValidation::schoolYearError($value);
+            if ($problem === 'format') {
+                $fail('Enter a school year in YYYY-YYYY format.');
+            } elseif ($problem === 'consecutive') {
+                $fail('The ending year must be one year after the starting year.');
+            } elseif ($problem === 'future') {
+                $fail('Enter a current or previous school year.');
+            }
+        }];
+        $rules['documents'][] = 'array:form_138,good_moral_certificate,birth_certificate,marriage_certificate,transfer_credentials,transcript_of_records';
+        foreach (['form_138', 'good_moral_certificate', 'birth_certificate', 'marriage_certificate', 'transfer_credentials', 'transcript_of_records'] as $document) {
+            $rules['documents.' . $document] = array_map(fn ($rule) => $rule === 'max:5120' ? 'max:' . (AdmissionValidation::uploadLimit() / 1024) : $rule, $rules['documents.' . $document]);
+            array_unshift($rules['documents.' . $document], 'bail');
+            $rules['documents.' . $document][] = function ($attribute, $value, $fail) {
+                if ($value->getSize() === 0 || !in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'jpg', 'jpeg', 'png'], true)) {
+                    $fail('Choose a non-empty PDF, JPG, JPEG, or PNG file, up to ' . AdmissionValidation::uploadLabel() . '.');
+                }
+            };
+        }
+
         $validated = $request->validate($rules, [
+            'first_name.regex' => 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.',
+            'last_name.regex' => 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.',
+            'middle_name.regex' => 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.',
+            'father_name.regex' => 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.',
+            'mother_name.regex' => 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.',
+            'guardian_name.regex' => 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.',
+            'spouse_name.regex' => 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.',
+            'lrn.regex' => 'Enter exactly 12 digits for the LRN.',
+            'school_year_completed.required' => 'Please enter your last school year attended.',
+            'postal_code.regex' => $philippines ? 'Enter a 4-digit Philippine postal code other than 0000.' : 'Use up to 20 letters or digits, with single spaces or hyphens between groups.',
+            'birthdate.date' => 'Enter a valid date of birth.',
+            'country.in' => 'Choose a country from the suggestions.',
+            'country.required' => 'Choose the country for your current address.',
+            'current_address.required' => 'Enter your street, purok, sitio, or another usable residential address description.',
+            'city.required_without' => 'Select or enter your city or municipality.',
+            'international_location.required' => 'Enter your city and state or province outside the Philippines.',
+            'birthdate.date_format' => 'Enter a valid date of birth in YYYY-MM-DD format.',
+            'email.email' => 'Enter a valid email address, such as name@example.com.',
+            'documents.*.mimes' => 'Choose a PDF, JPG, JPEG, or PNG file.',
+            'documents.*.max' => 'Each document must be ' . AdmissionValidation::uploadLabel() . ' or smaller.',
+            'documents.*.uploaded' => 'The file could not be uploaded. Choose a file no larger than ' . AdmissionValidation::uploadLabel() . '.',
             'education_level.in' => 'Choose an education level that matches your applicant type.',
             'birthdate.before_or_equal' => 'Enter a date of birth that is today or earlier.',
             'region_code.in' => 'Select a valid region from the list.',
@@ -416,11 +523,13 @@ class ApplicationController extends Controller
             'city_code.in' => 'Select a city or municipality that belongs to the chosen area.',
         ]);
 
-        // Never treat browser-submitted geographic labels as authoritative.
+        if (!empty($validated['barangay_code'])) {
+            $validated['barangay'] = collect($locations->barangays($validated['city_code']))
+                ->firstWhere('code', $validated['barangay_code'])['name'];
+        }
+
+        // Catalog selections use canonical names; unmatched text is a manual address.
         if (strcasecmp(trim($validated['country'] ?? 'Philippines'), 'Philippines') === 0) {
-            $validated['region'] = null;
-            $validated['province'] = null;
-            $validated['city'] = null;
 
             if (!empty($validated['region_code'])) {
                 $validated['region'] = $locations->region($validated['region_code'])['name'];
@@ -434,6 +543,7 @@ class ApplicationController extends Controller
                         )['name'];
                     }
                 } elseif (!empty($validated['city_code'])) {
+                    $validated['province'] = null;
                     $directCity = collect($locations->areas($validated['region_code']))
                         ->firstWhere('code', $validated['city_code']);
                     $validated['city'] = $directCity['name'];
@@ -524,7 +634,7 @@ class ApplicationController extends Controller
                     'birth_place' => $validated['birth_place'] ?? null,
 
                     'religion' => $validated['religion'] ?? null,
-                    'nationality' => $validated['nationality'] ?? 'Filipino',
+                    'nationality' => $validated['nationality'] ?? null,
                     'lrn' => $validated['lrn'] ?? null,
                     'marital_status' => $validated['marital_status'] ?? null,
 

@@ -114,7 +114,7 @@
             </div>
             @if($hasEducationDetails)
                 <dl class="application-education-list">
-                    @foreach(['Education level' => $application->education_level, 'Completion status' => $application->education_status, 'Most recent school' => $application->most_recent_school, 'School year' => $application->school_year_completed, 'School location' => $application->school_location, 'SHS strand' => $application->shs_strand, 'Previous or current program' => $application->previous_program, 'Last year level or semester attended' => $application->last_year_level, 'Home institution' => $application->home_institution, 'Home program' => $application->home_program] as $label => $value)
+                    @foreach(['Education level' => $application->education_level, 'Completion status' => $application->education_status, 'Most recent school' => $application->most_recent_school, 'Last School Year Attended' => $application->school_year_completed, 'School location' => $application->school_location, 'SHS strand' => $application->shs_strand, 'Previous or current program' => $application->previous_program, 'Last year level or semester attended' => $application->last_year_level, 'Home institution' => $application->home_institution, 'Home program' => $application->home_program] as $label => $value)
                         @if($value)<div><dt>{{ $label }}</dt><dd>{{ $value }}</dd></div>@endif
                     @endforeach
                 </dl>

@@ -8,6 +8,7 @@ use App\Models\Enrollment;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Models\StudentProfile;
+use App\Models\User;
 use App\Services\NotificationService;
 use App\Support\PrivateFilePreview;
 use Illuminate\Http\Request;
@@ -23,10 +24,21 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $query = Enrollment::where('status', 'approved')
-            ->with(['user', 'program', 'payment']);
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'receipt' => ['nullable', 'integer', 'min:1'],
+            'filter' => ['nullable', 'in:all,walk_in,gcash_pending,verified,rejected,unpaid,refund_follow_up,refunded'],
+        ]);
+        $query = Enrollment::with(['user', 'program', 'payment'])
+            ->where(function ($enrollments) {
+                $enrollments->whereIn('status', ['pending', 'approved'])
+                    ->orWhere(function ($rejected) {
+                        $rejected->where('status', 'rejected')
+                            ->where('is_paid', true)
+                            ->whereHas('payments', fn ($payments) => $payments->where('status', 'verified'));
+                    });
+            });
 
-        $request->validate(['search' => ['nullable', 'string', 'max:100'], 'receipt' => ['nullable', 'integer', 'min:1']]);
         if ($request->filled('search')) {
             $search = trim($request->query('search'));
             $query->where(function ($query) use ($search) {
@@ -36,7 +48,7 @@ class PaymentController extends Controller
             });
         }
 
-        $filter = $request->query('filter', 'all');
+        $filter = $filters['filter'] ?? 'all';
 
         $query = match ($filter) {
             'walk_in'       => $query->whereHas('payment', fn($q) => $q->where('payment_method', 'walk_in')),
@@ -44,10 +56,26 @@ class PaymentController extends Controller
             'verified'      => $query->whereHas('payment', fn($q) => $q->where('status', 'verified')),
             'rejected'      => $query->whereHas('payment', fn($q) => $q->where('status', 'rejected')),
             'unpaid'        => $query->where('is_paid', false)->whereDoesntHave('payment', fn($q) => $q->where('status', 'pending')),
+            'refund_follow_up' => $query->where('status', 'rejected')->whereHas('payments', fn ($q) => $q
+                ->where('status', 'verified')->where('refund_status', 'pending')),
+            'refunded' => $query->where('status', 'rejected')
+                ->whereHas('payments', fn ($q) => $q->where('status', 'verified'))
+                ->whereDoesntHave('payments', fn ($q) => $q
+                    ->where('status', 'verified')->where('refund_status', '!=', 'refunded')),
             default         => $query,
         };
 
         $enrollments = $query->latest()->paginate(\App\Support\TablePagination::perPage(20))->appends($request->except('receipt'));
+        $enrollments->each(function ($row) {
+            $row->has_outstanding_term_payment = Payment::outstandingForTerm($row)->exists();
+            $refundStatuses = Payment::where('enrollment_id', $row->id)
+                ->where('status', 'verified')
+                ->pluck('refund_status');
+            $row->has_verified_payment = $refundStatuses->isNotEmpty();
+            $row->has_pending_refund = $refundStatuses->contains('pending');
+            $row->refunds_fully_confirmed = $refundStatuses->isNotEmpty()
+                && $refundStatuses->every(fn ($status) => $status === 'refunded');
+        });
         $receiptEnrollment = $request->filled('receipt')
             ? Enrollment::whereKey($request->integer('receipt'))->whereIn('id', Payment::select('enrollment_id')->where('status', 'verified'))->first()
             : null;
@@ -64,8 +92,19 @@ class PaymentController extends Controller
         $latestPayment = Payment::where('enrollment_id', $enrollment->id)
             ->latest()
             ->first();
+        $outstandingTermPayments = Payment::outstandingForTerm($enrollment)
+            ->with('enrollment')
+            ->latest()
+            ->get();
+        $verifiedPayments = Payment::where('enrollment_id', $enrollment->id)
+            ->where('status', 'verified')
+            ->with('refundConfirmer')
+            ->oldest()
+            ->get();
+        $refundFullyConfirmed = $verifiedPayments->isNotEmpty()
+            && $verifiedPayments->every(fn ($verifiedPayment) => $verifiedPayment->refundIsComplete());
 
-        return view('cashier.payments.show', compact('enrollment', 'latestPayment'));
+        return view('cashier.payments.show', compact('enrollment', 'latestPayment', 'verifiedPayments', 'outstandingTermPayments', 'refundFullyConfirmed'));
     }
 
     // ── store() — walk-in ─────────────────────────────────────────
@@ -76,14 +115,22 @@ class PaymentController extends Controller
         $receiptNo = 'OR-' . date('Ymd') . '-' . Str::upper(Str::random(5));
 
         DB::transaction(function () use ($enrollment, $amount, $receiptNo) {
+            User::whereKey($enrollment->user_id)->lockForUpdate()->firstOrFail();
             $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
 
-            if ($lockedEnrollment->status !== 'approved') {
-                throw ValidationException::withMessages(['payment' => 'Only approved enrollments can be paid.']);
+            if (! in_array($lockedEnrollment->status, ['pending', 'approved'], true)) {
+                throw ValidationException::withMessages(['payment' => 'This enrollment is not eligible for payment.']);
             }
 
             if ($lockedEnrollment->is_paid) {
                 throw ValidationException::withMessages(['payment' => 'This enrollment is already paid.']);
+            }
+
+            if (Payment::unresolvedRefundsForTerm($lockedEnrollment)->exists()) {
+                throw ValidationException::withMessages(['payment' => 'A previous verified payment for this academic term has not been refunded. No new payment can be recorded until the Cashier confirms the refund.']);
+            }
+            if (Payment::outstandingForTerm($lockedEnrollment)->exists()) {
+                throw ValidationException::withMessages(['payment' => 'Another payment for this academic term is already pending or verified. Contact the Cashier to resolve it before recording another payment.']);
             }
 
             $attempts = Payment::where('enrollment_id', $lockedEnrollment->id)
@@ -126,23 +173,31 @@ class PaymentController extends Controller
 
             $lockedEnrollment->update(['is_paid' => true]);
 
-            if ($user->hasRole('new_applicant')) {
+            if ($user->hasRole('new_applicant') && $lockedEnrollment->status === 'approved') {
                 $user->syncRoles(['student']);
                 \App\Services\StudentWelcome::record($user);
-            } elseif (! $user->hasAnyRole(['student', 'alumni', 'admin', 'registrar', 'cashier'])) {
+            } elseif ($lockedEnrollment->status === 'approved' && ! $user->hasAnyRole(['student', 'alumni', 'admin', 'registrar', 'cashier'])) {
                 $user->assignRole('student');
             }
 
-            static::createStudentProfileIfMissing($user, $lockedEnrollment);
+            if ($lockedEnrollment->status === 'approved') {
+                StudentProfile::createForEnrollmentIfMissing($user, $lockedEnrollment);
+            }
         });
 
         $payment = Payment::where('enrollment_id', $enrollment->id)->latest()->first();
+        $awaitingRegistrarReview = $enrollment->fresh()->status === 'pending';
+        if ($awaitingRegistrarReview) {
+            $this->notifyRegistrarEnrollmentReady($enrollment->fresh());
+        }
 
         NotificationService::sendUserUpdateSafely(
             $enrollment->user,
             'enrollment-payment-recorded:'.$payment->id,
             'Payment Confirmed',
-            "Your enrollment payment of ₱{$amount} has been recorded. Receipt: {$receiptNo}.",
+            $awaitingRegistrarReview
+                ? "Your enrollment payment of ₱{$amount} has been recorded. It is now awaiting Registrar review. Receipt: {$receiptNo}."
+                : "Your enrollment payment of ₱{$amount} has been recorded. Receipt: {$receiptNo}.",
             'success',
             route('portal.enrollment.payment-info', $enrollment),
             'View payment record'
@@ -151,7 +206,9 @@ class PaymentController extends Controller
             NotificationService::send($admin, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", 'info', route('cashier.payments.index', ['receipt' => $enrollment->id]));
         }
         foreach (\App\Models\User::role('registrar')->get() as $reg) {
-            NotificationService::send($reg, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", 'info', route('registrar.enrollments.show', $enrollment));
+            if (! $awaitingRegistrarReview) {
+                NotificationService::send($reg, 'Payment Recorded', "Walk-in payment recorded for {$enrollment->user->name}.", 'info', route('registrar.enrollments.show', $enrollment));
+            }
         }
 
         return redirect()->route('cashier.payments.index')
@@ -170,7 +227,11 @@ class PaymentController extends Controller
         $receiptNo = 'OR-' . date('Ymd') . '-' . Str::upper(Str::random(5));
         $amount    = $payment->amount;
 
-        DB::transaction(function () use ($payment, $receiptNo) {
+        $userId = Enrollment::whereKey($payment->enrollment_id)->value('user_id');
+        abort_unless($userId, 404);
+
+        DB::transaction(function () use ($payment, $receiptNo, $userId) {
+            User::whereKey($userId)->lockForUpdate()->firstOrFail();
             $lockedEnrollment = Enrollment::whereKey($payment->enrollment_id)->lockForUpdate()->firstOrFail();
             $lockedPayment = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
 
@@ -178,8 +239,15 @@ class PaymentController extends Controller
                 abort(422, 'This payment is no longer eligible for verification.');
             }
 
-            if ($lockedEnrollment->status !== 'approved' || $lockedEnrollment->is_paid) {
+            if (! in_array($lockedEnrollment->status, ['pending', 'approved'], true) || $lockedEnrollment->is_paid) {
                 abort(422, 'This enrollment is no longer eligible for payment verification.');
+            }
+
+            if (Payment::unresolvedRefundsForTerm($lockedEnrollment)->exists()) {
+                throw ValidationException::withMessages(['payment' => 'A previous verified payment for this academic term has not been refunded. Resolve the refund before verifying another payment.']);
+            }
+            if (Payment::outstandingForTerm($lockedEnrollment)->exists()) {
+                throw ValidationException::withMessages(['payment' => 'Another payment for this academic term is already pending or verified. Resolve the other payment before verifying this one.']);
             }
 
             if (Payment::where('enrollment_id', $lockedEnrollment->id)
@@ -209,23 +277,32 @@ class PaymentController extends Controller
                 if (! $approvedApplicationExists) {
                     abort(422, 'This applicant does not have an approved application for the enrollment program.');
                 }
+            }
 
+            if ($user->hasRole('new_applicant') && $lockedEnrollment->status === 'approved') {
                 $user->syncRoles(['student']);
                 \App\Services\StudentWelcome::record($user);
-            } elseif (! $user->hasAnyRole(['student', 'alumni', 'admin', 'registrar', 'cashier'])) {
+            } elseif ($lockedEnrollment->status === 'approved' && ! $user->hasAnyRole(['student', 'alumni', 'admin', 'registrar', 'cashier'])) {
                 $user->assignRole('student');
             }
 
-            static::createStudentProfileIfMissing($user, $lockedEnrollment);
+            if ($lockedEnrollment->status === 'approved') {
+                StudentProfile::createForEnrollmentIfMissing($user, $lockedEnrollment);
+            }
         });
 
         $enrollment = $payment->fresh()->enrollment;
+        if ($enrollment->status === 'pending') {
+            $this->notifyRegistrarEnrollmentReady($enrollment);
+        }
 
         NotificationService::sendUserUpdateSafely(
             $enrollment->user,
             'enrollment-payment-verified:'.$payment->id,
             'GCash Payment Verified',
-            "Your GCash payment of ₱{$amount} has been verified. Receipt: {$receiptNo}.",
+            $enrollment->status === 'pending'
+                ? "Your GCash payment of ₱{$amount} has been verified. Your enrollment is now awaiting Registrar review. Receipt: {$receiptNo}."
+                : "Your GCash payment of ₱{$amount} has been verified. Receipt: {$receiptNo}.",
             'success',
             route('portal.enrollment.payment-info', $enrollment),
             'View payment record'
@@ -248,7 +325,11 @@ class PaymentController extends Controller
             'remarks' => ['required', 'string', 'max:1000'],
         ]);
 
-        $enrollment = DB::transaction(function () use ($payment, $validated) {
+        $userId = Enrollment::whereKey($payment->enrollment_id)->value('user_id');
+        abort_unless($userId, 404);
+
+        $enrollment = DB::transaction(function () use ($payment, $validated, $userId) {
+            User::whereKey($userId)->lockForUpdate()->firstOrFail();
             $lockedEnrollment = Enrollment::whereKey($payment->enrollment_id)->lockForUpdate()->firstOrFail();
             $lockedPayment = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
 
@@ -279,6 +360,61 @@ class PaymentController extends Controller
 
         return redirect()->route('cashier.payments.show', $enrollment)
             ->with('success', 'Payment rejected. Applicant has been notified.');
+    }
+
+    public function confirmRefund(Request $request, Payment $payment)
+    {
+        $validated = $request->validate([
+            'refund_amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0'],
+            'refund_reference' => ['required', 'string', 'max:255', 'not_regex:/^\s*$/'],
+        ]);
+        $userId = Enrollment::whereKey($payment->enrollment_id)->value('user_id');
+        abort_unless($userId, 404);
+
+        $payment = DB::transaction(function () use ($payment, $validated, $userId) {
+            User::whereKey($userId)->lockForUpdate()->firstOrFail();
+            $enrollment = Enrollment::whereKey($payment->enrollment_id)->lockForUpdate()->firstOrFail();
+            $lockedPayment = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
+
+            if ($enrollment->status !== 'rejected'
+                || ! $enrollment->is_paid
+                || $lockedPayment->enrollment_id !== $enrollment->id
+                || ! $lockedPayment->isVerified()
+                || ! $lockedPayment->refundIsPending()) {
+                throw ValidationException::withMessages([
+                    'refund_reference' => 'Only a verified payment with a pending refund for a rejected enrollment can be marked refunded.',
+                ]);
+            }
+
+            if (number_format((float) $validated['refund_amount'], 2, '.', '') !== number_format((float) $lockedPayment->amount, 2, '.', '')) {
+                throw ValidationException::withMessages([
+                    'refund_amount' => 'Only a full refund equal to the verified payment amount can be confirmed. Partial refunds do not release the payment block.',
+                ]);
+            }
+
+            $lockedPayment->update([
+                'refund_status' => 'refunded',
+                'refund_amount' => $validated['refund_amount'],
+                'refund_reference' => trim($validated['refund_reference']),
+                'refunded_by' => Auth::id(),
+                'refunded_at' => now(),
+            ]);
+
+            return $lockedPayment->fresh(['enrollment.user']);
+        });
+
+        NotificationService::sendUserUpdateSafely(
+            $payment->enrollment->user,
+            'enrollment-refund-confirmed:'.$payment->id,
+            'Refund Confirmed',
+            'The Cashier recorded confirmation of the refund for your rejected enrollment. You may submit a new enrollment request for this academic term.',
+            'success',
+            route('portal.enrollment.index'),
+            'View enrollment status'
+        );
+
+        return redirect()->route('cashier.payments.show', $payment->enrollment)
+            ->with('success', 'Refund confirmation recorded. The original verified payment and receipt remain in the audit history.');
     }
 
     // ── viewProof() ───────────────────────────────────────────────
@@ -327,44 +463,18 @@ class PaymentController extends Controller
         return redirect()->route('cashier.payments.index', ['receipt' => $enrollment->id]);
     }
 
-    // ── createStudentProfileIfMissing ─────────────────────────────
-    //
-    // Called on both walk-in and GCash payment confirmation — the two
-    // points at which a new_applicant becomes a student.
-    //
-    // Sets enrolled_ay from the enrollment's school_year so the student's
-    // first AY is permanently anchored in student_profiles without
-    // requiring any manual input.
-    //
-    // This is idempotent — safe to call even if a profile already exists.
-
-    private static function createStudentProfileIfMissing(
-        \App\Models\User $user,
-        Enrollment $enrollment
-    ): void {
-        if ($user->studentProfile()->exists()) {
-            return;
+    private function notifyRegistrarEnrollmentReady(Enrollment $enrollment): void
+    {
+        foreach (\App\Models\User::role(['registrar', 'admin'])->get() as $registrar) {
+            NotificationService::sendForEvent(
+                $registrar,
+                'enrollment-paid-awaiting-registrar:'.$enrollment->id,
+                'Enrollment Ready for Review',
+                $enrollment->user->name . "'s payment is verified. Review the selected subjects before approving enrollment.",
+                'info',
+                route('registrar.enrollments.index', ['review' => $enrollment->id])
+            );
         }
-
-        $application = Application::where('user_id', $user->id)
-            ->where('status', 'approved')
-            ->latest()
-            ->first();
-
-        $admissionType = $application?->academic_status ?? 'new_student';
-
-        StudentProfile::create([
-            'user_id'        => $user->id,
-            'student_number' => StudentProfile::generateStudentNumber(),
-            'lrn'            => $application?->lrn,
-            'admission_type' => $admissionType,
-            'gender'         => $application?->gender,
-            'birthdate'      => $application?->birthdate,
-            'phone'          => $application?->phone,
-            'address'        => $application?->current_address ?? $application?->address,
-            'program_id'     => $enrollment->program_id,
-            // ── New: anchor the AY at the moment of first payment ───────
-            'enrolled_ay'    => $enrollment->school_year,
-        ]);
     }
+
 }

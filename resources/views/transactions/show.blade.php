@@ -46,6 +46,14 @@
         <div><dt>Reference no.</dt><dd class="dtc-payment-reference">{{ $transaction->reference ?: '—' }}</dd></div>
         <div><dt>Recorded</dt><dd>{{ $fmt($transaction->occurred_at) ?? '—' }}</dd></div>
         <div><dt>Verified</dt><dd>{{ $fmt($transaction->verified_at) ?? 'Not yet' }}</dd></div>
+        @if(in_array($transaction->refund_status, ['pending', 'refunded'], true))
+            <div><dt>Refund status</dt><dd>{{ $transaction->refund_status === 'refunded' ? 'Full refund confirmed' : 'Refund pending confirmation' }}</dd></div>
+            @if($transaction->refund_reference)<div><dt>External refund reference</dt><dd class="dtc-payment-reference">{{ $transaction->refund_reference }}</dd></div>@endif
+            @if($transaction->refund_status === 'refunded')
+                <div><dt>Refund amount</dt><dd>₱{{ number_format((float) $transaction->refund_amount, 2) }}</dd></div>
+                <div><dt>Refund confirmed</dt><dd>{{ $fmt($transaction->refunded_at) ?? '—' }}@if($isStaff && $transaction->refund_confirmer)<small>{{ $transaction->refund_confirmer }}</small>@endif</dd></div>
+            @endif
+        @endif
         @if($canSeeProcessor)
             <div><dt>Processed by</dt><dd>{{ $transaction->staff_name ?: '—' }}</dd></div>
         @endif

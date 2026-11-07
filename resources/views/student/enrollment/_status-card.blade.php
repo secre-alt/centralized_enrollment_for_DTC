@@ -3,12 +3,17 @@
     $isApproved = $enrollment->status === 'approved';
     $isEnrolled = $isApproved && $enrollment->is_paid;
     $isRejected = $enrollment->status === 'rejected';
-    $isEnrollmentReview = $enrollment->status === 'pending';
-    $isPaymentReview = $isApproved && !$enrollment->is_paid && $payment && $payment->status === 'pending';
-    $isPaymentRejected = $isApproved && !$enrollment->is_paid && $payment && $payment->status === 'rejected';
-    $isPaymentDue = $isApproved && !$enrollment->is_paid && !$isPaymentReview;
-    $state = $isEnrolled ? 'success' : ($isRejected ? 'danger' : (($isEnrollmentReview || $isPaymentReview) ? 'info' : ($isPaymentDue ? 'warning' : 'neutral')));
-    $paymentStep = $isEnrolled ? 'done' : ($isApproved ? 'current' : 'upcoming');
+    $refundFullyConfirmed = $isRejected && $enrollment->is_paid && (bool) ($enrollment->refund_fully_confirmed ?? false);
+    $canPay = in_array($enrollment->status, ['pending', 'approved'], true);
+    $isRegistrarReview = $enrollment->status === 'pending' && $enrollment->is_paid;
+    $isPaymentReview = $canPay && !$enrollment->is_paid && $payment && $payment->status === 'pending';
+    $isPaymentRejected = $canPay && !$enrollment->is_paid && $payment && $payment->status === 'rejected';
+    $isPaymentMismatch = $canPay && !$enrollment->is_paid && $payment && $payment->status === 'verified';
+    $hasOutstandingTermPayment = $canPay && !$enrollment->is_paid && (bool) ($enrollment->has_outstanding_term_payment ?? false);
+    $isPaymentDue = $canPay && !$enrollment->is_paid && !$isPaymentReview && !$isPaymentRejected && !$isPaymentMismatch && !$hasOutstandingTermPayment;
+    $state = $isEnrolled ? 'success' : ($isRejected ? 'danger' : (($isRegistrarReview || $isPaymentReview) ? 'info' : (($isPaymentDue || $isPaymentRejected || $isPaymentMismatch || $hasOutstandingTermPayment) ? 'warning' : 'neutral')));
+    $paymentStep = $enrollment->is_paid ? 'done' : ($canPay ? 'current' : 'upcoming');
+    $registrarStep = $isApproved ? 'done' : ($isRegistrarReview ? 'current' : 'upcoming');
     $enrolledStep = $isEnrolled ? 'done' : 'upcoming';
 @endphp
 
@@ -36,10 +41,12 @@
                 Payment action needed
             @elseif($isPaymentReview)
                 In review
-            @elseif($isEnrollmentReview)
+            @elseif($isRegistrarReview)
                 In review
             @elseif($isPaymentDue)
                 Payment due
+            @elseif($hasOutstandingTermPayment)
+                Reconciliation needed
             @elseif($isRejected)
                 Rejected
             @else
@@ -76,7 +83,20 @@
                 </span>
                 <span class="dtc-enrollment-progress-copy">
                     <strong>Payment</strong>
-                    <span>{{ $isEnrolled ? 'Confirmed' : ($isPaymentReview ? 'Verifying' : ($isPaymentRejected ? 'Action needed' : ($isApproved ? 'Awaiting' : 'Not yet'))) }}</span>
+                    <span>{{ $enrollment->is_paid ? 'Confirmed' : ($isPaymentReview ? 'Verifying' : ($isPaymentRejected ? 'Action needed' : ($hasOutstandingTermPayment ? 'Blocked' : ($isPaymentMismatch ? 'Confirm with Cashier' : ($canPay ? 'Payment needed' : 'Not yet'))))) }}</span>
+                </span>
+            </li>
+            <li class="dtc-enrollment-progress-step is-{{ $registrarStep }} {{ $isApproved ? 'has-complete-connector' : '' }}" @if($registrarStep === 'current') aria-current="step" @endif>
+                <span class="dtc-enrollment-progress-marker" aria-hidden="true">
+                    @if($registrarStep === 'done')
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg>
+                    @else
+                        <span></span>
+                    @endif
+                </span>
+                <span class="dtc-enrollment-progress-copy">
+                    <strong>Registrar review</strong>
+                    <span>{{ $isApproved ? 'Approved' : ($isRegistrarReview ? 'Reviewing' : ($isRejected ? 'Rejected' : 'After payment')) }}</span>
                 </span>
             </li>
             <li class="dtc-enrollment-progress-step is-{{ $enrolledStep }}" @if($enrolledStep === 'done') aria-current="step" @endif>
@@ -96,12 +116,12 @@
     </div>
 
     <div class="dtc-enrollment-callout-zone">
-        <div class="dtc-enrollment-callout is-{{ $state }} {{ $isEnrolled ? 'is-enrolled' : '' }}" @if($isRejected || $isPaymentRejected) role="alert" @else role="status" @endif>
+        <div class="dtc-enrollment-callout is-{{ $state }} {{ $isEnrolled ? 'is-enrolled' : '' }}" @if($isRejected || $isPaymentRejected || $isPaymentMismatch) role="alert" @else role="status" @endif>
             @unless($isEnrolled)
                 <span class="dtc-icon-swatch dtc-enrollment-callout-icon" aria-hidden="true">
                     @if($isRejected || $isPaymentRejected)
                     <i data-lucide="circle-alert"></i>
-                    @elseif($isEnrollmentReview || $isPaymentReview)
+                    @elseif($isRegistrarReview || $isPaymentReview)
                     <i data-lucide="clock-3"></i>
                     @else
                     <i data-lucide="wallet"></i>
@@ -114,19 +134,25 @@
                     <span>You are officially enrolled for this semester.</span>
                 @elseif($isRejected)
                     <strong>Enrollment needs attention</strong>
-                    <span>{{ $enrollment->remarks ?: 'Contact the Registrar for guidance before submitting again.' }}</span>
+                    <span>{{ $enrollment->remarks ?: 'Contact the Registrar for guidance.' }}@if($enrollment->is_paid) @if($refundFullyConfirmed) The Cashier confirmed the full refund; you may submit a fresh enrollment request for this term.@else Payment was already collected. Contact the Cashier to arrange and confirm a full refund before paying again.@endif @endif</span>
                 @elseif($isPaymentRejected)
                     <strong>Payment proof needs correction</strong>
                     <span>{{ $payment->rejection_reason ?: 'Review your payment details and submit corrected proof.' }}</span>
-                @elseif($isEnrollmentReview)
-                    <strong>Registrar review in progress</strong>
-                    <span>We’ll notify you when the status changes.</span>
+                @elseif($isPaymentMismatch)
+                    <strong>Payment record needs confirmation</strong>
+                    <span>A verified payment exists, but this enrollment is not marked paid. Contact the Cashier before making another payment.</span>
+                @elseif($hasOutstandingTermPayment)
+                    <strong>Payment blocked pending reconciliation</strong>
+                    <span>A verified or pending payment already exists for this academic term. Contact the Cashier to resolve the existing payment or refund before paying again.</span>
                 @elseif($isPaymentReview)
                     <strong>Payment under review</strong>
                     <span>The Cashier is checking your payment. No action needed.</span>
+                @elseif($isRegistrarReview)
+                    <strong>Registrar review in progress</strong>
+                    <span>Your payment is confirmed. The Registrar is reviewing your selected subjects.</span>
                 @elseif($isPaymentDue)
-                    <strong>Payment needed</strong>
-                    <span>Your enrollment is approved. Complete payment to finish enrollment.</span>
+                    <strong>Payment needed first</strong>
+                    <span>Pay the enrollment fee at the Cashier or submit GCash proof. Registrar review begins after payment is verified.</span>
                 @else
                     <strong>Status unavailable</strong>
                     <span>Please contact the Registrar for help with this enrollment.</span>
@@ -143,15 +169,30 @@
                     <i data-lucide="rotate-ccw" aria-hidden="true"></i>
                     Review and resubmit proof
                 </a>
+            @elseif($isPaymentMismatch)
+                <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}" class="dtc-btn dtc-btn-primary dtc-enrollment-callout-action">
+                    <i data-lucide="wallet" aria-hidden="true"></i>
+                    View payment details
+                </a>
+            @elseif($hasOutstandingTermPayment)
+                <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}" class="dtc-btn dtc-btn-primary dtc-enrollment-callout-action">
+                    <i data-lucide="wallet" aria-hidden="true"></i>
+                    Review payment reconciliation
+                </a>
             @elseif($isPaymentDue)
                 <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}" class="dtc-btn dtc-btn-primary dtc-enrollment-callout-action">
                     <i data-lucide="wallet" aria-hidden="true"></i>
                     Pay tuition balance
                 </a>
-            @elseif($isRejected)
+            @elseif($isRejected && !$enrollment->is_paid)
                 <a href="{{ route('portal.enrollment.create') }}" class="dtc-btn dtc-btn-primary dtc-enrollment-callout-action">
                     <i data-lucide="rotate-ccw" aria-hidden="true"></i>
                     Correct enrollment
+                </a>
+            @elseif($isRejected && $enrollment->is_paid)
+                <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}" class="dtc-btn dtc-btn-primary dtc-enrollment-callout-action">
+                    <i data-lucide="wallet" aria-hidden="true"></i>
+                    {{ $refundFullyConfirmed ? 'View refund confirmation' : 'View payment details' }}
                 </a>
             @elseif($isPaymentReview && $payment->proof_of_payment)
                 <a href="{{ route('portal.enrollment.payment.proof', $payment) }}" target="_blank" rel="noopener" class="dtc-enrollment-proof-link">

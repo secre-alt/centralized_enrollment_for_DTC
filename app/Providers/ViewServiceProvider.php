@@ -134,10 +134,7 @@ class ViewServiceProvider extends ServiceProvider
                     ]],
                     ['text' => 'Payment History', 'url' => route('portal.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^portal/transactions(?:/|$)#']],
 
-                    ['text' => 'Appointments', 'icon' => 'calendar', 'submenu' => [
-                        ['text' => 'Book Appointment', 'url' => route('portal.appointments.create'), 'icon' => 'plus'],
-                        ['text' => 'My Appointments',  'url' => route('portal.appointments.index'),  'icon' => 'list'],
-                    ]],
+                    ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
                     ['text' => 'Certificate of Registration', 'url' => route('portal.cor.show'), 'icon' => 'file-badge'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
@@ -178,6 +175,28 @@ class ViewServiceProvider extends ServiceProvider
             if ($sidebar !== []) {
                 $sidebar[] = ['text' => 'Help Center', 'url' => route('help.index'), 'icon' => 'question-circle'];
             }
+
+            foreach ($sidebar as &$menuItem) {
+                if (isset($menuItem['header'])) {
+                    $menuItem['header'] = __('ui.navigation.headers.' . $menuItem['header']);
+                }
+                if (isset($menuItem['text'])) {
+                    $translated = __('ui.navigation.labels.' . $menuItem['text']);
+                    $menuItem['text'] = $translated === 'ui.navigation.labels.' . $menuItem['text']
+                        ? $menuItem['text']
+                        : $translated;
+                }
+                if (isset($menuItem['submenu'])) {
+                    foreach ($menuItem['submenu'] as &$submenuItem) {
+                        $translated = __('ui.navigation.labels.' . $submenuItem['text']);
+                        $submenuItem['text'] = $translated === 'ui.navigation.labels.' . $submenuItem['text']
+                            ? $submenuItem['text']
+                            : $translated;
+                    }
+                    unset($submenuItem);
+                }
+            }
+            unset($menuItem);
 
             $workCounts = app(\App\Services\SidebarWorkCounts::class)->forUser($user);
             foreach ($sidebar as &$menuItem) {

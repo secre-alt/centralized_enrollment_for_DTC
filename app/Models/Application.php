@@ -348,7 +348,7 @@ class Application extends Model
         $step = [
             'key' => 'enrollment',
             'label' => 'Enrollment and payment',
-            'description' => 'Activate your account, submit an enrollment request, and complete payment after Registrar approval.',
+            'description' => 'Activate your account, submit an enrollment request, pay the fee, and wait for Cashier verification before Registrar review.',
             'status' => 'current',
             'timestamp' => null,
         ];
@@ -358,17 +358,34 @@ class Application extends Model
         }
 
         if ($enrollment->status === 'rejected') {
-            $step['description'] = 'Your enrollment request was not approved. Sign in to review the Registrar remarks and contact the Registrar for guidance.';
+            $step['description'] = match ($this->enrollmentRefundStatus($enrollment)) {
+                'pending' => 'Your paid enrollment was rejected. Sign in to review the Registrar remarks and contact the Cashier to arrange and confirm the full refund before paying again.',
+                'refunded' => 'The Cashier confirmed the full refund for your rejected enrollment. Sign in to submit a fresh enrollment request for this term.',
+                'unknown' => 'Your paid enrollment was rejected, but its payment record needs reconciliation. Contact the Cashier before making another payment.',
+                default => 'Your enrollment request was not approved. Sign in to review the Registrar remarks and contact the Registrar for guidance.',
+            };
             $step['status'] = 'action_required';
             return $step;
         }
 
+        $payment = $enrollment->payment;
         if ($enrollment->status === 'pending') {
-            $step['description'] = 'Your enrollment request is awaiting Registrar review.';
+            if ($enrollment->is_paid && $payment?->status === 'verified') {
+                $step['description'] = 'Your payment is verified. The Registrar is reviewing your selected subjects.';
+            } elseif ($payment?->status === 'pending') {
+                $step['description'] = 'Your payment proof is awaiting Cashier verification.';
+            } elseif ($payment?->status === 'rejected') {
+                $step['description'] = 'Your payment proof was rejected. Sign in to review the reason and submit corrected proof.';
+                $step['status'] = 'action_required';
+            } elseif ($payment?->status === 'verified') {
+                $step['description'] = 'A verified payment record exists, but enrollment is not marked paid. Contact the Cashier before making another payment.';
+                $step['status'] = 'action_required';
+            } else {
+                $step['description'] = 'Pay the enrollment fee or submit GCash proof. Registrar review begins after the Cashier verifies payment.';
+            }
             return $step;
         }
 
-        $payment = $enrollment->payment;
         if ($enrollment->status === 'approved' && $payment?->status === 'verified' && !$enrollment->is_paid) {
             $step['description'] = 'A verified payment record exists, but enrollment is not marked paid. Contact the Cashier to confirm the record before making another payment.';
             $step['status'] = 'action_required';
@@ -388,7 +405,7 @@ class Application extends Model
 
         if ($this->isEnrollmentComplete($enrollment)) {
             $step['label'] = 'Enrollment and payment complete';
-            $step['description'] = 'The Registrar approved your enrollment and the Cashier verified payment. Your student record was created.';
+            $step['description'] = 'The Cashier verified payment and the Registrar approved your enrollment. Your student record was created.';
             $step['status'] = 'completed';
             $step['timestamp'] = $payment?->verified_at;
             return $step;
@@ -457,11 +474,28 @@ class Application extends Model
         }
 
         if ($enrollment->status === 'pending') {
-            return 'Your enrollment request is awaiting Registrar review. Monitor the student portal for the result.';
+            if ($enrollment->is_paid && $enrollment->payment?->status === 'verified') {
+                return 'Your payment is verified and your selected subjects are awaiting Registrar review.';
+            }
+            if ($enrollment->payment?->status === 'pending') {
+                return 'Your payment proof is awaiting Cashier verification. Monitor the student portal for an update.';
+            }
+            if ($enrollment->payment?->status === 'rejected') {
+                return 'Sign in to review the Cashier’s feedback and submit corrected payment proof.';
+            }
+            if ($enrollment->payment?->status === 'verified') {
+                return 'A verified payment record exists, but enrollment is not marked paid. Contact the Cashier before making another payment.';
+            }
+            return 'Pay the enrollment fee first. Registrar review begins after the Cashier verifies payment.';
         }
 
         if ($enrollment->status === 'rejected') {
-            return 'Sign in to review the Registrar remarks on your enrollment request and contact the Registrar for guidance.';
+            return match ($this->enrollmentRefundStatus($enrollment)) {
+                'pending' => 'Sign in to review the Registrar remarks and contact the Cashier to arrange and confirm the full refund before paying again.',
+                'refunded' => 'The Cashier confirmed the full refund. Sign in to submit a fresh enrollment request for this term.',
+                'unknown' => 'The paid enrollment’s payment record needs reconciliation. Contact the Cashier before making another payment.',
+                default => 'Sign in to review the Registrar remarks on your enrollment request and contact the Registrar for guidance.',
+            };
         }
 
         if ($enrollment->status === 'approved' && $enrollment->payment?->status === 'pending') {
@@ -481,5 +515,22 @@ class Application extends Model
         }
 
         return 'Your enrollment is not fully confirmed yet. Sign in to the portal or contact the Registrar or Cashier for assistance.';
+    }
+
+    private function enrollmentRefundStatus(Enrollment $enrollment): string
+    {
+        if (! $enrollment->is_paid) {
+            return 'not_paid';
+        }
+
+        $refundStatuses = \App\Models\Payment::where('enrollment_id', $enrollment->id)
+            ->where('status', 'verified')
+            ->pluck('refund_status');
+
+        if ($refundStatuses->isEmpty()) {
+            return 'unknown';
+        }
+
+        return $refundStatuses->every(fn ($status) => $status === 'refunded') ? 'refunded' : 'pending';
     }
 }

@@ -149,12 +149,25 @@ class SettingsController extends Controller
     public function updateAcademic(Request $request)
     {
         $request->validate([
-            'current_school_year' => ['required', 'string', 'max:20'],
+            'current_school_year' => [
+                'required',
+                'string',
+                'regex:/^[0-9]{4}-[0-9]{4}$/D',
+                function ($attribute, $value, $fail) {
+                    if (is_string($value)
+                        && preg_match('/^([0-9]{4})-([0-9]{4})$/D', $value, $matches) === 1
+                        && (int) $matches[2] !== (int) $matches[1] + 1) {
+                        $fail('The ending year must be one year after the starting year.');
+                    }
+                },
+            ],
             'current_semester'    => ['required', 'in:1st,2nd,Summer'],
             'semester_starts_on'  => ['nullable', 'required_with:semester_ends_on', 'date'],
             'semester_ends_on'    => ['nullable', 'required_with:semester_starts_on', 'date', 'after_or_equal:semester_starts_on'],
             'enrollment_open'     => ['nullable'],
             'registrar_name'      => ['nullable', 'string', 'max:255'],
+        ], [
+            'current_school_year.regex' => 'Enter the current academic year in YYYY-YYYY format.',
         ]);
 
         Setting::updateOrCreate(['key' => 'current_school_year'], ['value' => $request->current_school_year]);

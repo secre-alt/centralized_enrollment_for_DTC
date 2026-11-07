@@ -94,6 +94,7 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::prefix('apply')->name('public.application.')->group(function () {
         Route::get('/', [ApplicationController::class, 'create'])->name('create');
         Route::get('/locations/regions', [\App\Http\Controllers\Public\ApplicationLocationController::class, 'regions'])->name('locations.regions');
+        Route::get('/locations/cities/{city}/barangays', [\App\Http\Controllers\Public\ApplicationLocationController::class, 'barangays'])->whereNumber('city')->name('locations.barangays');
         Route::get('/locations/regions/{region}/areas', [\App\Http\Controllers\Public\ApplicationLocationController::class, 'areas'])->whereNumber('region')->name('locations.areas');
         Route::get('/locations/provinces/{province}/cities', [\App\Http\Controllers\Public\ApplicationLocationController::class, 'cities'])->whereNumber('province')->name('locations.cities');
         Route::post('/', [ApplicationController::class, 'store'])->middleware('throttle:application-submission')->name('store');
@@ -123,6 +124,7 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::middleware('role:admin|registrar|cashier')->group(function () {
         Route::get('/profile',           [ProfileController::class, 'show'])->name('profile.show');
         Route::post('/profile',          [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/language', [ProfileController::class, 'updateLanguage'])->name('profile.language.update');
         Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
         Route::delete('/profile/avatar', [ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
     });
@@ -260,6 +262,7 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
     Route::post('/payments/{payment}/verify', [CashierPaymentController::class, 'verify'])->name('payments.verify');
     Route::post('/payments/{payment}/reject', [CashierPaymentController::class, 'reject'])->name('payments.reject');
+    Route::post('/payments/{payment}/confirm-refund', [CashierPaymentController::class, 'confirmRefund'])->middleware('role:cashier')->name('payments.confirm-refund');
 
     Route::get('/document-payments', [CashierDocumentPaymentController::class, 'index'])->name('document-payments.index');
     Route::get('/document-payments/{documentRequest}', [CashierDocumentPaymentController::class, 'show'])->name('document-payments.show');
@@ -327,6 +330,7 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     // ── PROFILE SETTINGS (Student / Alumni / New Applicant) ──────────────────
     Route::get('/profile',          [ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile',          [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/language', [ProfileController::class, 'updateLanguage'])->name('profile.language.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::delete('/profile/avatar',[ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
 });

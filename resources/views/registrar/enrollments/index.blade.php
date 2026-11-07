@@ -7,7 +7,7 @@
     <div>
         <h4 class="mb-0 font-weight-bold u-text" >Pending Enrollments</h4>
         <p class="mb-0 u-text-secondary-sm" >
-            Enrollment submissions awaiting registrar approval.
+            Payment-verified enrollments awaiting your subject review.
         </p>
     </div>
 @endsection
@@ -46,7 +46,7 @@
 {{-- Enrollments Table --}}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span class="font-weight-bold u-text" >All Pending Enrollments</span>
+        <span class="font-weight-bold u-text" >Awaiting Registrar Review</span>
         <span  class="u-text-secondary-sm">{{ $enrollments->total() }} total</span>
     </div>
 
@@ -113,7 +113,7 @@
                 @empty
                 <tr>
                     <td colspan="7" class="text-center py-4 u-text-muted" >
-                        No pending enrollments.
+                        No payment-verified enrollments are awaiting review.
                     </td>
                 </tr>
                 @endforelse

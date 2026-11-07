@@ -55,17 +55,17 @@ class CashierPaymentFlowTest extends TestCase
     }
 
     /** @test */
-    public function walk_in_payment_notifications_link_to_pages_each_staff_role_can_open()
+    public function walk_in_payment_notifies_the_registrar_only_after_payment_is_recorded()
     {
         $cashier = $this->makeUserWithRole('cashier');
         $registrar = $this->makeUserWithRole('registrar');
         $admin = $this->makeUserWithRole('admin');
-        $enrollment = Enrollment::factory()->create(['status' => 'approved', 'is_paid' => false]);
+        $enrollment = Enrollment::factory()->pending()->create(['is_paid' => false]);
 
         $this->actingAs($cashier)->post(route('cashier.payments.store', $enrollment));
 
-        $registrarNotice = UserNotification::where('user_id', $registrar->id)->where('title', 'Payment Recorded')->firstOrFail();
-        $this->assertSame(route('registrar.enrollments.show', $enrollment), $registrarNotice->link);
+        $registrarNotice = UserNotification::where('user_id', $registrar->id)->where('title', 'Enrollment Ready for Review')->firstOrFail();
+        $this->assertSame(route('registrar.enrollments.index', ['review' => $enrollment->id]), $registrarNotice->link);
         $this->actingAs($registrar)->get($registrarNotice->link)->assertOk();
 
         $this->assertSame(1, UserNotification::where('user_id', $admin->id)->where('title', 'Payment Recorded')->count());
@@ -88,17 +88,17 @@ class CashierPaymentFlowTest extends TestCase
     }
 
     /** @test */
-    public function walk_in_payment_is_rejected_until_enrollment_is_approved()
+    public function cashier_can_record_walk_in_payment_before_registrar_approval()
     {
         $cashier = $this->makeUserWithRole('cashier');
         $enrollment = Enrollment::factory()->pending()->create(['is_paid' => false]);
 
         $this->actingAs($cashier)
             ->post(route('cashier.payments.store', $enrollment))
-            ->assertSessionHasErrors('payment');
+            ->assertRedirect(route('cashier.payments.index'));
 
-        $this->assertSame(0, Payment::where('enrollment_id', $enrollment->id)->count());
-        $this->assertFalse($enrollment->fresh()->is_paid);
+        $this->assertSame(1, Payment::where('enrollment_id', $enrollment->id)->count());
+        $this->assertTrue($enrollment->fresh()->is_paid);
     }
 
     /** @test */

@@ -88,6 +88,12 @@ class EnrollmentController extends Controller
         $enrollments->each(function ($enrollment) {
             $enrollment->subjects = \App\Models\CourseSubject::whereIn('id', $enrollment->subject_ids ?? [])
                 ->get(['id', 'subject_code', 'subject_name']);
+            $enrollment->has_outstanding_term_payment = Payment::outstandingForTerm($enrollment)->exists();
+            $refundStatuses = Payment::where('enrollment_id', $enrollment->id)
+                ->where('status', 'verified')
+                ->pluck('refund_status');
+            $enrollment->refund_fully_confirmed = $refundStatuses->isNotEmpty()
+                && $refundStatuses->every(fn ($status) => $status === 'refunded');
         });
 
         return view('student.enrollment.index', compact('enrollments', 'linkedPaymentEnrollment'));
@@ -197,15 +203,14 @@ class EnrollmentController extends Controller
                 ->with('error', 'You already have an active enrollment for the current academic term.');
         }
 
-        // Notify all registrars of the new enrollment submission
-        $registrars = \App\Models\User::role(['registrar', 'admin'])->get();
-        foreach ($registrars as $registrar) {
+        // Payment is the first review step; notify Cashiers when the request is submitted.
+        foreach (\App\Models\User::role(['cashier', 'admin'])->get() as $cashier) {
             \App\Services\NotificationService::send(
-                $registrar,
-                'New Enrollment Submitted',
-                "{$user->name} submitted an enrollment for {$enrollment->program->name} (Year {$enrollment->year_level}) and is awaiting your review.",
+                $cashier,
+                'Enrollment Awaiting Payment',
+                "{$user->name} submitted an enrollment for {$enrollment->program->name} (Year {$enrollment->year_level}) and is ready for payment.",
                 'info',
-                route('registrar.enrollments.index', ['review' => $enrollment->id])
+                route('cashier.payments.show', $enrollment)
             );
         }
 
@@ -213,13 +218,13 @@ class EnrollmentController extends Controller
             $user,
             'enrollment-submitted:'.$enrollment->id,
             'Enrollment Submitted',
-            "We received your enrollment for {$enrollment->program->name}. It is awaiting Registrar review.",
+            "We received your enrollment for {$enrollment->program->name}. Pay the enrollment fee at the Cashier or submit GCash proof for verification before Registrar review.",
             'info',
             route('portal.enrollment.index'),
             'View enrollment status'
         );
 
-        return redirect()->route('portal.enrollment.index')->with('success', 'Enrollment submitted. Awaiting Registrar approval.');
+        return redirect()->route('portal.enrollment.index')->with('success', 'Enrollment submitted. Please pay the fee; Registrar review begins after the Cashier verifies payment.');
     }
 
     /** Resolve the active term from Registrar-managed academic settings. */
@@ -263,13 +268,20 @@ class EnrollmentController extends Controller
         $proofPath = null;
         try {
             $result = DB::transaction(function () use ($enrollment, $request, $validated, &$proofPath) {
+                \App\Models\User::whereKey(Auth::id())->lockForUpdate()->firstOrFail();
                 $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
 
-                if ($lockedEnrollment->status !== 'approved') {
-                    return 'not_approved';
+                if (! in_array($lockedEnrollment->status, ['pending', 'approved'], true)) {
+                    return 'not_payable';
                 }
                 if ($lockedEnrollment->is_paid) {
                     return 'paid';
+                }
+                if (Payment::unresolvedRefundsForTerm($lockedEnrollment)->exists()) {
+                    return 'refund_unresolved';
+                }
+                if (Payment::outstandingForTerm($lockedEnrollment)->exists()) {
+                    return 'prior_payment';
                 }
 
                 $attempts = Payment::where('enrollment_id', $lockedEnrollment->id)
@@ -319,8 +331,10 @@ class EnrollmentController extends Controller
 
         if (is_string($result)) {
             $message = [
-                'not_approved' => 'Your enrollment must be approved before submitting payment.',
+                'not_payable' => 'This enrollment is not eligible for payment.',
                 'paid' => 'This enrollment has already been paid.',
+                'refund_unresolved' => 'A previous verified payment for this academic term has not been refunded. Contact the Cashier; no new payment can be made until the refund is confirmed.',
+                'prior_payment' => 'Another payment for this academic term is already pending or verified. Contact the Cashier to resolve it before paying again.',
                 'verified' => 'A verified payment already exists for this enrollment. Contact the Cashier if the records do not match.',
                 'pending' => 'You already have a payment pending verification. Please wait for the Cashier to review it.',
             ][$result];
@@ -446,6 +460,15 @@ class EnrollmentController extends Controller
         $latestPayment = Payment::where('enrollment_id', $enrollment->id)
             ->latest()
             ->first();
+        $verifiedPayments = Payment::where('enrollment_id', $enrollment->id)
+            ->where('status', 'verified')
+            ->get(['refund_status']);
+        $refundFullyConfirmed = $verifiedPayments->isNotEmpty()
+            && $verifiedPayments->every(fn ($verifiedPayment) => $verifiedPayment->refund_status === 'refunded');
+        $outstandingTermPayments = Payment::outstandingForTerm($enrollment)
+            ->with('enrollment')
+            ->latest()
+            ->get();
 
         return view('student.enrollment.payment', compact(
             'enrollment',
@@ -453,7 +476,9 @@ class EnrollmentController extends Controller
             'gcashName',
             'gcashQrReady',
             'fee',
-            'latestPayment'
+            'latestPayment',
+            'outstandingTermPayments',
+            'refundFullyConfirmed'
         ));
     }
 }

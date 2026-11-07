@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Registrar;
 
 use App\Http\Controllers\Controller;
+use App\Models\Application;
 use App\Models\Enrollment;
+use App\Models\Payment;
+use App\Models\StudentProfile;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class EnrollmentController extends Controller
 {
@@ -17,7 +22,10 @@ class EnrollmentController extends Controller
             'search' => ['nullable', 'string', 'max:200'],
         ]);
 
-        $query = Enrollment::with('user', 'program')->where('status', 'pending');
+        $query = Enrollment::with('user', 'program', 'payment')
+            ->where('status', 'pending')
+            ->where('is_paid', true)
+            ->whereHas('payment', fn ($payment) => $payment->where('status', 'verified'));
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
             $query->where(function ($matches) use ($search) {
@@ -46,7 +54,7 @@ class EnrollmentController extends Controller
 
     public function show(Enrollment $enrollment)
     {
-        $enrollment->load('user', 'program', 'creditedSubjects.courseSubject');
+        $enrollment->load('user', 'program', 'payment', 'creditedSubjects.courseSubject');
         $subjects = \App\Models\CourseSubject::whereIn('id', $enrollment->subject_ids)->get();
         $programSubjects = \App\Models\CourseSubject::where('program_id', $enrollment->program_id)
             ->orderBy('year_level')->orderBy('semester')->orderBy('subject_code')
@@ -103,32 +111,54 @@ class EnrollmentController extends Controller
 
     public function approve(Enrollment $enrollment)
     {
-        $enrollment->update(['status' => 'approved']);
+        $enrollment = DB::transaction(function () use ($enrollment) {
+            $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            $payment = Payment::where('enrollment_id', $lockedEnrollment->id)
+                ->where('status', 'verified')
+                ->latest()
+                ->first();
 
-        $fee = number_format(\App\Models\Setting::get('enrollment_fee', 500), 2);
+            if ($lockedEnrollment->status !== 'pending' || ! $lockedEnrollment->is_paid || ! $payment) {
+                throw ValidationException::withMessages([
+                    'enrollment' => 'The Cashier must verify payment before the Registrar can review this enrollment.',
+                ]);
+            }
+
+            $user = $lockedEnrollment->user;
+            if ($user->hasRole('new_applicant')) {
+                $approvedApplicationExists = Application::where('user_id', $user->id)
+                    ->where('program_id', $lockedEnrollment->program_id)
+                    ->where('status', 'approved')
+                    ->exists();
+
+                if (! $approvedApplicationExists) {
+                    throw ValidationException::withMessages([
+                        'enrollment' => 'This applicant does not have an approved application for the enrollment program.',
+                    ]);
+                }
+
+                $user->syncRoles(['student']);
+                \App\Services\StudentWelcome::record($user);
+            } elseif (! $user->hasAnyRole(['student', 'alumni', 'admin', 'registrar', 'cashier'])) {
+                $user->assignRole('student');
+            }
+
+            $lockedEnrollment->update(['status' => 'approved']);
+            StudentProfile::createForEnrollmentIfMissing($user, $lockedEnrollment);
+
+            return $lockedEnrollment->fresh(['user', 'program']);
+        });
 
         // ── Notify Student ────────────────────────────────────────────
         NotificationService::sendUserUpdateSafely(
             $enrollment->user,
             'enrollment-approved:'.$enrollment->id,
             'Enrollment Approved',
-            "Your enrollment has been approved by the Registrar. Please proceed to the Cashier to pay the ₱{$fee} enrollment fee.",
+            'Your enrollment has been approved by the Registrar after payment verification.',
             'success',
-            route('portal.enrollment.payment-info', $enrollment),
-            'View payment options'
+            route('portal.enrollment.index'),
+            'View enrollment status'
         );
-
-        // ── Notify Cashier ────────────────────────────────────────────
-        $cashiers = User::role('cashier')->get();
-        foreach ($cashiers as $cashier) {
-            NotificationService::send(
-                $cashier,
-                'Enrollment Ready for Payment',
-                $enrollment->user->name . "'s enrollment has been approved. They are ready to pay the ₱{$fee} enrollment fee.",
-                'info',
-                route('cashier.payments.index')
-            );
-        }
 
         // ── Notify Admin ──────────────────────────────────────────────
         $admins = User::role('admin')->get();
@@ -144,7 +174,7 @@ class EnrollmentController extends Controller
         }
 
         return redirect()->route('registrar.enrollments.index')
-            ->with('success', 'Enrollment approved. Student and Cashier have been notified.');
+            ->with('success', 'Enrollment approved. Student has been notified.');
     }
 
     public function reject(Request $request, Enrollment $enrollment)
@@ -153,17 +183,35 @@ class EnrollmentController extends Controller
             'remarks' => ['required', 'string', 'max:500'],
         ]);
 
-        $enrollment->update([
-            'status'  => 'rejected',
-            'remarks' => $validated['remarks'],
-        ]);
+        $enrollment = DB::transaction(function () use ($enrollment, $validated) {
+            $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            $hasVerifiedPayment = Payment::where('enrollment_id', $lockedEnrollment->id)
+                ->where('status', 'verified')
+                ->exists();
+
+            if ($lockedEnrollment->status !== 'pending' || ! $lockedEnrollment->is_paid || ! $hasVerifiedPayment) {
+                throw ValidationException::withMessages([
+                    'enrollment' => 'Only enrollments with verified payment can be rejected by the Registrar.',
+                ]);
+            }
+
+            $lockedEnrollment->update([
+                'status'  => 'rejected',
+                'remarks' => $validated['remarks'],
+            ]);
+            Payment::where('enrollment_id', $lockedEnrollment->id)
+                ->where('status', 'verified')
+                ->update(['refund_status' => 'pending']);
+
+            return $lockedEnrollment->fresh(['user']);
+        });
 
         // ── Notify Student ────────────────────────────────────────────
         NotificationService::sendUserUpdateSafely(
             $enrollment->user,
             'enrollment-rejected:'.$enrollment->id,
             'Enrollment Rejected',
-            'Your enrollment was rejected. Reason: ' . $validated['remarks'],
+            'Your enrollment was rejected after payment was verified. Contact the Cashier to arrange a refund; refunds are handled outside this system. Reason: ' . $validated['remarks'],
             'danger',
             route('portal.enrollment.index'),
             'Review enrollment'
@@ -181,8 +229,18 @@ class EnrollmentController extends Controller
             );
         }
 
+        foreach (User::role('cashier')->get() as $cashier) {
+            NotificationService::send(
+                $cashier,
+                'Refund Follow-up Needed',
+                $enrollment->user->name . "'s paid enrollment was rejected by the Registrar. Contact the student to arrange the refund.",
+                'warning',
+                route('cashier.payments.show', $enrollment)
+            );
+        }
+
         return redirect()->route('registrar.enrollments.index')
-            ->with('success', 'Enrollment rejected. Student has been notified.');
+            ->with('success', 'Enrollment rejected. Student and Cashier have been notified about refund follow-up.');
     }
 
     // ── Alumni Promotion ─────────────────────────────────────────────────────

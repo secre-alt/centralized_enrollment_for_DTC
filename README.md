@@ -10,6 +10,7 @@ DTC EMS is a Laravel 9 enrollment management system for Danao Technological Coll
 - **Registrar:** review applications and enrollments, manage appointment slots, document requests, and student progression.
 - **Cashier:** record walk-in payments and verify or reject submitted GCash payments. Only verified/recorded payment marks an enrollment paid.
 - **Admin:** manage users, programs, subjects, settings, reports, audit logs, and database backup files.
+- **Language preferences:** users can choose English or Tagalog in Profile Settings, or follow the system default selected by an administrator. The public landing page, shared navigation, account-access pages, profile settings, and main staff dashboards are localized; remaining role workflows still need translation.
 
 ## Requirements
 
@@ -104,7 +105,7 @@ Applicants use the public **Apply** workflow; there is no public student self-re
 
 ## Enrollment and payment rules
 
-Enrollment records use `pending`, `approved`, or `rejected`. Rejected enrollments retain Registrar feedback in `remarks`; students may submit another enrollment after rejection. Approval alone does **not** complete enrollment. A GCash payment proof remains pending until Cashier verification; only successful verification (or a Cashier-recorded walk-in payment) sets `is_paid` and issues payment receipt information. Do not manually mark an enrollment paid to bypass that process.
+Enrollment records use `pending`, `approved`, or `rejected`. Students submit an enrollment and pay first; the Cashier records walk-in payments or verifies GCash proof before the enrollment enters the Registrar review queue. Only a verified payment sets `is_paid`; the Registrar can then approve or reject the selected subjects. Approval plus verified payment completes enrollment and creates the student record. Rejected enrollments retain Registrar feedback in `remarks`; students can submit another enrollment after an unpaid rejection. If a paid enrollment is rejected, the Cashier records refund follow-up without changing the original verified payment or receipt. A new payment for the same student and term stays blocked until the Cashier confirms a full external refund, enters its reference, and records the amount equal to the original payment. Partial refunds do not release the block; the system does not initiate or attest to the external refund itself. Do not manually mark an enrollment paid to bypass verification.
 
 ## Production deployment checklist
 

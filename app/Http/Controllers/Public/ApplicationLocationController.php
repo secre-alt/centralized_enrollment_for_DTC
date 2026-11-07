@@ -30,4 +30,11 @@ class ApplicationLocationController extends Controller
 
         return response()->json($this->locations->cities($province))->header('Cache-Control', 'public, max-age=86400');
     }
+
+    public function barangays(string $city): JsonResponse
+    {
+        abort_unless($this->locations->hasCity($city), 404);
+
+        return response()->json($this->locations->barangays($city))->header('Cache-Control', 'public, max-age=86400');
+    }
 }

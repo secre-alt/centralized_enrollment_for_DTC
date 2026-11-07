@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\AppointmentPayment;
 use App\Models\DocumentRequest;
 use App\Models\Enrollment;
+use App\Models\Payment;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -195,14 +196,66 @@ class PortalPaymentPagesTest extends TestCase
         $this->assertSame('gcash', $payment->fresh()->payment_method);
     }
 
-    public function test_missing_qr_and_unapproved_enrollment_do_not_offer_online_payment(): void
+    public function test_pending_enrollment_can_pay_before_registrar_review_but_rejected_unpaid_enrollment_cannot(): void
     {
         $user = $this->makeUserWithRole('student');
         Storage::disk('local')->delete('qr.png');
         $document = $this->document($user, ['payment_method' => 'gcash_qr']);
         $this->actingAs($user)->get(route('portal.payments.document', $document))->assertOk()->assertSee('GCash is currently unavailable.')->assertDontSee('name="proof_of_payment"', false);
         $enrollment = Enrollment::factory()->create(['user_id' => $user->id, 'status' => 'pending']);
-        $this->get(route('portal.enrollment.payment-info', $enrollment))->assertOk()->assertSee('Payment is available after')->assertDontSee('name="proof_of_payment"', false);
+        $this->get(route('portal.enrollment.payment-info', $enrollment))
+            ->assertOk()
+            ->assertSee('Walk-in payment')
+            ->assertSee('name="proof_of_payment"', false)
+            ->assertSee('<label for="enrollment-gcash-reference"', false)
+            ->assertSee('id="enrollment-gcash-reference"', false)
+            ->assertSee('<label for="enrollment-payment-proof"', false)
+            ->assertSee('id="enrollment-payment-proof"', false)
+            ->assertSee('class="dtc-file-label enrollment-proof-picker', false)
+            ->assertSee('class="dtc-file-text enrollment-proof-file-name" aria-live="polite">No file chosen', false)
+            ->assertSee('enrollment-proof-picker-action', false);
+        $pendingPayment = \App\Models\Payment::factory()->gcashPending()->create([
+            'enrollment_id' => $enrollment->id,
+            'proof_of_payment' => 'payment-proofs/enrollment-proof.jpg',
+        ]);
+        $this->get(route('portal.enrollment.payment-info', $enrollment))
+            ->assertOk()
+            ->assertSee('css/enrollment-status.css', false)
+            ->assertSee('dtc-enrollment-callout is-info', false)
+            ->assertSee('role="status"', false)
+            ->assertSee('The Cashier is checking your payment. No action is needed while it is under review.')
+            ->assertSee('View submitted proof')
+            ->assertSee(route('portal.enrollment.payment.proof', $pendingPayment), false)
+            ->assertDontSee('name="proof_of_payment"', false);
+        $rejectedEnrollment = Enrollment::factory()->create(['user_id' => $user->id, 'status' => 'rejected']);
+        $this->get(route('portal.enrollment.payment-info', $rejectedEnrollment))
+            ->assertOk()->assertSee('This enrollment is not eligible for payment.')
+            ->assertDontSee('name="proof_of_payment"', false);
+    }
+
+    public function test_verified_enrollment_payment_uses_the_success_callout_and_preserves_receipt_and_proof(): void
+    {
+        $user = $this->makeUserWithRole('student');
+        $enrollment = Enrollment::factory()->create(['user_id' => $user->id, 'status' => 'approved']);
+        $payment = Payment::factory()->create([
+            'enrollment_id' => $enrollment->id,
+            'payment_method' => 'gcash',
+            'status' => 'verified',
+            'receipt_no' => 'OR-20261107-RBGKG',
+            'amount' => 500,
+            'proof_of_payment' => 'payment-proofs/verified-proof.jpg',
+        ]);
+
+        $this->actingAs($user)->get(route('portal.enrollment.payment-info', $enrollment))
+            ->assertOk()
+            ->assertSee('dtc-enrollment-callout is-success', false)
+            ->assertSee('role="status"', false)
+            ->assertSee('The Cashier confirmed your enrollment payment.')
+            ->assertSee('Receipt: OR-20261107-RBGKG')
+            ->assertSee('₱500.00')
+            ->assertSee('View submitted proof')
+            ->assertSee(route('portal.enrollment.payment.proof', $payment), false)
+            ->assertDontSee('class="portal-payment-card portal-payment-status"', false);
     }
 
     public function test_document_proof_submission_returns_each_role_to_its_payment_page(): void

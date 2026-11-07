@@ -23,14 +23,14 @@ class StudentGcashPaymentTest extends TestCase
     }
 
     /** @test */
-    public function a_student_can_submit_a_gcash_proof_for_their_own_approved_unpaid_enrollment()
+    public function a_student_can_submit_a_gcash_proof_for_their_own_pending_enrollment()
     {
         $student    = $this->makeUserWithRole('new_applicant');
         $cashier    = $this->makeUserWithRole('cashier');
         $secondCashier = $this->makeUserWithRole('cashier');
         $enrollment = Enrollment::factory()->create([
             'user_id' => $student->id,
-            'status'  => 'approved',
+            'status'  => 'pending',
             'is_paid' => false,
         ]);
         $this->assertSame(0, UserNotification::whereIn('user_id', [$cashier->id, $secondCashier->id])->count(), 'Cashiers must not be alerted before payment proof is submitted.');
@@ -60,6 +60,7 @@ class StudentGcashPaymentTest extends TestCase
         $this->assertNull($payment->processed_by);
         $this->assertNull($payment->verified_by);
         $this->assertNull($payment->receipt_no);
+        $this->assertTrue($student->fresh()->hasRole('new_applicant'));
 
         $notification = UserNotification::where('user_id', $cashier->id)
             ->where('title', 'New GCash Payment Pending Verification')
@@ -170,7 +171,7 @@ class StudentGcashPaymentTest extends TestCase
     }
 
     /** @test */
-    public function a_student_cannot_pay_for_an_enrollment_that_is_not_yet_approved()
+    public function a_student_can_submit_gcash_payment_before_registrar_approval()
     {
         $student    = $this->makeUserWithRole('new_applicant');
         $enrollment = Enrollment::factory()->pending()->create(['user_id' => $student->id]);
@@ -183,7 +184,10 @@ class StudentGcashPaymentTest extends TestCase
             ]
         );
 
-        $response->assertSessionHas('error');
-        $this->assertDatabaseMissing('payments', ['enrollment_id' => $enrollment->id]);
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('payments', [
+            'enrollment_id' => $enrollment->id,
+            'status' => 'pending',
+        ]);
     }
 }

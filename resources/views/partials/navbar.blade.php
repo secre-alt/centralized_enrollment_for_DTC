@@ -19,7 +19,7 @@
         {{-- Input --}}
         <input type="text"
                id="global-search"
-               placeholder="Search anything..."
+               placeholder="{{ __('ui.search.placeholder') }}"
                class="navbar-search-input"
                autocomplete="off">
 
@@ -87,9 +87,9 @@
         type="button"
         id="darkModeToggle"
         class="theme-toggle-btn"
-        aria-label="Enable dark mode"
+        aria-label="{{ __('ui.navigation.enable_dark_mode') }}"
         aria-pressed="false"
-        title="Enable dark mode">
+        title="{{ __('ui.navigation.enable_dark_mode') }}">
         <i data-lucide="moon" id="darkModeIcon" aria-hidden="true"></i>
     </button>
 </li>
@@ -97,7 +97,7 @@
 <!-- Notification Bell Dropdown -->
 <li class="nav-item dropdown navbar-notification-item" id="notif-dropdown">
     <a href="#" class="nav-link dropdown-toggle navbar-icon-link"
-       data-toggle="dropdown" id="notifBell" aria-label="Open notifications"
+       data-toggle="dropdown" id="notifBell" aria-label="{{ __('ui.notifications.title') }}"
        aria-haspopup="true" aria-expanded="false">
         <i data-lucide="bell" class="navbar-icon" aria-hidden="true"></i>
         @if($unread > 0)
@@ -114,17 +114,17 @@
         <div class="notify-header">
             <div>
                 <div class="notify-header-title">
-                    Notifications
+                    {{ __('ui.notifications.title') }}
                 </div>
                 <div class="notify-header-subtitle" id="notif-subtitle">
                     @if($unread > 0)
-                        {{ $unread }} unread notification{{ $unread > 1 ? 's' : '' }}
+                        {{ trans_choice('ui.notifications.unread', $unread, ['count' => $unread]) }}
                     @else
-                        All caught up!
+                        {{ __('ui.notifications.caught_up') }}
                     @endif
                 </div>
             </div>
-            <button type="button" class="notify-mark-read" id="notif-mark-read" data-notice-all data-url="{{ route('notifications.markAllRead') }}" @if(!$unread) hidden @endif>Mark all as read</button>
+            <button type="button" class="notify-mark-read" id="notif-mark-read" data-notice-all data-url="{{ route('notifications.markAllRead') }}" @if(!$unread) hidden @endif>{{ __('ui.notifications.mark_all_read') }}</button>
         </div>
 
         {{-- Notification List --}}
@@ -143,7 +143,7 @@
                             {{ $notif->title }}
                         </div>
                         @if(!$notif->isRead())
-                            <div class="notif-dot" aria-label="Unread notification"></div>
+                            <div class="notif-dot" aria-label="{{ __('ui.notifications.unread_label') }}"></div>
                         @endif
                     </div>
                     <div class="notif-message">
@@ -154,16 +154,16 @@
                         {{ $notif->created_at->diffForHumans() }}
                     </div>
                 </a>
-                <button type="button" class="notice-dropdown-state" data-notice-state data-url="{{ route('notifications.state', $notif) }}" data-read="{{ $notif->isRead() ? '1' : '0' }}" aria-label="{{ $notif->isRead() ? 'Mark unread' : 'Mark as read' }}: {{ $notif->title }}" title="{{ $notif->isRead() ? 'Mark unread' : 'Mark as read' }}"><i data-lucide="{{ $notif->isRead() ? 'mail' : 'check' }}" aria-hidden="true"></i></button>
+                <button type="button" class="notice-dropdown-state" data-notice-state data-url="{{ route('notifications.state', $notif) }}" data-read="{{ $notif->isRead() ? '1' : '0' }}" aria-label="{{ $notif->isRead() ? __('ui.notifications.mark_unread') : __('ui.notifications.mark_read') }}: {{ $notif->title }}" title="{{ $notif->isRead() ? __('ui.notifications.mark_unread') : __('ui.notifications.mark_read') }}"><i data-lucide="{{ $notif->isRead() ? 'mail' : 'check' }}" aria-hidden="true"></i></button>
             </div>
             @empty
             <div class="notify-empty">
                 <i data-lucide="bell-off" class="notify-empty-icon" aria-hidden="true"></i>
                 <div class="notify-empty-title">
-                    No notifications yet
+                    {{ __('ui.notifications.none') }}
                 </div>
                 <div class="notify-empty-subtitle">
-                    You're all caught up!
+                    {{ __('ui.notifications.caught_up') }}
                 </div>
             </div>
             @endforelse
@@ -172,7 +172,7 @@
         {{-- Footer --}}
         <div class="notify-footer" id="notify-footer">
             <a href="{{ route('notifications.index') }}" class="notify-view-all">
-                View all notifications →
+                {{ __('ui.notifications.view_all') }}
             </a>
         </div>
     </div>

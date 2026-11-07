@@ -21,7 +21,7 @@ test('education profiles switch labels and applicable fields without clearing va
         querySelectorAll() { return [this.field]; }
     }));
     const context = vm.createContext({
-        document: { getElementById: node, querySelector: node, createElement: () => ({}) },
+        document: { getElementById: node, querySelector: node, querySelectorAll: () => [], createElement: () => ({}) },
         window: {}, Event,
         applicantType: { value: '' }, educationSections: sections,
         documentSections: [],

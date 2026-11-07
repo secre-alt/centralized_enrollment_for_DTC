@@ -16,6 +16,7 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
     protected $fillable = [
         'name',
         'email',
+        'preferred_language',
         'password',
         'status',
         'avatar',

@@ -11,6 +11,7 @@ use Tests\TestCase;
 
 class ApplicationEducationLevelsTest extends TestCase
 {
+    use \Tests\AdmissionTestPayload;
     use RefreshDatabase, SeedsRoles;
 
     public function test_levels_are_validated_against_applicant_type_including_direct_posts(): void
@@ -31,12 +32,12 @@ class ApplicationEducationLevelsTest extends TestCase
         foreach ($cases as $index => [$type, $level, $allowed]) {
             $this->get(route('public.application.create'))->assertOk();
             $email = 'education-level-'.$index.'@example.test';
-            $response = $this->from(route('public.application.create'))->post(route('public.application.store'), [
+            $response = $this->from(route('public.application.create'))->post(route('public.application.store'), $this->admissionPayload([
                 'submission_token' => session('public_application_submission_token'), 'academic_status' => $type,
                 'program_id' => $program->id, 'first_name' => 'Test', 'last_name' => 'Applicant',
                 'gender' => 'female', 'birthdate' => '2005-01-01', 'email' => $email,
                 'ack_enrollment' => 'on', 'education_level' => $level,
-            ]);
+            ]));
             if ($allowed) {
                 $response->assertRedirect(route('public.application.success'));
                 $this->assertDatabaseHas('applications', ['email' => $email, 'education_level' => $level]);

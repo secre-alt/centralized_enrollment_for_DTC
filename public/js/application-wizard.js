@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
        CONFIG
     ════════════════════════════════════════════════════════════ */
 
-    const TOTAL       = 6;
+    const TOTAL       = document.querySelectorAll('#applicationForm > .wiz-panel').length;
     const STORAGE_KEY = 'dtc_application_draft';
     const CHECKS_KEY  = 'dtc_req_checks';
     let   current     = 1;
@@ -100,6 +100,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         connectors.forEach(function (c, i) { c.classList.toggle('completed', i + 1 < current); });
 
+        const stepCount = document.getElementById('wizardStepCount');
+        const sectionName = document.getElementById('wizardSectionName');
+        if (stepCount) stepCount.textContent = 'Step ' + current + ' of ' + TOTAL;
+        if (sectionName) sectionName.textContent = steps[current - 1].querySelector('.wiz-step-label').textContent.trim();
+
         btnPrev.style.visibility = current === 1 ? 'hidden' : 'visible';
 
         if (current === TOTAL) {
@@ -109,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
             btnNext.classList.remove('d-none');
             btnSubmit.classList.add('d-none');
         }
-        if (current === 6) buildReview();
+        if (current === TOTAL) buildReview();
 
         /* Rebuild each icon before Lucide renders it. Reusing a rendered SVG can
            leave the previous checkmark paths in place when returning to a step. */
@@ -141,53 +146,126 @@ document.addEventListener('DOMContentLoaded', function () {
     function validateStep(n) {
         const panel = document.getElementById('step-' + n);
         if (!panel) return true;
-        let ok = true;
         let firstInvalid = null;
-        panel.querySelectorAll('[required]').forEach(function (el) {
-            if (el.type === 'hidden' || el.disabled) return;
-            const field = el.closest('.wiz-field');
-            if (!el.value.trim()) {
-                el.classList.add('wiz-invalid');
-                el.setAttribute('aria-invalid', 'true');
+        panel.querySelectorAll('input, select, textarea').forEach(function (el) {
+            if (el.type === 'hidden' || el.disabled || el.closest('.d-none')) return;
+            const message = validationMessage(el);
+            if (message) {
+                showFieldError(el, message);
                 if (!firstInvalid) firstInvalid = el;
-                if (field) {
-                    let err = field.querySelector('.wiz-err-msg');
-                    if (!err) {
-                        err = document.createElement('span');
-                        err.className = 'wiz-err-msg wiz-err-dynamic';
-                        err.innerHTML = '<i data-lucide="alert-circle"></i> This field is required.';
-                        field.appendChild(err);
-                        if (window.lucide) lucide.createIcons({ nodes: [err] });
-                    }
-                    err.id = (el.id || el.name) + '-error';
-                    const descriptions = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
-                    if (!descriptions.includes(err.id)) descriptions.push(err.id);
-                    el.setAttribute('aria-describedby', descriptions.join(' '));
-                }
-                ok = false;
-            } else {
-                clearFieldError(el);
-            }
+            } else clearFieldError(el);
         });
-        if (firstInvalid) setTimeout(function () { firstInvalid.focus(); }, 0);
-        return ok;
+        if (firstInvalid) {
+            revealInvalidField(firstInvalid);
+            setTimeout(function () {
+                firstInvalid.focus();
+                if (firstInvalid.scrollIntoView) firstInvalid.scrollIntoView({ block: 'center', behavior: 'auto' });
+            }, 0);
+        }
+        return !firstInvalid;
+    }
+
+    function validationMessage(el) {
+        const rules = window.dtcAdmissionValidation || {};
+        let value = (el.value || '').trim();
+        const name = el.name || el.id;
+        if ((rules.nameFields || []).includes(name)) value = value.replace(/\s+/gu, ' ');
+        if (el.validity && el.validity.badInput) return 'Enter a complete, valid value.';
+        if (el.required && !value) {
+            return name === 'school_year_completed'
+                ? 'Please enter your last school year attended.'
+                : 'This field is required.';
+        }
+        if (el.type === 'file') {
+            const file = el.files && el.files[0];
+            if (!file) return '';
+            if (!/\.(pdf|jpe?g|png)$/i.test(file.name)) return 'Choose a PDF, JPG, JPEG, or PNG file.';
+            if (file.size === 0) return 'Choose a non-empty document.';
+            if (file.size > (rules.maxUploadBytes || 5242880)) return 'Each document must be ' + (rules.maxUploadLabel || '5 MB') + ' or smaller.';
+            if (rules.maxPostBytes) {
+                const files = Array.from(document.querySelectorAll('#applicationForm input[type="file"]')).filter(function (input) { return !input.disabled && !input.closest('.d-none'); });
+                const total = files.reduce(function (bytes, input) { return bytes + (input.files && input.files[0] ? input.files[0].size : 0); }, 0);
+                if (total + 65536 > rules.maxPostBytes) return 'Combined uploads are too large for this server. Choose smaller files.';
+            }
+            return '';
+        }
+        if (!value) return '';
+        if (el.maxLength > 0 && Array.from(value).length > el.maxLength) return 'Use ' + el.maxLength + ' characters or fewer.';
+        if ((rules.nameFields || []).includes(name) && !new RegExp(rules.namePattern, 'u').test(value)) {
+            return 'Enter a name using letters, spaces, apostrophes, periods, or hyphens.';
+        }
+        if ((rules.phoneFields || []).includes(name)) {
+            if (!new RegExp(rules.phoneCharacters).test(value) || !new RegExp(rules.phonePattern).test(value.replace(/[ ().-]/g, ''))) {
+                return 'Use 09XXXXXXXXX, +639XXXXXXXXX, a landline with area code, or an international number starting with +.';
+            }
+        }
+        if (name === 'email' && el.validity && el.validity.typeMismatch) return 'Enter a valid email address, such as name@example.com.';
+        if (name === 'birthdate') {
+            const date = new Date(value + 'T00:00:00Z');
+            if (!/^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}$/.test(value) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) return 'Enter a valid date of birth.';
+            if (value > rules.today) return 'Enter a date of birth that is today or earlier.';
+            if (value > rules.latestBirthdate) return 'Applicants must be at least ' + rules.minimumAge + ' years old.';
+            if (value < rules.earliestBirthdate) return 'Enter a date of birth for an applicant aged ' + rules.maximumAge + ' or younger.';
+        }
+        if (name === 'country' && rules.countries && !rules.countries.some(country => country.toLowerCase() === value.toLowerCase()) && !Object.prototype.hasOwnProperty.call(rules.countryAliases || {}, value.toLowerCase())) return 'Choose a country from the suggestions.';
+        if (name === 'lrn' && !/^[0-9]{12}$/.test(value)) return 'Enter exactly 12 digits for the LRN.';
+        if (name === 'postal_code') {
+            const country = document.getElementById('country');
+            const philippines = !country || !country.value.trim() || country.value.trim().toLowerCase() === 'philippines';
+            if (philippines && !new RegExp(rules.philippinePostalPattern || '^(?!0000$)[0-9]{4}$').test(value)) return 'Enter a 4-digit Philippine postal code other than 0000.';
+            if (!philippines && rules.internationalPostalPattern && !new RegExp(rules.internationalPostalPattern).test(value)) return 'Use up to 20 letters or digits, with single spaces or hyphens between groups.';
+        }
+        if (name === 'school_year_completed' && rules.yearPattern) {
+            if (!new RegExp(rules.yearPattern, 'u').test(value)) return 'Enter a school year in YYYY-YYYY format.';
+            const years = value.split('-').map(Number);
+            if (years[1] !== years[0] + 1) return 'The ending year must be one year after the starting year.';
+            if (years[0] > rules.schoolYearMaxStart) return 'Enter a current or previous school year.';
+        }
+        return '';
+    }
+
+    function revealInvalidField(el) {
+        if (el.closest('#personalDetailsContent')) setPersonalDetailsExpanded(true);
+        const details = el.closest('details');
+        if (details) details.open = true;
+        if (el.type === 'file') document.querySelector('.doc-tab-btn[data-tab="uploads"]')?.click();
+    }
+
+    function showFieldError(el, message) {
+        el.classList.add('wiz-invalid');
+        el.setAttribute('aria-invalid', 'true');
+        const field = el.closest('.wiz-field') || el.closest('.document-input');
+        if (!field) return;
+        let error = field.querySelector('.wiz-err-msg');
+        if (!error) {
+            error = document.createElement('span');
+            error.className = 'wiz-err-msg wiz-err-dynamic';
+            field.appendChild(error);
+        }
+        error.textContent = message;
+        error.id = (el.id || el.name) + '-error';
+        const descriptions = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+        if (!descriptions.includes(error.id)) descriptions.push(error.id);
+        el.setAttribute('aria-describedby', descriptions.join(' '));
+        if (el.type === 'file') el.closest('.document-input-control')?.classList.add('is-invalid');
     }
 
     function clearFieldError(el) {
         el.classList.remove('wiz-invalid');
         el.removeAttribute('aria-invalid');
-        const field = el.closest('.wiz-field');
+        const field = el.closest('.wiz-field') || el.closest('.document-input');
         const error = field && field.querySelector('.wiz-err-msg');
         if (error) {
-            const descriptions = (el.getAttribute('aria-describedby') || '').split(/\s+/)
-                .filter(function (id) { return id && id !== error.id; });
+            const descriptions = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(function (id) { return id && id !== error.id; });
             if (descriptions.length) el.setAttribute('aria-describedby', descriptions.join(' '));
             else el.removeAttribute('aria-describedby');
             error.remove();
         }
+        if (el.type === 'file') el.closest('.document-input-control')?.classList.remove('is-invalid');
     }
 
-    document.querySelectorAll('.wiz-input').forEach(function (el) {
+    document.querySelectorAll('.wiz-input, .document-input-file').forEach(function (el) {
+        if (el.type !== 'file' && el.maxLength < 0) el.maxLength = 255;
         const field = el.closest('.wiz-field');
         const error = field && field.querySelector('.wiz-err-msg');
         if (error) {
@@ -198,10 +276,23 @@ document.addEventListener('DOMContentLoaded', function () {
             el.setAttribute('aria-describedby', descriptions.join(' '));
         }
         function clear() {
+            if (el.name === 'school_year_completed') {
+                const message = validationMessage(el);
+                if (message) showFieldError(el, message);
+                else clearFieldError(el);
+                return;
+            }
             clearFieldError(el);
         }
         el.addEventListener('input',  clear);
-        el.addEventListener('change', clear);
+        function check() {
+            if (el.disabled || el.closest('.d-none')) return;
+            const message = validationMessage(el);
+            if (message) showFieldError(el, message);
+            else clearFieldError(el);
+        }
+        el.addEventListener('change', check);
+        el.addEventListener('blur', check);
     });
 
     btnNext.addEventListener('click', function () { goTo(current + 1); });
@@ -215,19 +306,14 @@ document.addEventListener('DOMContentLoaded', function () {
         s.addEventListener('click', function () {
             const target = i + 1;
             if (target === current) return;
+            if (target > current) {
+                for (let step = 1; step < target; step++) {
+                    if (!validateStep(step)) { goTo(step, true); return; }
+                }
+            }
             goTo(target, true);
         });
     });
-
-    const screeningToggle = document.getElementById('screeningNoticeToggle');
-    const screeningContent = document.getElementById('screeningNoticeContent');
-    if (screeningToggle && screeningContent) {
-        screeningToggle.addEventListener('click', function () {
-            const expanded = screeningToggle.getAttribute('aria-expanded') === 'true';
-            screeningToggle.setAttribute('aria-expanded', String(!expanded));
-            screeningContent.hidden = expanded;
-        });
-    }
 
     const personalDetailsToggle = document.getElementById('personalDetailsToggle');
     const personalDetailsContent = document.getElementById('personalDetailsContent');
@@ -280,78 +366,53 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* ── Privacy policy modal ── */
+    /* Legal dialogs: keyboard containment and focus restoration. */
     const privacyModalEl = document.getElementById('privacyModal');
-    const closePrivacyModalBtn = document.getElementById('closePrivacyModal');
-    const openPrivacyModalLink = document.getElementById('openPrivacyModal');
-
-    if (privacyModalEl) {
-        // Open modal when clicking Privacy Policy link
-        if (openPrivacyModalLink) {
-            openPrivacyModalLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                privacyModalEl.classList.add('active');
-            });
-        }
-
-        // Close modal when clicking "I Understand"
-        if (closePrivacyModalBtn) {
-            closePrivacyModalBtn.addEventListener('click', function () {
-                privacyModalEl.classList.remove('active');
-            });
-        }
-
-        // Close modal when clicking outside
-        privacyModalEl.addEventListener('click', function (e) {
-            if (e.target === privacyModalEl) {
-                privacyModalEl.classList.remove('active');
-            }
-        });
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && privacyModalEl.classList.contains('active')) {
-                privacyModalEl.classList.remove('active');
-            }
-        });
-    }
-
-    /* ── Terms modal ── */
     const termsModalEl = document.getElementById('termsModal');
-    const closeTermsModalBtn = document.getElementById('closeTermsModal');
-    const openTermsModalLink = document.getElementById('openTermsModal');
-
-    if (termsModalEl) {
-        // Open modal when clicking Terms link
-        if (openTermsModalLink) {
-            openTermsModalLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                termsModalEl.classList.add('active');
-            });
+    function bindLegalDialog(overlay, openerId, closerId) {
+        const opener = document.getElementById(openerId);
+        const closer = document.getElementById(closerId);
+        if (!overlay || !opener || !closer) return;
+        const dialog = overlay.querySelector('[role="dialog"]');
+        let returnFocus;
+        let background = [];
+        function close() {
+            overlay.classList.remove('active');
+            background.forEach(function (item) { item.node.inert = item.inert; });
+            background = [];
+            if (returnFocus && returnFocus.isConnected) returnFocus.focus();
         }
-
-        // Close modal when clicking "I Understand"
-        if (closeTermsModalBtn) {
-            closeTermsModalBtn.addEventListener('click', function () {
-                termsModalEl.classList.remove('active');
-            });
-        }
-
-        // Close modal when clicking outside
-        termsModalEl.addEventListener('click', function (e) {
-            if (e.target === termsModalEl) {
-                termsModalEl.classList.remove('active');
+        opener.addEventListener('click', function (event) {
+            event.preventDefault();
+            returnFocus = document.activeElement;
+            for (let node = overlay; node && node !== document.body; node = node.parentElement) {
+                Array.from(node.parentElement.children).forEach(function (sibling) {
+                    if (sibling === node || /^(SCRIPT|STYLE)$/.test(sibling.tagName)) return;
+                    background.push({ node: sibling, inert: sibling.inert });
+                    sibling.inert = true;
+                });
             }
+            overlay.classList.add('active');
+            dialog.focus();
         });
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && termsModalEl.classList.contains('active')) {
-                termsModalEl.classList.remove('active');
+        closer.addEventListener('click', close);
+        overlay.addEventListener('click', function (event) { if (event.target === overlay) close(); });
+        overlay.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') { event.preventDefault(); close(); return; }
+            if (event.key !== 'Tab') return;
+            const focusable = Array.from(dialog.querySelectorAll('a[href], button:not([disabled]), [tabindex="0"]'))
+                .filter(function (node) { return node.getClientRects().length; });
+            const first = focusable[0] || dialog;
+            const last = focusable[focusable.length - 1] || dialog;
+            if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+                event.preventDefault(); last.focus();
+            } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog)) {
+                event.preventDefault(); first.focus();
             }
         });
     }
-
+    bindLegalDialog(privacyModalEl, 'openPrivacyModal', 'closePrivacyModal');
+    bindLegalDialog(termsModalEl, 'openTermsModal', 'closeTermsModal');
 
     /* ════════════════════════════════════════════════════════════
        FILE PICKER LABELS
@@ -427,35 +488,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const educationProfiles = {
         new_student: {
             title: 'Senior High School Background',
-            description: 'Provide information about the Senior High School where you graduated or last attended.',
+            description: 'Enter your most recent school and completion status.',
             school: 'Senior High School Name', year: 'School Year Graduated or Last Attended',
             program: 'Previous Degree Program', level: 'Last Year Level',
             example: 'e.g. Danao National High School'
         },
         transferee: {
             title: 'Previous College Information',
-            description: 'Provide information about the college or university where you were last enrolled before applying for transfer.',
+            description: 'Enter your previous college, program, and year level.',
             school: 'Previous College or University', year: 'Last School Year Attended',
             program: 'Previous Degree Program', level: 'Last Year Level',
             example: 'e.g. Cebu Normal University'
         },
         shiftee: {
             title: 'Current Academic Information',
-            description: 'Provide information about your current or previous academic program before shifting to another program.',
-            school: 'Current College or University', year: 'Current or Last School Year Attended',
+            description: 'Enter the program you are shifting from.',
+            school: 'Current College or University', year: 'Last School Year Attended',
             program: 'Current or Previous Degree Program', level: 'Current Year Level',
             example: 'Enter your current institution'
         },
         returnee: {
             title: 'Previous Enrollment Information',
-            description: 'Provide information about your last enrollment before taking a break from your studies.',
+            description: 'Enter your previous program and last school year attended.',
             school: 'College or University Last Attended', year: 'Last School Year Attended',
             program: 'Previous Degree Program', level: 'Last Year Level and Semester Attended',
             example: 'Enter the institution where you were last enrolled'
         },
         cross_enrollee: {
             title: 'Home Institution Information',
-            description: 'Provide information about your home institution and current studies.',
+            description: 'Enter your home institution and current program.',
             school: 'Most Recent School Attended', year: 'Last School Year Attended',
             program: 'Current Degree Program', level: 'Current Year Level',
             example: 'Enter your most recent school'
@@ -470,7 +531,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('educationDescription').textContent = profile.description;
         const labels = {
             most_recent_school: profile.school,
-            school_year_completed: profile.year,
+            school_year_completed: 'Last School Year Attended',
             previous_program: profile.program,
             last_year_level: profile.level,
             education_status: type === 'transferee' ? 'Enrollment or Completion Status' : 'Completion Status'
@@ -483,7 +544,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('previous_program').placeholder = 'e.g. BS Information Systems';
         document.getElementById('last_year_level').placeholder = type === 'returnee'
             ? 'e.g. 2nd year, 1st semester' : 'e.g. 2nd year';
-        document.getElementById('last_year_level').setAttribute('aria-describedby', 'lastYearLevelHint');
     }
 
     function updateEducationLevels(type) {
@@ -507,8 +567,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const hint = document.getElementById('educationLevelHint');
         if (hint) hint.textContent = previous && !allowed.includes(previous)
             ? 'Applicant type changed. Choose an education level again.'
-            : type === 'new_student' ? 'Use Other for an equivalent or older qualification.'
-                : allowed.length ? 'Choose the level of your current or previous college studies.' : 'Choose your applicant type in Admission first.';
+            : type === 'new_student' ? 'Other includes equivalent qualifications.'
+                : allowed.length ? 'Current or previous college level.' : 'Choose your applicant type in Admission first.';
         if (previous !== select.value) {
             select.dispatchEvent(new Event('change', { bubbles: true }));
         }
@@ -517,6 +577,17 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateApplicantType() {
         const t = applicantType.value;
         updateEducation(t);
+        const requiredEducation = ((window.dtcAdmissionValidation || {}).requiredEducation || {})[t] || [];
+        document.querySelectorAll('#step-4 input, #step-4 select').forEach(function (field) {
+            field.required = requiredEducation.includes(field.name);
+            const label = document.querySelector('#step-4 label[for="' + field.id + '"]');
+            if (label) {
+                label.querySelector('.req')?.remove();
+                if (field.required) {
+                    const star = document.createElement('span'); star.className = 'req'; star.textContent = ' *'; label.appendChild(star);
+                }
+            }
+        });
         documentSections.forEach(function (s) {
             const visible = s.getAttribute('data-type') === t;
             s.classList.toggle('d-none', !visible);
@@ -539,10 +610,19 @@ document.addEventListener('DOMContentLoaded', function () {
         spouseField.classList.toggle('d-none', !m);
         marriageDocument.classList.toggle('d-none', !m);
         marriageDocument.querySelectorAll('input[type="file"]').forEach(function (field) { field.disabled = !m; });
-        if (!m) document.getElementById('spouse_name').value = '';
+        if (!m) {
+            const spouse = document.getElementById('spouse_name');
+            spouse.value = '';
+            saveField(spouse);
+        }
     }
     function updateDisability() {
         pwdIdField.classList.toggle('d-none', disability.value.trim() === '');
+        if (disability.value.trim() === '') {
+            const pwd = document.getElementById('pwd_id');
+            pwd.value = '';
+            saveField(pwd);
+        }
     }
 
     applicantType.addEventListener('change', function () { updateApplicantType(); saveField(applicantType); });
@@ -575,6 +655,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const draft = loadDraft();
         if (!Object.keys(draft).length) return;
         document.querySelectorAll(PERSIST_SELECTOR).forEach(function (el) {
+            if (el.name === 'country' && el.dataset.hasOldInput === 'true') return;
             if (LOC_NAMES.indexOf(el.name) !== -1) return;   /* handled by cascade */
             // Build the allowed options before assigning a saved select value.
             if (el.name === 'education_level') updateEducationLevels(applicantType.value);
@@ -639,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (personalDetailsContent) {
         const hasPersonalDetails = Array.from(personalDetailsContent.querySelectorAll('input, select')).some(function (field) {
             const value = field.value.trim();
-            return value !== '' && (field.name !== 'nationality' || value.toLowerCase() !== 'filipino');
+            return value !== '';
         });
         if (hasPersonalDetails) setPersonalDetailsExpanded(true);
     }
@@ -700,7 +781,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const postal   = val('postal_code');
             const country  = val('country');
 
-            const parts = [street, barangay ? 'Brgy. ' + barangay : '', city, province, region].filter(function(p){ return p && p !== '—'; });
+            const outside = country && country !== '—' && country.toLowerCase() !== 'philippines';
+            const parts = (outside ? [street, val('international_location')] : [street, barangay ? 'Brgy. ' + barangay : '', city, province, region]).filter(function(p){ return p && p !== '—'; });
             let addr = parts.join(', ');
             if (postal && postal !== '—') addr += ' ' + postal;
             if (country && country !== '—') addr += ', ' + country;
@@ -708,7 +790,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         /* Section builder */
-        function section(title, icon, rows, step) {
+        function section(title, icon, rows, step, counts) {
             const filled = rows.filter(function(r){ return r[1] && r[1] !== '—'; });
             const html = rows.map(function(r) {
                 const empty = !r[1] || r[1] === '—';
@@ -721,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 '<div class="rev-section-head">' +
                     '<i data-lucide="' + icon + '"></i>' +
                     '<span>' + title + '</span>' +
-                    '<span class="rev-badge">' + filled.length + ' / ' + rows.length + '</span>' +
+                    '<span class="rev-badge" title="Details provided; optional omissions do not prevent submission">' + (counts ? counts.filled : filled.length) + ' / ' + (counts ? counts.total : rows.length) + '</span>' +
                     '<button type="button" class="rev-edit" data-edit-step="' + step + '" aria-label="Edit ' + escHtml(title) + '">Edit</button>' +
                 '</div>' +
                 '<div class="rev-section-body">' + html + '</div>' +
@@ -739,7 +821,7 @@ document.addEventListener('DOMContentLoaded', function () {
             new_student:'New Student / First Year', transferee:'Transferee',
             shiftee:'Shiftee', returnee:'Returnee / Readmitted', cross_enrollee:'Cross-Enrollee'
         };
-        const rawType = val('academic_status');
+        const rawType = applicantType.value;
         const typeLabel = typeLabels[rawType] || rawType;
 
         /* Assemble display full name */
@@ -759,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ['Education level', val('education_level')],
             ['Completion status', val('education_status')],
             [profile ? profile.school : 'Most recent school', val('most_recent_school')],
-            [profile ? profile.year : 'School year completed or last attended', val('school_year_completed')],
+            ['Last School Year Attended', val('school_year_completed')],
             ['School location', val('school_location')],
         ];
         if (rawType === 'new_student') educationRows.push(['Senior High School strand', val('shs_strand')]);
@@ -774,11 +856,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const documentRows = [];
+        let applicableDocuments = 0;
         form.querySelectorAll('input[type="file"]').forEach(function (input) {
-            if (input.disabled || !input.files || !input.files.length) return;
+            if (input.disabled || input.closest('.d-none')) return;
+            applicableDocuments++;
+            if (!input.files || !input.files.length) return;
             const label = input.closest('.document-input')?.querySelector('label[for="' + input.id + '"]');
             documentRows.push([label ? label.textContent.trim() : 'Supporting document', input.files[0].name]);
         });
+        const selectedDocuments = documentRows.length;
         if (!documentRows.length) documentRows.push(['Supporting documents', 'No files selected']);
 
         const html =
@@ -807,12 +893,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 ['LRN',            val('lrn')],
                 ['Marital Status', val('marital_status')],
                 ['Spouse Name',    nameVal('spouse_name')],
+                ['Your Occupation', val('occupation')],
+                ['Disability / Accessibility Needs', val('disability')],
+                ['PWD ID', val('pwd_id')],
             ], 2) +
-            section('Contact & Address', 'map-pin', [
+            section('Contact Information', 'phone', [
                 ['Email',    val('email')],
                 ['Phone',    val('phone')],
-                ['Address',  fullAddress()],
+
             ], 3) +
+            section('Current Address', 'map-pin', [['Address', fullAddress()]], 3) +
             section(profile ? profile.title : 'Educational Background', 'school', educationRows, 4) +
             section('Family Information', 'users', [
                 ["Guardian's Name",     nameVal('guardian_name')],
@@ -823,11 +913,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 ["Mother's Occupation", val('mother_occupation')],
                 ["Parent's Address",    val('parent_address')],
                 ["Parent's Contact",    val('parent_contact')],
-                ['Occupation',          val('occupation')],
-                ['Disability',          val('disability')],
-                ['PWD ID',              val('pwd_id')],
             ], 5) +
-            section('Supporting Documents', 'files', documentRows, 5);
+            section('Supporting Documents', 'files', documentRows, 6, { filled: selectedDocuments, total: applicableDocuments });
 
         const container = document.getElementById('reviewSummary');
         if (container) {

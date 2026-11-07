@@ -41,3 +41,27 @@
 }
 .dr-appointment-history .dr-pickup-summary { background:transparent; border-right:0; border-left:0; border-bottom:0; border-radius:0; color:var(--dr-ink-2); }
 .dr-appointment-history .dr-pay > .dr-btn { min-height:44px; }
+
+.dr-appointment-history .dr-appointments-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    padding: 40px 24px;
+    border: 1px solid var(--dr-line);
+    border-radius: 20px;
+}
+.dr-appointments-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    background: var(--dr-brand-soft);
+    color: var(--dr-brand);
+}
+.dr .dr-appointments-empty-icon svg { width: 26px; height: 26px; }
+.dr-appointment-history .dr-appointments-empty h2 { margin: 0; font-size: 18px; }
+.dr-appointment-history .dr-appointments-empty p { margin: 8px 0 0; }

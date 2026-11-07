@@ -22,8 +22,9 @@ class TransactionHistory
                 ->join('users as u', 'u.id', '=', 'e.user_id')
                 ->leftJoin('users as processor', 'processor.id', '=', 'p.processed_by')
                 ->leftJoin('users as verifier', 'verifier.id', '=', 'p.verified_by')
+                ->leftJoin('users as refund_confirmer', 'refund_confirmer.id', '=', 'p.refunded_by')
                 ->where(function ($q) use ($staff, $userId) { if (! $staff) $q->where('e.user_id', $userId); })
-                ->selectRaw("CONCAT('E-', p.id) as transaction_key, p.id as source_id, 'enrollment' as category, u.name as payer, u.email as email, CONCAT('Enrollment #', e.id) as related, p.amount as amount, p.payment_method as method, p.status as status, p.created_at as occurred_at, p.verified_at as verified_at, COALESCE(verifier.name, processor.name) as staff_name, p.reference_number as reference, e.id as enrollment_id, NULL as document_request_id, p.rejection_reason as rejection_reason");
+                ->selectRaw("CONCAT('E-', p.id) as transaction_key, p.id as source_id, 'enrollment' as category, u.name as payer, u.email as email, CONCAT('Enrollment #', e.id) as related, p.amount as amount, p.payment_method as method, p.status as status, p.created_at as occurred_at, p.verified_at as verified_at, COALESCE(verifier.name, processor.name) as staff_name, p.reference_number as reference, e.id as enrollment_id, NULL as document_request_id, p.rejection_reason as rejection_reason, p.refund_status as refund_status, p.refund_amount as refund_amount, p.refund_reference as refund_reference, p.refunded_at as refunded_at, refund_confirmer.name as refund_confirmer");
         }
         if ($includeDocuments) {
             $parts[] = DB::table('document_requests as d')
@@ -33,7 +34,7 @@ class TransactionHistory
                 ->where('d.status', '<>', 'cancelled')
                 ->where(fn ($q) => $q->where('d.fee', '>', 0)->orWhere('d.is_paid', true))
                 ->where(function ($q) use ($staff, $userId) { if (! $staff) $q->where('d.user_id', $userId); })
-                ->selectRaw("CONCAT('D-', d.id) as transaction_key, d.id as source_id, 'document' as category, u.name as payer, u.email as email, CONCAT('Document request #', d.id, ' — ', d.document_type) as related, COALESCE(d.amount_received, d.fee) as amount, d.payment_method as method, d.payment_status as status, COALESCE(d.payment_submitted_at, d.created_at) as occurred_at, d.verified_at as verified_at, COALESCE(verifier.name, rejecter.name) as staff_name, d.reference_number as reference, NULL as enrollment_id, d.id as document_request_id, d.payment_rejection_reason as rejection_reason");
+                ->selectRaw("CONCAT('D-', d.id) as transaction_key, d.id as source_id, 'document' as category, u.name as payer, u.email as email, CONCAT('Document request #', d.id, ' — ', d.document_type) as related, COALESCE(d.amount_received, d.fee) as amount, d.payment_method as method, d.payment_status as status, COALESCE(d.payment_submitted_at, d.created_at) as occurred_at, d.verified_at as verified_at, COALESCE(verifier.name, rejecter.name) as staff_name, d.reference_number as reference, NULL as enrollment_id, d.id as document_request_id, d.payment_rejection_reason as rejection_reason, NULL as refund_status, NULL as refund_amount, NULL as refund_reference, NULL as refunded_at, NULL as refund_confirmer");
         }
         if ($includeAppointments) {
             $parts[] = DB::table('appointment_payments as ap')
@@ -41,7 +42,7 @@ class TransactionHistory
                 ->join('users as u', 'u.id', '=', 'a.user_id')
                 ->leftJoin('users as verifier', 'verifier.id', '=', 'ap.verified_by')
                 ->where(function ($q) use ($staff, $userId) { if (! $staff) $q->where('a.user_id', $userId); })
-                ->selectRaw("CONCAT('A-', ap.id) as transaction_key, ap.id as source_id, 'appointment' as category, u.name as payer, u.email as email, CONCAT('Appointment #', a.id, ' — ', a.document_type) as related, ap.amount as amount, ap.payment_method as method, ap.status as status, ap.created_at as occurred_at, ap.verified_at as verified_at, verifier.name as staff_name, ap.reference_number as reference, NULL as enrollment_id, NULL as document_request_id, ap.rejection_reason as rejection_reason");
+                ->selectRaw("CONCAT('A-', ap.id) as transaction_key, ap.id as source_id, 'appointment' as category, u.name as payer, u.email as email, CONCAT('Appointment #', a.id, ' — ', a.document_type) as related, ap.amount as amount, ap.payment_method as method, ap.status as status, ap.created_at as occurred_at, ap.verified_at as verified_at, verifier.name as staff_name, ap.reference_number as reference, NULL as enrollment_id, NULL as document_request_id, ap.rejection_reason as rejection_reason, NULL as refund_status, NULL as refund_amount, NULL as refund_reference, NULL as refunded_at, NULL as refund_confirmer");
         }
 
         $union = array_shift($parts);

@@ -1,9 +1,9 @@
-<section class="card mb-3 dtc-welcome-card" aria-label="Your account">
+<section class="card mb-3 dtc-welcome-card" aria-label="{{ __('ui.profile.title') }}">
     <div class="card-body">
         <div class="dtc-welcome-layout">
             @include('portal.partials.dashboard-avatar', ['avatarRoutePrefix' => 'profile'])
             <div class="dtc-welcome-copy">
-                <h2 class="dtc-welcome-title"><span class="dtc-welcome-greeting">Hello,</span>{{ auth()->user()->name }}</h2>
+                <h2 class="dtc-welcome-title"><span class="dtc-welcome-greeting">{{ __('dashboard.hello') }}</span>{{ auth()->user()->name }}</h2>
                 <p class="dtc-welcome-meta">{{ $staffRoleLabel }}</p>
                 <p class="dtc-welcome-text">{{ $staffWelcomeMessage }}</p>
             </div>

@@ -372,6 +372,22 @@ body.dtc-dark main:has(.app-wizard-page) {
     transition: background-color .2s;
 }
 #birthdate::-webkit-calendar-picker-indicator:hover { background-color: #dce7ff; }
+.admission-wizard #step-2 #birthdate {
+    box-sizing: border-box;
+    height: var(--wiz-control-height, 48px);
+    min-height: var(--wiz-control-height, 48px);
+    padding: 10px 12px;
+    font-weight: 400;
+}
+.admission-wizard #birthdate::-webkit-calendar-picker-indicator {
+    box-sizing: content-box;
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+    margin: 0 2px 0 8px;
+    border-radius: 5px;
+}
+.admission-wizard #birthdate::-webkit-datetime-edit { padding: 0; }
 body.dtc-dark #birthdate { color-scheme: dark; }
 body.dtc-dark #birthdate::-webkit-calendar-picker-indicator { background-color: #2b3c5a; }
 body.dtc-dark #birthdate:focus { box-shadow: 0 0 0 4px rgba(110, 147, 247, .16); }
@@ -964,11 +980,10 @@ body.dtc-dark .loc-summary i { color: #4ade80; }
 
 
 /* ────────────────────────────────────────────────────────────────
-   RELIGION DATALIST INPUT
+   DATALIST INPUTS
 ──────────────────────────────────────────────────────────────── */
 
-/* Native datalist inputs look like plain text inputs — no extra styles needed.
-   Just ensure the list icon indicator is visible in supporting browsers. */
+/* Keep native datalist inputs recognizable without changing their text-input behavior. */
 input[list].wiz-input {
     /* Shows a small dropdown arrow in Chrome/Edge */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -978,6 +993,9 @@ input[list].wiz-input {
 }
 body.dtc-dark input[list].wiz-input {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
 }
 
 
@@ -2159,36 +2177,6 @@ body.dtc-dark .wiz-address-heading p { color: #94a3b8; }
 .app-wizard-page .wiz-step[aria-current="step"] .wiz-step-label { color: #0f4cdb; font-weight: 700; }
 .app-wizard-page .wiz-step[aria-current="step"] .wiz-step-dot { box-shadow: 0 0 0 4px rgba(15, 76, 219, .12); }
 .app-wizard-page .wiz-step.completed .wiz-step-dot { background: #16a34a; border-color: #16a34a; color: #fff; }
-.application-screening-notice {
-    margin: 0 0 16px;
-    overflow: hidden;
-    border: 1px solid #bfdbfe;
-    border-left: 3px solid #0f4cdb;
-    border-radius: 8px;
-    background: #fff;
-}
-.application-screening-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    min-height: 48px;
-    padding: 10px 14px;
-    border: 0;
-    background: transparent;
-    color: #17418f;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 650;
-    text-align: left;
-    cursor: pointer;
-}
-.application-screening-toggle > svg { width: 17px; height: 17px; flex: 0 0 auto; }
-.application-screening-toggle:focus-visible { outline: 3px solid rgba(15, 76, 219, .4); outline-offset: -3px; }
-.application-screening-chevron { margin-left: auto; transition: transform .18s ease; }
-.application-screening-toggle[aria-expanded="true"] .application-screening-chevron { transform: rotate(180deg); }
-.application-screening-content { padding: 0 16px 14px 41px; color: #334155; font-size: 13px; line-height: 1.55; }
-.application-screening-content[hidden] { display: none; }
 .app-wizard-page .wiz-name-section { margin: 0 0 28px; }
 .app-wizard-page .wiz-name-section-header {
     display: flex;
@@ -2269,9 +2257,6 @@ body.dtc-dark .wiz-address-heading p { color: #94a3b8; }
 .status-lookup-page .status-remarks-copy { overflow-wrap: anywhere; }
 .status-lookup-page .status-progress li { min-width: 0; }
 .status-lookup-page .status-progress li > div { min-width: 0; }
-body.dtc-dark .application-screening-notice { background: #111c2e; border-color: #334155; border-left-color: #60a5fa; }
-body.dtc-dark .application-screening-toggle { color: #bfdbfe; }
-body.dtc-dark .application-screening-content { color: #cbd5e1; }
 body.dtc-dark .app-wizard-page .wiz-step[aria-current="step"] .wiz-step-label { color: #93c5fd; }
 body.dtc-dark .app-wizard-page .wiz-personal-section-title { color: #e2e8f0; }
 body.dtc-dark .app-wizard-page .wiz-name-section-header h3 { color: #e2e8f0; }
@@ -2286,7 +2271,6 @@ body.dtc-dark .status-lookup-page .status-lookup-secure { background: #172554; c
     .app-wizard-page .app-wizard-topbar { margin-bottom: 12px; }
     .app-wizard-page .app-wizard-tracker { margin-bottom: 14px; }
     .app-wizard-page .wiz-step-label { font-size: 8px; }
-    .application-screening-content { padding-right: 12px; padding-left: 39px; }
     .status-page-heading h1 { font-size: 21px; }
     .status-lookup-page .wiz-panel-header { gap: 12px; }
     .status-lookup-page .status-result-badge { white-space: normal; }
@@ -2315,19 +2299,20 @@ main:has(.app-wizard-page) {
     main:has(.app-wizard-page) { padding-left: 0; padding-right: 0; }
 }
 
+/* Legacy status-page presentation; admission uses the tokens below. */
 /* ================================================================
    PANEL BREATHING ROOM
    More space between the panel (card) edge and its contents.
    Header and body share the same horizontal inset so the icon,
    titles and fields stay left-aligned with each other.
    ================================================================ */
-.wiz-panel-header { padding: 24px 36px; }
-.wiz-panel-body   { padding: 32px 36px 40px; }
+.app-wizard-page:not(.admission-wizard) .wiz-panel-header { padding: 24px 36px; }
+.app-wizard-page:not(.admission-wizard) .wiz-panel-body   { padding: 32px 36px 40px; }
 
 /* Application fields: permanent labels, calm surfaces, and separate feedback. */
-.app-wizard-page .wiz-field { gap: 8px; min-width: 0; }
-.app-wizard-page .wiz-field > label { margin: 0; font-size: 13px; line-height: 1.5; font-weight: 600; }
-.app-wizard-page .wiz-input {
+.app-wizard-page:not(.admission-wizard) .wiz-field { gap: 8px; min-width: 0; }
+.app-wizard-page:not(.admission-wizard) .wiz-field > label { margin: 0; font-size: 13px; line-height: 1.5; font-weight: 600; }
+.app-wizard-page:not(.admission-wizard) .wiz-input {
     min-height: 50px;
     padding: 12px 14px;
     border: 1px solid #cbd5e1;
@@ -2335,49 +2320,49 @@ main:has(.app-wizard-page) {
     background: #fff;
     box-shadow: 0 1px 2px rgba(15, 23, 42, .035);
 }
-.app-wizard-page .wiz-input:hover:not(:disabled):not(:focus):not(.wiz-invalid) { border-color: #94a3b8; }
-.app-wizard-page .wiz-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, .1); }
-.app-wizard-page .wiz-input::placeholder { color: #94a3b8; font-weight: 400; }
-.app-wizard-page .wiz-input:disabled { opacity: .65; cursor: not-allowed; }
-.app-wizard-page .wiz-input.wiz-invalid,
-.app-wizard-page .wiz-input.is-invalid { border-color: #dc2626; background: #fff; box-shadow: none; }
-.app-wizard-page .wiz-input.wiz-invalid:focus { box-shadow: 0 0 0 4px rgba(220, 38, 38, .1); }
-.app-wizard-page .wiz-err-msg { position: static; margin: 0; padding: 0; color: #b42318; font-size: 12px; line-height: 1.5; align-items: flex-start; }
-.app-wizard-page .wiz-err-msg :is(i, svg) { width: 14px; height: 14px; margin-top: 2px; flex: 0 0 14px; }
-.app-wizard-page .wiz-personal-names { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1.12fr) minmax(0, .86fr); gap: 20px 16px; }
-.app-wizard-page .wiz-name-composite { display: grid; align-items: start; min-width: 0; gap: 0; }
-.app-wizard-page .wiz-name-composite--first { grid-template-columns: 96px minmax(0, 1fr); }
-.app-wizard-page .wiz-name-composite--last { grid-template-columns: minmax(0, 1fr) 82px; }
-.app-wizard-page .wiz-name-composite > .wiz-field:first-child > .wiz-input { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.app-wizard-page .wiz-name-composite > .wiz-field:last-child > .wiz-input { border-top-left-radius: 0; border-bottom-left-radius: 0; }
-body.dtc-dark .app-wizard-page .wiz-input { background: #152034; border-color: #334155; color: #f1f5f9; }
-body.dtc-dark .app-wizard-page .wiz-input:focus { border-color: #60a5fa; box-shadow: 0 0 0 4px rgba(96, 165, 250, .12); }
-body.dtc-dark .app-wizard-page .wiz-input.wiz-invalid,
-body.dtc-dark .app-wizard-page .wiz-input.is-invalid { background: #152034; border-color: #f87171; }
-body.dtc-dark .app-wizard-page .wiz-err-msg { color: #fca5a5; }
+.app-wizard-page:not(.admission-wizard) .wiz-input:hover:not(:disabled):not(:focus):not(.wiz-invalid) { border-color: #94a3b8; }
+.app-wizard-page:not(.admission-wizard) .wiz-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, .1); }
+.app-wizard-page:not(.admission-wizard) .wiz-input::placeholder { color: #94a3b8; font-weight: 400; }
+.app-wizard-page:not(.admission-wizard) .wiz-input:disabled { opacity: .65; cursor: not-allowed; }
+.app-wizard-page:not(.admission-wizard) .wiz-input.wiz-invalid,
+.app-wizard-page:not(.admission-wizard) .wiz-input.is-invalid { border-color: #dc2626; background: #fff; box-shadow: none; }
+.app-wizard-page:not(.admission-wizard) .wiz-input.wiz-invalid:focus { box-shadow: 0 0 0 4px rgba(220, 38, 38, .1); }
+.app-wizard-page:not(.admission-wizard) .wiz-err-msg { position: static; margin: 0; padding: 0; color: #b42318; font-size: 12px; line-height: 1.5; align-items: flex-start; }
+.app-wizard-page:not(.admission-wizard) .wiz-err-msg :is(i, svg) { width: 14px; height: 14px; margin-top: 2px; flex: 0 0 14px; }
+.app-wizard-page:not(.admission-wizard) .wiz-personal-names { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1.12fr) minmax(0, .86fr); gap: 20px 16px; }
+.app-wizard-page:not(.admission-wizard) .wiz-name-composite { display: grid; align-items: start; min-width: 0; gap: 0; }
+.app-wizard-page:not(.admission-wizard) .wiz-name-composite--first { grid-template-columns: 96px minmax(0, 1fr); }
+.app-wizard-page:not(.admission-wizard) .wiz-name-composite--last { grid-template-columns: minmax(0, 1fr) 82px; }
+.app-wizard-page:not(.admission-wizard) .wiz-name-composite > .wiz-field:first-child > .wiz-input { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.app-wizard-page:not(.admission-wizard) .wiz-name-composite > .wiz-field:last-child > .wiz-input { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-input { background: #152034; border-color: #334155; color: #f1f5f9; }
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-input:focus { border-color: #60a5fa; box-shadow: 0 0 0 4px rgba(96, 165, 250, .12); }
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-input.wiz-invalid,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-input.is-invalid { background: #152034; border-color: #f87171; }
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-err-msg { color: #fca5a5; }
 @media (max-width: 599px) {
-    .app-wizard-page .wiz-personal-names { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-    .app-wizard-page .wiz-input { font-size: 16px; }
+    .app-wizard-page:not(.admission-wizard) .wiz-personal-names { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .app-wizard-page:not(.admission-wizard) .wiz-input { font-size: 16px; }
 }
 
 @media (max-width: 768px) {
-    .wiz-panel-header { padding: 20px 24px; }
-    .wiz-panel-body   { padding: 24px 24px 28px; }
+    .app-wizard-page:not(.admission-wizard) .wiz-panel-header { padding: 20px 24px; }
+    .app-wizard-page:not(.admission-wizard) .wiz-panel-body   { padding: 24px 24px 28px; }
 }
 @media (max-width: 600px) {
-    .wiz-panel-header { padding: 18px 18px; }
-    .wiz-panel-body   { padding: 20px 18px 24px; }
+    .app-wizard-page:not(.admission-wizard) .wiz-panel-header { padding: 18px 18px; }
+    .app-wizard-page:not(.admission-wizard) .wiz-panel-body   { padding: 20px 18px 24px; }
 }
 
 /* Animated labels retain separate validation feedback below each control. */
-.app-wizard-page .wiz-field:has(> label + .wiz-input),
-.app-wizard-page .wiz-field:has(> label + .name-group) {
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input),
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group) {
     position: relative;
     gap: 0;
     --wiz-floating-surface: #fff;
 }
-.app-wizard-page .wiz-field:has(> label + .wiz-input) > label,
-.app-wizard-page .wiz-field:has(> label + .name-group) > label {
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input) > label,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group) > label {
     position: absolute;
     z-index: 2;
     top: 0;
@@ -2393,46 +2378,326 @@ body.dtc-dark .app-wizard-page .wiz-err-msg { color: #fca5a5; }
     transform-origin: left center;
     transition: transform .18s ease, color .18s ease;
 }
-.app-wizard-page .wiz-field:has(> label + .wiz-input) > .wiz-input {
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input) > .wiz-input {
     padding: 18px 15px 6px;
 }
-.app-wizard-page .wiz-field:has(> label + .wiz-input) > select.wiz-input,
-.app-wizard-page .wiz-field:has(> label + input[type="date"].wiz-input) > input.wiz-input {
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input) > select.wiz-input,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + input[type="date"].wiz-input) > input.wiz-input {
     padding-top: 16px;
 }
-.app-wizard-page .wiz-field:has(> label + .name-group) .name-group .wiz-input {
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group) .name-group .wiz-input {
     padding-top: 16px;
 }
-.app-wizard-page .wiz-field:has(> label + .wiz-input:focus) > label,
-.app-wizard-page .wiz-field:has(> label + .wiz-input:not(:placeholder-shown)) > label,
-.app-wizard-page .wiz-field:has(> label + select.wiz-input) > label,
-.app-wizard-page .wiz-field:has(> label + input[type="date"].wiz-input) > label,
-.app-wizard-page .wiz-field:has(> label + input.wiz-input:not([placeholder])) > label,
-.app-wizard-page .wiz-field:has(> label + .name-group:focus-within) > label,
-.app-wizard-page .wiz-field:has(> label + .name-group input:not(:placeholder-shown)) > label {
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input:focus) > label,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input:not(:placeholder-shown)) > label,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + select.wiz-input) > label,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + input[type="date"].wiz-input) > label,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + input.wiz-input:not([placeholder])) > label,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group:focus-within) > label,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group input:not(:placeholder-shown)) > label {
     color: #0f4cdb;
     transform: translateY(-6px) scale(.9);
 }
-.app-wizard-page .wiz-field:has(> label + .wiz-input) > .wiz-input::placeholder,
-.app-wizard-page .wiz-field:has(> label + .name-group) .wiz-input::placeholder { color: transparent; }
-.app-wizard-page .wiz-field:has(> label + .wiz-input:focus) > .wiz-input::placeholder,
-.app-wizard-page .wiz-field:has(> label + .name-group:focus-within) .wiz-input::placeholder { color: #94a3b8; }
-.app-wizard-page .wiz-field:has(> label + .wiz-input:focus-visible) > .wiz-input,
-.app-wizard-page .wiz-field:has(> label + .name-group:focus-within) .name-group { outline-offset: 2px; }
-.app-wizard-page .wiz-field > .wiz-hint,
-.app-wizard-page .wiz-field > .wiz-err-msg { margin-top: 7px; }
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input) > .wiz-input::placeholder,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group) .wiz-input::placeholder { color: transparent; }
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input:focus) > .wiz-input::placeholder,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group:focus-within) .wiz-input::placeholder { color: #94a3b8; }
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input:focus-visible) > .wiz-input,
+.app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group:focus-within) .name-group { outline-offset: 2px; }
+.app-wizard-page:not(.admission-wizard) .wiz-field > .wiz-hint,
+.app-wizard-page:not(.admission-wizard) .wiz-field > .wiz-err-msg { margin-top: 7px; }
 
-body.dtc-dark .app-wizard-page .wiz-field { --wiz-floating-surface: #152034; }
-.app-wizard-page .wiz-field > .wiz-err-msg { position: static; transform: none; }
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field { --wiz-floating-surface: #152034; }
+.app-wizard-page:not(.admission-wizard) .wiz-field > .wiz-err-msg { position: static; transform: none; }
 @media (min-width: 600px) and (max-width: 899px) {
-    .app-wizard-page .wiz-personal-names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .app-wizard-page:not(.admission-wizard) .wiz-personal-names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + .wiz-input) > label,
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + .name-group) > label { color: #94a3b8; }
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + .wiz-input:focus) > label,
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + .wiz-input:not(:placeholder-shown)) > label,
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + select.wiz-input) > label,
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + input[type="date"].wiz-input) > label,
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + input.wiz-input:not([placeholder])) > label,
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + .name-group:focus-within) > label,
-body.dtc-dark .app-wizard-page .wiz-field:has(> label + .name-group input:not(:placeholder-shown)) > label { color: #93c5fd; }
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input) > label,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group) > label { color: #94a3b8; }
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input:focus) > label,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .wiz-input:not(:placeholder-shown)) > label,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + select.wiz-input) > label,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + input[type="date"].wiz-input) > label,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + input.wiz-input:not([placeholder])) > label,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group:focus-within) > label,
+body.dtc-dark .app-wizard-page:not(.admission-wizard) .wiz-field:has(> label + .name-group input:not(:placeholder-shown)) > label { color: #93c5fd; }
+
+/* Admission design tokens and layout. Keep status lookup styling independent. */
+body:has(.admission-wizard) { min-height: 100dvh; }
+body:has(.admission-wizard) > .site-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    flex-shrink: 0;
+    padding: 12px 16px;
+    background: var(--dtc-surface, #fff);
+}
+main:has(.admission-wizard) { min-height: 0; padding-bottom: 64px; }
+.admission-wizard {
+    --wiz-space-1: 4px;
+    --wiz-space-2: 8px;
+    --wiz-space-3: 12px;
+    --wiz-space-4: 16px;
+    --wiz-space-6: 24px;
+    --wiz-space-8: 32px;
+    --wiz-control-height: 48px;
+    --wiz-gap: var(--wiz-space-6);
+    --wiz-card-padding: var(--wiz-space-6);
+    --wiz-border: var(--dtc-border, #e2e8f0);
+    --wiz-radius: var(--dtc-radius-sm, 8px);
+    --wiz-focus: var(--dtc-primary, #0f4cdb);
+    width: min(1280px, calc(100% - 48px));
+    padding: 16px 0 24px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+body.dtc-dark .admission-wizard { --wiz-border: #334155; --wiz-focus: #60a5fa; }
+.admission-wizard .app-wizard-topbar { align-items: center; gap: 12px; margin-bottom: 12px; }
+.admission-wizard .app-wizard-intro { margin: 0; min-width: 0; flex: 1 1 0; }
+.admission-wizard .app-wizard-intro h1 { font-size: 28px; line-height: 1.2; }
+.admission-wizard .app-wizard-intro p { margin: 4px 0 0; font-size: 14px; }
+.admission-wizard .app-wizard-back { width: 48px; height: 48px; }
+.admission-wizard .admission-card {
+    padding: 32px;
+    border: 1px solid var(--wiz-border);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 32px rgba(15, 23, 42, .04);
+}
+body.dtc-dark .admission-wizard .admission-card { background: #111c2e; }
+.admission-wizard .admission-progress-heading { display: flex; justify-content: space-between; gap: 16px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #64748b; }
+body.dtc-dark .admission-wizard .admission-progress-heading { color: #a7b4c8; }
+.admission-wizard .app-wizard-tracker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin: 4px 0 20px; }
+.admission-wizard .wiz-step { position: relative; min-width: 0; width: 100%; min-height: 44px; padding: 0; display: flex; justify-content: center; }
+.admission-wizard .wiz-step::before { content: ''; width: 100%; height: 4px; border-radius: 4px; background: var(--wiz-border); transition: background .18s ease; }
+.admission-wizard .wiz-step.completed::before { background: #16a34a; }
+.admission-wizard .wiz-step.active::before { background: var(--wiz-focus); }
+.admission-wizard .wiz-step::after, .admission-wizard .wiz-step-dot, .admission-wizard .wiz-connector { display: none; }
+.admission-wizard .wiz-step-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.admission-wizard .wiz-panel { overflow: visible; margin: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.admission-wizard .wiz-panel-header { padding: 0 0 28px; gap: 12px; border: 0; background: transparent; align-items: center; }
+.admission-wizard .wiz-panel-icon { width: 36px; height: 36px; flex: 0 0 36px; }
+.admission-wizard .wiz-panel-title { font-size: 24px; line-height: 1.3; margin: 0; }
+.admission-wizard .wiz-panel-sub { font-size: 13px; line-height: 1.4; margin-top: 4px; }
+.admission-wizard .wiz-panel-body { padding: 0; }
+.admission-wizard .wiz-row { gap: var(--wiz-gap); margin-bottom: var(--wiz-gap); }
+.admission-wizard #step-1 .wiz-row { width: 100%; max-width: none; }
+.admission-wizard .wiz-row--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.admission-wizard .wiz-field,
+.admission-wizard #step-2 .wiz-field { min-width: 0; gap: 4px; margin: 0 0 var(--wiz-gap); }
+.admission-wizard .wiz-row > .wiz-field,
+.admission-wizard #step-2 .wiz-field { margin-bottom: 0; }
+.admission-wizard .wiz-field > label { position: static; font-size: 14px; line-height: 1.5; font-weight: 600; margin: 0; padding: 0; transform: none; }
+.admission-wizard .wiz-input,
+.admission-wizard #step-2 .wiz-input { min-height: var(--wiz-control-height); height: auto; padding: 10px 12px; font-size: 16px; line-height: 1.5; border: 1px solid var(--wiz-border); border-radius: var(--wiz-radius); box-shadow: none; }
+/* Floating labels keep field errors in normal document flow. */
+.admission-wizard .wiz-field:has(> label + .wiz-input) { position: relative; gap: 0; --wiz-label-surface: #fff; }
+.admission-wizard .wiz-field:has(> label + .wiz-input) > label { position: absolute; top: 0; left: 10px; z-index: 2; padding: 0 4px; max-width: calc(100% - 20px); background: var(--wiz-label-surface); color: #64748b; font-size: 14px; line-height: 1.25; transform: translateY(15px); transform-origin: left center; transition: transform .18s ease, color .18s ease; pointer-events: none; }
+.admission-wizard .wiz-field:has(> .wiz-input:focus) > label,
+.admission-wizard .wiz-field:has(> .wiz-input:not(:placeholder-shown)) > label,
+.admission-wizard .wiz-field:has(> select.wiz-input) > label,
+.admission-wizard .wiz-field:has(> input.wiz-input:not([placeholder])) > label { color: #64748b; transform: translateY(-7px) scale(.86); }
+.admission-wizard .wiz-field > .wiz-input::placeholder { color: transparent; }
+.admission-wizard .wiz-field > .wiz-input:focus::placeholder { color: #94a3b8; }
+.admission-wizard .wiz-field > .wiz-err-msg,
+.admission-wizard .wiz-field > .wiz-hint { margin-top: 6px; }
+body.dtc-dark .admission-wizard .wiz-field { --wiz-label-surface: #152034; }
+body.dtc-dark .admission-wizard .wiz-field > label { color: #a7b4c8; }
+@media (prefers-reduced-motion: reduce) {
+    .admission-wizard .wiz-field > label { transition: none; }
+}
+.admission-wizard .wiz-input:focus { border-color: var(--wiz-focus); outline: 3px solid color-mix(in srgb, var(--wiz-focus) 25%, transparent); outline-offset: 1px; box-shadow: none; }
+.admission-wizard :is(button, a, summary):focus-visible { outline: 3px solid var(--wiz-focus); outline-offset: 3px; }
+.admission-wizard .wiz-err-msg { position: static; font-size: 12px; line-height: 1.5; margin: 0; }
+.admission-wizard .wiz-hint { font-size: 12px; line-height: 1.5; }
+.admission-wizard .wiz-personal-names { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1.12fr) minmax(0, .86fr); gap: var(--wiz-gap); }
+.admission-wizard .wiz-name-composite { display: grid; min-width: 0; gap: 0; }
+.admission-wizard #step-2 .wiz-name-composite > .wiz-field:first-child > .wiz-input { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.admission-wizard #step-2 .wiz-name-composite > .wiz-field:last-child > .wiz-input { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left-width: 0; }
+.admission-wizard #step-2 .wiz-name-composite > .wiz-field:focus-within { z-index: 3; }
+.admission-wizard .wiz-name-composite--first { grid-template-columns: 96px minmax(0, 1fr); }
+.admission-wizard .wiz-name-composite--last { grid-template-columns: minmax(0, 1fr) 82px; }
+.admission-wizard .wiz-personal-pair { gap: var(--wiz-gap); }
+.admission-wizard :is(.wiz-name-section, .wiz-personal-section) { margin: 0 0 24px; }
+.admission-wizard :is(.wiz-name-section-header, .wiz-personal-section-title) { margin-bottom: 16px; }
+.admission-wizard .wiz-personal-disclosure { overflow: visible; border: 0; }
+.admission-wizard .wiz-personal-toggle { min-height: 48px; padding: 8px 12px; }
+.admission-wizard .wiz-personal-content { padding: 24px 16px 16px; }
+.admission-wizard .wiz-personal-content .wiz-personal-pair { margin-bottom: 16px; }
+.admission-wizard .wiz-guardian-toggle { min-height: 44px; padding: 8px 0; font-size: 14px; }
+.admission-wizard #step-5 .wiz-panel-header { flex-wrap: wrap; }
+.admission-wizard #step-5 .wiz-panel-header > div:first-child { flex: 1; }
+.admission-wizard #step-5 #guardianDetails { margin: 0; flex: 0 0 180px; }
+.admission-wizard #step-5 #guardianDetails[open] { flex-basis: 100%; }
+.admission-wizard .wiz-divider { border: 0; margin: 12px 0; }
+.admission-wizard .wiz-nav { gap: 16px; margin-top: 32px; padding-top: 0; border-top: 0; }
+.admission-wizard .wiz-nav > .wiz-btn {
+    box-sizing: border-box;
+    flex: 0 1 112px;
+    width: 112px;
+    min-width: 0;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    justify-content: center;
+    gap: 8px;
+}
+.admission-wizard .wiz-btn { min-height: 48px; padding: 8px 20px; font-size: 14px; border-radius: var(--wiz-radius); }
+.admission-wizard .wiz-panel-body > :last-child,
+.admission-wizard .wiz-family-section > :last-child { margin-bottom: 0; }
+/* Education row wrappers keep their DOM order while sharing one grid. */
+.admission-wizard #step-4 .wiz-panel-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wiz-gap); }
+.admission-wizard #step-4 :is(.wiz-row, .education-section) { display: contents; }
+.admission-wizard #step-4 .wiz-field { margin: 0; }
+.admission-wizard #step-4 :is(.wiz-divider, .wiz-group-label, .wiz-panel-body > .wiz-hint) { grid-column: 1 / -1; margin: 0; }
+.admission-wizard #step-4 .wiz-divider { display: none; }
+.admission-wizard .document-section:not(.d-none) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.admission-wizard .document-section > .wiz-inline-notice { grid-column: 1 / -1; margin: 0 0 4px; }
+.admission-wizard .document-input { padding: 8px 12px; margin: 0; min-width: 0; }
+.admission-wizard .document-input > label { font-size: 14px; }
+.admission-wizard .document-input-control { padding: 0 8px 0 0; gap: 8px; flex-wrap: nowrap; min-height: 48px; }
+.admission-wizard .document-input-control.is-invalid { border-color: #dc2626; }
+body.dtc-dark .admission-wizard .document-input-control.is-invalid { border-color: #f87171; }
+.admission-wizard .document-input-btn { min-height: 48px; align-items: center; padding: 8px 12px; margin: 0; }
+.admission-wizard .document-input-filename { min-width: 0; flex-basis: 0; }
+.admission-wizard .doc-tabs { margin-bottom: 8px; }
+.admission-wizard .doc-tab-btn { min-height: 44px; font-size: 14px; }
+.admission-wizard .rev-summary { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.admission-wizard .rev-section { overflow: visible; min-width: 0; }
+.admission-wizard .rev-section-head { min-height: 48px; padding: 12px 18px; border-radius: var(--wiz-radius) var(--wiz-radius) 0 0; font-size: 14px; }
+.admission-wizard .rev-edit { min-height: 44px; margin: 0 0 0 auto; font-size: 14px; }
+.admission-wizard .rev-row { grid-template-columns: 180px minmax(0, 1fr); padding: 10px 18px; }
+.admission-wizard .privacy-modal-overlay { transition: opacity .2s; }
+.admission-wizard .privacy-modal { width: min(640px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: 16px; }
+.admission-wizard .privacy-modal-body { min-height: 0; overscroll-behavior: contain; }
+.admission-wizard :is(.privacy-modal-header, .privacy-modal-footer) { flex-shrink: 0; }
+.admission-wizard .privacy-modal-footer button { min-height: 48px; }
+@media (min-width: 1024px) and (max-height: 800px) {
+    .admission-wizard { --wiz-gap: 24px; --wiz-card-padding: 24px; padding-top: 12px; padding-bottom: 16px; }
+    .admission-wizard .app-wizard-intro h1 { font-size: 24px; }
+    .admission-wizard .app-wizard-intro p { margin-top: 0; }
+    .admission-wizard :is(.app-wizard-topbar, .app-wizard-tracker) { margin-bottom: 8px; }
+    .admission-wizard .admission-card { padding: 28px 28px 24px; }
+}
+@media (min-width: 1024px) {
+    .admission-wizard { width: var(--dtc-public-shell-width, min(1280px, calc(100% - 48px))); }
+}
+@media (max-width: 1100px) {
+    .admission-wizard .wiz-step { flex-direction: column; gap: 4px; }
+    .admission-wizard .wiz-connector { margin-bottom: 20px; }
+}
+@media (max-width: 899px) {
+    .admission-wizard .wiz-personal-names { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+    .admission-wizard { width: calc(100% - 32px); --wiz-card-padding: 16px; }
+    .admission-wizard .app-wizard-intro h1 { font-size: 24px; }
+    .admission-wizard .admission-card { padding: 24px 16px; }
+    .admission-wizard .app-wizard-tracker { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .admission-wizard .wiz-connector { display: none; }
+    .admission-wizard .wiz-panel-title { font-size: 21px; }
+    .admission-wizard .wiz-step::after { display: none; }
+    .admission-wizard :is(.wiz-row--2, .wiz-row--3, .wiz-row--4, .wiz-personal-names, .wiz-personal-pair, .rev-summary, #step-4 .wiz-panel-body, .document-section:not(.d-none)) { grid-template-columns: minmax(0, 1fr); }
+    .admission-wizard .rev-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .admission-wizard .wiz-col-2 { grid-column: auto; }
+    .admission-wizard .doc-tabs { flex-wrap: wrap; }
+    .admission-wizard .doc-tab-btn { flex: 1 1 100%; }
+}
+/* Visibility utilities must also work when the external Bootstrap CDN is unavailable. */
+.admission-wizard .d-none { display: none !important; }
+@media (max-width: 767px) {
+    .admission-wizard .app-wizard-topbar { flex-wrap: wrap; }
+}
+@media (min-width: 1100px) {
+    .admission-wizard .wiz-address-section { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--wiz-gap); }
+    .admission-wizard .wiz-address-section .wiz-row { display: contents; }
+    .admission-wizard .wiz-address-section .wiz-field { margin: 0; }
+    .admission-wizard .wiz-address-section > .wiz-field:first-child,
+    .admission-wizard #internationalLocationField { grid-column: 1 / -1; }
+    .admission-wizard #step-4 .wiz-panel-body { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .admission-wizard #step-4 .wiz-field { grid-column: span 4; }
+    .admission-wizard #step-4 .wiz-field:has(#school_location),
+    .admission-wizard #step-4 .wiz-field:has(#previous_program) { grid-column: span 8; }
+    .admission-wizard #step-4:has([data-education-for="new_student"]:not(.d-none)) .wiz-field:has(#school_location) { grid-column: span 4; }
+    .admission-wizard .wiz-personal-content:not([hidden]) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--wiz-gap); }
+    .admission-wizard .wiz-personal-content .wiz-personal-pair { display: contents; margin: 0; }
+    .admission-wizard .wiz-family-section { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--wiz-gap); }
+    .admission-wizard .wiz-family-section > .wiz-row { grid-template-columns: minmax(0, 1fr); margin: 0; }
+    .admission-wizard .wiz-family-section > .wiz-row:has(#occupation) { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .admission-wizard :is(#guardianDetails, #pwdIdField) { grid-column: 1 / -1; margin: 0; }
+}
+
+.admission-wizard .wiz-address-section { margin-top: 28px; padding-top: 24px; border-top: 0; }
+.admission-wizard .wiz-address-section > :is(.wiz-subsection-title, .wiz-panel-sub, .wiz-field:first-of-type) { grid-column: 1 / -1; }
+.admission-wizard .wiz-address-section > .wiz-panel-sub { margin-top: -8px; margin-bottom: 16px; }
+
+.admission-wizard .wiz-address-section > :is(#locationHint, .wiz-field:has(#current_address)) { grid-column: 1 / -1; }
+@media (min-width: 1100px) { .admission-wizard .wiz-address-section { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Consistent location pickers stay inside the address form on small screens. */
+.admission-wizard .wiz-address-section .wiz-field { position: relative; min-width: 0; }
+.admission-wizard .location-suggestions { position: absolute; top: calc(var(--wiz-control-height, 48px) + 4px); left: 0; right: 0; z-index: 30; max-height: 240px; overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--wiz-border); border-radius: 10px; background: #fff; box-shadow: 0 8px 24px rgba(15,23,42,.12); }
+.admission-wizard .location-suggestions[hidden] { display: none; }
+.admission-wizard .location-suggestions [role="option"] { padding: 12px 14px; font-size: 14px; line-height: 1.5; cursor: pointer; overflow-wrap: anywhere; }
+.admission-wizard .location-suggestions [role="option"]:hover, .admission-wizard .location-suggestions [aria-selected="true"] { background: #eff6ff; color: #1d4ed8; }
+body.dtc-dark .admission-wizard .location-suggestions { background: #152034; color: #e2e8f0; }
+body.dtc-dark .admission-wizard .location-suggestions [role="option"]:hover, body.dtc-dark .admission-wizard .location-suggestions [aria-selected="true"] { background: #243b5b; color: #bfdbfe; }
+
+/* Shared gray chevrons with room between the value and the dropdown affordance. */
+.admission-wizard { --wiz-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+.admission-wizard select.wiz-input,
+.admission-wizard #step-2 select.wiz-input,
+.admission-wizard input.wiz-input[role="combobox"] {
+    appearance: none; -webkit-appearance: none;
+    background-image: var(--wiz-chevron);
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px 16px;
+    padding-right: 44px;
+}
+.admission-wizard [data-lucide^="chevron-"],
+.admission-wizard [class*="lucide-chevron-"],
+.admission-wizard .wiz-personal-chevron { color: #94a3b8; flex-shrink: 0; }
+.admission-wizard .wiz-panel-header { gap: 16px; padding-bottom: 32px; }
+.admission-wizard .wiz-panel-body > .wiz-hint:first-child { margin-bottom: 24px; }
+.admission-wizard #step-3 > .wiz-panel-body > .wiz-row { margin-bottom: 0; }
+.admission-wizard .wiz-address-section { margin-top: 28px; padding-top: 0; }
+.admission-wizard .wiz-address-heading { grid-column: 1 / -1; margin-bottom: 24px; }
+.admission-wizard .wiz-address-heading > .wiz-subsection-title { margin: 0; }
+.admission-wizard .wiz-address-heading > .wiz-panel-sub { margin: 6px 0 0; }
+@media (min-width: 1100px) {
+    .admission-wizard .wiz-address-heading { margin-bottom: 0; }
+    .admission-wizard .wiz-address-section > .wiz-field:has(#country) { grid-column: 1 / -1; }
+}
+
+/* Street and postal code share one balanced row at desktop widths. */
+.admission-wizard .wiz-address-section .wiz-address-postal { display: grid; grid-column: 1 / -1; align-items: start; gap: var(--wiz-gap); }
+.admission-wizard .wiz-address-section .wiz-address-postal > .wiz-field { margin-bottom: 0; }
+
+/* Admission spacing: 24px rows, 32px sections, 6px supporting text. */
+.admission-wizard .wiz-panel-header { padding-bottom: 24px; }
+.admission-wizard .wiz-panel-sub { margin: 6px 0 0; }
+.admission-wizard .wiz-address-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 32px;
+    padding-top: 0;
+    align-items: start;
+}
+.admission-wizard .wiz-address-section > .wiz-row { display: contents; }
+.admission-wizard .wiz-address-section .wiz-field { margin: 0; }
+.admission-wizard .wiz-address-section .wiz-address-heading { grid-column: 1 / -1; margin: 0; }
+.admission-wizard .wiz-address-section .wiz-address-postal { display: grid; margin: 0; }
+.admission-wizard .wiz-field > .wiz-hint { margin: 6px 0 0; line-height: 1.5; }
+/* Repeated lookup instructions stay available to assistive technology without extra grid rows. */
+.admission-wizard :is(#countryHint, #locationHint, #barangayHint[data-state="ready"]) {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px !important;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+@media (min-width: 768px) {
+    .admission-wizard .wiz-address-section { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .admission-wizard .wiz-address-section > .wiz-field:has(#country) { grid-column: 1 / -1; }
+}

@@ -95,7 +95,7 @@
                             <div><strong>Select subjects</strong></div>
                         </div>
                         <div class="dtc-subjects-hint" id="subjects-hint">
-                            Available subjects are based on your choices above.
+                            All subjects for the selected year and semester will be selected automatically.
                         </div>
                         <div id="subjects-container">
                             <div style="background:var(--dtc-surface-soft); border:2px dashed var(--dtc-border);
@@ -121,7 +121,7 @@
                                 Enrollment Fee: ₱{{ number_format($fee, 2) }} (fixed rate)
                             </div>
                             <div class="dtc-enrollment-payment-copy">
-                                Pay after Registrar approval using either option below.
+                                Pay first; the Registrar reviews your subjects after the Cashier verifies payment.
                             </div>
                             <div class="dtc-enrollment-payment-options" aria-label="Available payment options">
                                 <span><i data-lucide="smartphone" aria-hidden="true"></i> GCash</span>
@@ -145,18 +145,18 @@
         <div class="card u-primary-gradient-btn dtc-enrollment-guide-card"
              >
             <div class="card-body p-4">
-                <h5 style="font-weight:700; color:#fff; margin-bottom:6px;">
+                <h5 class="dtc-enrollment-guide-title">
                     <i data-lucide="info" class="mr-2"></i> After You Submit
                 </h5>
-                <p class="dtc-enrollment-guide-intro">Your enrollment follows three review and payment steps.</p>
-                <div style="font-size:13px; line-height:1.8; opacity:0.9;">
+                <p class="dtc-enrollment-guide-intro">Payment is verified before the Registrar reviews your subjects.</p>
+                <div class="dtc-enrollment-guide-steps">
                    @foreach([
-                    ['icon'=>'scan-search', 'text'=>'The Registrar reviews your selected subjects.'],
-                    ['icon'=>'bell', 'text'=>'You receive a notification when your enrollment is approved.'],
-                    ['icon'=>'badge-check', 'text'=>'Pay ₱' . number_format($fee, 2) . ' through GCash or at the Cashier, then wait for verification.'],
+                    ['icon'=>'wallet', 'text'=>'Pay the ₱' . number_format($fee, 2) . ' fee at the Cashier or submit GCash proof.'],
+                    ['icon'=>'badge-check', 'text'=>'The Cashier verifies your payment and issues a receipt.'],
+                    ['icon'=>'scan-search', 'text'=>'The Registrar reviews your selected subjects and decides on your enrollment.'],
                 ] as $step)
-                    <div style="display:flex; gap:10px; margin-bottom:12px;">
-                        <i data-lucide="{{ $step['icon'] }}" style="color:#FFC72C; margin-top:3px; flex-shrink:0;"></i>
+                    <div class="dtc-enrollment-guide-step">
+                        <i data-lucide="{{ $step['icon'] }}" class="dtc-enrollment-guide-step-icon" aria-hidden="true"></i>
                         <span>{{ $step['text'] }}</span>
                     </div>
                     @endforeach
@@ -219,6 +219,7 @@ function loadSubjects() {
                                onmouseover="this.style.background='var(--dtc-surface-soft)'"
                                onmouseout="this.style.background='transparent'">
                             <input type="checkbox" name="subject_ids[]" value="${s.id}"
+                                   checked
                                    style="width:18px; height:18px; accent-color:var(--dtc-primary);
                                           cursor:pointer; flex-shrink:0;">
                             <div  class="u-flex-1">
@@ -231,14 +232,6 @@ function loadSubjects() {
                             </div>
                         </label>
                     `).join('')}
-                    <div style="padding:10px 16px; background:var(--dtc-surface-soft); border-top:1px solid var(--dtc-border);
-                                text-align:right;">
-                        <button type="button" onclick="selectAll()" style="font-size:12px;
-                                color:var(--dtc-primary); background:none; border:none; cursor:pointer;
-                                font-weight:600; font-family:'Poppins',sans-serif;">
-                            Select All
-                        </button>
-                    </div>
                 </div>`;
         })
         .catch(error => {
@@ -299,14 +292,7 @@ function loadAllSubjects() {
                         </label>
                     `).join('')}
                 </div>
-            `).join('') + `
-                <div style="text-align:right;">
-                    <button type="button" onclick="selectAll()" style="font-size:12px;
-                            color:var(--dtc-primary); background:none; border:none; cursor:pointer;
-                            font-weight:600; font-family:'Poppins',sans-serif;">
-                        Select All
-                    </button>
-                </div>`;
+            `).join('');
         })
         .catch(error => {
             window.dtcRequestFailure(error);
@@ -314,15 +300,11 @@ function loadAllSubjects() {
         });
 }
 
-function selectAll() {
-    document.querySelectorAll('input[name="subject_ids[]"]').forEach(cb => cb.checked = true);
-}
-
 document.getElementById('program_id').addEventListener('change', loadSubjects);
 document.getElementById('year_level').addEventListener('change', loadSubjects);
 document.getElementById('semester').addEventListener('change', loadSubjects);
 document.getElementById('type-regular').addEventListener('change', function () {
-    document.getElementById('subjects-hint').textContent = 'Showing subjects for the selected term.';
+    document.getElementById('subjects-hint').textContent = 'All subjects for the selected year and semester are selected. Uncheck any you will not take.';
     loadSubjects();
 });
 document.getElementById('type-irregular').addEventListener('change', function () {
@@ -333,7 +315,7 @@ document.getElementById('type-irregular').addEventListener('change', function ()
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('subjects-hint').textContent = isIrregularMode()
         ? 'Showing all subjects grouped by year and semester.'
-        : 'Showing subjects for the selected year and semester.';
+        : 'All subjects for the selected year and semester are selected. Uncheck any you will not take.';
     if (document.getElementById('program_id').value) loadSubjects();
 });
 </script>

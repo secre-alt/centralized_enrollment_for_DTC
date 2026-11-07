@@ -15,10 +15,14 @@ class DashboardController extends Controller
     {
         $totalStudents      = User::role('student')->count();
         $totalAlumni        = User::role('alumni')->count();
-        $pendingEnrollments = Enrollment::where('status', 'pending')->count();
+        $pendingEnrollments = Enrollment::where('status', 'pending')
+            ->where('is_paid', true)
+            ->whereHas('payment', fn ($query) => $query->where('status', 'verified'))
+            ->count();
         $appointmentsToday  = Appointment::whereHas('slot', fn($q) =>
             $q->whereDate('date', today()))->count();
-        $totalRevenue       = Payment::sum('amount');  // ← check this line exists
+        $totalRevenue       = Payment::where('status', 'verified')->sum('amount')
+            - Payment::where('refund_status', 'refunded')->sum('refund_amount');
 
         $enrollmentData = [];
         for ($m = 1; $m <= 12; $m++) {
@@ -28,8 +32,8 @@ class DashboardController extends Controller
         }
 
         $totalPaid    = Payment::count();
-        $totalUnpaid  = Enrollment::where('status', 'approved')->where('is_paid', false)->count();
-        $totalPending = Enrollment::where('status', 'pending')->count();
+        $totalUnpaid  = Enrollment::whereIn('status', ['pending', 'approved'])->where('is_paid', false)->count();
+        $totalPending = $pendingEnrollments;
 
         $recentActivities = UserNotification::with('user')
             ->latest()->take(6)->get();

@@ -14,6 +14,7 @@ use Tests\TestCase;
 
 class PublicApplicationEducationTest extends TestCase
 {
+    use \Tests\AdmissionTestPayload;
     use RefreshDatabase, SeedsRoles;
 
     protected function setUp(): void
@@ -48,14 +49,14 @@ class PublicApplicationEducationTest extends TestCase
         }
         $this->assertSame(['honorific', 'first_name', 'last_name', 'suffix', 'middle_name'], array_slice($names, 0, 5));
         $this->assertSame(5, $xpath->query('//*[contains(@class, "wiz-personal-names")]//div[contains(@class, "wiz-field")]/input')->length);
-        $this->assertSame('Filipino', $xpath->query('//*[@id="nationality"]')->item(0)->getAttribute('value'));
-        $this->assertSame(6, $xpath->query('//*[@id="personalDetailsContent"]//input | //*[@id="personalDetailsContent"]//select')->length);
+        $this->assertSame('', $xpath->query('//*[@id="nationality"]')->item(0)->getAttribute('value'));
+        $this->assertSame(9, $xpath->query('//*[@id="personalDetailsContent"]//input | //*[@id="personalDetailsContent"]//select')->length);
     }
 
-    public function test_personal_details_open_for_returned_values_but_not_the_default_nationality(): void
+    public function test_personal_details_open_for_returned_values_including_nationality(): void
     {
         foreach ([
-            [['nationality' => 'Filipino'], 'false'],
+            [['nationality' => 'Filipino'], 'true'],
             [['nationality' => 'Canadian'], 'true'],
             [['birth_place' => 'Danao'], 'true'],
             [['marital_status' => 'married', 'spouse_name' => 'Test Spouse'], 'true'],
@@ -71,13 +72,13 @@ class PublicApplicationEducationTest extends TestCase
     {
         $program = Program::factory()->create();
         $this->get(route('public.application.create'))->assertOk();
-        $this->from(route('public.application.create'))->post(route('public.application.store'), [
+        $this->from(route('public.application.create'))->post(route('public.application.store'), $this->admissionPayload([
             'submission_token' => $this->app['session.store']->get('public_application_submission_token'),
             'academic_status' => 'new_student', 'program_id' => $program->id,
             'first_name' => 'Test', 'last_name' => 'Applicant', 'gender' => 'female',
             'birthdate' => '2005-01-01', 'email' => 'optional-error@example.test', 'ack_enrollment' => 'on',
             'marital_status' => 'invalid-status',
-        ])->assertRedirect(route('public.application.create'))->assertSessionHasErrors('marital_status');
+        ]))->assertRedirect(route('public.application.create'))->assertSessionHasErrors('marital_status');
         $response = $this->get(route('public.application.create'))->assertOk();
         $xpath = $this->personalFormXPath($response->getContent());
         $this->assertSame('true', $xpath->query('//*[@id="personalDetailsToggle"]')->item(0)->getAttribute('aria-expanded'));
@@ -122,12 +123,12 @@ class PublicApplicationEducationTest extends TestCase
         foreach ($cases as $type => $specificFields) {
             $email = $type . '@example.test';
             $this->get(route('public.application.create'))->assertOk();
-            $this->post(route('public.application.store'), array_merge([
+            $this->post(route('public.application.store'), $this->admissionPayload(array_merge([
                 'academic_status' => $type,
                 'program_id' => $program->id,
                 'submission_token' => $this->app['session.store']->get('public_application_submission_token'),
                 'first_name' => 'Test',
-                'last_name' => ucfirst($type),
+                'last_name' => ucwords(str_replace('_', ' ', $type)),
                 'gender' => 'female',
                 'birthdate' => '2005-01-01',
                 'email' => $email,
@@ -143,7 +144,7 @@ class PublicApplicationEducationTest extends TestCase
                 'most_recent_school' => 'Danao National High School',
                 'school_year_completed' => '2024-2025',
                 'school_location' => 'Danao, Bohol',
-            ], $specificFields))
+            ], $specificFields)))
                 ->assertRedirect(route('public.application.success'));
 
             $application = Application::where('email', $email)->firstOrFail();
@@ -190,16 +191,16 @@ class PublicApplicationEducationTest extends TestCase
             ->assertSee('aria-label="Application steps"', false)
             ->assertDontSee('id="wizardBar"', false)
             ->assertDontSee('id="wizCurrentStep"', false)
-            ->assertSee('aria-controls="screeningNoticeContent"', false)
+            ->assertDontSee('screeningNoticeContent')
             ->assertSee('aria-expanded="false"', false)
-            ->assertSee('Application notice')
+            ->assertDontSee('Application notice')
             ->assertSee('type="text" name="honorific"', false)
             ->assertSee('type="text" name="suffix"', false)
             ->assertDontSee('Optional name details')
             ->assertSee('id="identity-details-heading"', false)
             ->assertSee('id="personal-additional-heading"', false);
 
-        $this->post(route('public.application.store'), [
+        $this->post(route('public.application.store'), $this->admissionPayload([
             'submission_token' => $this->app['session.store']->get('public_application_submission_token'),
             'academic_status' => 'new_student',
             'program_id' => $program->id,
@@ -214,7 +215,7 @@ class PublicApplicationEducationTest extends TestCase
             'birthdate' => '2005-01-01',
             'email' => 'MiXeD@example.test',
             'ack_enrollment' => 'on',
-        ])->assertRedirect(route('public.application.success'));
+        ]))->assertRedirect(route('public.application.success'));
 
         $application = Application::where('email', 'MiXeD@example.test')->firstOrFail();
         $stored = DB::table('applications')->where('id', $application->id)->first();
@@ -258,7 +259,7 @@ class PublicApplicationEducationTest extends TestCase
             'pwd_id' => 'pwd-00Ab-19',
             'most_recent_school' => 'danao national high school',
             'school_location' => 'remedios, bohol',
-            'school_year_completed' => ' 2024–2025 ',
+            'school_year_completed' => ' 2024-2025 ',
             'home_institution' => 'danao community college',
             'home_program' => 'bs information systems',
             'last_year_level' => ' 2ND year, 1st SEMESTER ',
@@ -269,7 +270,7 @@ class PublicApplicationEducationTest extends TestCase
             'ack_enrollment' => 'on',
         ];
 
-        $this->post(route('public.application.store'), $payload)
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.success'));
 
         $application = Application::where('first_name', 'Juan')->firstOrFail();
@@ -277,7 +278,7 @@ class PublicApplicationEducationTest extends TestCase
 
         $this->assertSame('Purok 2 Remedios Danao Bohol, Near St. John Clinic.', $stored->current_address);
         $this->assertSame('Remedios Danao Bohol', $stored->city);
-        $this->assertSame('United States Of America', $stored->country);
+        $this->assertSame('United States', $stored->country);
         $this->assertSame('Poblacion 2', $stored->barangay);
         $this->assertSame('Roman Catholic', $stored->religion);
         $this->assertSame('Filipino', $stored->nationality);
@@ -296,7 +297,7 @@ class PublicApplicationEducationTest extends TestCase
         $this->assertSame('06004', $stored->postal_code);
         $this->assertSame('001234567890', $stored->lrn);
         $this->assertSame('pwd-00Ab-19', $stored->pwd_id);
-        $this->assertSame('2024–2025', $stored->school_year_completed);
+        $this->assertSame('2024-2025', $stored->school_year_completed);
 
         $registrar = $this->makeUserWithRole('registrar');
         $this->actingAs($registrar)
@@ -307,7 +308,48 @@ class PublicApplicationEducationTest extends TestCase
             ->assertSee('Danao Community College');
     }
 
-    public function test_education_details_are_optional_for_all_five_types_and_submission_requires_the_acknowledgment(): void
+    public function test_existing_historical_school_year_values_are_displayed_without_rewriting(): void
+    {
+        $application = Application::create([
+            'reference_no' => 'DTC-HISTORICAL-SCHOOL-YEAR',
+            'program_id' => Program::factory()->create()->id,
+            'first_name' => 'Juan',
+            'last_name' => 'Cruz',
+            'email' => 'historical-school-year@example.test',
+            'school_year_completed' => '2024–2025',
+        ]);
+
+        $this->actingAs($this->makeUserWithRole('registrar'))
+            ->get(route('registrar.applications.show', $application))
+            ->assertOk()
+            ->assertSee('Last School Year Attended')
+            ->assertSee('2024–2025');
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'school_year_completed' => '2024–2025',
+        ]);
+
+        $singleYearApplication = Application::create([
+            'reference_no' => 'DTC-HISTORICAL-SINGLE-YEAR',
+            'program_id' => Program::factory()->create()->id,
+            'first_name' => 'Maria',
+            'last_name' => 'Santos',
+            'email' => 'historical-single-year@example.test',
+            'school_year_completed' => '2024',
+        ]);
+
+        $this->get(route('registrar.applications.show', $singleYearApplication))
+            ->assertOk()
+            ->assertSee('2024');
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $singleYearApplication->id,
+            'school_year_completed' => '2024',
+        ]);
+    }
+
+    public function test_valid_education_minimums_for_all_five_types_still_require_acknowledgment(): void
     {
         $program = Program::factory()->create();
         foreach (['new_student', 'transferee', 'shiftee', 'returnee', 'cross_enrollee'] as $type) {
@@ -315,7 +357,7 @@ class PublicApplicationEducationTest extends TestCase
                 'academic_status' => $type,
                 'program_id' => $program->id,
                 'first_name' => 'Optional',
-                'last_name' => ucfirst($type),
+                'last_name' => ucwords(str_replace('_', ' ', $type)),
                 'gender' => 'male',
                 'birthdate' => '2005-01-01',
                 'email' => $type . '-optional-education@example.test',
@@ -324,9 +366,9 @@ class PublicApplicationEducationTest extends TestCase
 
             $this->get(route('public.application.create'))->assertOk();
             $payload['submission_token'] = $this->app['session.store']->get('public_application_submission_token');
-            $this->post(route('public.application.store'), $payload)
+            $this->post(route('public.application.store'), $this->admissionPayload($payload))
                 ->assertRedirect(route('public.application.success'));
-            $this->assertNull(Application::where('email', $payload['email'])->firstOrFail()->most_recent_school);
+            $this->assertSame('Example School', Application::where('email', $payload['email'])->firstOrFail()->most_recent_school);
         }
 
         $payload = [
@@ -342,7 +384,7 @@ class PublicApplicationEducationTest extends TestCase
         $this->get(route('public.application.create'))->assertOk();
         $payload['submission_token'] = $this->app['session.store']->get('public_application_submission_token');
         $this->from(route('public.application.create'))
-            ->post(route('public.application.store'), $payload)
+            ->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.create'))
             ->assertSessionHasErrors('ack_enrollment');
         $this->assertDatabaseMissing('applications', ['email' => $payload['email']]);
@@ -367,14 +409,14 @@ class PublicApplicationEducationTest extends TestCase
         $this->get(route('public.application.create'))->assertOk();
         $payload['submission_token'] = $this->app['session.store']->get('public_application_submission_token');
         $this->from(route('public.application.create'))
-            ->post(route('public.application.store'), $payload)
+            ->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.create'))
             ->assertSessionHasErrors('previous_program');
         $this->assertDatabaseMissing('applications', ['email' => $payload['email']]);
 
         $payload['email'] = 'irrelevant-field@example.test';
         $payload['previous_program'] = 'Previous program';
-        $this->post(route('public.application.store'), $payload)
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.success'));
         $this->assertNull(Application::where('email', $payload['email'])->firstOrFail()->shs_strand);
     }
@@ -401,14 +443,14 @@ class PublicApplicationEducationTest extends TestCase
                 $this->get(route('public.application.create'))->assertOk();
                 $payload['submission_token'] = $this->app['session.store']->get('public_application_submission_token');
                 $this->from(route('public.application.create'))
-                    ->post(route('public.application.store'), $payload)
+                    ->post(route('public.application.store'), $this->admissionPayload($payload))
                     ->assertRedirect(route('public.application.create'))
                     ->assertSessionHasErrors($missingField);
             }
         }
     }
 
-    public function test_admission_form_renders_the_six_step_sections_and_education_inputs(): void
+    public function test_admission_form_renders_the_eight_step_sections_and_education_inputs(): void
     {
         $this->get(route('public.application.create'))
             ->assertOk()
@@ -416,10 +458,12 @@ class PublicApplicationEducationTest extends TestCase
             ->assertSee('Educational Background')
             ->assertSee('most_recent_school')
             ->assertSee('home_institution')
-            ->assertSee('Family &amp; Supporting Documents', false)
+            ->assertSee('Family Information')
+            ->assertSee('Supporting Documents')
+            ->assertSee('Current Address')
             ->assertSee('id="educationHeading"', false)
             ->assertSee('id="educationDescription"', false)
-            ->assertSee('All other fields are optional and can be left blank.')
+            ->assertSee('Other fields are optional.')
             ->assertDontSee('(Optional)')
             ->assertSee('By clicking <strong>Continue</strong>, you confirm accurate details', false)
             ->assertSee('type="hidden" id="ack_enrollment" name="ack_enrollment" value=""', false)
@@ -431,7 +475,7 @@ class PublicApplicationEducationTest extends TestCase
     {
         $program = Program::factory()->create();
         $this->get(route('public.application.create'))->assertOk()
-            ->assertSee('No parent details? Add a guardian instead.')
+            ->assertSee('Parent and guardian details are optional.')
             ->assertSee('name="guardian_name"', false);
         $payload = [
             'submission_token' => $this->app['session.store']->get('public_application_submission_token'),
@@ -441,7 +485,7 @@ class PublicApplicationEducationTest extends TestCase
             'ack_enrollment' => 'on', 'guardian_name' => '  mARIA rEYES ',
             'guardian_contact' => ' 09171234567 ',
         ];
-        $this->post(route('public.application.store'), $payload)
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertSessionHasNoErrors()->assertRedirect(route('public.application.success'));
         $application = Application::where('email', $payload['email'])->firstOrFail();
         $this->assertSame('Maria Reyes', $application->guardian_name);
@@ -457,14 +501,14 @@ class PublicApplicationEducationTest extends TestCase
     {
         $program = Program::factory()->create();
         $this->get(route('public.application.create'))->assertOk();
-        $this->from(route('public.application.create'))->post(route('public.application.store'), [
+        $this->from(route('public.application.create'))->post(route('public.application.store'), $this->admissionPayload([
             'submission_token' => $this->app['session.store']->get('public_application_submission_token'),
             'academic_status' => 'new_student', 'program_id' => $program->id,
             'first_name' => 'Juan', 'last_name' => 'Cruz', 'gender' => 'male',
             'birthdate' => '2005-01-01', 'email' => 'invalid-guardian@example.test',
             'ack_enrollment' => 'on', 'guardian_name' => str_repeat('a', 256),
             'guardian_contact' => str_repeat('1', 51),
-        ])->assertSessionHasErrors(['guardian_name', 'guardian_contact']);
+        ]))->assertSessionHasErrors(['guardian_name', 'guardian_contact']);
         $response = $this->get(route('public.application.create'))->assertOk();
         $xpath = $this->personalFormXPath($response->getContent());
         $this->assertTrue($xpath->query('//*[@id="guardianDetails"]')->item(0)->hasAttribute('open'));
@@ -489,12 +533,12 @@ class PublicApplicationEducationTest extends TestCase
             'ack_enrollment' => 'on',
         ];
 
-        $this->post(route('public.application.store'), $payload)
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.success'));
 
         $this->withSession(['public_application_submission_token' => $token])
             ->from(route('public.application.create'))
-            ->post(route('public.application.store'), $payload)
+            ->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.create'))
             ->assertSessionHasErrors('application');
 

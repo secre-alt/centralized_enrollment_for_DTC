@@ -17,17 +17,17 @@
 
                 <a href="{{ route('landing') }}"
                 class="{{ request()->routeIs('landing') ? 'active' : '' }}">
-                    Home
+                    {{ __('ui.navigation.home') }}
                 </a>
 
                 <a href="{{ route('public.application.create') }}"
                 class="{{ request()->routeIs('public.application.create') ? 'active' : '' }}">
-                    Admissions
+                    {{ __('ui.navigation.admissions') }}
                 </a>
 
                 <a href="{{ route('public.application.status.form') }}"
                 class="{{ request()->routeIs('public.application.status.form') ? 'active' : '' }}">
-                    Check Status
+                    {{ __('ui.navigation.check_status') }}
                 </a>
 
             </div>
@@ -38,22 +38,22 @@
                     type="button"
                     id="darkModeToggle"
                     class="theme-toggle-btn"
-                    aria-label="Enable dark mode"
+                    aria-label="{{ __('ui.navigation.enable_dark_mode') }}"
                     aria-pressed="false"
-                    title="Enable dark mode">
+                    title="{{ __('ui.navigation.enable_dark_mode') }}">
                     <i data-lucide="moon" id="darkModeIcon" aria-hidden="true"></i>
                 </button>
             </div>
 
             <button type="button" class="public-signin" data-signin-modal="trigger">
-                <i data-lucide="arrow-right"></i> Sign in
+                <i data-lucide="arrow-right"></i> {{ __('ui.navigation.sign_in') }}
             </button>
             
             <button
                 type="button"
                 class="public-navbar-toggle"
                 id="applicationNavbarToggle"
-                aria-label="Toggle navigation"
+                aria-label="{{ __('ui.navigation.toggle_navigation') }}"
                 aria-controls="applicationMobileNav"
                 aria-expanded="false"
             >
@@ -66,21 +66,21 @@
 
             <a href="{{ route('landing') }}"
             class="{{ request()->routeIs('landing') ? 'active' : '' }}">
-                Home
+                {{ __('ui.navigation.home') }}
             </a>
 
             <a href="{{ route('public.application.create') }}"
             class="{{ request()->routeIs('public.application.create') ? 'active' : '' }}">
-                Admissions
+                {{ __('ui.navigation.admissions') }}
             </a>
 
             <a href="{{ route('public.application.status.form') }}"
             class="{{ request()->routeIs('public.application.status.form') ? 'active' : '' }}">
-                Check Status
+                {{ __('ui.navigation.check_status') }}
             </a>
 
             <button type="button" class="public-signin" data-signin-modal="trigger">
-                <i data-lucide="arrow-right"></i> Sign in
+                <i data-lucide="arrow-right"></i> {{ __('ui.navigation.sign_in') }}
             </button>
 
         </div>

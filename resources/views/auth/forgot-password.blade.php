@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.pwa-head')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password — DTC EMS</title>
+    <title>{{ __('ui.auth.forgot_title') }} — DTC EMS</title>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     @include('partials.auth-appearance')
 </head>
@@ -22,7 +22,7 @@
             </div>
         </div>
         <p class="auth-card-tagline">
-            Reset your <span>password.</span>
+            {{ __('ui.auth.forgot_tagline') }} <span>{{ __('ui.auth.password_word') }}</span>
         </p>
     </div>
 
@@ -31,20 +31,20 @@
 
         @if (session('status'))
             <div class="auth-alert auth-alert--success" role="status">
-                <div>{{ session('status') }}<p class="auth-message-help">No email? Check your spam folder or try again later.</p></div>
+                <div>{{ session('status') }}<p class="auth-message-help">{{ __('ui.auth.email_help') }}</p></div>
             </div>
         @endif
 
-        <h1 class="auth-card-title">Forgot password?</h1>
+        <h1 class="auth-card-title">{{ __('ui.auth.forgot_title') }}</h1>
         <p class="auth-card-subtitle">
-            Enter your account email.
+            {{ __('ui.auth.enter_account_email') }}
         </p>
 
         <form method="POST" action="{{ route('password.email') }}" data-link-request>
             @csrf
 
             <div class="auth-field">
-                <label for="email" class="auth-label">Email address</label>
+                <label for="email" class="auth-label">{{ __('ui.auth.email') }}</label>
                 <div class="auth-input-wrap">
                     <i data-lucide="mail" class="auth-input-icon" aria-hidden="true"></i>
                     <input
@@ -52,7 +52,7 @@
                         name="email"
                         id="email"
                         class="auth-input @error('email') auth-input--error @enderror"
-                        placeholder="Enter your registered email"
+                        placeholder="{{ __('ui.auth.registered_email') }}"
                         value="{{ old('email') }}"
                         autocomplete="email"
                         required
@@ -67,15 +67,15 @@
                 @enderror
             </div>
 
-            <button type="submit" class="auth-btn" data-loading-text="Sending link…">
-                Send reset link
+            <button type="submit" class="auth-btn" data-loading-text="{{ __('ui.auth.sending') }}">
+                {{ __('ui.auth.send_reset') }}
             </button>
         </form>
 
         <div style="text-align:center; margin-bottom: 4px;">
             <a href="{{ route('landing') }}" class="auth-back">
                 <i data-lucide="arrow-left"></i>
-                Back to Sign In
+                {{ __('ui.auth.back_sign_in') }}
             </a>
         </div>
 
@@ -83,7 +83,7 @@
 
     {{-- ── Footer ───────────────────────────────────────── --}}
     <div class="auth-card-footer">
-        <p class="auth-card-copyright">© {{ date('Y') }} Danao Technological College</p>
+        <p class="auth-card-copyright">{{ __('ui.auth.copyright', ['year' => date('Y')]) }}</p>
     </div>
 
 </div>

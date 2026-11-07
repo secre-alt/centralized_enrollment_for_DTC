@@ -10,6 +10,7 @@ use Tests\TestCase;
 
 class PublicApplicationSubmissionRateLimitTest extends TestCase
 {
+    use \Tests\AdmissionTestPayload;
     use RefreshDatabase;
 
     public function test_valid_submissions_are_allowed_up_to_the_ip_limit_and_fresh_forms_do_not_reset_it(): void
@@ -25,14 +26,14 @@ class PublicApplicationSubmissionRateLimitTest extends TestCase
                 'academic_status' => 'new_student',
                 'program_id' => $program->id,
                 'first_name' => 'Applicant',
-                'last_name' => 'Number ' . $number,
+                'last_name' => $number === 1 ? 'Santos' : 'Reyes',
                 'gender' => 'female',
                 'birthdate' => '2005-01-01',
                 'email' => 'applicant' . $number . '@example.test',
                 'ack_enrollment' => 'on',
             ];
 
-            $this->post(route('public.application.store'), $payload)
+            $this->post(route('public.application.store'), $this->admissionPayload($payload))
                 ->assertRedirect(route('public.application.success'));
         }
 
@@ -41,7 +42,7 @@ class PublicApplicationSubmissionRateLimitTest extends TestCase
         $payload['submission_token'] = $this->app['session.store']->get('public_application_submission_token');
         $payload['email'] = 'applicant3@example.test';
 
-        $this->post(route('public.application.store'), $payload)->assertStatus(429);
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))->assertStatus(429);
         $this->assertSame(2, Application::count());
     }
 
@@ -63,9 +64,9 @@ class PublicApplicationSubmissionRateLimitTest extends TestCase
             'ack_enrollment' => 'on',
         ];
 
-        $this->post(route('public.application.store'), $payload)
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertRedirect(route('public.application.success'));
-        $this->post(route('public.application.store'), $payload)
+        $this->post(route('public.application.store'), $this->admissionPayload($payload))
             ->assertSessionHasErrors('application');
 
         $this->assertSame(1, Application::count());

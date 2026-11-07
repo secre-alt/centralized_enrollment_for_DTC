@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     @include('partials.pwa-head')
@@ -74,8 +74,7 @@
         FOOTER
     ========================================================== --}}
     <footer class="site-footer">
-        © {{ date('Y') }} Danao Technological College —
-        Enrollment Management System. All rights reserved.
+        {{ __('ui.public.footer', ['year' => date('Y')]) }}
     </footer>
 
 

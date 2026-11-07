@@ -1,5 +1,8 @@
 @php
     $subjectCount = count($subjects);
+    $canReview = $enrollment->status === 'pending'
+        && $enrollment->is_paid
+        && $enrollment->payment?->status === 'verified';
 @endphp
 
 <div id="review-content">
@@ -14,8 +17,12 @@
             </div>
         </div>
         <div class="dtc-review-header-right">
-            @if($enrollment->is_paid)
+            @if($canReview)
+                <span class="dtc-status-badge is-success"><span class="dtc-status-dot"></span> Paid — Ready for Review</span>
+            @elseif($enrollment->is_paid)
                 <span class="dtc-status-badge is-success"><span class="dtc-status-dot"></span> Enrolled &amp; Paid</span>
+            @elseif($enrollment->status === 'pending')
+                <span class="dtc-status-badge is-warning"><span class="dtc-status-dot"></span> Awaiting Cashier</span>
             @elseif($enrollment->status === 'approved')
                 <span class="dtc-status-badge is-info"><span class="dtc-status-dot"></span> Approved — Awaiting Payment</span>
             @elseif($enrollment->status === 'rejected')
@@ -83,6 +90,15 @@
         <div class="dtc-review-section">
             @if($classification === 'transferee')
                 <p class="u-text-secondary-sm">Transferee: verify the selected subjects against evaluated transfer records before approval. Admission classification and subject selection are separate.</p>
+            @endif
+            @if($canReview)
+                <div class="dtc-payment-info-notice">
+                    The Cashier has verified payment. Review the selected subjects before approving. If you reject this enrollment, the student must arrange a refund directly with the Cashier.
+                </div>
+            @elseif($enrollment->status === 'pending')
+                <div class="dtc-payment-info-notice">
+                    Registrar review is available after the Cashier verifies the enrollment fee.
+                </div>
             @endif
             <div class="dtc-review-section-title">
                 <span><i data-lucide="book"></i> Selected Subjects</span>
@@ -278,6 +294,7 @@
         <div class="dtc-review-footer-default">
             <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Close</button>
 
+            @if($canReview)
             <div class="dtc-review-footer-right">
                 <button type="button" class="dtc-btn dtc-btn-outline-danger dtc-review-reject-trigger"
                         data-target="rejectPanel-{{ $enrollment->id }}">
@@ -301,8 +318,10 @@
                     </button>
                 </form>
             </div>
+            @endif
         </div>
 
+        @if($canReview)
         <div class="dtc-review-footer-reject u-hidden" >
             <div class="rg-rejection-buttons">
             <button type="button" class="dtc-btn dtc-btn-secondary dtc-review-reject-cancel">Cancel</button>
@@ -311,6 +330,7 @@
             </button>
             </div>
         </div>
+        @endif
 
     </div>
 </div>

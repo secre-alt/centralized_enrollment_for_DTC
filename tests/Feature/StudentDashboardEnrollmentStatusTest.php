@@ -101,7 +101,7 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
             ->assertViewHas('latestEnrollment', fn ($enrollment) => $enrollment->is($current))
             ->assertViewHas('currentTermEnrollment', fn ($enrollment) => $enrollment->is($current))
             ->assertSee('1 of 5 complete')
-            ->assertSee('Await Registrar Review')
+            ->assertSee('Pay Enrollment Fee')
             ->assertDontSee('All steps completed! You are officially enrolled.');
     }
 
@@ -172,10 +172,10 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
             ->assertSee(route('portal.enrollment.create'));
     }
 
-    public function test_pending_enrollment_is_shown_as_under_registrar_review(): void
+    public function test_unpaid_pending_enrollment_prompts_payment_before_registrar_review(): void
     {
         $student = $this->makeUserWithRole('student');
-        Enrollment::factory()->pending()->create([
+        $enrollment = Enrollment::factory()->pending()->create([
             'user_id' => $student->id,
             'is_paid' => false,
         ]);
@@ -183,9 +183,30 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
         $this->actingAs($student)->get(route('portal.dashboard'))
             ->assertOk()
             ->assertSee('In Progress')
-            ->assertSee('Await Registrar Review')
+            ->assertSee('Pay Enrollment Fee')
+            ->assertSee(route('portal.enrollment.payment-info', $enrollment))
             ->assertSee('data-step-state="active"', false)
             ->assertDontSee('All steps completed! You are officially enrolled.');
+    }
+
+    public function test_verified_payment_waits_for_registrar_review_before_enrollment_is_complete(): void
+    {
+        $student = $this->makeUserWithRole('student');
+        $enrollment = Enrollment::factory()->pending()->create([
+            'user_id' => $student->id,
+            'is_paid' => true,
+        ]);
+        Payment::factory()->create([
+            'enrollment_id' => $enrollment->id,
+            'status' => 'verified',
+            'verified_at' => now(),
+        ]);
+
+        $this->actingAs($student)->get(route('portal.enrollment.index'))
+            ->assertOk()
+            ->assertSee('Registrar review in progress')
+            ->assertSee('Your payment is confirmed. The Registrar is reviewing your selected subjects.')
+            ->assertDontSee('You are officially enrolled for this semester.');
     }
 
     public function test_rejected_payment_is_not_shown_as_confirmed_or_enrolled(): void
@@ -231,7 +252,8 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
         $this->actingAs($student)->get(route('portal.dashboard'))
             ->assertOk()
             ->assertSee('Enrolled')
-            ->assertSee('Your payment is confirmed.')
+            ->assertSee('Officially enrolled')
+            ->assertDontSee('dtc-profile-payment', false)
             ->assertSee('All steps completed! You are officially enrolled.');
     }
 
@@ -390,6 +412,36 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
             ->assertSee('Await Registrar Review')
             ->assertSee(route('portal.application.show'))
             ->assertDontSee('Not Found');
+    }
+
+    public function test_new_applicant_dashboard_does_not_show_previous_term_congratulations_during_new_enrollment(): void
+    {
+        $applicant = $this->makeUserWithRole('new_applicant');
+        $program = Program::factory()->create();
+        Application::create([
+            'reference_no' => 'DTC-TEST-APP-002',
+            'program_id' => $program->id,
+            'first_name' => 'Applicant',
+            'last_name' => 'Test',
+            'email' => $applicant->email,
+            'status' => 'approved',
+            'user_id' => $applicant->id,
+        ]);
+        \App\Models\Setting::set('current_school_year', '2026-2027');
+        \App\Models\Setting::set('current_semester', '2nd');
+        Enrollment::factory()->paid()->create([
+            'user_id' => $applicant->id,
+            'school_year' => '2026-2027',
+            'semester' => 1,
+        ]);
+
+        $this->actingAs($applicant)->get(route('portal.dashboard'))
+            ->assertOk()
+            ->assertSee('Official enrollment')
+            ->assertSee('Not Started')
+            ->assertSee('Proceed to Official Enrollment')
+            ->assertSee(route('portal.enrollment.create'))
+            ->assertDontSee('Congratulations! Your official enrollment is complete and paid.');
     }
 
     public function test_alumni_dashboard_summary_uses_real_document_request_data_and_next_action(): void

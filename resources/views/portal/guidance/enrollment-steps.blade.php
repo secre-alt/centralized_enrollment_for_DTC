@@ -13,9 +13,10 @@ $steps = [
  ['title'=>'Submit Application','desc'=>'Complete your pre-enrollment information and supporting documents.','done'=>(bool) $application],
  ['title'=>'Registrar Review','desc'=>'Your application and requirements are checked by the Registrar.','done'=>$application && in_array($application->status,['approved'])],
  ['title'=>'Official Enrollment','desc'=>'Submit your official enrollment and selected subjects.','done'=>(bool)$enrollment],
- ['title'=>'Enrollment Approval','desc'=>'Wait for the Registrar to review your enrollment.','done'=>$enrollment && $enrollment->status==='approved'],
- ['title'=>'Payment','desc'=>'Submit the required payment and proof for Cashier verification.','done'=>$enrollment && $enrollment->is_paid],
- ['title'=>'Enrollment Completed','desc'=>'Your account is fully enrolled for the current term.','done'=>$enrollment && $enrollment->is_paid],
+ ['title'=>'Payment','desc'=>'Pay at the Cashier or submit GCash proof before Registrar review.','done'=>$enrollment && $enrollment->is_paid],
+ ['title'=>'Cashier Verification','desc'=>'The Cashier verifies your payment before forwarding enrollment for subject review.','done'=>$enrollment && $enrollment->is_paid],
+ ['title'=>'Registrar Review','desc'=>'After payment verification, the Registrar reviews your selected subjects.','done'=>$enrollment && $enrollment->status==='approved'],
+ ['title'=>'Enrollment Completed','desc'=>'Your account is fully enrolled after payment verification and Registrar approval.','done'=>$enrollment && $enrollment->is_paid && $enrollment->status==='approved'],
 ];
 @endphp
 <div class="card"><div class="card-body"><div class="dtc-timeline">
