@@ -16,21 +16,33 @@
 <link rel="stylesheet" href="{{ asset('css/dtc-filters.css') }}">
 <link rel="stylesheet" href="{{ asset('css/registrar-workspace.css') }}">
 @endpush
+@push('js')<script src="{{ asset('js/dtc-filters.js') }}"></script>@endpush
 @section('content')
 <div class="registrar-workspace">
-<form method="GET" action="{{ route('registrar.enrollments.index') }}" class="dtc-fl" aria-label="Search and filter pending enrollments">
+@php
+    $listFilterCount = collect(['program_id', 'school_year', 'year_level', 'semester', 'classification', 'date_from', 'date_to'])->filter(fn ($key) => request()->filled($key))->count();
+@endphp
+<form data-dtc-filters method="GET" action="{{ route('registrar.enrollments.index') }}" class="dtc-fl dtc-fl-expanded" aria-label="Search and filter pending enrollments">
     <div class="dtc-fl-toolbar">
         <div class="dtc-pay-search dtc-fl-search">
             <i data-lucide="search" class="dtc-pay-search-icon" aria-hidden="true"></i>
-            <input type="search" name="search" class="dtc-pay-search-input" value="{{ request('search') }}" placeholder="Search student or program" aria-label="Search pending enrollments">
+            <input type="search" name="search" class="dtc-pay-search-input" data-dtc-filter-search value="{{ request('search') }}" placeholder="Search student or program" aria-label="Search pending enrollments">
         </div>
-        <button type="button" class="dtc-fl-toggle" data-toggle="collapse" data-target="#enrollmentFilters" aria-expanded="false" aria-controls="enrollmentFilters">
-            <i data-lucide="sliders-horizontal" aria-hidden="true"></i><span>Filters</span>
+        <button type="button" class="dtc-fl-toggle {{ $listFilterCount ? 'has-filters' : '' }}" data-dtc-filter-toggle data-toggle="collapse" data-target="#enrollmentFilters" aria-expanded="{{ $listFilterCount ? 'true' : 'false' }}" aria-controls="enrollmentFilters">
+            <i data-lucide="sliders-horizontal" aria-hidden="true"></i><span>Filters</span><span class="dtc-fl-count" data-dtc-filter-count @if(!$listFilterCount) hidden @endif>{{ $listFilterCount }}</span>
         </button>
         <button type="submit" class="sr-only">Search enrollments</button>
     </div>
-    <div class="collapse" id="enrollmentFilters">
+    <div class="collapse {{ $listFilterCount ? 'show' : '' }}" id="enrollmentFilters">
         <div class="dtc-fl-panel">
+@include('partials.list-select-filters', ['selectPrefix' => 'review', 'selectFilters' => [
+'program_id' => ['label' => 'Program', 'all' => 'All programs', 'options' => $programs->pluck('name', 'id')],
+'school_year' => ['label' => 'Academic year', 'all' => 'All academic years', 'options' => $academicFilters['school_year']->mapWithKeys(fn ($value) => [$value => $value])],
+'year_level' => ['label' => 'Year level', 'all' => 'All year levels', 'options' => $academicFilters['year_level']->mapWithKeys(fn ($value) => [$value => $value])],
+'semester' => ['label' => 'Semester', 'all' => 'All semesters', 'options' => $academicFilters['semester']->mapWithKeys(fn ($value) => [$value => $value])],
+'classification' => ['label' => 'Load classification', 'all' => 'All classifications', 'options' => ['regular' => 'Regular', 'irregular' => 'Irregular']],
+]])
+@include('partials.list-date-filters', ['datePrefix' => 'review', 'dateLabel' => 'Enrollment submitted'])
             @include('partials.table-rows', ['tableRecords' => $enrollments, 'tableId' => 'registrar-table-1', 'fixedRows' => true])
             <div class="dtc-fl-actions">
                 <button type="submit" class="btn btn-primary">Apply</button>
@@ -71,9 +83,9 @@
                     <td data-reg-label="Student Name">
                         <div  class="u-flex-center-gap-10">
                             <x-dtc.user-avatar :user="$enrollment->user" style="width:32px; height:32px; border-radius:50%;
-                                        background:linear-gradient(135deg,#0F4CDB,#1a5feb);
+                                        background:var(--dtc-primary);
                                         display:flex; align-items:center; justify-content:center;
-                                        color:#fff; font-weight:700; font-size:12px; flex-shrink:0;" />
+                                        color:#fff; font-weight:600; font-size:12px; flex-shrink:0;" />
                             <span style="font-size:13px; font-weight:500;">{{ $enrollment->user->name }}</span>
                         </div>
                     </td>
@@ -88,13 +100,13 @@
                     <td data-reg-label="Type">
                         @php $classification = $enrollment->resolveClassification(); @endphp
                         @if($classification !== 'new_student')
-                            <span class="dtc-status-badge is-info" style="font-size:10px;">{{ ucfirst(str_replace('_', ' ', $classification)) }}</span>
+                            <span class="dtc-status-badge is-info" style="font-size:12px;">{{ ucfirst(str_replace('_', ' ', $classification)) }}</span>
                         @endif
                         @if($enrollment->is_irregular)
-                            <span class="dtc-status-badge is-warning" style="font-size:10px;">Irregular</span>
+                            <span class="dtc-status-badge is-warning" style="font-size:12px;">Irregular</span>
                         @endif
                         @if($classification === 'new_student' && !$enrollment->is_irregular)
-                            <span class="u-text-muted" style="font-size:11px;">Regular</span>
+                            <span class="u-text-muted" style="font-size:12px;">Regular</span>
                         @endif
                     </td>
                     <td data-reg-label="Status">

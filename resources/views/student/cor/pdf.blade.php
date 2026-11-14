@@ -65,7 +65,11 @@
     </thead>
     <tbody>
         @forelse ($subjects as $subject)
-            @php $sched = $subject->schedules->first(); @endphp
+            @php
+                $assignment = $offeringAssignments[$subject->id] ?? null;
+                $sched = $assignment?->classSchedule ?? $subject->schedules->whereNull('section_code')->first();
+                $displaySubject = $assignment?->classSchedule->courseSubject ?? $subject;
+            @endphp
             <tr>
                 <td>
                     @if($sched)
@@ -75,8 +79,13 @@
                     @endif
                 </td>
                 <td>{{ $sched->room ?? 'TBA' }}</td>
-                <td><span class="badge">{{ $subject->subject_code }}</span></td>
-                <td>{{ $subject->subject_name }}</td>
+                <td><span class="badge">{{ $displaySubject->subject_code }}</span></td>
+                <td>
+                    {{ $displaySubject->subject_name }}
+                    @if($assignment)
+                        <br><small>Section {{ $sched->section_code }} · Hosted by {{ $sched->hostingProgram->name ?? $sched->courseSubject->program->name }}</small>
+                    @endif
+                </td>
                 <td>{{ rtrim(rtrim(number_format($subject->units, 1), '0'), '.') }}</td>
                 <td>{{ $sched->instructor_name ?? 'TBA' }}</td>
             </tr>

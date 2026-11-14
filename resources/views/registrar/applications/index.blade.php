@@ -28,10 +28,10 @@
 
 {{-- Search & Filter --}}
 @php
-    $appFilterCount = collect(['type', 'program_id', 'status'])->filter(fn ($k) => filled(request($k)))->count();
+    $appFilterCount = collect(['type', 'program_id', 'status', 'date_from', 'date_to'])->filter(fn ($k) => filled(request($k)))->count();
     $appHasFilters  = $appFilterCount > 0 || filled(request('search'));
 @endphp
-<form method="GET" action="{{ route('registrar.applications.index') }}" id="applications-filter-form" class="dtc-fl" data-dtc-filters aria-label="Filter applications">
+<form method="GET" action="{{ route('registrar.applications.index') }}" id="applications-filter-form" class="dtc-fl dtc-fl-expanded" data-dtc-filters aria-label="Filter applications">
     <div class="dtc-fl-toolbar">
         <div class="dtc-pay-search dtc-fl-search">
             <i data-lucide="search" class="dtc-pay-search-icon" aria-hidden="true"></i>
@@ -93,6 +93,7 @@
                     @endforeach
                 </select>
             </div>
+@include('partials.list-date-filters', ['datePrefix' => 'application', 'dateLabel' => 'Application submitted'])
             @include('partials.table-rows', ['tableRecords' => $applications, 'tableId' => 'registrar-table-1', 'fixedRows' => true])
 <div class="dtc-fl-actions">
                 <button type="submit" class="btn btn-primary">Apply</button>
@@ -301,6 +302,8 @@
     function buildUrl(extra) {
         var p = new URLSearchParams(extra || {});
         p.set('search', searchInput.value.trim());
+        p.set('date_from', document.querySelector('#application-date_from').value);
+        p.set('date_to', document.querySelector('#application-date_to').value);
         p.set('type',   typeSelect.value);
         p.set('status', statusSelect.value);
         p.set('program_id', programSelect.value);
@@ -320,6 +323,7 @@
     typeSelect.addEventListener('change',   fetchResults);
     statusSelect.addEventListener('change', fetchResults);
     programSelect.addEventListener('change', fetchResults);
+    document.querySelectorAll('#application-date_from, #application-date_to').forEach(function (field) { field.addEventListener('change', fetchResults); });
 
     // Form submit (Enter / Filter button)
     searchInput.closest('form').addEventListener('submit', function (e) {

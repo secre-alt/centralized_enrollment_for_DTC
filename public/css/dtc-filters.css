@@ -25,7 +25,7 @@ body.dtc-dark .dtc-fl-toggle.has-filters { border-color: rgba(108, 155, 255, .45
 
 .dtc-fl-count {
     min-width: 18px; height: 18px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 999px; background: var(--dtc-primary); color: #fff; font-size: 10px; font-weight: 700;
+    border-radius: 999px; background: var(--dtc-primary); color: #fff; font-size: 12px; font-weight: 600;
 }
 .dtc-fl-count[hidden] { display: none; }
 
@@ -62,6 +62,21 @@ body.dtc-dark .dtc-fl-toggle.has-filters { border-color: rgba(108, 155, 255, .45
     .dtc-fl-panel { grid-template-columns: 1fr; }
 }
 
+/* Expanded record filters share equal tracks and controls across staff/portal pages. */
+.dtc-fl.dtc-fl-expanded { margin: 0 0 24px; }
+.dtc-fl.dtc-fl-expanded .dtc-fl-toolbar { gap: 8px; }
+.dtc-fl.dtc-fl-expanded .dtc-fl-search { min-width: 0; max-width: none; }
+.dtc-fl.dtc-fl-expanded .dtc-fl-panel { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 24px; }
+.dtc-fl.dtc-fl-expanded .dtc-fl-field label { margin-bottom: 8px; font-size: 14px; line-height: 20px; }
+.dtc-fl.dtc-fl-expanded .form-control { min-width: 0; min-height: 44px; font-size: 14px; border-radius: 8px; }
+.dtc-fl.dtc-fl-expanded .dtc-fl-actions { gap: 8px; align-self: end; flex-wrap: wrap; }
+.dtc-fl.dtc-fl-expanded .dtc-fl-actions > :is(.btn, a) { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; margin: 0; padding: 10px 16px; }
+@media (max-width: 767.98px) {
+    .dtc-fl.dtc-fl-expanded .dtc-fl-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 16px; }
+}
+@media (max-width: 479.98px) {
+    .dtc-fl.dtc-fl-expanded .dtc-fl-panel { grid-template-columns: minmax(0, 1fr); }
+}
 @media (prefers-reduced-motion: reduce) {
     .dtc-fl-toggle { transition: none; }
 }

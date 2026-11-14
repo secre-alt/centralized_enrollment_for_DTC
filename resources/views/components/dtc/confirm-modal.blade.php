@@ -9,9 +9,6 @@
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <button type="button" class="dtc-confirm-close" id="dtcConfirmClose" aria-label="Close">
-                <i data-lucide="x" aria-hidden="true"></i>
-            </button>
             <div class="dtc-confirm-icon-wrap" aria-hidden="true">
                 <i data-lucide="info" id="dtcConfirmIcon"></i>
             </div>

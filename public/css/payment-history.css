@@ -2,7 +2,7 @@
 .dtc-payment-history { min-width: 0; }
 .dtc-payment-reference { overflow-wrap: anywhere; font-weight: 600; }
 .dtc-payment-amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.ph-sub { display: block; margin-top: 2px; color: var(--dtc-text-secondary); font-size: 11.5px; line-height: 1.4; }
+.ph-sub { display: block; margin-top: 2px; color: var(--dtc-text-secondary); font-size: 12px; line-height: 1.4; }
 
 /* ── Filters ─────────────────────────────────────────────── */
 .ph-toolbar { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
@@ -16,7 +16,7 @@
 .ph-filter-toggle svg { width: 16px; height: 16px; }
 .ph-filter-toggle:hover, .ph-filter-toggle[aria-expanded="true"], .ph-filter-toggle.has-filters { color: var(--dtc-primary); border-color: #BFDBFE; background: var(--dtc-primary-soft); }
 .ph-filter-toggle:focus-visible, .ph-view:focus-visible, .ph-ref-link:focus-visible, .ph-clear:focus-visible, .ph-back:focus-visible { outline: 3px solid rgba(15, 76, 219, .25); outline-offset: 2px; }
-.ph-filter-count { min-width: 18px; height: 18px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--dtc-primary); color: #fff; font-size: 10px; font-weight: 700; }
+.ph-filter-count { min-width: 18px; height: 18px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--dtc-primary); color: #fff; font-size: 12px; font-weight: 600; }
 
 .ph-advanced {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end;
@@ -41,7 +41,7 @@
 .ph-table .ph-action-col { width: 44px; }
 .ph-ref-link { color: var(--dtc-text); text-decoration: none; }
 .ph-ref-link:hover { color: var(--dtc-primary); }
-.ph-amount { font-weight: 700; color: var(--dtc-text); }
+.ph-amount { font-weight: 600; color: var(--dtc-text); }
 .ph-date { color: var(--dtc-text-secondary); white-space: nowrap; }
 .ph-related, .ph-payer { max-width: 240px; overflow-wrap: anywhere; }
 .ph-related { color: var(--dtc-text-secondary); }
@@ -54,13 +54,13 @@
 .ph-footer .pagination { margin: 0; flex-wrap: wrap; }
 
 /* ── Details ─────────────────────────────────────────────── */
-.ph-detail { max-width: 720px; }
+.ph-detail { width: 100%; min-width: 0; }
 .ph-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px; color: var(--dtc-text-secondary); font-size: 13px; font-weight: 600; text-decoration: none; }
 .ph-back:hover { color: var(--dtc-primary); }
 .ph-back svg { width: 16px; height: 16px; }
 .ph-summary { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px; margin-bottom: 14px; border: 1px solid var(--dtc-border-soft); border-radius: var(--dtc-radius-lg); background: var(--dtc-surface); box-shadow: var(--dtc-shadow-sm); }
 .ph-summary-main { min-width: 0; }
-.ph-summary-amount { margin-top: 4px; color: var(--dtc-text); font-size: 26px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.ph-summary-amount { margin-top: 4px; color: var(--dtc-text); font-size: 26px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
 .ph-summary-ref { margin-top: 4px; color: var(--dtc-text-secondary); font-size: 12.5px; }
 .ph-summary .dtc-status-badge { flex: 0 0 auto; }
 .ph-note { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; padding: 12px 14px; border: 1px solid var(--dtc-border); border-left-width: 3px; border-radius: 10px; background: var(--dtc-surface-soft); color: var(--dtc-text-secondary); font-size: 13px; line-height: 1.5; }
@@ -72,7 +72,7 @@
 .ph-facts > div:last-child { border-bottom: 0; }
 .ph-facts dt { color: var(--dtc-text-secondary); font-size: 12.5px; font-weight: 500; }
 .ph-facts dd { margin: 0; min-width: 0; color: var(--dtc-text); font-size: 13.5px; overflow-wrap: anywhere; }
-.ph-facts dd small { display: block; margin-top: 2px; color: var(--dtc-text-secondary); font-size: 11.5px; }
+.ph-facts dd small { display: block; margin-top: 2px; color: var(--dtc-text-secondary); font-size: 12px; }
 
 /* ── Mobile: each payment becomes one tappable card ─────── */
 @media (max-width: 767.98px) {
@@ -125,18 +125,25 @@
 .dtc-payment-history .ph-search { position:relative; max-width:none; min-width:0; }
 .dtc-payment-history .ph-search .dtc-pay-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); width:17px; height:17px; pointer-events:none; }
 .dtc-payment-history .ph-search input { height:44px; padding-left:42px; padding-right:38px; font-size:13px; }
-.dtc-payment-history .ph-status-bar { display:flex; flex-wrap:wrap; gap:7px; overflow:visible; padding:0; }
-.dtc-payment-history .ph-status-bar .dtc-filter-pill { flex:0 0 auto; padding:7px 11px; font-size:11px; }
-.dtc-payment-history .ph-advanced .dtc-table-rows { padding:0; }
-.dtc-payment-history .ph-advanced [data-table-rows-field] { display:flex; flex-direction:column; align-items:stretch; gap:6px; margin:0; font-size:12px; font-weight:600; color:var(--dtc-text-secondary); }
-.dtc-payment-history .ph-advanced select { min-height:42px; }
+.dtc-payment-history .ph-status-bar { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; overflow:visible; padding:0; }
+.dtc-payment-history .ph-status-bar .dtc-filter-pill { display:flex; align-items:center; justify-content:center; gap:6px; min-width:0; min-height:44px; padding:10px 8px; border:1px solid var(--dtc-border); border-radius:10px; background:var(--dtc-surface); color:var(--dtc-text-secondary); font-size:13px; font-weight:600; text-align:center; white-space:normal; line-height:1.35; }
+.dtc-payment-history .ph-status-bar .dtc-filter-pill.is-active { border-color:var(--dtc-primary); background:var(--dtc-primary); color:#fff; }
+.dtc-payment-history .ph-status-bar .dtc-filter-pill:not(.is-active):hover { border-color:var(--dtc-primary); background:var(--dtc-primary-soft); color:var(--dtc-primary); }
+.dtc-payment-history .ph-status-bar .dtc-filter-pill:focus-visible { outline:3px solid var(--dtc-primary); outline-offset:2px; }
+.ph-status-count { opacity:.65; font-variant-numeric:tabular-nums; }
+.dtc-payment-history .ph-advanced .dtc-table-rows { display:block; min-width:0; padding:0; }
+.dtc-payment-history .ph-advanced [data-table-rows-status]:empty { display:none; }
+.dtc-payment-history .ph-advanced [data-table-rows-field] { display:flex; flex-direction:column; align-items:stretch; width:100%; gap:6px; margin:0; font-size:12px; font-weight:600; line-height:18px; color:var(--dtc-text-secondary); }
+.dtc-payment-history .ph-field label { line-height:18px; }
+.dtc-payment-history .ph-advanced .form-control,
+.dtc-payment-history .ph-advanced select { width:100%; height:42px; min-height:42px; box-sizing:border-box; }
 .ph-list-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid var(--dtc-border-soft); }
 .ph-list-heading h2 { margin:0; color:var(--dtc-text); font-size:14px; font-weight:600; }
 .ph-list-heading > span { color:var(--dtc-text-muted); font-size:12px; }
 .ph-table-scroll { overflow-x:auto; }
 .ph-table { width:100%; margin:0; }
 .ph-table .ph-ref-link { font-weight:600; color:var(--dtc-primary); }
-.ph-table .ph-sub { display:block; margin-top:4px; font-size:11px; }
+.ph-table .ph-sub { display:block; margin-top:4px; font-size:12px; }
 .ph-table .ph-amount { font-variant-numeric:tabular-nums; }
 .ph-view { width:40px; height:40px; border:1px solid var(--dtc-border-soft); }
 .ph-detail .ph-summary { padding:24px; border-top:3px solid var(--dtc-primary); }
@@ -157,7 +164,7 @@
     .ph-table .ph-payer { order:1; grid-column:1/-1; margin:0; font-size:13px; }
     .ph-table .ph-related { order:2; grid-column:1/-1; margin:0; font-size:12px; color:var(--dtc-text-muted); }
     .ph-table .ph-amount { order:3; grid-column:1; padding-top:6px !important; font-size:19px; line-height:1.4; }
-    .ph-table .ph-date { order:3; grid-column:2; align-self:end; margin:0; padding-bottom:3px !important; font-size:11px; text-align:right; }
+    .ph-table .ph-date { order:3; grid-column:2; align-self:end; margin:0; padding-bottom:3px !important; font-size:12px; text-align:right; }
     .ph-table .ph-ref-link:focus-visible::after { outline:2px solid #60a5fa; outline-offset:-2px; border-radius:8px; }
     .ph-footer { justify-content:space-between; padding:14px 16px; text-align:left; }
     .ph-detail .ph-summary { padding:18px; gap:10px; }
@@ -189,3 +196,29 @@
         line-height:1.35;
     }
 }
+
+/* Compact additions to the existing student/alumni payment history. */
+.ph-history-exports { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin: 0; }
+.ph-history-exports .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border-radius: 8px; font-size: 14px; line-height: 22px; box-shadow: none !important; }
+.ph-summary-help { margin: 0 0 16px; color: var(--dtc-text-secondary); font-size: 12px; line-height: 20px; }
+.ph-summary-help > summary { width: fit-content; padding: 8px 0; cursor: pointer; }
+.ph-summary-help > summary:focus-visible { outline: 2px solid var(--dtc-on-primary-soft); outline-offset: 3px; }
+.ph-summary-help .ph-summary-note { margin: 4px 0 0; }
+@media (max-width: 575.98px) {
+    .content-header:has(.ph-history-exports) .dtc-page-actions { width: 100%; }
+    .ph-history-exports { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    .ph-history-exports .btn { width: 100%; min-width: 0; padding: 10px 12px; white-space: nowrap; }
+}
+.ph-totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 8px; }
+.ph-totals > div { min-width: 0; padding: 16px; border: 1px solid var(--dtc-border); border-radius: 12px; background: var(--dtc-surface); }
+.ph-totals h2 { margin: 0 0 8px; color: var(--dtc-text-secondary); font-size: 13px; font-weight: 500; line-height: 20px; }
+.ph-totals p { margin: 0; color: var(--dtc-text); font-size: 24px; font-weight: 500; line-height: 32px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.ph-summary-note { margin: 0 0 16px; color: var(--dtc-text-secondary); font-size: 12px; line-height: 20px; }
+.ph-receipt { align-self: flex-start; min-height: 44px; margin-bottom: 16px; padding: 10px 16px; border-radius: 8px; }
+@media (max-width: 575.98px) {
+    .ph-totals { gap: 8px; }
+    .ph-totals > div { padding: 12px; }
+    .ph-totals h2 { min-height: 40px; font-size: 12px; }
+    .ph-totals p { font-size: 18px; line-height: 24px; }
+}
+@media (max-width: 359.98px) { .ph-totals { grid-template-columns: 1fr; } .ph-totals h2 { min-height: 0; } }

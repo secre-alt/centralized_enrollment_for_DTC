@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'hero_title' => 'Your DTC Services.',
-    'hero_subtitle' => 'One Convenient Portal.',
-    'hero_description' => 'Manage your enrollment, certificate requests, appointments, and payments through one secure and centralized online platform.',
-    'hero_support' => 'Enroll. Request. Schedule. Pay. Everything you need, connected in one system.',
+    'hero_title' => 'Your next step',
+    'hero_subtitle' => 'at DTC',
+    'hero_description' => 'Apply for admission, manage your enrollment, request certificates, and track payments at Danao Technological College.',
+    'hero_support' => 'For applicants, students, and alumni',
     'apply' => 'Apply for Admission',
     'sign_in_account' => 'Sign in to your account',
     'new_here' => 'New here?',

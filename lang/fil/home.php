@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'hero_title' => 'Mga Serbisyo ng DTC.',
-    'hero_subtitle' => 'Isang Maginhawang Portal.',
-    'hero_description' => 'Pamahalaan ang iyong enrollment, mga kahilingan ng sertipiko, appointment, at bayad sa isang ligtas at pinagsama-samang online platform.',
-    'hero_support' => 'Mag-enroll. Humiling. Mag-iskedyul. Magbayad. Lahat ng kailangan mo ay magkakaugnay sa iisang sistema.',
+    'hero_title' => 'Ang susunod mong hakbang',
+    'hero_subtitle' => 'sa DTC',
+    'hero_description' => 'Mag-apply para sa admission, pamahalaan ang enrollment, humiling ng sertipiko, at subaybayan ang mga bayad sa Danao Technological College.',
+    'hero_support' => 'Para sa mga aplikante, estudyante, at alumni',
     'apply' => 'Mag-apply para sa Admission',
     'sign_in_account' => 'Mag-sign in sa iyong account',
     'new_here' => 'Bago ka rito?',

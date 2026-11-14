@@ -12,9 +12,18 @@
         <ul class="student-cor-list">
             @foreach($subjectPreview as $subject)
                 <li>
+                    @php
+                        $assignment = $offeringAssignments[$subject->id] ?? null;
+                        $displaySubject = $assignment?->classSchedule->courseSubject ?? $subject;
+                    @endphp
                     <div class="student-cor-subject">
-                        <span class="student-cor-code">{{ $subject->subject_code }}</span>
-                        <h3>{{ $subject->subject_name }}</h3>
+                        <span class="student-cor-code">{{ $displaySubject->subject_code }}</span>
+                        <h3>{{ $displaySubject->subject_name }}</h3>
+                        @if($assignment)
+                            <small class="d-block text-muted">
+                                Section {{ $assignment->classSchedule->section_code }} · Hosted by {{ $assignment->classSchedule->hostingProgram->name ?? $assignment->classSchedule->courseSubject->program->name }}
+                            </small>
+                        @endif
                     </div>
                     <span class="student-cor-units"><strong>{{ rtrim(rtrim(number_format($subject->units ?? 3, 1), '0'), '.') }}</strong> units</span>
                 </li>

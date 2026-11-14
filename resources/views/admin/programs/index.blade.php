@@ -143,14 +143,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Program Name</label>
-                        <input type="text" name="name" class="form-control"
+                        <label for="admin-programs-index-name-1">Program Name</label>
+                        <input id="admin-programs-index-name-1" type="text" name="name" class="form-control"
                                placeholder="e.g. BS Information Systems"
                                value="{{ old('name') }}" required>
                     </div>
                     <div class="form-group">
-                        <label>Program Code</label>
-                        <input type="text" name="code" class="form-control"
+                        <label for="admin-programs-index-code-2">Program Code</label>
+                        <input id="admin-programs-index-code-2" type="text" name="code" class="form-control"
                                placeholder="e.g. BSIS"
                                value="{{ old('code') }}" required>
                     </div>
@@ -182,11 +182,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Program Name</label>
+                        <label for="edit-program-name">Program Name</label>
                         <input type="text" name="name" id="edit-program-name" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label>Program Code</label>
+                        <label for="edit-program-code">Program Code</label>
                         <input type="text" name="code" id="edit-program-code" class="form-control" required>
                     </div>
                 </div>
@@ -204,7 +204,7 @@
 @if($errors->any())
 <script>
     $(function(){
-        @if($errors->has('subject_code') || $errors->has('subject_name') || $errors->has('year_level') || $errors->has('semester'))
+        @if($errors->has('subject_code') || $errors->has('subject_name') || $errors->has('classification') || $errors->has('year_level') || $errors->has('semester'))
             $('#addSubjectModal').modal('show');
         @elseif($errors->has('name') || $errors->has('code'))
             $('#addProgramModal').modal('show');

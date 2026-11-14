@@ -46,6 +46,12 @@
                         Record a refund only after confirming the full external refund was completed.
                     @endif
                 </p>
+                @if($enrollment->remarks)
+                    <p class="mb-2"><strong>Reason / Registrar note:</strong> {{ $enrollment->remarks }}</p>
+                @endif
+                @foreach($enrollment->replacementRequests->where('status', 'refund_requested') as $refundRequest)
+                    <p class="mb-2"><strong>Student refund reason:</strong> {{ $refundRequest->student_reason }}</p>
+                @endforeach
                 @foreach ($verifiedPayments as $verifiedPayment)
                     <div class="border-top pt-2 mt-2">
                         <div>Receipt {{ $verifiedPayment->receipt_no }} · ₱{{ number_format($verifiedPayment->amount, 2) }}</div>
@@ -109,12 +115,11 @@
                 </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center;
-                        margin-top:14px; padding-top:14px; border-top:1px dashed var(--dtc-border);">
+            <div class="dtc-payment-fee">
                 <span class="dtc-review-info-label u-text-sm" >Enrollment Fee</span>
-                <span style="font-size:22px; font-weight:800; color:#15803D;">
+                <strong>
                     ₱{{ number_format($fee, 2) }}
-                </span>
+                </strong>
             </div>
         </div>
 
@@ -177,10 +182,10 @@
     </div>
 
     {{-- ── Footer ─────────────────────────────────────────────────────── --}}
+    @if (! $enrollment->is_paid && (($latestPayment && $latestPayment->isPending() && $latestPayment->isGcash()) || ($outstandingTermPayments->isEmpty() && (! $latestPayment || $latestPayment->isRejected()))))
     <div class="dtc-review-footer">
 
         <div class="dtc-review-footer-default">
-            <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Close</button>
 
             @if (! $enrollment->is_paid && $latestPayment && $latestPayment->isPending() && $latestPayment->isGcash())
                 <div class="dtc-review-footer-right">
@@ -222,7 +227,7 @@
             @endif
         </div>
 
-        <div class="dtc-review-footer-reject u-hidden" >
+        <div class="dtc-review-footer-reject dtc-action-footer u-hidden" >
             <button type="button" class="dtc-btn dtc-btn-secondary dtc-review-reject-cancel">Cancel</button>
             <button type="button" class="dtc-btn dtc-btn-danger" data-dtc-confirm data-dtc-confirm-tone="danger" data-dtc-confirm-title="Reject payment?" data-dtc-confirm-message="The submitted GCash payment from {subject} will be rejected with the reason entered above." data-dtc-confirm-subject="{{ $enrollment->user->name }}" data-dtc-confirm-ok="Reject" data-dtc-confirm-form="#rejectForm-{{ $enrollment->id }}">
                 Confirm rejection
@@ -230,4 +235,5 @@
         </div>
 
     </div>
+    @endif
 </div>

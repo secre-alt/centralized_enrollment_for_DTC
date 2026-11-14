@@ -4,14 +4,13 @@
 @section('title', 'My Appointments')
 
 @section('content_header')
-    <div class="dr dr-head">
-        <div>
-            <h1>My appointments</h1>
-        </div>
-        <a href="{{ route('portal.appointments.create') }}" class="dr-btn dr-btn--primary">
+    <x-dtc.page-header title="My appointments" subtitle="Track document preparation, pickup schedules, and payments">
+        <x-slot name="actions">
+        <a href="{{ route('portal.appointments.create') }}" class="dtc-btn dtc-btn-primary">
             <i data-lucide="plus" aria-hidden="true"></i> Request a document
         </a>
-    </div>
+        </x-slot>
+    </x-dtc.page-header>
 @endsection
 
 @php
@@ -307,7 +306,7 @@
                         @method('PUT')
 
                         <div class="modal-header">
-                            <h5 class="modal-title" id="edit-title-{{ $appointment->id }}" style="font-size:14px; font-weight:700;">
+                            <h5 class="modal-title" id="edit-title-{{ $appointment->id }}" style="font-size:14px; font-weight:600;">
                                 <i data-lucide="pencil" style="width:16px;height:16px;margin-right:6px;"></i>
                                 Edit Appointment
                             </h5>
@@ -349,7 +348,7 @@
                                                 <div class="dtc-doc-icon">
                                                     <i data-lucide="{{ $doc['icon'] }}"></i>
                                                 </div>
-                                                <div class="dtc-doc-label" style="font-size:11px;">{{ $doc['label'] }}</div>
+                                                <div class="dtc-doc-label" style="font-size:12px;">{{ $doc['label'] }}</div>
                                             </div>
                                         </label>
                                     </div>
@@ -381,7 +380,7 @@
                                             <div class="dtc-slot-info">
                                                 <div class="dtc-slot-date">
                                                     {{ \Carbon\Carbon::parse($appointment->slot->date)->format('l, F d, Y') }}
-                                                    <span style="font-size:10px; color:var(--dtc-primary); font-weight:600; margin-left:6px;">Current</span>
+                                                    <span style="font-size:12px; color:var(--dtc-primary); font-weight:600; margin-left:6px;">Current</span>
                                                 </div>
                                                 <div class="dtc-slot-time">
                                                     <i data-lucide="clock" style="width:12px;height:12px;"></i>
@@ -465,16 +464,14 @@
 
                         </div>
 
-                        <div class="modal-footer" style="justify-content:space-between;">
-                            <div style="font-size:11px; color:var(--dtc-text-muted); display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="bell" style="width:12px;height:12px;"></i>
+                        <div class="modal-footer dtc-action-footer dtc-action-footer-with-note">
+                            <p class="dtc-action-footer-note">
                                 The Registrar will be notified of your changes.
-                            </div>
-                            <div style="display:flex; gap:8px;">
+                            </p>
+                            <div class="dtc-action-footer-buttons">
                                 <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
                                 <button type="submit" class="btn btn-primary btn-sm">
-                                    <i data-lucide="save" style="width:13px;height:13px;margin-right:4px;"></i>
-                                    Save Changes
+                                    Save changes
                                 </button>
                             </div>
                         </div>

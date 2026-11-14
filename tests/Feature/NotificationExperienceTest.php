@@ -151,6 +151,32 @@ class NotificationExperienceTest extends TestCase
         $this->get(route('cashier.payments.index', ['receipt' => 999999]))->assertOk()->assertDontSee('data-auto-receipt data-url=', false);
     }
 
+    public function test_payment_review_notifications_open_current_modal_for_staff_only(): void
+    {
+        $enrollment = Enrollment::factory()->create();
+        foreach (['cashier', 'admin'] as $role) {
+            $staff = $this->makeUserWithRole($role);
+            $notification = $this->notice($staff, ['link' => route('cashier.payments.show', $enrollment)]);
+            $url = route('cashier.payments.index', ['review' => $enrollment->id]);
+            $this->actingAs($staff)->get(route('notifications.open', $notification))->assertRedirect($url);
+            $this->get(route('notifications.read', $notification))->assertRedirect($url);
+            $this->get($url)->assertOk()
+                ->assertSee('data-auto-review-url="'.route('cashier.payments.show', $enrollment).'"', false);
+            $missing = $this->notice($staff, ['link' => route('cashier.payments.show', 999999)]);
+            $this->get(route('notifications.open', $missing))->assertRedirect(route('cashier.payments.index'));
+            $this->get(route('cashier.payments.index', ['review' => 999999]))->assertOk()
+                ->assertDontSee('data-auto-review-url=', false);
+            $this->getJson(route('cashier.payments.index', ['review' => 'invalid']))->assertUnprocessable();
+        }
+        foreach (['student', 'alumni', 'new_applicant', 'registrar'] as $role) {
+            $user = $this->makeUserWithRole($role);
+            $notification = $this->notice($user, ['link' => route('cashier.payments.show', $enrollment)]);
+            $this->actingAs($user)->get(route('notifications.open', $notification))
+                ->assertRedirect(route('notifications.index'));
+            $this->get(route('cashier.payments.index', ['review' => $enrollment->id]))->assertForbidden();
+        }
+    }
+
     public function test_every_role_can_poll_only_their_own_notifications_without_marking_read(): void
     {
         foreach (['admin', 'registrar', 'cashier', 'student', 'alumni', 'new_applicant'] as $role) {

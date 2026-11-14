@@ -9,6 +9,7 @@
         <p class="portal-payment-description">Year {{ $enrollment->year_level }} &middot; {{ $enrollment->semester }} Semester</p>
     </header>
     @if($enrollment->status === 'rejected' && $enrollment->is_paid)
+        @include('student.enrollment._refund-next-steps')
         <div class="alert alert-warning" role="alert">
             @if ($refundFullyConfirmed)
                 The Cashier recorded confirmation of the full refund. You may submit a fresh enrollment request for this term.

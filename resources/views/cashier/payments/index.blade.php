@@ -36,6 +36,7 @@
         'refunded'      => 'Refunded',
     ];
     $payFilterCount = ($filter && $filter !== 'all') ? 1 : 0;
+    $payFilterCount += collect(['program_id', 'school_year', 'year_level', 'semester', 'method', 'submitted_from', 'submitted_to'])->filter(fn ($key) => request()->filled($key))->count();
 @endphp
 <form method="GET" action="{{ route('cashier.payments.index') }}" id="payments-filter-form" class="dtc-fl" aria-label="Filter payments">
     <div class="dtc-fl-toolbar">
@@ -66,6 +67,40 @@
                     @endforeach
                 </select>
             </div>
+            <div class="dtc-fl-field">
+                <label for="filter-pay-program">Program</label>
+                <select name="program_id" id="filter-pay-program" class="form-control">
+                    <option value="">All programs</option>
+                    @foreach($programs as $program)
+                        <option value="{{ $program->id }}" @selected((string) request('program_id') === (string) $program->id)>{{ $program->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @foreach(['school_year' => 'Academic year', 'year_level' => 'Year level', 'semester' => 'Semester'] as $field => $label)
+                <div class="dtc-fl-field">
+                    <label for="filter-pay-{{ $field }}">{{ $label }}</label>
+                    <select name="{{ $field }}" id="filter-pay-{{ $field }}" class="form-control">
+                        <option value="">All {{ strtolower($label) }}s</option>
+                        @foreach($academicFilters[$field] as $value)
+                            <option value="{{ $value }}" @selected((string) request($field) === (string) $value)>{{ $value }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endforeach
+            <div class="dtc-fl-field">
+                <label for="filter-pay-method">Payment method</label>
+                <select name="method" id="filter-pay-method" class="form-control">
+                    <option value="">All methods</option>
+                    <option value="gcash" @selected(request('method') === 'gcash')>GCash</option>
+                    <option value="walk_in" @selected(request('method') === 'walk_in')>Walk-in / Cash</option>
+                </select>
+            </div>
+            @foreach(['submitted_from' => 'Enrollment submitted from', 'submitted_to' => 'Enrollment submitted through'] as $field => $label)
+                <div class="dtc-fl-field">
+                    <label for="filter-pay-{{ $field }}">{{ $label }}</label>
+                    <input type="date" name="{{ $field }}" id="filter-pay-{{ $field }}" class="form-control" value="{{ request($field) }}">
+                </div>
+            @endforeach
             @include('partials.table-rows', ['tableRecords' => $enrollments, 'tableId' => 'enrollment-payments-table', 'fixedRows' => true])
             <div class="dtc-fl-actions">
                 <button type="submit" class="btn btn-primary">Apply</button>
@@ -103,9 +138,9 @@
                     <td>
                         <div  class="u-flex-center-gap-10">
                             <x-dtc.user-avatar :user="$enrollment->user" style="width:32px; height:32px; border-radius:50%;
-                                        background:linear-gradient(135deg,#22C55E,#059669);
+                                        background:var(--dtc-primary);
                                         display:flex; align-items:center; justify-content:center;
-                                        color:#fff; font-weight:700; font-size:12px; flex-shrink:0;" />
+                                        color:#fff; font-weight:600; font-size:12px; flex-shrink:0;" />
                             <div>
                                 <div style="font-size:13px; font-weight:500; color:var(--dtc-text);">
                                     {{ $enrollment->user->name }}
@@ -225,7 +260,7 @@
     var rows    = Array.prototype.slice.call(document.querySelectorAll('.js-payment-row'));
     var none    = document.getElementById('paymentNoResults');
     var counter = document.getElementById('paymentCount');
-    if (!input || !rows.length) { return; }
+    if (!input) { return; }
 
     var sel       = document.getElementById('filter-pay-status');
     var fBadge    = document.getElementById('paymentFilterCount');
@@ -233,11 +268,15 @@
     var fClear    = document.getElementById('paymentFilterClear');
     function syncFilterUi() {
         var n = sel && sel.value && sel.value !== 'all' ? 1 : 0;
+        document.querySelectorAll('#paymentsFilterPanel [name]').forEach(function (field) {
+            if (field.name !== 'filter' && field.name !== 'per_page' && field.value) { n++; }
+        });
         if (fBadge)  { fBadge.textContent = n; fBadge.hidden = n === 0; }
         if (fToggle) { fToggle.classList.toggle('has-filters', n > 0); }
         if (fClear)  { fClear.hidden = n === 0 && !input.value.trim(); }
     }
     if (sel) { sel.addEventListener('change', syncFilterUi); }
+    document.getElementById('paymentsFilterPanel').addEventListener('change', syncFilterUi);
 
     var index = rows.map(function (r) { return r.textContent.replace(/\s+/g, ' ').toLowerCase(); });
 

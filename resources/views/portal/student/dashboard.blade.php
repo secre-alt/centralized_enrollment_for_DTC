@@ -18,7 +18,16 @@
 @section('content')
 
 @php
-    if (!$latestEnrollment) {
+    $latestReplacementRequest = $latestEnrollment?->replacementRequests
+        ->sortByDesc('id')
+        ->first();
+    if ($latestReplacementRequest?->status === 'refund_requested') {
+        $appStatusLabel = 'Refund Pending Cashier Reconciliation';
+    } elseif ($latestReplacementRequest?->status === 'refunded') {
+        $appStatusLabel = 'Refund Confirmed';
+    } elseif ($latestReplacementRequest?->status === 'open') {
+        $appStatusLabel = 'Subject Replacement Required';
+    } elseif (!$latestEnrollment) {
         $appStatusLabel = 'Not Started';
     } elseif ($latestEnrollment->status === 'approved' && $latestEnrollment->is_paid) {
         $appStatusLabel = 'Enrolled';
@@ -31,10 +40,10 @@
     } else {
         $appStatusLabel = 'Status Unavailable';
     }
-    if (!$latestEnrollment || $latestEnrollment->status !== 'approved') {
-        $paymentStatusLabel = 'Not Required';
-    } elseif ($latestEnrollment->is_paid) {
+    if ($latestEnrollment && $latestEnrollment->is_paid) {
         $paymentStatusLabel = 'Confirmed';
+    } elseif (!$latestEnrollment || $latestEnrollment->status !== 'approved') {
+        $paymentStatusLabel = 'Not Required';
     } elseif ($latestEnrollment->payment && $latestEnrollment->payment->status === 'pending') {
         $paymentStatusLabel = 'Awaiting Verification';
     } elseif ($latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected') {
@@ -221,7 +230,7 @@
                                 {{ $notif->title }}
                             </div>
                             <div class="u-text-xxs-secondary">{{ $notif->message }}</div>
-                            <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:2px;">
+                            <div style="font-size:12px; color:var(--dtc-text-muted); margin-top:2px;">
                                 {{ $notif->created_at->format('M d, Y') }}
                             </div>
                         </div>
@@ -253,7 +262,7 @@
                 <a href="{{ route('notifications.index') }}" class="quick-action-btn">
                     <i data-lucide="bell"></i> Notifications
                     @if($unreadCount > 0)
-                        <span class="badge badge-danger ml-auto" style="font-size:10px;">{{ $unreadCount }}</span>
+                        <span class="badge badge-danger ml-auto" style="font-size:12px;">{{ $unreadCount }}</span>
                     @endif
                 </a>
             </div>
@@ -264,17 +273,17 @@
         <div class="card dtc-upcoming-appointment-card"
              >
             <div class="card-body p-3">
-                <div style="font-size:11px; font-weight:600; opacity:0.75; margin-bottom:8px;
-                            text-transform:uppercase; letter-spacing:0.5px;">
+                <div style="font-size:12px; font-weight:600; opacity:0.75; margin-bottom:8px;
+                            text-transform: none; letter-spacing: 0;">
                     Upcoming Appointment
                 </div>
                 <div style="display:flex; align-items:center; gap:14px;">
                     <div style="background:rgba(255,255,255,0.15); border-radius:12px;
                                 padding:10px 14px; text-align:center; min-width:52px;">
-                        <div style="font-size:22px; font-weight:800; line-height:1; color:#FFC72C;">
+                        <div style="font-size:22px; font-weight:600; line-height:1; color:#FFC72C;">
                             {{ \Carbon\Carbon::parse($nextAppointment->slot->date)->format('d') }}
                         </div>
-                        <div style="font-size:10px; font-weight:600; opacity:0.8;">
+                        <div style="font-size:12px; font-weight:600; opacity:0.8;">
                             {{ \Carbon\Carbon::parse($nextAppointment->slot->date)->format('M') }}
                         </div>
                     </div>
@@ -282,11 +291,11 @@
                         <div  class="u-text-sm-bold">
                             {{ $nextAppointment->document_labels->join(', ') }}
                         </div>
-                        <div style="font-size:11px; opacity:0.75; margin-top:2px;">
+                        <div style="font-size:12px; opacity:0.75; margin-top:2px;">
                             <i data-lucide="clock" class="mr-1"></i>
                             {{ \Carbon\Carbon::parse($nextAppointment->slot->start_time)->format('h:i A') }}
                         </div>
-                        <div style="font-size:11px; opacity:0.75; margin-top:2px;">
+                        <div style="font-size:12px; opacity:0.75; margin-top:2px;">
                             <i data-lucide="map-pin" class="mr-1"></i> Registrar Office
                         </div>
                     </div>

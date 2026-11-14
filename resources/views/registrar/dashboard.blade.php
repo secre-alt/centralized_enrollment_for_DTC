@@ -89,9 +89,9 @@
                             <td data-summary-label="{{ __('dashboard.student_name') }}">
                                 <div  class="u-flex-center-gap-10">
                                     <x-dtc.user-avatar :user="$enrollment->user" style="width:32px; height:32px; border-radius:50%;
-                                                background:linear-gradient(135deg,#0F4CDB,#1a5feb);
+                                                background:var(--dtc-primary);
                                                 display:flex; align-items:center; justify-content:center;
-                                                color:#fff; font-weight:700; font-size:12px; flex-shrink:0;" />
+                                                color:#fff; font-weight:600; font-size:12px; flex-shrink:0;" />
                                     <span style="font-size:13px; font-weight:500;">{{ $enrollment->user->name }}</span>
                                 </div>
                             </td>
@@ -203,9 +203,9 @@
                             <td data-summary-label="{{ __('dashboard.applicant_name') }}">
                                 <div  class="u-flex-center-gap-10">
                                     <x-dtc.user-avatar :user="$application->user" :name="$application->full_name" style="width:32px; height:32px; border-radius:50%;
-                                                background:linear-gradient(135deg,#0F4CDB,#1a5feb);
+                                                background:var(--dtc-primary);
                                                 display:flex; align-items:center; justify-content:center;
-                                                color:#fff; font-weight:700; font-size:12px; flex-shrink:0;" />
+                                                color:#fff; font-weight:600; font-size:12px; flex-shrink:0;" />
                                     <span style="font-size:13px; font-weight:500;">{{ $application->full_name }}</span>
                                 </div>
                             </td>

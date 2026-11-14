@@ -32,15 +32,8 @@ body {
 
 /* ── Header — same as sign-in modal ─────────────────────── */
 .auth-card-header {
-    padding: 24px 24px 28px;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(15, 76, 219, 0.97) 0%,
-            rgba(15, 76, 219, 0.92) 55%,
-            rgba(15, 76, 219, 0.72) 100%
-        ),
-        url('/images/dtc-building.webp') center center / cover no-repeat;
+    background: #0b3baf;
+    padding: 24px;
 }
 
 .auth-brand {
@@ -60,21 +53,21 @@ body {
 .auth-brand-name {
     color: #ffffff;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     margin: 0;
 }
 
 .auth-brand-sub {
     color: rgba(255, 255, 255, 0.65);
-    font-size: 10.5px;
+    font-size: 12px;
     margin: 2px 0 0;
 }
 
 .auth-card-tagline {
     color: #ffffff;
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.4;
     margin: 0;
 }
@@ -119,7 +112,7 @@ body {
 
 .auth-card-title {
     font-size: 21px;
-    font-weight: 700;
+    font-weight: 600;
     color: #1E293B;
     margin: 0 0 8px;
     line-height: 1.35;
@@ -216,7 +209,9 @@ body {
 .auth-input:focus {
     border-color: #0F4CDB;
     background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(15, 76, 219, 0.1);
+    border-width: 2px;
+    outline: none !important;
+    box-shadow: none;
 }
 
 .auth-input:disabled {
@@ -255,7 +250,7 @@ body {
     border: none;
     border-radius: 11px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     font-family: 'Poppins', sans-serif;
     cursor: pointer;
     display: flex;
@@ -263,14 +258,14 @@ body {
     justify-content: center;
     gap: 8px;
     transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 6px 18px rgba(15, 76, 219, 0.28);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
     margin-bottom: 18px;
 }
 
 .auth-btn:hover {
     background: #0B43C1;
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(15, 76, 219, 0.36);
+    transform: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 }
 
 .auth-btn:disabled {
@@ -304,7 +299,7 @@ body {
 :is(html.dtc-dark body, body.dtc-dark) .auth-alert--error { background: #301b24; border-color: #71323e; color: #fecaca; }
 @media (max-width: 359.98px) { .auth-secondary-actions { grid-template-columns: 1fr; } }
 
-.auth-back i { font-size: 11px; }
+.auth-back i { font-size: 12px; }
 
 /* ── Footer ──────────────────────────────────────────────── */
 .auth-card-footer {
@@ -314,7 +309,7 @@ body {
 }
 
 .auth-card-copyright {
-    font-size: 10.5px;
+    font-size: 12px;
     color: #94A3B8;
     margin: 0;
 }
@@ -368,7 +363,7 @@ body {
         transparent calc(50% + 2px)
     );
     color: #0f4cdb;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     transform: translateY(-50%) scale(.96);
 }
@@ -420,7 +415,7 @@ body {
 :is(html.dtc-dark body, body.dtc-dark) .auth-input:focus {
     border-color: #6c9bff;
     background: #111827;
-    box-shadow: 0 0 0 3px rgba(108, 155, 255, .18);
+    box-shadow: none;
 }
 :is(html.dtc-dark body, body.dtc-dark) .auth-field .auth-label {
     background: #111827;

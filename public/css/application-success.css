@@ -6,27 +6,32 @@
 .application-success-icon svg { width: 30px; height: 30px; stroke-width: 2.75; }
 .application-success-card-icon { width: 42px; height: 42px; flex: 0 0 42px; }
 .application-success-card-icon svg { width: 20px; height: 20px; }
-.application-success-eyebrow { margin: 0 0 8px; color: #0f4cdb; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.application-success-hero h1, .application-success-card h2, .application-next-steps h2, .application-screening-notice h2 { margin: 0; color: #17233c; font-weight: 700; }
+.application-success-eyebrow { margin: 0 0 8px; color: #0f4cdb; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.application-success-hero h1, .application-success-card h2, .application-next-steps h2, .application-screening-notice h2 { margin: 0; color: #17233c; font-weight: 600; }
 .application-success-hero h1 { font-size: clamp(28px, 4vw, 38px); line-height: 1.2; }
 .application-success-hero.is-compact { max-width: none; margin-bottom: 20px; text-align: left; }
 .application-success-hero.is-compact h1 { font-size: clamp(22px, 3vw, 28px); }
 .application-success-icon.is-cancelled { color: #b42318; background: #fef0ee; border-color: #fbd3cd; }
 .application-success-hero > p:last-child { margin: 12px 0 0; color: #64748b; font-size: 16px; line-height: 1.65; }
-.application-reference-card, .application-success-card, .application-next-steps, .application-screening-notice { border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 10px 30px rgba(15, 35, 60, .06); }
-.application-reference-card { padding: 22px 26px; color: #fff; background: linear-gradient(135deg, #0f4cdb, #143a9a); border-color: transparent; box-shadow: 0 16px 32px rgba(15, 76, 219, .2); }
+.application-reference-card, .application-success-card, .application-next-steps, .application-screening-notice { border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
+.application-reference-card {
+  color: #fff;  border-color: transparent;
+    background: #0b3baf;
+    padding: 24px;
+    box-shadow: none;
+}
 .application-reference-heading, .application-reference-footer, .application-success-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .application-reference-card .application-success-eyebrow { color: #cddcff; }
-.application-reference-card .application-reference-label { margin: 0; color: #cddcff; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
-.application-reference-value { margin: 8px 0 18px; font-size: clamp(24px, 4vw, 34px); font-weight: 700; line-height: 1.15; letter-spacing: .05em; overflow-wrap: anywhere; }
+.application-reference-card .application-reference-label { margin: 0; color: #cddcff; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.application-reference-value { margin: 8px 0 18px; font-size: clamp(24px, 4vw, 34px); font-weight: 600; line-height: 1.15; letter-spacing: 0; overflow-wrap: anywhere; }
 .application-reference-footer { padding-top: 16px; border-top: 1px solid rgba(255,255,255,.16); }
 .application-reference-footer p { margin: 0; color: #dbe7ff; font-size: 13px; line-height: 1.5; }
-.application-submitted-badge, .application-copy-reference { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.application-submitted-badge, .application-copy-reference { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .application-reference-card .application-submitted-badge { padding: 7px 10px; color: #fff; background: rgba(255,255,255,.16); }
 .application-submitted-badge { padding: 6px 10px; color: #166534; background: #dcfce7; }
 .application-submitted-badge svg { width: 14px; height: 14px; }
 .application-reference-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.application-reference-link { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 14px; color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.application-reference-link { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 14px; color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
 .application-reference-link:hover { color: #fff; text-decoration: none; background: rgba(255,255,255,.14); }
 .application-reference-link svg { width: 16px; height: 16px; }
 .application-copy-reference { min-height: 40px; padding: 0 14px; color: #0f4cdb; background: #fff; border: 0; cursor: pointer; }
@@ -41,19 +46,24 @@
 .application-summary-list, .application-education-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; margin: 24px 0 0; }
 .application-summary-list dt, .application-education-list dt { margin-bottom: 4px; color: #64748b; font-size: 12px; font-weight: 500; }
 .application-summary-list dd, .application-education-list dd { margin: 0; color: #17233c; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
-.application-next-steps { padding: 26px; color: #334155; background: linear-gradient(180deg, #f3f7ff 0%, #ffffff 100%); border-color: #dbe6fb; }
+.application-next-steps {
+  color: #334155;
+    background: #fff;
+    padding: 24px;
+    border-color: #e2e8f0;
+}
 .application-next-steps .application-success-card-icon { color: #0f4cdb; background: #e4edff; border-color: #cddcff; }
 .application-next-steps h2 { margin-top: 20px; color: #17233c; }
 .application-next-steps ol { margin: 16px 0 0; padding: 0; list-style: none; counter-reset: next-step; }
 .application-next-steps li { position: relative; padding-left: 34px; margin-bottom: 14px; font-size: 13px; line-height: 1.6; counter-increment: next-step; }
 .application-next-steps li:last-child { margin-bottom: 0; }
-.application-next-steps li::before { content: counter(next-step); position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; color: #0f4cdb; background: #e4edff; border-radius: 50%; font-size: 12px; font-weight: 700; }
+.application-next-steps li::before { content: counter(next-step); position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; color: #0f4cdb; background: #e4edff; border-radius: 50%; font-size: 12px; font-weight: 600; }
 .application-next-steps p { margin: 14px 0 0; font-size: 13px; line-height: 1.6; }
-.application-cancel-card { margin-top: 20px; padding: 24px 26px; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 10px 30px rgba(15, 35, 60, .06); }
+.application-cancel-card { margin-top: 20px; padding: 24px 26px; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
 .application-cancel-head { display: flex; gap: 14px; align-items: flex-start; }
 .application-cancel-icon { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; flex: 0 0 42px; color: #b42318; background: #fef0ee; border: 1px solid #fbd3cd; border-radius: 14px; }
 .application-cancel-icon svg { width: 20px; height: 20px; }
-.application-cancel-head h2 { margin: 0; color: #17233c; font-size: 17px; font-weight: 700; }
+.application-cancel-head h2 { margin: 0; color: #17233c; font-size: 17px; font-weight: 600; }
 .application-cancel-head p { margin: 5px 0 0; color: #64748b; font-size: 13px; line-height: 1.55; }
 .application-cancel-form { margin-top: 20px; }
 .application-cancel-form label { display: block; margin-bottom: 8px; color: #334155; font-size: 13px; font-weight: 600; }
@@ -78,9 +88,9 @@
 .application-screening-notice p { margin: 5px 0 0; font-size: 13px; line-height: 1.6; }
 .application-success-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 28px; }
 .application-success-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 17px; border: 1px solid transparent; border-radius: 10px; font-size: 13px; font-weight: 600; text-decoration: none; }
-.application-success-button:hover { text-decoration: none; transform: translateY(-1px); }
+.application-success-button:hover { text-decoration: none; transform: none; }
 .application-success-button svg { width: 16px; height: 16px; }
-.application-success-button--primary { color: #fff; background: #0f4cdb; box-shadow: 0 6px 14px rgba(15, 76, 219, .18); }
+.application-success-button--primary { color: #fff; background: #0f4cdb; box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
 .application-success-button--primary:hover { color: #fff; background: #0b43c1; }
 .application-success-button--secondary { color: #334155; background: #fff; border-color: #cbd5e1; }
 .application-success-button--secondary:hover { color: #0f4cdb; border-color: #0f4cdb; }

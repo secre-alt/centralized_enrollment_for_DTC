@@ -1,8 +1,12 @@
 @php
     $subjectCount = count($subjects);
+    $hasOpenReplacement = $enrollment->replacementRequests->contains('status', 'open');
     $canReview = $enrollment->status === 'pending'
         && $enrollment->is_paid
-        && $enrollment->payment?->status === 'verified';
+        && $enrollment->payment?->status === 'verified'
+        && ! $hasOpenReplacement;
+    $unclassifiedSubjects = $subjects->reject(fn ($subject) => in_array($subject->classification, ['major', 'minor', 'general_education'], true));
+    $sectionAssignments = $enrollment->subjectOfferings()->with('classSchedule')->get()->keyBy('curriculum_subject_id');
 @endphp
 
 <div id="review-content">
@@ -19,6 +23,8 @@
         <div class="dtc-review-header-right">
             @if($canReview)
                 <span class="dtc-status-badge is-success"><span class="dtc-status-dot"></span> Paid — Ready for Review</span>
+            @elseif($hasOpenReplacement)
+                <span class="dtc-status-badge is-warning"><span class="dtc-status-dot"></span> Subject Replacement Required</span>
             @elseif($enrollment->is_paid)
                 <span class="dtc-status-badge is-success"><span class="dtc-status-dot"></span> Enrolled &amp; Paid</span>
             @elseif($enrollment->status === 'pending')
@@ -41,6 +47,9 @@
 
     {{-- ── Body ───────────────────────────────────────────────────────── --}}
     <div class="dtc-review-body">
+        @if($errors->any())
+            <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+        @endif
 
         <div class="dtc-review-section">
             <div class="dtc-review-section-title">
@@ -93,7 +102,15 @@
             @endif
             @if($canReview)
                 <div class="dtc-payment-info-notice">
-                    The Cashier has verified payment. Review the selected subjects before approving. If you reject this enrollment, the student must arrange a refund directly with the Cashier.
+                    The Cashier has verified payment. Review the selected subjects before approving or returning an unavailable subject for replacement.
+                    @if(! $replacementRequest)
+                        <p class="mt-2 mb-0"><strong>One or more classes full?</strong> Return only the affected subjects for replacement. Keep the existing payment and unaffected subjects.</p>
+                        <a class="dtc-btn dtc-btn-secondary mt-2" href="#return-subject-replacement-{{ $enrollment->id }}">Choose subjects to replace</a>
+                    @endif
+                </div>
+            @elseif($hasOpenReplacement)
+                <div class="dtc-payment-info-notice">
+                    The enrollment is waiting for the student's replacement or refund decision. The verified payment remains unchanged.
                 </div>
             @elseif($enrollment->status === 'pending')
                 <div class="dtc-payment-info-notice">
@@ -110,15 +127,172 @@
                     <div class="dtc-review-subject-item">
                         <span class="dtc-review-subject-code">{{ $subject->subject_code }}</span>
                         <span class="dtc-review-subject-name">{{ $subject->subject_name }}</span>
+                        @if($subject->classification !== 'unclassified')
+                            <span class="dtc-status-badge is-neutral">{{ ucfirst(str_replace('_', ' ', $subject->classification)) }}</span>
+                        @endif
                         @if($enrollment->is_irregular)
-                            <span class="dtc-status-badge is-neutral" style="margin-left:auto; font-size:10px;">Y{{ $subject->year_level }} · Sem {{ $subject->semester }}</span>
+                            <span class="dtc-status-badge is-neutral" style="margin-left:auto; font-size:12px;">Y{{ $subject->year_level }} · Sem {{ $subject->semester }}</span>
                         @endif
                     </div>
+                    @if($canReview)
+                        @if($sectionAssignments->has($subject->id))
+                            <p class="dtc-review-section-assignment">Section: {{ $sectionAssignments[$subject->id]->classSchedule?->section_code ?: 'Needs reconciliation' }}</p>
+                        @else
+                            <div class="form-group dtc-review-section-choice">
+                                <label for="approval-section-{{ $enrollment->id }}-{{ $subject->id }}">Section for {{ $subject->subject_code }}</label>
+                                <select id="approval-section-{{ $enrollment->id }}-{{ $subject->id }}" name="section_choices[{{ $subject->id }}]" form="approve-enrollment-{{ $enrollment->id }}" class="form-control" required>
+                                    <option value="">Select a recorded section</option>
+                                    @foreach($subject->schedules->where('school_year', $enrollment->school_year)->where('semester', $enrollment->semester)->where('is_active', true)->whereNotNull('section_code')->where('capacity', '>', 0) as $offering)
+                                        <option value="{{ $offering->id }}" @selected((string) old('section_choices.'.$subject->id) === (string) $offering->id)>{{ $offering->section_code }} · {{ $offering->day_pattern }} {{ $offering->time_start }}–{{ $offering->time_end }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">If no section is listed, reconcile the offering before approval. Seats and schedules are checked when you approve.</small>
+                            </div>
+                        @endif
+                    @endif
                 @empty
                     <p class="text-muted mb-0" style="font-size:12.5px;">No subjects selected.</p>
                 @endforelse
             </div>
         </div>
+
+        @if($replacementRequest)
+            <div class="alert alert-warning" role="status">
+                <strong>Subject Replacement Required</strong>
+                <p class="mb-1">{{ $replacementRequest->reason }}</p>
+                <span>The verified payment remains attached. The student must choose eligible offerings or request refund follow-up.</span>
+            </div>
+        @endif
+
+        @if($canReview && ! $replacementRequest)
+            <div class="dtc-review-section">
+                <div class="dtc-review-section-title">
+                    <span><i data-lucide="rotate-ccw"></i> Return for Subject Replacement</span>
+                </div>
+                <p class="text-muted">Use this when one or more classes are full or unavailable. Select only the affected subjects and provide a clear reason. The student chooses another eligible section or approved equivalent, then submits the revised load for review. Unaffected subjects, the official program and verified payment stay attached.</p>
+                <p class="text-muted">A section change alone does not make the student Irregular. The final assignments, approved equivalencies and preserved load classification determine the treatment. Returning subjects does not reject the enrollment or start a refund.</p>
+                <form id="return-subject-replacement-{{ $enrollment->id }}" method="POST" action="{{ route('registrar.enrollments.subject-replacement', $enrollment) }}">
+                    @csrf
+                    <div class="form-group">
+                        <span class="d-block font-weight-bold mb-2">Unavailable subject(s)</span>
+                        @foreach($subjects as $subject)
+                            <div class="custom-control custom-checkbox mb-1">
+                                <input class="custom-control-input" type="checkbox"
+                                       id="replacement-subject-{{ $enrollment->id }}-{{ $subject->id }}"
+                                       name="affected_subject_ids[]" value="{{ $subject->id }}">
+                                <label class="custom-control-label" for="replacement-subject-{{ $enrollment->id }}-{{ $subject->id }}">
+                                    {{ $subject->subject_code }} — {{ $subject->subject_name }}
+                                    ({{ ucfirst(str_replace('_', ' ', $subject->classification)) }})
+                                </label>
+                            </div>
+                            <div class="form-group ml-4">
+                                <label for="unavailable-section-{{ $enrollment->id }}-{{ $subject->id }}">Unavailable section, if known</label>
+                                <select id="unavailable-section-{{ $enrollment->id }}-{{ $subject->id }}"
+                                        name="unavailable_schedule_ids[{{ $subject->id }}]" class="form-control">
+                                    <option value="">Not recorded</option>
+                                    @foreach($subject->schedules->where('school_year', $enrollment->school_year)->where('semester', $enrollment->semester)->whereNotNull('section_code') as $offering)
+                                        <option value="{{ $offering->id }}">{{ $offering->section_code }} · {{ $offering->day_pattern }} · capacity {{ $offering->capacity }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="form-group">
+                        <label for="replacement-reason-{{ $enrollment->id }}">Reason for return</label>
+                        <textarea id="replacement-reason-{{ $enrollment->id }}" name="reason"
+                                  class="form-control" rows="3" minlength="10" maxlength="2000"
+                                  required placeholder="Explain why each selected subject cannot be enrolled in."></textarea>
+                    </div>
+                    <button type="button" class="dtc-btn dtc-btn-warning"
+                            data-dtc-confirm
+                            data-dtc-confirm-title="Return enrollment for subject replacement?"
+                            data-dtc-confirm-message="This keeps the verified payment and gives the student a replacement or refund choice."
+                            data-dtc-confirm-ok="Return for replacement"
+                            data-dtc-confirm-tone="warning"
+                            data-dtc-confirm-form="#return-subject-replacement-{{ $enrollment->id }}">
+                        <i data-lucide="rotate-ccw"></i> Return for Subject Replacement
+                    </button>
+                </form>
+            </div>
+        @endif
+
+        @if($canReview)
+            <details class="dtc-review-section dtc-review-equivalencies">
+                <summary>Academic equivalencies <span class="text-muted">Optional</span></summary>
+                <p class="text-muted">Only needed when a different subject will satisfy a curriculum subject. Ordinary same-subject enrollment does not require an equivalency.</p>
+                <p class="text-muted">Use only an official academic decision, never a similar title or unit count alone. The approval is directed from the selected curriculum subject to the target subject.</p>
+                @if($unclassifiedSubjects->isNotEmpty())
+                    <p class="dtc-equivalency-setup-note">To record equivalencies, first classify these subjects in subject management: {{ $unclassifiedSubjects->pluck('subject_code')->join(', ') }}. This does not block ordinary same-subject approval.</p>
+                @endif
+                @foreach($subjects as $subject)
+                    @php
+                        $candidates = $equivalentSubjects->filter(fn ($candidate) => $subject->units !== null && $candidate->units !== null && (float) $candidate->units === (float) $subject->units && (int) $candidate->id !== (int) $subject->id && ! $subject->equivalencies->contains('equivalent_subject_id', $candidate->id));
+                    @endphp
+                    @if(in_array($subject->classification, ['major', 'minor', 'general_education'], true) && $candidates->isNotEmpty())
+                        <form method="POST" action="{{ route('registrar.subjects.equivalencies.store', $subject) }}" class="border rounded p-3 mb-2">
+                            @csrf
+                            <input type="hidden" name="return_enrollment_id" value="{{ $enrollment->id }}">
+                            <strong>{{ $subject->subject_code }} — {{ $subject->subject_name }} ({{ ucfirst(str_replace('_', ' ', $subject->classification)) }})</strong>
+                            <div class="form-group mt-2">
+                                <label for="equivalent-subject-{{ $enrollment->id }}-{{ $subject->id }}">Officially equivalent subject</label>
+                                <select id="equivalent-subject-{{ $enrollment->id }}-{{ $subject->id }}" name="equivalent_subject_id" class="form-control" required>
+                                    <option value="">Select a subject</option>
+                                    @foreach($candidates as $candidate)
+                                        <option value="{{ $candidate->id }}">{{ $candidate->subject_code }} — {{ $candidate->subject_name }} ({{ $candidate->program->code }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="equivalency-reason-{{ $enrollment->id }}-{{ $subject->id }}">Academic approval reason</label>
+                                <textarea id="equivalency-reason-{{ $enrollment->id }}-{{ $subject->id }}" name="approval_reason" class="form-control" rows="2" maxlength="2000" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="equivalency-irregular-{{ $enrollment->id }}-{{ $subject->id }}">Does the approved mapping require Irregular enrollment?</label>
+                                <select id="equivalency-irregular-{{ $enrollment->id }}-{{ $subject->id }}" name="requires_irregular" class="form-control" required>
+                                    <option value="">Select approved load treatment</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Record equivalency approval</button>
+                        </form>
+                    @endif
+                @endforeach
+                <p class="small text-muted">Only matching-unit subjects without an existing directed approval appear as choices.</p>
+            </details>
+        @endif
+
+        @if($enrollment->replacementRequests->isNotEmpty())
+            <div class="dtc-review-section">
+                <div class="dtc-review-section-title">
+                    <span><i data-lucide="history"></i> Revision History</span>
+                </div>
+                @foreach($enrollment->replacementRequests->sortBy('id') as $revision)
+                    <div class="border rounded p-3 mb-2">
+                        <strong>Request #{{ $revision->id }} · {{ ucfirst(str_replace('_', ' ', $revision->status)) }}</strong>
+                        <p class="mb-1">{{ $revision->reason }}</p>
+                        @if($revision->student_reason)
+                            <p class="mb-1"><strong>Student refund reason:</strong> {{ $revision->student_reason }}</p>
+                        @endif
+                        <ul class="mb-0">
+                            @foreach($revision->items as $item)
+                                <li>
+                                    {{ $item->originalSubject->subject_code }} — {{ $item->originalSubject->subject_name }}
+                                    @if($item->originalSchedule)
+                                        (unavailable section {{ $item->originalSchedule->section_code }})
+                                    @endif
+                                    @if($item->selectedSchedule)
+                                        → {{ $item->selectedSchedule->courseSubject->subject_code }}
+                                        / Section {{ $item->selectedSchedule->section_code }}
+                                        (hosted by {{ $item->selectedSchedule->hostingProgram->name ?? $item->selectedSchedule->courseSubject->program->name }})
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
         {{-- Credited / Waived Subjects — documentation only, does not affect COR or payment --}}
         @if(in_array($classification, ['transferee', 'shiftee', 'cross_enrollee', 'returnee']))
@@ -174,8 +348,8 @@
                 @csrf
                 <div class="form-row">
                     <div class="form-group col-md-6 mb-2">
-                        <label class="dtc-form-label" style="font-size:11px;">DTC Subject</label>
-                        <select name="course_subject_id" class="dtc-form-control" required>
+                        <label for="registrar-enrollments-_review-content-course-subject-id-1" class="dtc-form-label" style="font-size:12px;">DTC Subject</label>
+                        <select id="registrar-enrollments-_review-content-course-subject-id-1" name="course_subject_id" class="dtc-form-control" required>
                             <option value="">— Select subject —</option>
                             @foreach ($programSubjects as $ps)
                                 <option value="{{ $ps->id }}">{{ $ps->subject_code }} — {{ $ps->subject_name }}</option>
@@ -183,20 +357,20 @@
                         </select>
                     </div>
                     <div class="form-group col-md-6 mb-2">
-                        <label class="dtc-form-label" style="font-size:11px;">Credited Units</label>
-                        <input type="number" name="credited_units" class="dtc-form-control" step="0.5" min="0" max="6">
+                        <label for="registrar-enrollments-_review-content-credited-units-2" class="dtc-form-label" style="font-size:12px;">Credited Units</label>
+                        <input id="registrar-enrollments-_review-content-credited-units-2" type="number" name="credited_units" class="dtc-form-control" step="0.5" min="0" max="6">
                     </div>
                     <div class="form-group col-md-6 mb-2">
-                        <label class="dtc-form-label" style="font-size:11px;">Equivalent Subject</label>
-                        <input type="text" name="equivalent_subject" class="dtc-form-control" placeholder="e.g. Mathematics 101">
+                        <label for="registrar-enrollments-_review-content-equivalent-subject-3" class="dtc-form-label" style="font-size:12px;">Equivalent Subject</label>
+                        <input id="registrar-enrollments-_review-content-equivalent-subject-3" type="text" name="equivalent_subject" class="dtc-form-control" placeholder="e.g. Mathematics 101">
                     </div>
                     <div class="form-group col-md-6 mb-2">
-                        <label class="dtc-form-label" style="font-size:11px;">Previous School</label>
-                        <input type="text" name="equivalent_school" class="dtc-form-control" placeholder="e.g. ABC College">
+                        <label for="registrar-enrollments-_review-content-equivalent-school-4" class="dtc-form-label" style="font-size:12px;">Previous School</label>
+                        <input id="registrar-enrollments-_review-content-equivalent-school-4" type="text" name="equivalent_school" class="dtc-form-control" placeholder="e.g. ABC College">
                     </div>
                     <div class="form-group col-12 mb-2">
-                        <label class="dtc-form-label" style="font-size:11px;">Remarks</label>
-                        <textarea name="remarks" class="dtc-form-control" rows="2" placeholder="Optional notes"></textarea>
+                        <label for="registrar-enrollments-_review-content-remarks-5" class="dtc-form-label" style="font-size:12px;">Remarks</label>
+                        <textarea id="registrar-enrollments-_review-content-remarks-5" name="remarks" class="dtc-form-control" rows="2" placeholder="Optional notes"></textarea>
                     </div>
                 </div>
                 <button type="submit" class="dtc-btn dtc-btn-secondary" style="font-size:12px;">
@@ -236,10 +410,10 @@
                     @csrf
                     <div class="form-row align-items-end">
                         <div class="form-group col-md-6 mb-2">
-                            <label class="dtc-form-label" style="font-size:11px;">
+                            <label for="registrar-enrollments-_review-content-graduation-year-6" class="dtc-form-label" style="font-size:12px;">
                                 Graduation Year <span class="dtc-required">*</span>
                             </label>
-                            <select name="graduation_year" class="dtc-form-control" required>
+                            <select id="registrar-enrollments-_review-content-graduation-year-6" name="graduation_year" class="dtc-form-control" required>
                                 <option value="">— Select year —</option>
                                 @for($y = date('Y') + 1; $y >= 1990; $y--)
                                     <option value="{{ $y }}">{{ $y }}</option>
@@ -275,6 +449,10 @@
 
         {{-- Reject reason — hidden until "Reject" is clicked --}}
         <div class="dtc-review-reject-panel rg-rejection-panel" id="rejectPanel-{{ $enrollment->id }}">
+            <p><strong>Reject ends this enrollment request.</strong> Its verified payment stays recorded and requires Cashier refund reconciliation. This does not give the student a subject replacement choice.</p>
+            @if(! $replacementRequest)
+                <p>If the problem is a full or unavailable class, <a href="#return-subject-replacement-{{ $enrollment->id }}">return the affected subjects for replacement</a> instead.</p>
+            @endif
             <form method="POST" action="{{ route('registrar.enrollments.reject', $enrollment) }}" id="rejectForm-{{ $enrollment->id }}">
                 @csrf
                 <label class="dtc-form-label" for="remarks-{{ $enrollment->id }}">
@@ -289,16 +467,16 @@
     </div>
 
     {{-- ── Footer ─────────────────────────────────────────────────────── --}}
+    @if($canReview)
     <div class="dtc-review-footer rg-enrollment-decisions">
 
         <div class="dtc-review-footer-default">
-            <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Close</button>
 
             @if($canReview)
             <div class="dtc-review-footer-right">
                 <button type="button" class="dtc-btn dtc-btn-outline-danger dtc-review-reject-trigger"
                         data-target="rejectPanel-{{ $enrollment->id }}">
-                    <i data-lucide="x"></i> Reject
+                    Reject
                 </button>
 
                 <form id="approve-enrollment-{{ $enrollment->id }}"
@@ -314,7 +492,7 @@
                             data-dtc-confirm-ok="Approve"
                             data-dtc-confirm-tone="success"
                             data-dtc-confirm-form="#approve-enrollment-{{ $enrollment->id }}">
-                        <i data-lucide="check"></i> Approve
+                        Approve
                     </button>
                 </form>
             </div>
@@ -325,14 +503,15 @@
         <div class="dtc-review-footer-reject u-hidden" >
             <div class="rg-rejection-buttons">
             <button type="button" class="dtc-btn dtc-btn-secondary dtc-review-reject-cancel">Cancel</button>
-            <button type="button" class="dtc-btn dtc-btn-danger" data-dtc-confirm data-dtc-confirm-tone="danger" data-dtc-confirm-title="Reject enrollment?" data-dtc-confirm-message="The enrollment for {subject} will be rejected with the reason entered above." data-dtc-confirm-subject="{{ $enrollment->user->name }}" data-dtc-confirm-ok="Reject" data-dtc-confirm-form="#rejectForm-{{ $enrollment->id }}">
-                <i data-lucide="circle-x"></i> Confirm Rejection
+            <button type="button" class="dtc-btn dtc-btn-danger" data-dtc-confirm data-dtc-confirm-tone="danger" data-dtc-confirm-title="Reject paid enrollment?" data-dtc-confirm-message="This ends the enrollment request for {subject} and requires Cashier refund reconciliation. For full classes, cancel and use Return for Subject Replacement to preserve the paid enrollment." data-dtc-confirm-subject="{{ $enrollment->user->name }}" data-dtc-confirm-ok="Reject enrollment" data-dtc-confirm-form="#rejectForm-{{ $enrollment->id }}">
+                Confirm rejection
             </button>
             </div>
         </div>
         @endif
 
     </div>
+    @endif
 </div>
 
 {{-- Edit Credited Subject modal — shared, repopulated by JS per row --}}
@@ -351,19 +530,19 @@
                 <div class="modal-body">
                     <p id="edit-credit-subject-label" class="font-weight-bold u-text mb-3"></p>
                     <div class="form-group">
-                        <label>Credited Units</label>
+                        <label for="edit-credit-units">Credited Units</label>
                         <input type="number" name="credited_units" id="edit-credit-units" class="form-control" step="0.5" min="0" max="6">
                     </div>
                     <div class="form-group">
-                        <label>Equivalent Subject</label>
+                        <label for="edit-credit-equiv-subject">Equivalent Subject</label>
                         <input type="text" name="equivalent_subject" id="edit-credit-equiv-subject" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Previous School</label>
+                        <label for="edit-credit-equiv-school">Previous School</label>
                         <input type="text" name="equivalent_school" id="edit-credit-equiv-school" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Remarks</label>
+                        <label for="edit-credit-remarks">Remarks</label>
                         <textarea name="remarks" id="edit-credit-remarks" class="form-control" rows="2"></textarea>
                     </div>
                 </div>

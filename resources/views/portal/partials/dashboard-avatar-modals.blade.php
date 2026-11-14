@@ -29,7 +29,6 @@
 <div class="modal fade dtc-avatar-confirm-modal" id="dashboardAvatarConfirmModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="dashboardAvatarConfirmTitle" aria-describedby="dashboardAvatarConfirmCopy">
     <div class="modal-dialog modal-dialog-centered dtc-avatar-confirm-dialog" role="document">
         <div class="modal-content dtc-avatar-confirm-card">
-            <button type="button" class="dtc-confirm-close" data-dismiss="modal" aria-label="Close"><i data-lucide="x" aria-hidden="true"></i></button>
             <div class="modal-body text-center">
                 <img id="dashboardAvatarConfirmPreview" class="dtc-avatar-confirm-preview" src="" alt="Cropped profile photo preview">
                 <h5 id="dashboardAvatarConfirmTitle" class="dtc-avatar-confirm-title">Use this profile photo?</h5>

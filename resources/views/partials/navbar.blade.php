@@ -19,6 +19,7 @@
         {{-- Input --}}
         <input type="text"
                id="global-search"
+               aria-label="{{ __('ui.search.placeholder') }}"
                placeholder="{{ __('ui.search.placeholder') }}"
                class="navbar-search-input"
                autocomplete="off">

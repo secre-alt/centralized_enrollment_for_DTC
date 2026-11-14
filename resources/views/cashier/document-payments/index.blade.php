@@ -12,28 +12,37 @@
 <link rel="stylesheet" href="{{ asset('css/dtc-filters.css') }}">
 <link rel="stylesheet" href="{{ asset('css/cashier-payment-pages.css') }}">
 @endpush
+@push('js')<script src="{{ asset('js/dtc-filters.js') }}"></script>@endpush
 @section('content')
 <div class="cashier-payment-page">
-<form method="GET" action="{{ route('cashier.document-payments.index') }}" class="dtc-fl" aria-label="Filter document payments">
+@php
+    $listFilterCount = collect(['method', 'document_type', 'date_from', 'date_to'])->filter(fn ($key) => request()->filled($key))->count() + ($filter !== 'all' ? 1 : 0);
+@endphp
+<form data-dtc-filters method="GET" action="{{ route('cashier.document-payments.index') }}" class="dtc-fl dtc-fl-expanded" aria-label="Filter document payments">
     <div class="dtc-fl-toolbar">
         <div class="dtc-pay-search dtc-fl-search">
             <i data-lucide="search" class="dtc-pay-search-icon" aria-hidden="true"></i>
-            <input type="search" name="search" class="dtc-pay-search-input" value="{{ request('search') }}" placeholder="Search name or request" aria-label="Search document payments">
+            <input type="search" name="search" class="dtc-pay-search-input" data-dtc-filter-search value="{{ request('search') }}" placeholder="Search name or request" aria-label="Search document payments">
         </div>
-        <button type="button" class="dtc-fl-toggle" data-toggle="collapse" data-target="#documentPaymentsFilters" aria-controls="documentPaymentsFilters" aria-expanded="false">
-            <i data-lucide="sliders-horizontal" aria-hidden="true"></i> Filters
+        <button type="button" class="dtc-fl-toggle {{ $listFilterCount ? 'has-filters' : '' }}" data-dtc-filter-toggle data-toggle="collapse" data-target="#documentPaymentsFilters" aria-controls="documentPaymentsFilters" aria-expanded="{{ $listFilterCount ? 'true' : 'false' }}">
+            <i data-lucide="sliders-horizontal" aria-hidden="true"></i> Filters <span class="dtc-fl-count" data-dtc-filter-count @if(!$listFilterCount) hidden @endif>{{ $listFilterCount }}</span>
         </button>
     </div>
-    <div class="collapse" id="documentPaymentsFilters">
+    <div class="collapse {{ $listFilterCount ? 'show' : '' }}" id="documentPaymentsFilters">
         <div class="dtc-fl-panel">
             <div class="dtc-fl-field">
                 <label for="document-payment-status">Payment status</label>
-                <select class="form-control" id="document-payment-status" name="status">
+                <select class="form-control" id="document-payment-status" name="status" data-dtc-filter data-dtc-filter-default="all">
                     @foreach (['all' => 'All', 'unpaid' => 'Unpaid', 'pending_verification' => 'Pending GCash', 'rejected' => 'Rejected', 'verified' => 'Verified'] as $key => $label)
                         <option value="{{ $key }}" @selected($filter === $key)>{{ $label }} ({{ $key === 'all' ? $counts->sum() : ($counts[$key] ?? 0) }})</option>
                     @endforeach
                 </select>
             </div>
+@include('partials.list-select-filters', ['selectPrefix' => 'docpay', 'selectFilters' => [
+'document_type' => ['label' => 'Document type', 'all' => 'All documents', 'options' => ['tor' => 'Transcript of Records', 'true_copy' => 'True Copy of Records', 'certification' => 'Certification', 'diploma' => 'Diploma']],
+'method' => ['label' => 'Payment method', 'all' => 'All methods', 'options' => ['gcash' => 'GCash', 'walk_in' => 'Walk-in / Cash']],
+]])
+@include('partials.list-date-filters', ['datePrefix' => 'docpay', 'dateLabel' => 'Record created'])
             @include('partials.table-rows', ['tableRecords' => $requests, 'tableId' => 'document-payments-table', 'fixedRows' => true])
             <div class="dtc-fl-actions">
                 <button type="submit" class="btn btn-primary">Apply</button>

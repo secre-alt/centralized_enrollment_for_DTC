@@ -63,11 +63,16 @@ class CorController extends Controller
         }
 
         $subjects = CourseSubject::whereIn('id', $enrollment->subject_ids ?? [])
-            ->with('schedules')
+            ->with(['schedules.hostingProgram'])
             ->orderBy('subject_code')
             ->get();
 
-        return [$enrollment, $subjects];
+        $offeringAssignments = $enrollment->subjectOfferings()
+            ->with(['classSchedule.courseSubject.program', 'classSchedule.hostingProgram'])
+            ->get()
+            ->keyBy('curriculum_subject_id');
+
+        return [$enrollment, $subjects, $offeringAssignments];
     }
 
     public function show(Request $request)
@@ -82,10 +87,10 @@ class CorController extends Controller
                 ->with('error', 'Your Certificate of Registration will be available once your enrollment is approved and paid.');
         }
 
-        [$enrollment, $subjects] = $resolved;
+        [$enrollment, $subjects, $offeringAssignments] = $resolved;
         $totalUnits = $subjects->sum('units');
 
-        return view('student.cor.show', compact('enrollment', 'subjects', 'totalUnits'));
+        return view('student.cor.show', compact('enrollment', 'subjects', 'totalUnits', 'offeringAssignments'));
     }
 
     public function download(Request $request)
@@ -100,10 +105,10 @@ class CorController extends Controller
                 ->with('error', 'Your Certificate of Registration will be available once your enrollment is approved and paid.');
         }
 
-        [$enrollment, $subjects] = $resolved;
+        [$enrollment, $subjects, $offeringAssignments] = $resolved;
         $totalUnits = $subjects->sum('units');
 
-        $pdf = Pdf::loadView('student.cor.pdf', compact('enrollment', 'subjects', 'totalUnits'));
+        $pdf = Pdf::loadView('student.cor.pdf', compact('enrollment', 'subjects', 'totalUnits', 'offeringAssignments'));
 
         return $pdf->download('COR_' . str_replace(' ', '_', $enrollment->user->name) . '.pdf');
     }

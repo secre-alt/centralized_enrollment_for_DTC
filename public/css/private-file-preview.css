@@ -1,6 +1,6 @@
 .private-file-preview { display:flex; flex-direction:column; gap:14px; min-height:calc(100vh - 180px); padding:0 0 24px; }
 .private-file-preview-header { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 18px; border:1px solid var(--dtc-border); border-radius:12px; background:var(--dtc-surface); }
-.private-file-preview-header h1 { margin:0; color:var(--dtc-text); font-size:18px; font-weight:700; }
+.private-file-preview-header h1 { margin:0; color:var(--dtc-text); font-size:18px; font-weight:600; }
 .private-file-preview-header p { margin:4px 0 0; color:var(--dtc-text-secondary); font-size:12px; overflow-wrap:anywhere; }
 .private-file-preview-header nav { display:flex; flex-wrap:wrap; gap:8px; }
 .private-file-preview-back,.private-file-preview-download { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:8px 12px; border:1px solid var(--dtc-border); border-radius:8px; background:var(--dtc-surface); color:var(--dtc-text); font-size:12px; font-weight:600; text-decoration:none; }

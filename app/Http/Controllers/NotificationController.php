@@ -206,6 +206,15 @@ class NotificationController extends Controller
                 : route('notifications.index');
         }
 
+        // Keep stored payment notifications on the current list/modal workflow.
+        if (preg_match('#^/cashier/payments/(\d+)/?$#', $path, $paymentMatch)) {
+            if (! Auth::user()->hasAnyRole(['cashier', 'admin'])) return route('notifications.index');
+
+            return Enrollment::whereKey($paymentMatch[1])->exists()
+                ? route('cashier.payments.index', ['review' => (int) $paymentMatch[1]])
+                : route('cashier.payments.index');
+        }
+
         // Historical notifications stored the standalone enrollment receipt URL.
         // Open the current receipt modal on the payment list instead.
         if (preg_match('#^/cashier/payments/(\d+)/receipt/?$#', $path, $receiptMatch)) {

@@ -150,7 +150,6 @@ textarea {
     position: relative;
     overflow: hidden;
     min-height: 680px;
-    padding: 90px 0 100px;
     background:
         linear-gradient(
             90deg,
@@ -163,28 +162,18 @@ textarea {
             rgba(244, 248, 252, 0) 100%
         ),
         url('/images/dtc-building.webp') right center / cover no-repeat;
-
     isolation: isolate;
+    padding: 80px 0 88px;
+    will-change: auto;
 }
 
 .hero::after {
     content: "";
-
     position: absolute;
-
     inset: 0;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.08) 0%,
-            rgba(255, 255, 255, 0) 50%,
-            rgba(15, 76, 219, 0.03) 100%
-        );
-
     pointer-events: none;
-
     z-index: -1;
+    background: none;
 }
 
 /* Dark mode: the hero gradient/overlay above are hardcoded to the
@@ -206,13 +195,7 @@ body.dtc-dark .hero {
 }
 
 body.dtc-dark .hero::after {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(15, 23, 42, 0.15) 0%,
-            rgba(15, 23, 42, 0) 50%,
-            rgba(15, 76, 219, 0.08) 100%
-        );
+    background: none;
 }
 
 .hero .container {
@@ -240,20 +223,20 @@ body.dtc-dark .hero::after {
 
 .hero-eyebrow {
     font-size: 13px;
-    font-weight: 700;
     color: var(--blue-800);
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
     margin-bottom: 16px;
+    font-weight: 500;
 }
 
 .hero-left h1 {
     font-size: 52px;
-    font-weight: 700;
-    line-height: 1.12;
     color: var(--text-900);
-    margin-bottom: 22px;
     max-width: 640px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    line-height: 1.12;
 }
 
 .hero-left h1 span {
@@ -270,10 +253,10 @@ body.dtc-dark .hero::after {
 
 .hero-left p.hero-support {
     font-size: 14px;
-    font-weight: 600;
     color: var(--text-700);
     max-width: 560px;
-    margin-bottom: 34px;
+    font-weight: 400;
+    margin-bottom: 32px;
 }
 
 
@@ -300,11 +283,10 @@ body.dtc-dark .hero::after {
     padding: 15px 30px;
     border-radius: 11px;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    box-shadow:
-        0 10px 26px rgba(255, 199, 44, 0.32);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
     transition:
         background 0.25s ease,
         transform 0.25s ease,
@@ -314,9 +296,8 @@ body.dtc-dark .hero::after {
 .btn-primary-cta:hover {
     background: var(--yellow-dark);
     color: var(--text-900);
-    transform: translateY(-2px);
-    box-shadow:
-        0 14px 32px rgba(255, 199, 44, 0.42);
+    transform: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 }
 
 .btn-secondary-cta {
@@ -334,8 +315,7 @@ body.dtc-dark .hero::after {
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    box-shadow:
-        0 6px 20px rgba(15, 76, 219, 0.06);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
     transition:
         border-color 0.2s ease,
         background 0.2s ease,
@@ -349,7 +329,7 @@ body.dtc-dark .hero::after {
 
     background: rgba(255, 255, 255, 1);
 
-    transform: translateY(-1px);
+    transform: none;
 }
 
 body.dtc-dark .btn-secondary-cta {
@@ -396,8 +376,7 @@ body.dtc-dark .btn-secondary-cta:hover {
 
     font-weight: 500;
 
-    box-shadow:
-        0 4px 14px rgba(15, 76, 219, 0.05);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 
     backdrop-filter: blur(4px);
 }
@@ -449,13 +428,13 @@ body.dtc-dark .feature-pill {
 .section-heading .eyebrow {
     font-size: 13px;
 
-    font-weight: 700;
+    font-weight: 600;
 
     color: var(--blue-800);
 
-    letter-spacing: 1.2px;
+    letter-spacing: 0;
 
-    text-transform: uppercase;
+    text-transform: none;
 
     margin-bottom: 10px;
 }
@@ -463,7 +442,7 @@ body.dtc-dark .feature-pill {
 .section-heading h2 {
     font-size: 32px;
 
-    font-weight: 700;
+    font-weight: 600;
 
     color: var(--text-900);
 
@@ -540,9 +519,9 @@ body.dtc-dark .feature-pill {
     background: var(--blue-800);
     color: var(--white);
 
-    transform: translateY(-1px);
+    transform: none;
 
-    box-shadow: 0 8px 20px rgba(15, 76, 219, 0.18);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 }
 
 .carousel-arrow:focus-visible {
@@ -618,7 +597,7 @@ body.dtc-dark .feature-pill {
 
     opacity: 1;
 
-    box-shadow: 0 24px 48px rgba(15, 76, 219, 0.16);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 
     transform: translateX(0) translateZ(0) rotateY(0deg) scale(1);
 }
@@ -672,10 +651,9 @@ body.dtc-dark .feature-pill {
 }
 
 .service-card:hover {
-    box-shadow:
-        0 12px 32px rgba(15, 76, 219, 0.10);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 
-    transform: translateY(-3px);
+    transform: none;
 }
 
 .service-card .icon-box {
@@ -747,7 +725,7 @@ body.dtc-dark .feature-pill {
 
     color: var(--yellow);
 
-    font-weight: 700;
+    font-weight: 600;
 
     font-size: 16px;
 
@@ -1006,7 +984,7 @@ body.dtc-dark .feature-pill {
 .login-branding .brand-row h1 {
     font-size: 20px;
 
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .login-branding .brand-row p {
@@ -1019,7 +997,7 @@ body.dtc-dark .feature-pill {
 .login-branding h2 {
     font-size: 32px;
 
-    font-weight: 700;
+    font-weight: 600;
 
     line-height: 1.25;
 
@@ -1087,7 +1065,7 @@ body.dtc-dark .feature-pill {
 .login-branding .role-pill i {
     color: var(--yellow);
 
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .login-panel {
@@ -1128,7 +1106,7 @@ body.dtc-dark .feature-pill {
 .card-header-logo h2 {
     font-size: 24px;
 
-    font-weight: 700;
+    font-weight: 600;
 
     color: var(--text-900);
 
@@ -1168,7 +1146,7 @@ body.dtc-dark .feature-pill {
 .card-header-logo .user-email i {
     color: var(--text-400);
 
-    font-size: 11px;
+    font-size: 12px;
 }
 
 
@@ -1230,8 +1208,7 @@ body.dtc-dark .feature-pill {
 
     outline: none;
 
-    transition:
-        all 0.2s;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s;
 
     font-family: 'Poppins', sans-serif;
 }
@@ -1355,17 +1332,15 @@ body.dtc-dark .feature-pill {
 
     font-size: 15px;
 
-    font-weight: 700;
+    font-weight: 600;
 
     cursor: pointer;
 
-    transition:
-        all 0.2s;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s;
 
     font-family: 'Poppins', sans-serif;
 
-    box-shadow:
-        0 8px 20px rgba(255, 199, 44, 0.35);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 
     display: flex;
 
@@ -1382,10 +1357,9 @@ body.dtc-dark .feature-pill {
 .btn-signin:hover {
     background: var(--yellow-dark);
 
-    transform: translateY(-2px);
+    transform: none;
 
-    box-shadow:
-        0 12px 28px rgba(255, 199, 44, 0.45);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 }
 
 .btn-back {
@@ -1411,8 +1385,7 @@ body.dtc-dark .feature-pill {
 
     font-family: 'Poppins', sans-serif;
 
-    transition:
-        all 0.2s;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s;
 
     display: flex;
 
@@ -1454,7 +1427,7 @@ body.dtc-dark .feature-pill {
 }
 
 .divider span {
-    font-size: 11px;
+    font-size: 12px;
 
     color: var(--text-400);
 
@@ -1485,7 +1458,7 @@ body.dtc-dark .feature-pill {
 
     padding: 4px 10px;
 
-    font-size: 11px;
+    font-size: 12px;
 
     color: var(--text-500);
 
@@ -1493,7 +1466,7 @@ body.dtc-dark .feature-pill {
 }
 
 .role-pill i {
-    font-size: 10px;
+    font-size: 12px;
 
     color: var(--blue-800);
 }
@@ -1501,7 +1474,7 @@ body.dtc-dark .feature-pill {
 .card-footer-text {
     margin-top: 24px;
 
-    font-size: 11px;
+    font-size: 12px;
 
     color: var(--text-400);
 }
@@ -1690,10 +1663,10 @@ body.dtc-dark .feature-pill {
    .carousel-track .service-card {
     width: min(240px, 72%);
     }
-    
+
     .carousel-track .service-card.is-center {
         transform: none;
-        position: relative;   
+        position: relative;
         margin: 0 auto;
     }
 
@@ -1780,7 +1753,7 @@ body.dtc-dark .feature-pill {
     }
 
     .feature-pill {
-        font-size: 11px;
+        font-size: 12px;
 
         padding: 7px 12px;
     }
@@ -1807,13 +1780,27 @@ body.dtc-dark .feature-pill {
 .hero-explore-link {
     opacity: 0;
     transform: translateY(24px);
-    animation: heroEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: none;
+    opacity: 1;
+    transform: none;
 }
 
-.hero-eyebrow           { animation-delay: 0.05s; }
-.hero-left h1            { animation-delay: 0.15s; }
+.hero-eyebrow {
+ animation-delay: 0.05s;
+    font-weight: 500;
+}
+.hero-left h1 {
+ animation-delay: 0.15s;
+    font-weight: 700;
+    margin-bottom: 24px;
+    line-height: 1.12;
+}
 .hero-left p.hero-desc   { animation-delay: 0.25s; }
-.hero-left p.hero-support { animation-delay: 0.33s; }
+.hero-left p.hero-support {
+ animation-delay: 0.33s;
+    font-weight: 400;
+    margin-bottom: 32px;
+}
 .hero-cta-group          { animation-delay: 0.41s; }
 .hero-explore-link       { animation-delay: 0.49s; }
 
@@ -1825,7 +1812,8 @@ body.dtc-dark .feature-pill {
 }
 
 .hero {
-    will-change: background-position;
+    padding: 80px 0 88px;
+    will-change: auto;
 }
 
 
@@ -1834,17 +1822,20 @@ body.dtc-dark .feature-pill {
    ========================================================================== */
 
 .reveal {
-    opacity: 0;
-    transform: translateY(28px);
-
-    transition:
-        opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: 1;
+    transform: none;
+    transition: none;
 }
 
-.reveal.reveal-left  { transform: translateX(-28px); }
-.reveal.reveal-right { transform: translateX(28px); }
-.reveal.reveal-scale { transform: scale(0.94); }
+.reveal.reveal-left {
+    transform: none;
+}
+.reveal.reveal-right {
+    transform: none;
+}
+.reveal.reveal-scale {
+    transform: none;
+}
 
 .reveal.revealed {
     opacity: 1;
@@ -1879,7 +1870,7 @@ body.dtc-dark .feature-pill {
 
     cursor: pointer;
 
-    box-shadow: 0 10px 24px rgba(15, 76, 219, 0.28);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 
     opacity: 0;
     visibility: hidden;
@@ -1904,7 +1895,7 @@ body.dtc-dark .feature-pill {
     background: var(--yellow);
     color: var(--text-900);
 
-    transform: translateY(-3px);
+    transform: none;
 }
 
 .back-to-top:focus-visible {
@@ -1992,7 +1983,7 @@ body.dtc-dark .feature-pill {
     background: var(--white);
     border-radius: 22px;
     padding: 32px 28px;
-    box-shadow: 0 28px 72px rgba(10, 22, 50, 0.30);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
     animation: dtcSvcBoxIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
@@ -2079,10 +2070,10 @@ body.dtc-dark .dtc-svc-close {
 
 .dtc-svc-badge {
     display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
     color: var(--blue-800);
     background: rgba(15, 76, 219, 0.08);
     border-radius: 999px;
@@ -2097,7 +2088,7 @@ body.dtc-dark .dtc-svc-badge {
 
 .dtc-svc-title {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-900);
     margin: 0 0 4px;
     line-height: 1.2;
@@ -2135,9 +2126,9 @@ body.dtc-dark .dtc-svc-desc {
     align-items: center;
     gap: 7px;
     font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.9px;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
     color: var(--blue-800);
     margin-bottom: 14px;
 }
@@ -2243,10 +2234,10 @@ body.dtc-dark .dtc-svc-who i {
     align-items: center;
     gap: 6px;
     margin-top: 14px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--blue-800);
-    letter-spacing: 0.4px;
+    letter-spacing: 0;
     opacity: 0;
     transform: translateY(4px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -2263,7 +2254,7 @@ body.dtc-dark .dtc-svc-who i {
 }
 
 .card-hint i {
-    font-size: 11px;
+    font-size: 12px;
 }
 
 body.dtc-dark .service-card .card-hint {

@@ -1,13 +1,13 @@
 @extends('adminlte::page')
 @include('partials.navbar')
 @section('title', 'Help Center')
+@section('content_header')
+<x-dtc.page-header title="Help Center" subtitle="Clear answers for your next step">
+    <x-slot name="actions"><a class="help-contact-jump" href="#help-contact-title">Contact the Registrar <span aria-hidden="true">↗</span></a></x-slot>
+</x-dtc.page-header>
+@endsection
 @section('content')
 <div class="help-center">
-    <header class="help-heading">
-        <h1>Help Center</h1>
-        <p>Clear answers for your next step.</p>
-        <a class="help-contact-jump" href="#help-contact-title">Contact the Registrar <span aria-hidden="true">↗</span></a>
-    </header>
     <form method="GET" action="{{ route('help.index') }}" class="help-search" role="search">
         <label for="help-query">Search help topics</label>
         @if($category !== '')<input type="hidden" name="category" value="{{ $category }}">@endif
@@ -21,10 +21,11 @@
             <a href="{{ route('help.index', ['q' => $query, 'category' => $item]) }}" @if($category === $item) aria-current="page" @endif>{{ $item }}</a>
         @endforeach
     </nav>
-    <div class="help-layout">
-        <main>
+    <section class="help-content" aria-label="Help topics and contact details">
             <div class="help-results"><h2>{{ $query !== '' ? 'Search results' : ($category ?: 'Common questions') }}</h2><span>{{ $topics->count() }} {{ $topics->count() === 1 ? 'topic' : 'topics' }}</span></div>
             @if($query !== '')<p class="help-query-note">Results for “{{ $query }}” · <a href="{{ route('help.index', ['category' => $category]) }}">Clear search</a></p>@endif
+    <div class="help-layout">
+        <main>
             <div class="help-question-list">
             @forelse($topics as $topic)
                 <details class="help-topic">
@@ -50,6 +51,7 @@
             <p class="help-contact-note">Have your application or booking reference ready. Never share your password.</p>
         </aside>
     </div>
+    </section>
 </div>
 @endsection
 @section('css')

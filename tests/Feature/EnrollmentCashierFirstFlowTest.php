@@ -25,6 +25,13 @@ class EnrollmentCashierFirstFlowTest extends TestCase
         $cashier = $this->makeUserWithRole('cashier');
         $registrar = $this->makeUserWithRole('registrar');
         $enrollment = Enrollment::factory()->pending()->create(['user_id' => $student->id]);
+        $subject = \App\Models\CourseSubject::factory()->create(['program_id' => $enrollment->program_id]);
+        $enrollment->update(['subject_ids' => [$subject->id], 'school_year' => '2026-2027', 'semester' => 1]);
+        $section = \App\Models\ClassSchedule::create([
+            'course_subject_id' => $subject->id, 'section_code' => 'A', 'school_year' => '2026-2027',
+            'semester' => 1, 'capacity' => 10, 'is_active' => true, 'day_pattern' => 'MWF',
+            'time_start' => '08:00:00', 'time_end' => '09:00:00',
+        ]);
 
         $this->actingAs($registrar)
             ->get(route('registrar.enrollments.index'))
@@ -45,7 +52,7 @@ class EnrollmentCashierFirstFlowTest extends TestCase
         $this->actingAs($registrar)
             ->get(route('registrar.enrollments.index'))
             ->assertViewHas('enrollments', fn ($enrollments) => $enrollments->total() === 1);
-        $this->post(route('registrar.enrollments.approve', $enrollment))
+        $this->post(route('registrar.enrollments.approve', $enrollment), ['section_choices' => [$subject->id => $section->id]])
             ->assertRedirect(route('registrar.enrollments.index'));
 
         $this->assertSame('approved', $enrollment->fresh()->status);

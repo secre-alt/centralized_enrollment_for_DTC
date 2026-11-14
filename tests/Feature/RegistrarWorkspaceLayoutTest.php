@@ -33,9 +33,19 @@ class RegistrarWorkspaceLayoutTest extends TestCase
     {
         $this->seedRoles();
         $registrar = $this->makeUserWithRole('registrar');
+        $cashier = $this->makeUserWithRole('cashier');
         $student = $this->makeUserWithRole('student');
         $program = \App\Models\Program::factory()->create(['name' => 'Information Systems', 'code' => 'BSIS']);
-        \App\Models\Enrollment::factory()->pending()->create(['user_id' => $student->id, 'program_id' => $program->id]);
+        $pendingEnrollment = \App\Models\Enrollment::factory()->pending()->create([
+            'user_id' => $student->id,
+            'program_id' => $program->id,
+            'is_paid' => true,
+        ]);
+        \App\Models\Payment::factory()->create([
+            'enrollment_id' => $pendingEnrollment->id,
+            'verified_by' => $cashier->id,
+            'verified_at' => now(),
+        ]);
         \App\Models\Enrollment::factory()->create(['user_id' => $student->id, 'program_id' => $program->id]);
         foreach ([$student->name, $student->email, 'Information', 'BSIS'] as $search) {
             $this->actingAs($registrar)->get(route('registrar.enrollments.index', ['search' => $search, 'per_page' => 5]))

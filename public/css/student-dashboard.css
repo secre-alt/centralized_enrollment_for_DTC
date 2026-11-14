@@ -1,17 +1,24 @@
 /* Academic calendar follows the existing theme in both modes. */
 .dtc-portal-dashboard .dtc-current-term {
     border:1px solid var(--dtc-border) !important;
-    border-radius:22px !important;
-    background:linear-gradient(145deg, var(--dtc-surface) 55%, color-mix(in srgb, var(--dtc-primary) 5%, var(--dtc-surface))) !important;
-    box-shadow:0 10px 30px rgba(15, 23, 42, .08);
+    background: var(--dtc-surface) !important;
+    border-radius: 16px !important;
+    box-shadow: none;
 }
-.dtc-current-term > .card-body { padding:28px !important; }
+.dtc-current-term > .card-body {
+    padding: 24px !important;
+}
 .dtc-current-term-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; }
 .dtc-term-identity { display:flex; align-items:center; gap:16px; min-width:0; }
 .dtc-term-icon { display:flex; align-items:center; justify-content:center; width:50px; height:50px; flex:0 0 50px; border:1px solid color-mix(in srgb,var(--dtc-primary) 25%,var(--dtc-border)); border-radius:14px; background:var(--dtc-primary-soft); color:var(--dtc-primary); }
 .dtc-term-icon svg { width:21px; height:21px; }
-.dtc-current-term-kicker { color:var(--dtc-text-secondary); font-size:10px; font-weight:400; letter-spacing:.11em; text-transform:uppercase; }
-.dtc-current-term-heading h2 { margin:5px 0 0; color:var(--dtc-text); font-size:26px; font-weight:600; letter-spacing:-.035em; line-height:1.25; }
+.dtc-current-term-kicker { color:var(--dtc-text-secondary); font-size:12px; font-weight:400; letter-spacing: 0; text-transform: none; }
+.dtc-current-term-heading h2 {
+  color:var(--dtc-text); font-size:26px;   line-height:1.25;
+    margin: 8px 0 0;
+    letter-spacing: 0;
+    font-weight: 500;
+}
 .dtc-term-badge { display:inline-flex; align-items:center; gap:7px; flex-shrink:0; padding:7px 12px; border:1px solid var(--dtc-border); border-radius:999px; background:var(--dtc-surface-soft); color:var(--dtc-text-secondary); font-size:12px; font-weight:500; }
 .dtc-term-badge > span { width:7px; height:7px; border-radius:50%; background:currentColor; }
 .dtc-term-badge.is-in_progress,.dtc-term-badge.is-upcoming { background:var(--dtc-primary-soft); color:var(--dtc-primary); border-color:color-mix(in srgb,var(--dtc-primary) 30%,var(--dtc-border)); }
@@ -19,13 +26,30 @@
 .dtc-term-dates { display:flex; justify-content:space-between; gap:16px; margin-top:28px; }
 .dtc-term-dates > div { display:grid; gap:4px; }
 .dtc-term-dates > div:last-child { text-align:right; }
-.dtc-term-dates span { color:var(--dtc-text-secondary); font-size:10px; font-weight:400; letter-spacing:.1em; text-transform:uppercase; }
+.dtc-term-dates span { color:var(--dtc-text-secondary); font-size:12px; font-weight:400; letter-spacing: 0; text-transform: none; }
 .dtc-term-dates time { color:var(--dtc-text); font-size:13px; font-weight:500; }
-.dtc-term-progress { position:relative; height:9px; margin-top:17px; border:1px solid color-mix(in srgb,var(--dtc-border) 75%,transparent); border-radius:999px; background:linear-gradient(180deg,#E8EDF5,#E2E8F0); box-shadow:inset 0 1px 2px rgba(15,23,42,.08); }
-.dtc-term-progress > span { display:block; width:var(--term-progress); height:100%; border-radius:inherit; background:linear-gradient(90deg,#1749C8,#3B82F6); box-shadow:inset 0 1px 0 rgba(255,255,255,.28); transition:width .45s cubic-bezier(.2,.7,.2,1); }
-.dtc-term-progress::after { position:absolute; top:50%; left:clamp(9px,var(--term-progress),calc(100% - 9px)); width:20px; height:20px; border:5px solid #2563EB; border-radius:50%; background:#FFFFFF; box-shadow:0 0 0 5px rgba(37,99,235,.14),0 3px 9px rgba(15,23,42,.18); transform:translate(-50%,-50%); content:''; }
-.dtc-term-progress-meta { display:flex; justify-content:space-between; gap:14px; margin-top:14px; color:var(--dtc-text-secondary); font-size:12px; }
-.dtc-term-progress-meta strong { color:var(--dtc-text); font-weight:500; }
+.dtc-term-progress {
+    position: relative;
+    overflow: hidden;
+    border: 0;
+    border-radius: 6px;
+    height: 12px;
+    margin-top: 16px;
+    background: var(--dtc-surface-soft);
+    box-shadow: none;
+}
+.dtc-term-progress > span {
+    display: block; width: clamp(0%, var(--term-progress), 100%); height: 100%; border-radius: inherit;
+    background: var(--dtc-primary);
+    box-shadow: none;
+    transition: none;
+}
+.dtc-term-progress::after {
+ position:absolute; top:50%; left:clamp(9px,var(--term-progress),calc(100% - 9px)); width:20px; height:20px; border:5px solid #2563EB; border-radius:50%; background:#FFFFFF; box-shadow: 0 1px 2px rgba(15, 23, 42, .06); transform:translate(-50%,-50%);
+    content: none;
+}
+.dtc-term-progress-meta { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px 16px; margin-top:12px; color:var(--dtc-text-secondary); font-size:13px; line-height:20px; font-variant-numeric:tabular-nums; }
+.dtc-term-progress-meta strong { color:var(--dtc-text); font-weight:600; }
 .dtc-term-footer { display:flex; justify-content:flex-end; margin-top:26px; padding-top:24px; border-top:1px solid var(--dtc-border); }
 .dtc-term-footer a { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:42px; padding:10px 16px; border:1px solid color-mix(in srgb,var(--dtc-primary) 25%,var(--dtc-border)); border-radius:12px; color:var(--dtc-primary); font-size:12px; font-weight:500; text-decoration:none; }
 .dtc-term-footer a:hover { background:var(--dtc-primary-soft); }
@@ -33,8 +57,9 @@
 .dtc-term-footer svg { width:15px; height:15px; }
 body.dtc-dark .dtc-portal-dashboard .dtc-current-term {
     border-color:#334155 !important;
-    background:linear-gradient(145deg,#111827 55%,rgba(15,76,219,.18)) !important;
-    box-shadow:0 14px 36px rgba(2,6,23,.32);
+    background: var(--dtc-surface) !important;
+    border-radius: 16px !important;
+    box-shadow: none;
 }
 body.dtc-dark .dtc-term-icon {
     border-color:rgba(255,199,44,.38);
@@ -59,21 +84,22 @@ body.dtc-dark .dtc-term-badge.is-upcoming {
 }
 body.dtc-dark .dtc-term-badge.is-in_progress > span {
     background:#93C5FD;
-    box-shadow:0 0 0 4px rgba(147,197,253,.18);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
 }
 body.dtc-dark .dtc-term-progress {
-    border-color:rgba(148,163,184,.12);
-    background:linear-gradient(180deg,#263449,#334155);
-    box-shadow:inset 0 1px 2px rgba(0,0,0,.24);
+    background: #253247;
+    box-shadow: none;
 }
 body.dtc-dark .dtc-term-progress > span {
-    background:linear-gradient(90deg,#2563EB,#60A5FA);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+    background: #3b82f6;
+    box-shadow: none;
+    transition: none;
 }
 body.dtc-dark .dtc-term-progress::after {
     border-color:#3B82F6;
     background:#F8FAFC;
-    box-shadow:0 0 0 5px rgba(96,165,250,.22),0 3px 11px rgba(0,0,0,.38);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    content: none;
 }
 body.dtc-dark .dtc-term-footer {
     border-top-color:#334155;
@@ -128,10 +154,10 @@ body.dtc-dark .dtc-term-empty {
     display: none;
     content: none;
 }
-.dtc-enrollment-eyebrow { display: block; margin-bottom: 10px; color: var(--dtc-primary); font-size: 10px; font-weight:400; letter-spacing: .13em; text-transform: uppercase; }
+.dtc-enrollment-eyebrow { display: block; margin-bottom: 10px; color: var(--dtc-primary); font-size: 12px; font-weight:400; letter-spacing: 0; text-transform: none; }
 .dtc-enrollment-card .dtc-enrollment-card-header h2 { margin: 0; color: var(--dtc-text); font-size: clamp(19px, 1.7vw, 26px); font-weight:600; letter-spacing: -.025em; line-height: 1.25; }
 .dtc-enrollment-card .dtc-enrollment-card-header p { margin: 9px 0 0; color: var(--dtc-text-secondary); font-size: 12px; line-height: 1.6; }
-.dtc-enrollment-card .dtc-enrollment-status { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 1px; padding: 8px 11px; border: 1px solid var(--dtc-border); border-radius: 999px; background: var(--dtc-primary-soft); color: var(--dtc-primary); font-size: 11px; font-weight:500; white-space: nowrap; }
+.dtc-enrollment-card .dtc-enrollment-status { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 1px; padding: 8px 11px; border: 1px solid var(--dtc-border); border-radius: 999px; background: var(--dtc-primary-soft); color: var(--dtc-primary); font-size: 12px; font-weight:500; white-space: nowrap; }
 .dtc-enrollment-status > span { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .dtc-enrollment-card .dtc-enrollment-status.is-complete { border-color: color-mix(in srgb, var(--dtc-success) 30%, var(--dtc-border)); background: color-mix(in srgb, var(--dtc-success) 10%, var(--dtc-surface)); color: var(--dtc-success); }
 .dtc-enrollment-card .dtc-enrollment-card-body { padding: 30px 28px 28px !important; }
@@ -146,9 +172,9 @@ body.dtc-dark .dtc-term-empty {
 .dtc-enrollment-card .dtc-enrollment-step:last-child[data-step-state="done"] .dtc-enrollment-marker { border-color: color-mix(in srgb, var(--dtc-success) 18%, var(--dtc-surface)); background: var(--journey-green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--dtc-success) 18%, var(--dtc-surface)); }
 .dtc-enrollment-card .dtc-enrollment-step[data-step-state="rejected"] .dtc-enrollment-marker { border-color: color-mix(in srgb, var(--dtc-danger) 18%, var(--dtc-surface)); background: var(--dtc-danger); color: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--dtc-danger) 18%, var(--dtc-surface)); }
 .dtc-enrollment-step-copy { display: grid; gap: 5px; min-width: 0; }
-.dtc-enrollment-card .dtc-enrollment-step-number { color: var(--dtc-text-muted); font-size: 9px; font-weight:400; letter-spacing: .09em; text-transform: uppercase; }
+.dtc-enrollment-card .dtc-enrollment-step-number { color: var(--dtc-text-muted); font-size: 12px; font-weight:400; letter-spacing: 0; text-transform: none; }
 .dtc-enrollment-card .dtc-enrollment-step-copy strong { color: var(--dtc-text); font-size: 12px; font-weight:500; line-height: 1.45; }
-.dtc-enrollment-card .dtc-enrollment-step-copy > span { color: var(--dtc-text-secondary); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.dtc-enrollment-card .dtc-enrollment-step-copy > span { color: var(--dtc-text-secondary); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .dtc-enrollment-card .dtc-enrollment-step[data-step-state="pending"] .dtc-enrollment-step-copy strong { color: var(--dtc-text-secondary); }
 .dtc-enrollment-card .dtc-enrollment-step[data-step-state="rejected"] .dtc-enrollment-step-copy strong { color: var(--dtc-danger); }
 .dtc-enrollment-card .dtc-enrollment-notice { display: flex; align-items: center; gap: 14px; margin-top: 28px; padding: 18px; border: 1px solid var(--dtc-border); border-radius: 14px; background: var(--dtc-primary-soft); color: var(--dtc-primary); }
@@ -157,13 +183,23 @@ body.dtc-dark .dtc-term-empty {
 .dtc-enrollment-card .dtc-enrollment-notice strong { color: var(--dtc-text); font-size: 14px; font-weight:600; }
 .dtc-enrollment-card .dtc-enrollment-notice span { color: var(--dtc-text-secondary); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 .dtc-enrollment-card .dtc-enrollment-notice.is-complete { border-color: color-mix(in srgb, var(--dtc-success) 30%, var(--dtc-border)); background: color-mix(in srgb, var(--dtc-success) 8%, var(--dtc-surface)); }
-.dtc-enrollment-card .dtc-enrollment-notice.is-complete > svg { background: var(--journey-green); }
+.dtc-enrollment-card .dtc-enrollment-notice.is-complete > svg {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--journey-green);
+    box-shadow: none;
+}
 .dtc-enrollment-card .dtc-enrollment-notice.is-rejected { border-color: color-mix(in srgb, var(--dtc-danger) 30%, var(--dtc-border)); background: color-mix(in srgb, var(--dtc-danger) 8%, var(--dtc-surface)); }
 .dtc-enrollment-card .dtc-enrollment-notice.is-rejected > svg { background: var(--dtc-danger); }
 @media (max-width: 767.98px) {
     .dtc-enrollment-card .dtc-enrollment-card-header { position: relative; display: block; padding: 24px 22px 0 !important; }
     .dtc-enrollment-eyebrow { min-height: 28px; padding-right: 130px; margin-bottom: 12px; }
-    .dtc-enrollment-card .dtc-enrollment-status { position: absolute; top: 20px; right: 22px; font-size: 10px; }
+    .dtc-enrollment-card .dtc-enrollment-status { position: absolute; top: 20px; right: 22px; font-size: 12px; }
     .dtc-enrollment-card .dtc-enrollment-card-header h2 { font-size: 22px; }
     .dtc-enrollment-card .dtc-enrollment-card-body { padding: 26px 22px 22px !important; }
     .dtc-enrollment-card .dtc-enrollment-steps { display: flex; flex-direction: column; }
@@ -178,6 +214,6 @@ body.dtc-dark .dtc-term-empty {
 @media (max-width: 359.98px) {
     .dtc-enrollment-card .dtc-enrollment-card-header { padding: 20px 16px 0 !important; }
     .dtc-enrollment-card .dtc-enrollment-status { right: 16px; }
-    .dtc-enrollment-eyebrow { font-size: 9px; padding-right: 118px; }
+    .dtc-enrollment-eyebrow { font-size: 12px; padding-right: 118px; }
     .dtc-enrollment-card .dtc-enrollment-card-body { padding: 24px 16px 20px !important; }
 }

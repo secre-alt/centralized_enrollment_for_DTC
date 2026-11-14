@@ -38,7 +38,7 @@ class ApplicationController extends Controller
                 'submitted', 'under_review', 'revision_required', 'approved', 'rejected', 'cancelled',
             ])],
             'program_id' => ['nullable', 'integer', 'exists:programs,id'],
-        ]);
+        ] + \App\Support\ListDateRange::rules($request));
 
         $applications = Application::with(['program', 'user', 'reviewer', 'documents'])
             ->when(isset($filters['search']), function ($query) use ($filters) {
@@ -59,6 +59,7 @@ class ApplicationController extends Controller
             ->when($filters['program_id'] ?? null, function ($query, $programId) {
                 $query->where('program_id', $programId);
             })
+            ->tap(fn ($query) => \App\Support\ListDateRange::apply($query, $filters, 'applications.created_at'))
             ->latest()
             ->paginate(\App\Support\TablePagination::perPage(10))->withQueryString()
             ->withQueryString();

@@ -124,7 +124,7 @@ class LanguagePreferenceTest extends TestCase
             ->assertOk()
             ->assertSee('<html lang="fil">', false)
             ->assertSee('Mag-sign in')
-            ->assertSee('Mga Serbisyo ng DTC.')
+            ->assertSee('Ang susunod mong hakbang')
             ->assertSee('Paano ako mag-e-enroll gamit ang DTC EMS?');
 
         $user = $this->makeUserWithRole('student');
@@ -150,7 +150,7 @@ class LanguagePreferenceTest extends TestCase
         $this->actingAs($user)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('PANEL NG ADMIN')
+            ->assertSee('Panel ng admin')
             ->assertSee('Pamahalaan ang mga User')
             ->assertSee('Dashboard ng Admin')
             ->assertSee('Kabuuang Kita')

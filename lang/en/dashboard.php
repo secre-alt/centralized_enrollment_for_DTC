@@ -52,6 +52,7 @@ return [
     'all_users' => 'All Users',
     'download_enrollment_report' => 'Download Enrollment Report',
     'download_payment_report' => 'Download Payment Report',
+    'payment_reports' => 'Payment Reports',
     'recent_enrollments' => 'Recent Enrollments',
     'student_name' => 'Student Name',
     'course' => 'Course',

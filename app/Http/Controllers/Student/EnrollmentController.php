@@ -4,15 +4,17 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
+use App\Models\EnrollmentReplacementRequest;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Models\Setting;
+use App\Services\EnrollmentSubjectReplacementService;
+use App\Services\NotificationService;
 use App\Support\PrivateFilePreview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class EnrollmentController extends Controller
 {
@@ -52,9 +54,9 @@ class EnrollmentController extends Controller
 
             return view('student.enrollment.create', [
                 'lockedProgram' => $application->program,
-                'application'   => $application,
-                'programs'      => null,   // signals the Blade to render locked UI
-                'fee'           => $fee,
+                'application' => $application,
+                'programs' => null,   // signals the Blade to render locked UI
+                'fee' => $fee,
             ]);
         }
 
@@ -62,12 +64,13 @@ class EnrollmentController extends Controller
         $programs = Program::all();
 
         return view('student.enrollment.create', [
-            'programs'      => $programs,
+            'programs' => $programs,
             'lockedProgram' => null,
-            'application'   => null,
-            'fee'           => $fee,
+            'application' => null,
+            'fee' => $fee,
         ]);
     }
+
     // ── index() — NEW ────────────────────────────────────────────
     public function index(Request $request)
     {
@@ -76,11 +79,17 @@ class EnrollmentController extends Controller
         $linkedPaymentEnrollment = $request->filled('payment')
             ? Enrollment::where('user_id', $user->id)->whereKey($request->integer('payment'))->first()
             : null;
-        if ($linkedPaymentEnrollment) return redirect()->route('portal.enrollment.payment-info', $linkedPaymentEnrollment);
-
+        if ($linkedPaymentEnrollment) {
+            return redirect()->route('portal.enrollment.payment-info', $linkedPaymentEnrollment);
+        }
 
         $enrollments = Enrollment::where('user_id', $user->id)
-            ->with(['program', 'payment'])
+            ->with([
+                'program',
+                'payment',
+                'replacementRequests.items.originalSubject',
+                'replacementRequests.items.selectedSchedule.courseSubject.program',
+            ])
             ->latest()
             ->paginate(\App\Support\TablePagination::perPage(10))->appends($request->except('payment'));
 
@@ -105,8 +114,8 @@ class EnrollmentController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'program_id'  => ['required', 'exists:programs,id'],
-            'year_level'  => ['required', 'integer', 'min:1', 'max:5'],
+            'program_id' => ['required', 'exists:programs,id'],
+            'year_level' => ['required', 'integer', 'min:1', 'max:5'],
             'semester' => ['required', 'integer', 'in:1,2,3'],
             'is_irregular' => ['nullable', 'boolean'],
             'subject_ids' => ['required', 'array', 'min:1'],
@@ -186,15 +195,15 @@ class EnrollmentController extends Controller
             }
 
             return Enrollment::create([
-                'user_id'      => $user->id,
-                'program_id'   => $validated['program_id'],
-                'year_level'   => $validated['year_level'],
-                'semester'    => $term['semester'],
-                'school_year'  => $term['school_year'],
+                'user_id' => $user->id,
+                'program_id' => $validated['program_id'],
+                'year_level' => $validated['year_level'],
+                'semester' => $term['semester'],
+                'school_year' => $term['school_year'],
                 'is_irregular' => $isIrregular,
-                'subject_ids'  => $validated['subject_ids'],
-                'status'       => 'pending',
-                'is_paid'      => false,
+                'subject_ids' => $validated['subject_ids'],
+                'status' => 'pending',
+                'is_paid' => false,
             ]);
         });
 
@@ -242,6 +251,274 @@ class EnrollmentController extends Controller
         }
 
         return ['school_year' => $schoolYear, 'semester' => $semester];
+    }
+
+    public function showReplacement(
+        Enrollment $enrollment,
+        EnrollmentSubjectReplacementService $replacementService
+    ) {
+        abort_unless((int) $enrollment->user_id === (int) Auth::id(), 403);
+        $enrollment->load([
+            'program',
+            'payment',
+            'replacementRequests.items.originalSubject',
+            'replacementRequests.items.originalSchedule',
+            'replacementRequests.items.selectedSchedule.courseSubject.program',
+            'replacementRequests.items.selectedSchedule.hostingProgram',
+        ]);
+        $replacementRequest = $enrollment->replacementRequests
+            ->where('status', 'open')
+            ->sortByDesc('id')
+            ->first();
+
+        abort_unless(
+            $enrollment->status === 'pending'
+                && $enrollment->is_paid
+                && $enrollment->payments()->where('status', 'verified')->exists()
+                && $replacementRequest,
+            404
+        );
+
+        $replacementOptions = collect();
+        $capacityReconciliationRequired = [];
+        foreach ($replacementRequest->items as $item) {
+            $replacementOptions[$item->id] = $replacementService->eligibleOfferings($enrollment, $item);
+            $capacityReconciliationRequired[$item->id] = $replacementService
+                ->requiresCapacityReconciliation($enrollment, $item);
+        }
+        $retainedIrregular = (bool) ($replacementRequest->baseline_is_irregular ?? $enrollment->is_irregular)
+            || $replacementService->enrollmentRequiresIrregular($enrollment, $replacementRequest->items->pluck('original_subject_id')->all());
+
+        return view('student.enrollment.revise', compact(
+            'enrollment',
+            'replacementRequest',
+            'replacementOptions',
+            'capacityReconciliationRequired',
+            'retainedIrregular'
+        ));
+    }
+
+    public function submitReplacement(
+        Request $request,
+        Enrollment $enrollment,
+        EnrollmentSubjectReplacementService $replacementService
+    ) {
+        abort_unless((int) $enrollment->user_id === (int) Auth::id(), 403);
+        $validated = $request->validate([
+            'replacements' => ['required', 'array', 'min:1'],
+            'replacements.*' => ['required', 'integer', 'distinct', 'exists:class_schedules,id'],
+            'confirm_revision' => ['required', 'accepted'],
+        ]);
+
+        $case = DB::transaction(function () use ($enrollment, $validated, $replacementService) {
+            \App\Models\User::whereKey(Auth::id())->lockForUpdate()->firstOrFail();
+            $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            if ((int) $lockedEnrollment->user_id !== (int) Auth::id()
+                || $lockedEnrollment->status !== 'pending'
+                || ! $lockedEnrollment->is_paid
+                || ! $lockedEnrollment->payments()->where('status', 'verified')->exists()) {
+                abort(404);
+            }
+
+            $replacementRequest = EnrollmentReplacementRequest::where('enrollment_id', $lockedEnrollment->id)
+                ->where('status', 'open')
+                ->lockForUpdate()
+                ->with('items.originalSubject')
+                ->latest('id')
+                ->firstOrFail();
+
+            $items = $replacementRequest->items->keyBy('id');
+            $submitted = collect($validated['replacements'])->mapWithKeys(
+                fn ($scheduleId, $itemId) => [(int) $itemId => (int) $scheduleId]
+            );
+            if ($submitted->keys()->sort()->values()->all() !== $items->keys()->map(fn ($id) => (int) $id)->sort()->values()->all()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'replacements' => 'Choose one eligible section for each subject the Registrar identified.',
+                ]);
+            }
+
+            $lockedSchedules = \App\Models\ClassSchedule::whereIn('id', $submitted->values())
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+            $selectedSchedules = [];
+            $selectedSchedulesByItem = [];
+            $targetSubjectIds = [];
+            foreach ($items as $item) {
+                $schedule = $lockedSchedules->get($submitted[$item->id]);
+                if (! $schedule) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'replacements' => 'One of the selected class sections is no longer available.',
+                    ]);
+                }
+
+                $replacementService->assertOfferingEligible(
+                    $lockedEnrollment,
+                    $item,
+                    $schedule
+                );
+                $selectedSchedules[] = $schedule;
+                $selectedSchedulesByItem[$item->id] = $schedule;
+                $targetSubjectIds[] = (int) $schedule->course_subject_id;
+            }
+
+            $unaffectedSubjectIds = collect($lockedEnrollment->subject_ids ?? [])
+                ->map(fn ($id) => (int) $id)
+                ->diff($items->pluck('original_subject_id')->map(fn ($id) => (int) $id));
+            $unaffectedAssignments = $lockedEnrollment->subjectOfferings()
+                ->whereIn('curriculum_subject_id', $unaffectedSubjectIds)
+                ->with('classSchedule')
+                ->get()->keyBy('curriculum_subject_id');
+            $finalSubjectIds = $unaffectedSubjectIds->map(fn ($id) => (int) ($unaffectedAssignments->get($id)?->classSchedule?->course_subject_id ?? $id))
+                ->merge($targetSubjectIds)->all();
+            if (count($finalSubjectIds) !== count(array_unique($finalSubjectIds))) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'replacements' => 'The revised load cannot contain the same class subject more than once.',
+                ]);
+            }
+
+            $replacementService->assertNoScheduleConflicts(
+                $lockedEnrollment,
+                $selectedSchedules,
+                $items->pluck('original_subject_id')->all()
+            );
+
+            foreach ($items as $item) {
+                $schedule = $selectedSchedulesByItem[$item->id];
+                $equivalency = $replacementService->equivalencyFor(
+                    $item->originalSubject,
+                    $schedule->courseSubject
+                );
+
+                $item->update([
+                    'selected_schedule_id' => $schedule->id,
+                    'equivalency_id' => $equivalency?->id,
+                ]);
+                $lockedEnrollment->subjectOfferings()->updateOrCreate(
+                    ['curriculum_subject_id' => $item->original_subject_id],
+                    ['class_schedule_id' => $schedule->id]
+                );
+            }
+
+            $baselineIsIrregular = $replacementRequest->baseline_is_irregular
+                ?? (bool) $lockedEnrollment->is_irregular;
+            $lockedEnrollment->update([
+                'is_irregular' => (bool) $baselineIsIrregular
+                    || $replacementService->enrollmentRequiresIrregular($lockedEnrollment),
+            ]);
+
+            $replacementRequest->update([
+                'status' => 'submitted',
+                'submitted_at' => now(),
+            ]);
+
+            return $replacementRequest->fresh(['enrollment.user', 'items.originalSubject']);
+        }, 3);
+
+        foreach (\App\Models\User::role(['registrar', 'admin'])->get() as $registrar) {
+            NotificationService::sendForEvent(
+                $registrar,
+                'enrollment-revision-submitted:'.$case->id,
+                'Revised Enrollment Awaiting Review',
+                $case->enrollment->user->name.' resubmitted enrollment #'.$case->enrollment_id.' for Registrar review.',
+                'info',
+                route('registrar.enrollments.show', $case->enrollment)
+            );
+        }
+
+        NotificationService::sendUserUpdateSafely(
+            $case->enrollment->user,
+            'enrollment-revision-submitted:'.$case->id,
+            'Revised Enrollment Submitted',
+            'Your revised subject selections were submitted to the Registrar. Your verified payment remains on the original enrollment.',
+            'info',
+            route('portal.enrollment.index'),
+            'View enrollment status'
+        );
+
+        return redirect()->route('portal.enrollment.index')
+            ->with('success', 'Revised enrollment submitted for Registrar review. No new enrollment or payment was created.');
+    }
+
+    public function requestEnrollmentRefund(Request $request, EnrollmentReplacementRequest $replacementRequest)
+    {
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:5', 'max:1000'],
+            'confirm_refund' => ['required', 'accepted'],
+        ]);
+
+        abort_unless(
+            (int) $replacementRequest->enrollment()->value('user_id') === (int) Auth::id(),
+            403
+        );
+
+        $case = DB::transaction(function () use ($replacementRequest, $validated) {
+            $lockedEnrollment = Enrollment::whereKey($replacementRequest->enrollment_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $lockedCase = EnrollmentReplacementRequest::whereKey($replacementRequest->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ((int) $lockedEnrollment->user_id !== (int) Auth::id()
+                || $lockedEnrollment->status !== 'pending'
+                || ! $lockedEnrollment->is_paid
+                || $lockedCase->status !== 'open') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'reason' => 'This enrollment is no longer eligible for a refund request.',
+                ]);
+            }
+
+            $payments = Payment::where('enrollment_id', $lockedEnrollment->id)
+                ->where('status', 'verified')
+                ->lockForUpdate()
+                ->get();
+            if ($payments->isEmpty() || $payments->contains(fn ($payment) => $payment->refund_status !== 'not_required')) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'reason' => 'The verified payment is missing or already has a refund request.',
+                ]);
+            }
+
+            foreach ($payments as $payment) {
+                $payment->update(['refund_status' => 'pending']);
+            }
+
+            $lockedEnrollment->update([
+                'status' => 'rejected',
+                'remarks' => 'Student requested a refund: '.trim($validated['reason']),
+            ]);
+            $lockedCase->update([
+                'status' => 'refund_requested',
+                'student_reason' => trim($validated['reason']),
+            ]);
+
+            return $lockedCase->fresh(['enrollment.user']);
+        });
+
+        foreach (\App\Models\User::role('cashier')->get() as $cashier) {
+            NotificationService::sendForEvent(
+                $cashier,
+                'enrollment-refund-requested:'.$case->id,
+                'Enrollment Refund Requested',
+                $case->enrollment->user->name.' requested refund follow-up for enrollment #'.$case->enrollment_id.'. Verify the original payment before recording reconciliation.',
+                'warning',
+                route('cashier.payments.show', $case->enrollment)
+            );
+        }
+
+        NotificationService::sendUserUpdateSafely(
+            $case->enrollment->user,
+            'enrollment-refund-requested:'.$case->id,
+            'Refund Request Sent',
+            'Your refund request was sent to the Cashier. The original verified payment remains in your history and is pending reconciliation.',
+            'info',
+            route('portal.enrollment.index'),
+            'View enrollment status'
+        );
+
+        return redirect()->route('portal.enrollment.index')
+            ->with('success', 'Refund request sent to the Cashier. It is not marked complete until the Cashier records the actual refund.');
     }
 
     // ── submitGcash() — NEW ────────────────────────────────────────
@@ -296,17 +573,17 @@ class EnrollmentController extends Controller
 
                 $proofPath = $request->file('proof_of_payment')->store('payment-proofs', 'local');
                 $payment = Payment::create([
-                    'enrollment_id'    => $lockedEnrollment->id,
-                    'payment_method'   => 'gcash',
+                    'enrollment_id' => $lockedEnrollment->id,
+                    'payment_method' => 'gcash',
                     'reference_number' => $validated['reference_number'],
                     'proof_of_payment' => $proofPath,
-                    'status'           => 'pending',
-                    'processed_by'     => null,
-                    'verified_by'      => null,
-                    'verified_at'      => null,
-                    'amount'           => Setting::get('enrollment_fee', 500),
-                    'receipt_no'       => null,
-                    'paid_at'          => null,
+                    'status' => 'pending',
+                    'processed_by' => null,
+                    'verified_by' => null,
+                    'verified_at' => null,
+                    'amount' => Setting::get('enrollment_fee', 500),
+                    'receipt_no' => null,
+                    'paid_at' => null,
                 ]);
 
                 foreach (\App\Models\User::role('cashier')->get() as $cashier) {
@@ -413,13 +690,14 @@ class EnrollmentController extends Controller
                 ->get(['id', 'subject_code', 'subject_name', 'units', 'year_level', 'semester']);
 
             $grouped = $subjects->groupBy(function ($s) {
-                return $s->year_level . '|' . $s->semester;
+                return $s->year_level.'|'.$s->semester;
             })->map(function ($group, $key) {
                 [$year, $sem] = explode('|', $key);
+
                 return [
                     'year_level' => (int) $year,
-                    'semester'   => (int) $sem,
-                    'subjects'   => $group->values(),
+                    'semester' => (int) $sem,
+                    'subjects' => $group->values(),
                 ];
             })->values();
 
@@ -429,7 +707,7 @@ class EnrollmentController extends Controller
         // ── Regular mode — unchanged ────────────────────────────────────
         $validated = $request->validate([
             'year_level' => ['required', 'integer', 'min:1', 'max:5'],
-            'semester'   => ['required'],
+            'semester' => ['required'],
         ]);
 
         $subjects = \App\Models\CourseSubject::where('program_id', $program->id)
@@ -451,10 +729,10 @@ class EnrollmentController extends Controller
 
         $enrollment->load('program', 'payment');
 
-        $gcashNumber  = Setting::get('gcash_number');
-        $gcashName    = Setting::get('gcash_name');
+        $gcashNumber = Setting::get('gcash_number');
+        $gcashName = Setting::get('gcash_name');
         $gcashQrReady = Setting::get('gcash_qr_path') && Storage::disk('local')->exists(Setting::get('gcash_qr_path'));
-        $fee          = Setting::get('enrollment_fee', 500);
+        $fee = Setting::get('enrollment_fee', 500);
 
         // Latest payment (could be pending/rejected/verified)
         $latestPayment = Payment::where('enrollment_id', $enrollment->id)

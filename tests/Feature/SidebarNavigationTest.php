@@ -44,6 +44,29 @@ class SidebarNavigationTest extends TestCase
         $this->assertSame($count.' unread notifications', $badge->getAttribute('aria-label'));
     }
 
+    public function test_student_appointment_submenu_links_and_active_state(): void
+    {
+        $this->seedRoles();
+        $student = $this->makeUserWithRole('student', ['preferred_language' => 'en']);
+        foreach (['portal.appointments.create', 'portal.appointments.index'] as $routeName) {
+            app()->forgetInstance(\JeroenNoten\LaravelAdminLte\AdminLte::class);
+            $response = $this->actingAs($student)->get(route($routeName))->assertOk();
+            $document = new \DOMDocument();
+            @$document->loadHTML($response->getContent());
+            $xpath = new \DOMXPath($document);
+            $parent = $xpath->query('//aside//li[contains(@class,"has-treeview")][a/p/span[normalize-space(.)="Appointments"]]')->item(0);
+            $this->assertNotNull($parent);
+            $links = $xpath->query('./ul/li/a', $parent);
+            $this->assertSame(2, $links->length);
+            $this->assertSame(route('portal.appointments.create'), $links->item(0)->getAttribute('href'));
+            $this->assertSame(route('portal.appointments.index'), $links->item(1)->getAttribute('href'));
+            $active = $xpath->query('./ul/li/a[contains(concat(" ",normalize-space(@class)," ")," active ")]', $parent);
+            $this->assertSame(1, $active->length);
+            $this->assertSame(route($routeName), $active->item(0)->getAttribute('href'));
+            $this->assertSame('true', $xpath->query('./a', $parent)->item(0)->getAttribute('aria-expanded'));
+        }
+    }
+
     public static function unreadCounts(): array
     {
         return [[0, '0'], [4, '4'], [24, '24'], [120, '99+']];

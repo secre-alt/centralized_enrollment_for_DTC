@@ -258,30 +258,30 @@
                     @endif
 
                     <div class="form-group">
-                        <label class="dtc-slot-label">Date</label>
-                        <input type="date" name="date" class="form-control dtc-slot-input"
+                        <label for="registrar-appointments-slots-date-1" class="dtc-slot-label">Date</label>
+                        <input id="registrar-appointments-slots-date-1" type="date" name="date" class="form-control dtc-slot-input"
                                min="{{ today()->toDateString() }}"
                                value="{{ old('date') }}" required>
                     </div>
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
-                                <label class="dtc-slot-label">Start Time</label>
-                                <input type="time" name="start_time" class="form-control dtc-slot-input"
+                                <label for="registrar-appointments-slots-start-time-2" class="dtc-slot-label">Start Time</label>
+                                <input id="registrar-appointments-slots-start-time-2" type="time" name="start_time" class="form-control dtc-slot-input"
                                        value="{{ old('start_time') }}" required>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <label class="dtc-slot-label">End Time</label>
-                                <input type="time" name="end_time" class="form-control dtc-slot-input"
+                                <label for="registrar-appointments-slots-end-time-3" class="dtc-slot-label">End Time</label>
+                                <input id="registrar-appointments-slots-end-time-3" type="time" name="end_time" class="form-control dtc-slot-input"
                                        value="{{ old('end_time') }}" required>
                             </div>
                         </div>
                     </div>
                     <div class="form-group mb-0">
-                        <label class="dtc-slot-label">Max Bookings</label>
-                        <input type="number" name="max_bookings" class="form-control dtc-slot-input"
+                        <label for="registrar-appointments-slots-max-bookings-4" class="dtc-slot-label">Max Bookings</label>
+                        <input id="registrar-appointments-slots-max-bookings-4" type="number" name="max_bookings" class="form-control dtc-slot-input"
                                value="{{ old('max_bookings', 5) }}" min="1" max="50" required>
                         <small class="dtc-slot-hint">Maximum students that can book this slot</small>
                     </div>
@@ -320,25 +320,25 @@
                     <div id="editSlotErrors" class="alert alert-danger py-2 px-3 mb-3" style="font-size:13px; display:none;">{{ $errors->first() }}</div>
 
                     <div class="form-group">
-                        <label class="dtc-slot-label">Date</label>
+                        <label for="edit_date" class="dtc-slot-label">Date</label>
                         <input type="date" name="date" id="edit_date" class="form-control dtc-slot-input" required>
                     </div>
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
-                                <label class="dtc-slot-label">Start Time</label>
+                                <label for="edit_start_time" class="dtc-slot-label">Start Time</label>
                                 <input type="time" name="start_time" id="edit_start_time" class="form-control dtc-slot-input" required>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <label class="dtc-slot-label">End Time</label>
+                                <label for="edit_end_time" class="dtc-slot-label">End Time</label>
                                 <input type="time" name="end_time" id="edit_end_time" class="form-control dtc-slot-input" required>
                             </div>
                         </div>
                     </div>
                     <div class="form-group mb-0">
-                        <label class="dtc-slot-label">Max Bookings</label>
+                        <label for="edit_max_bookings" class="dtc-slot-label">Max Bookings</label>
                         <input type="number" name="max_bookings" id="edit_max_bookings"
                                class="form-control dtc-slot-input" min="1" max="50" required>
                         <small class="dtc-slot-hint" id="edit_max_hint">Maximum students that can book this slot</small>

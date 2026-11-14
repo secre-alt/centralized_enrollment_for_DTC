@@ -69,7 +69,7 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">{{ __('dashboard.enrollment_overview') }}</span>
-                <span class="badge badge-primary" style="font-size:11px;">{{ now()->year }}</span>
+                <span class="badge badge-primary" style="font-size:12px;">{{ now()->year }}</span>
             </div>
             <div class="card-body">
                 <canvas id="enrollmentChart" height="110"></canvas>
@@ -86,8 +86,8 @@
                     <div style="position:relative; width:180px; height:180px;">
                         <canvas id="paymentChart"></canvas>
                         <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-                            <div style="font-size:20px; font-weight:700;">₱{{ number_format($totalRevenue, 0) }}</div>
-                            <div style="font-size:10px; color:var(--dtc-text-secondary); font-weight:600;">{{ __('dashboard.total') }}</div>
+                            <div style="font-size:20px; font-weight:600;">₱{{ number_format($totalRevenue, 0) }}</div>
+                            <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:600;">{{ __('dashboard.total') }}</div>
                         </div>
                     </div>
                 </div>
@@ -211,8 +211,8 @@
                 <a href="{{ route('admin.reports.enrollment') }}" class="quick-action-btn" target="_blank">
                 <i data-lucide="file-type"></i> {{ __('dashboard.download_enrollment_report') }}
                 </a>
-                <a href="{{ route('admin.reports.payment') }}" class="quick-action-btn" target="_blank">
-                    <i data-lucide="file-type"></i> {{ __('dashboard.download_payment_report') }}
+                <a href="{{ route('reports.payments.index') }}" class="quick-action-btn">
+                    <i data-lucide="file-type"></i> {{ __('dashboard.payment_reports') }}
                 </a>
             </div>
         </div>

@@ -9,7 +9,7 @@ class CourseSubject extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['program_id', 'subject_code', 'subject_name', 'units', 'year_level', 'semester'];
+    protected $fillable = ['program_id', 'subject_code', 'subject_name', 'classification', 'units', 'year_level', 'semester'];
 
     public function program()
     {
@@ -19,5 +19,10 @@ class CourseSubject extends Model
     public function schedules()
     {
         return $this->hasMany(ClassSchedule::class);
+    }
+
+    public function equivalencies()
+    {
+        return $this->hasMany(CourseSubjectEquivalency::class, 'source_subject_id');
     }
 }

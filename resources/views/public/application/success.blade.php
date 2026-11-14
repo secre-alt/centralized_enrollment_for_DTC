@@ -186,18 +186,6 @@ try {
             update();
         }
 
-        // One-time success toast (not repeated on refresh or revisit in this tab)
-        @if($application->status === 'submitted')
-        var toastKey = 'dtc-application-toast-{{ $application->reference_no }}';
-        try {
-            if (!sessionStorage.getItem(toastKey)) {
-                sessionStorage.setItem(toastKey, '1');
-                window.dtcToast && window.dtcToast.success('Save your reference number for future inquiries.', { title: 'Application submitted' });
-            }
-        } catch (e) {
-            window.dtcToast && window.dtcToast.success('Save your reference number for future inquiries.', { title: 'Application submitted' });
-        }
-        @endif
     });
 </script>
 @endsection

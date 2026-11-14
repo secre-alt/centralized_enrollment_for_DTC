@@ -49,18 +49,18 @@
         border: 1px solid var(--dtc-border); border-radius: 999px; background: var(--dtc-surface);
         color: var(--dtc-text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
     }
-    .dq-chip b { font-weight: 700; opacity: .7; }
+    .dq-chip b { font-weight: 600; opacity: .7; }
     .dq-chip.is-active { background: var(--dtc-primary); border-color: var(--dtc-primary); color: #fff; }
 
     .dq-table { margin: 0; }
     .dq-table td { vertical-align: middle; }
     .dq-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .dq-avatar { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-                 background: linear-gradient(135deg, #7C3AED, #A78BFA); color: #fff; font-weight: 700; font-size: 12px; }
+                 background: var(--dtc-primary); color: #fff; font-weight: 600; font-size: 12px; }
     .dq-name { font-size: 13px; font-weight: 600; color: var(--dtc-text); }
     .dq-sub  { font-size: 12px; color: var(--dtc-text-secondary); overflow-wrap: anywhere; }
     .dq-doc  { font-size: 13px; font-weight: 600; color: var(--dtc-text); }
-    .dq-fee  { font-size: 13px; font-weight: 700; color: var(--dtc-success); margin-bottom: 3px; }
+    .dq-fee  { font-size: 13px; font-weight: 600; color: var(--dtc-success); margin-bottom: 3px; }
     .dq-badge { white-space: nowrap; }
     .dq-lock { font-size: 12px; color: var(--dtc-text-muted); margin: -6px 0 14px; }
     .dq-empty[hidden] { display: none; }
@@ -102,7 +102,7 @@
         .dq-row td:nth-child(3),
         .dq-row td:nth-child(6) { display: none !important; }   /* fee/payment + date move into the doc box / modal */
 
-        .dq-avatar { width: 30px; height: 30px; flex-basis: 30px; font-size: 11px; }
+        .dq-avatar { width: 30px; height: 30px; flex-basis: 30px; font-size: 12px; }
         .dq-purpose { max-width: none; }
         .dq-update { min-height: 38px; }
         .dq-table tbody tr.dq-none, .dq-table tbody tr.dq-none td { display: block; width: 100%; }
@@ -115,21 +115,48 @@
     <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
 @endif
 
+@php $documentFiltersOpen = collect(request()->only(['document_type', 'payment_status', 'pickup_from', 'pickup_to', 'per_page']))->contains(fn ($value) => filled($value)); @endphp
 <form method="GET" action="{{ route('registrar.documents.index') }}" class="dtc-fl rg-document-controls">
     <input type="hidden" name="status" value="{{ $status }}">
     <div class="dtc-fl-toolbar">
         <div class="dq-search">
             <i data-lucide="search" aria-hidden="true"></i>
             <input type="search" id="dqSearch" name="search" value="{{ request('search') }}" maxlength="200" placeholder="Search requests" autocomplete="off" aria-label="Search all document requests">
-            @if(request('search'))<a class="dq-clear" href="{{ route('registrar.documents.index', ['status' => $status, 'per_page' => $requests->perPage()]) }}" aria-label="Clear search">&times;</a>@endif
+            @if(request('search'))<a class="dq-clear" href="{{ request()->fullUrlWithQuery(['search' => null, 'page' => null]) }}" aria-label="Clear search">&times;</a>@endif
         </div>
-        <button type="button" class="dtc-fl-toggle" data-toggle="collapse" data-target="#documentFilters" aria-expanded="false" aria-controls="documentFilters">
+        <button type="button" class="dtc-fl-toggle {{ $documentFiltersOpen ? 'has-filters' : '' }}" data-toggle="collapse" data-target="#documentFilters" aria-expanded="{{ $documentFiltersOpen ? 'true' : 'false' }}" aria-controls="documentFilters">
             <i data-lucide="sliders-horizontal" aria-hidden="true"></i><span>Filters</span>
         </button>
     </div>
     <button type="submit" class="sr-only">Search requests</button>
-    <div class="collapse" id="documentFilters">
+    <div class="collapse {{ $documentFiltersOpen ? 'show' : '' }}" id="documentFilters">
         <div class="dtc-fl-panel">
+            <div class="dtc-fl-field">
+                <label for="document-type-filter">Document type</label>
+                <select id="document-type-filter" name="document_type" class="form-control">
+                    <option value="">All documents</option>
+                    @foreach(['tor' => 'Transcript of Records', 'true_copy' => 'True Copy of Records', 'certification' => 'Certification', 'diploma' => 'Diploma'] as $value => $label)
+                        <option value="{{ $value }}" @selected(request('document_type') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="dtc-fl-field">
+                <label for="document-payment-filter">Payment status</label>
+                <select id="document-payment-filter" name="payment_status" class="form-control">
+                    <option value="">All payments</option>
+                    @foreach(['unpaid' => 'Unpaid', 'pending_verification' => 'Pending verification', 'verified' => 'Verified', 'rejected' => 'Rejected', 'no_payment_required' => 'No payment required'] as $value => $label)
+                        <option value="{{ $value }}" @selected(request('payment_status') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="dtc-fl-field">
+                <label for="document-pickup-from">Pickup from</label>
+                <input id="document-pickup-from" name="pickup_from" type="date" class="form-control" value="{{ request('pickup_from') }}">
+            </div>
+            <div class="dtc-fl-field">
+                <label for="document-pickup-to">Pickup to</label>
+                <input id="document-pickup-to" name="pickup_to" type="date" class="form-control" value="{{ request('pickup_to') }}">
+            </div>
             @include('partials.table-rows', ['tableRecords' => $requests, 'tableId' => 'registrar-table-1', 'fixedRows' => true])
             <div class="dtc-fl-actions"><button type="submit" class="btn btn-primary">Apply</button><a class="dtc-fl-clear" href="{{ route('registrar.documents.index') }}">Reset</a></div>
         </div>
@@ -138,7 +165,7 @@
 <div class="dq-tools">
     <nav class="dq-chips" aria-label="Filter by status">
         @foreach (['all' => 'All', 'submitted' => 'Submitted', 'processing' => 'Processing', 'ready' => 'Ready', 'released' => 'Released'] as $key => $label)
-            <a class="dq-chip {{ $status === $key ? 'is-active' : '' }}" aria-current="{{ $status === $key ? 'page' : 'false' }}" href="{{ route('registrar.documents.index', array_merge(request()->only(['search', 'per_page']), ['status' => $key])) }}">{{ $label }} <b>{{ $key === 'all' ? $allCount : ($statusCounts[$key] ?? 0) }}</b></a>
+            <a class="dq-chip {{ $status === $key ? 'is-active' : '' }}" aria-current="{{ $status === $key ? 'page' : 'false' }}" href="{{ route('registrar.documents.index', array_merge(request()->only(['search', 'per_page', 'document_type', 'payment_status', 'pickup_from', 'pickup_to']), ['status' => $key])) }}">{{ $label }} <b>{{ $key === 'all' ? $allCount : ($statusCounts[$key] ?? 0) }}</b></a>
         @endforeach
     </nav>
 </div>
@@ -188,7 +215,7 @@
                             <span class="dq-pay is-{{ $paymentTone[$req->payment_status] ?? 'neutral' }}">{{ $req->paymentNotRequired() ? 'No Payment Required' : ($paymentText[$req->payment_status] ?? ucfirst($req->payment_status)) }}</span>
                         </td>
                         <td>
-                            <span class="dtc-status-badge dq-badge is-{{ $statusTone($req->status) }}" style="font-weight:700;">
+                            <span class="dtc-status-badge dq-badge is-{{ $statusTone($req->status) }}" style="font-weight:600;">
                                 <span class="dtc-status-dot"></span>{{ ucfirst($req->status) }}
                             </span>
                         </td>
@@ -262,7 +289,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Update Request Status</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
                     </div>
                     <div class="modal-body">
                         <p style="font-size:13px; color:var(--dtc-text-secondary); margin-bottom:16px;">

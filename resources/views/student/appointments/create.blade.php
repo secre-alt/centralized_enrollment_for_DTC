@@ -4,7 +4,7 @@
 @section('title', 'Request a Document')
 
 @section('content_header')
-    <div class="dr dr-head">
+    <div class="dr dr-head dtc-booking-header">
         <div>
             <a href="{{ route('portal.appointments.index') }}" class="dr-back">
                 <i data-lucide="chevron-left" aria-hidden="true"></i> My appointments
@@ -45,7 +45,7 @@
 @endphp
 
 @section('content')
-<div class="dr dr-create">
+<div class="dr dr-create dtc-booking-page">
     @if ($errors->any())
         <div class="dr-alert dr-alert--error" role="alert">
             <i data-lucide="circle-alert" aria-hidden="true"></i>
@@ -352,6 +352,7 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('css/document-request-flow.css') }}">
     <link rel="stylesheet" href="{{ asset('css/pickup-picker.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/booking-create.css') }}">
 @endsection
 
 @section('js')

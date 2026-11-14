@@ -87,9 +87,9 @@
                             <td data-summary-label="{{ __('dashboard.payer') }}">
                                 <div  class="u-flex-center-gap-10">
                                     <x-dtc.user-avatar :user="$payment->enrollment->user" style="width:32px; height:32px; border-radius:50%;
-                                                background:linear-gradient(135deg,#22C55E,#059669);
+                                                background:var(--dtc-primary);
                                                 display:flex; align-items:center; justify-content:center;
-                                                color:#fff; font-weight:700; font-size:12px; flex-shrink:0;" />
+                                                color:#fff; font-weight:600; font-size:12px; flex-shrink:0;" />
                                     <span  class="u-text-sm">{{ $payment->enrollment->user->name }}</span>
                                 </div>
                             </td>
@@ -139,10 +139,10 @@
                     <canvas id="collectionChart"></canvas>
                     <div style="position:absolute; top:50%; left:50%;
                                 transform:translate(-50%,-50%); text-align:center;">
-                        <div style="font-size:16px; font-weight:700;">
+                        <div style="font-size:16px; font-weight:600;">
                             ₱{{ number_format($totalRevenue, 0) }}
                         </div>
-                        <div style="font-size:10px; color:var(--dtc-text-secondary); font-weight:600;">{{ __('dashboard.total') }}</div>
+                        <div style="font-size:12px; color:var(--dtc-text-secondary); font-weight:600;">{{ __('dashboard.total') }}</div>
                     </div>
                 </div>
                 <div  class="u-text-sm">
@@ -182,19 +182,19 @@
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-6 col-md-3 mb-3 mb-md-0">
-                        <div style="font-size:22px; font-weight:700; color:var(--dtc-primary);">{{ $totalTransactions }}</div>
+                        <div style="font-size:22px; font-weight:600; color:var(--dtc-primary);">{{ $totalTransactions }}</div>
                         <div class="u-text-xxs-secondary-bold">{{ __('dashboard.total_transactions') }}</div>
                     </div>
                     <div class="col-6 col-md-3 mb-3 mb-md-0">
-                        <div style="font-size:22px; font-weight:700; color:var(--dtc-success);">{{ $totalPaid }}</div>
+                        <div style="font-size:22px; font-weight:600; color:var(--dtc-success);">{{ $totalPaid }}</div>
                         <div class="u-text-xxs-secondary-bold">{{ __('dashboard.paid') }}</div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div style="font-size:22px; font-weight:700; color:var(--dtc-warning);">{{ $pendingPayments }}</div>
+                        <div style="font-size:22px; font-weight:600; color:var(--dtc-warning);">{{ $pendingPayments }}</div>
                         <div class="u-text-xxs-secondary-bold">{{ __('dashboard.pending') }}</div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div style="font-size:22px; font-weight:700;">₱{{ number_format($totalRevenue, 2) }}</div>
+                        <div style="font-size:22px; font-weight:600;">₱{{ number_format($totalRevenue, 2) }}</div>
                         <div class="u-text-xxs-secondary-bold">{{ __('dashboard.total_amount') }}</div>
                     </div>
                 </div>

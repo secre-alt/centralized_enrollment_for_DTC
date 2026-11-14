@@ -63,7 +63,7 @@ class ViewServiceProvider extends ServiceProvider
                         ['text' => 'Manage Users', 'url' => route('admin.users.index'), 'icon' => 'users'],
                         ['text' => 'Reports', 'icon' => 'chart-bar', 'submenu' => [
                             ['text' => 'Enrollment Report', 'url' => route('admin.reports.enrollment'), 'icon' => 'file-type'],
-                            ['text' => 'Payment Report',    'url' => route('admin.reports.payment'),    'icon' => 'file-type'],
+                            ['text' => 'Payment Reports', 'url' => route('reports.payments.index'), 'icon' => 'file-type', 'active' => ['regex:#^reports/payments(?:/|$)#']],
                         ]],
 
                         ['header' => 'ACADEMIC'],
@@ -118,6 +118,7 @@ class ViewServiceProvider extends ServiceProvider
                     ['text' => 'Process Payments','url' => route('cashier.payments.index'), 'icon' => 'banknote'],
                     ['text' => 'Payment History','url' => route('cashier.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^cashier/transactions(?:/|$)#']],
                     ['text' => 'Document Fees',  'url' => route('cashier.document-payments.index'), 'icon' => 'file-check'],
+                    ['text' => 'Payment Reports', 'url' => route('reports.payments.index'), 'icon' => 'chart-bar', 'active' => ['regex:#^reports/payments(?:/|$)#']],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];
@@ -134,7 +135,10 @@ class ViewServiceProvider extends ServiceProvider
                     ]],
                     ['text' => 'Payment History', 'url' => route('portal.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^portal/transactions(?:/|$)#']],
 
-                    ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
+                    ['text' => 'Appointments', 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#'], 'submenu' => [
+                        ['text' => 'Book Appointment', 'url' => route('portal.appointments.create'), 'icon' => 'plus', 'active' => ['portal/appointments/create']],
+                        ['text' => 'My Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'list', 'active' => ['portal/appointments']],
+                    ]],
                     ['text' => 'Certificate of Registration', 'url' => route('portal.cor.show'), 'icon' => 'file-badge'],
                     ['header' => 'SYSTEM'],
                     $notifItem,

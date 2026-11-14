@@ -20,11 +20,23 @@ use Illuminate\Validation\ValidationException;
 
 class DocumentRequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $requests = DocumentRequest::with(['appointment.slot', 'appointment.documentRequests', 'appointment.payments'])->where('user_id', Auth::id())
-            ->latest()
-            ->get();
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:200'],
+            'document_type' => ['nullable', 'in:tor,true_copy,certification,diploma'],
+        ] + \App\Support\ListDateRange::rules($request));
+        $query = DocumentRequest::with(['appointment.slot', 'appointment.documentRequests', 'appointment.payments'])->where('user_id', Auth::id());
+        if (isset($filters['document_type'])) $query->where('document_type', $filters['document_type']);
+        $search = trim($filters['search'] ?? '');
+        if ($search !== '') {
+            $query->where(fn ($matches) => $matches->where('purpose', 'like', '%'.$search.'%')
+                ->orWhere('reference_number', 'like', '%'.$search.'%')
+                ->orWhere('receipt_no', 'like', '%'.$search.'%')
+                ->orWhere('id', ctype_digit($search) ? (int) $search : -1));
+        }
+        \App\Support\ListDateRange::apply($query, $filters, 'document_requests.created_at');
+        $requests = $query->latest()->get();
 
         $schedule = app(AppointmentScheduleService::class);
         $pickupSlots = AppointmentSlot::where('date', '>=', today())

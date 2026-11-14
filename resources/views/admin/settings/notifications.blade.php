@@ -52,7 +52,7 @@
                                 <i data-lucide="mail"></i>
                             </div>
                             <div>
-                                <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">Email Notifications</h3>
+                                <h3 style="font-size:15px; font-weight:600; color:var(--dtc-text); margin:0;">Email Notifications</h3>
                                 <p style="font-size:12px; color:var(--dtc-text-secondary); margin:2px 0 0; max-width:480px;">
                                     Send updates to email addresses on file &mdash; application status,
                                     payment receipts, and document requests.
@@ -74,7 +74,7 @@
                                 <i data-lucide="message-square"></i>
                             </div>
                             <div>
-                                <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">SMS Notifications</h3>
+                                <h3 style="font-size:15px; font-weight:600; color:var(--dtc-text); margin:0;">SMS Notifications</h3>
                                 <p style="font-size:12px; color:var(--dtc-text-secondary); margin:2px 0 0; max-width:480px;">
                                     Send text messages for time-sensitive alerts such as appointment
                                     reminders and enrollment deadlines.
@@ -96,7 +96,7 @@
                                 <i data-lucide="monitor"></i>
                             </div>
                             <div>
-                                <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">In-App Alerts</h3>
+                                <h3 style="font-size:15px; font-weight:600; color:var(--dtc-text); margin:0;">In-App Alerts</h3>
                                 <p style="font-size:12px; color:var(--dtc-text-secondary); margin:2px 0 0; max-width:480px;">
                                     Show the notification bell and in-app alerts for logged-in
                                     students, registrars, and cashiers.

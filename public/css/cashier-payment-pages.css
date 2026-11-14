@@ -1,16 +1,21 @@
 /* Shared cashier payment lists; desktop keeps the existing tables. */
 .cashier-payment-page .dtc-fl { margin-bottom: 16px; }
 .cashier-payment-page .dtc-fl-toolbar { display:flex; align-items:center; gap:8px; }
-.cashier-payment-page .dtc-fl-search { position:relative; flex:1; min-width:0; margin:0; }
+.cashier-payment-page .dtc-fl-toolbar .dtc-fl-search { position:relative; flex:1; min-width:0; max-width:none; margin:0; }
 .cashier-payment-page .dtc-pay-search-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); width:16px; height:16px; pointer-events:none; }
 .cashier-payment-page .dtc-pay-search-input { width:100%; height:44px; padding-left:38px; font-size:13px; }
 .cashier-payment-page .dtc-fl-toggle { min-height:44px; flex-shrink:0; }
 .cashier-payment-page .dtc-fl-panel { align-items:end; }
+@media (min-width:768px) {
+    .cashier-payment-page #paymentsFilterPanel .dtc-fl-panel { grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; }
+}
 .cashier-payment-page .dtc-fl-panel > .dtc-table-rows { padding:0; margin:0; }
 .cashier-payment-page [data-fixed-placement] [data-table-rows-status]:empty { display:none; }
 .cashier-payment-page [data-table-rows-field] { display:flex; flex-direction:column; align-items:stretch; gap:6px; }
 .cashier-payment-page .card { overflow:hidden; }
-.cashier-payment-page .card-header { gap:12px; }
+.cashier-payment-page .card-header { gap:8px 16px; flex-wrap:wrap; }
+.cashier-payment-page .card-header > :first-child { min-width:0; flex:1 1 240px; overflow-wrap:anywhere; }
+.cashier-payment-page .card-header > :last-child:not(:first-child) { flex:0 0 auto; white-space:nowrap; }
 .cashier-payment-page .dtc-pay-actions { display:flex; gap:8px; }
 .cashier-payment-page .dtc-pay-actions button, .cashier-payment-page .dtc-docpay-action { min-height:40px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; border-radius:8px; font-size:12px; font-weight:600; }
 .cashier-payment-page .card-footer { gap:12px; }
@@ -18,7 +23,7 @@
 .cashier-payment-page .dtc-docpay-bundle-table .dtc-bundle-requester-name { min-width:0; color:var(--dtc-text); font-size:13px; font-weight:600; overflow-wrap:anywhere; }
 .cashier-payment-page .dtc-docpay-bundle-table .dtc-pay-avatar { width:32px; height:32px; flex:0 0 32px; border-radius:50%; }
 .cashier-payment-page .dtc-docpay-bundle-table .dtc-bundle-document-count { white-space:nowrap; }
-.cashier-payment-page .dtc-docpay-bundle-table .dtc-pay-fee { font-size:14px; font-weight:700; }
+.cashier-payment-page .dtc-docpay-bundle-table .dtc-pay-fee { font-size:14px; font-weight:600; }
 @media (max-width:767.98px) {
     .cashier-payment-page .table-responsive { padding:12px; overflow:visible; }
     .cashier-payment-page .card-header { padding:16px !important; }
@@ -42,7 +47,7 @@
     .cashier-payment-page table tbody td:first-child > div > div:not(.dtc-user-avatar) { min-width:0; }
     .cashier-payment-page table tbody td:first-child .dtc-user-avatar { width:34px !important; height:34px !important; flex:0 0 34px; }
     .cashier-payment-page table tbody td:first-child .u-text-xs-muted,
-    .cashier-payment-page table tbody td:first-child .u-text-xs-secondary { font-size:11px; overflow-wrap:anywhere; }
+    .cashier-payment-page table tbody td:first-child .u-text-xs-secondary { font-size:12px; overflow-wrap:anywhere; }
     .cashier-payment-page .dtc-payments-table td:nth-child(6),
     .cashier-payment-page .dtc-docpay-table td:nth-child(5) { order:2; flex:0 0 auto; align-self:flex-start; padding-top:3px !important; }
     .cashier-payment-page .dtc-payments-table td:nth-child(2),
@@ -51,19 +56,19 @@
     .cashier-payment-page .dtc-payments-table td:nth-child(4),
     .cashier-payment-page .dtc-payments-table td:nth-child(5),
     .cashier-payment-page .dtc-docpay-table td:nth-child(3),
-    .cashier-payment-page .dtc-docpay-table td:nth-child(6) { order:4; flex:0 1 auto; font-size:11px; color:var(--dtc-text-muted,#64748b); }
+    .cashier-payment-page .dtc-docpay-table td:nth-child(6) { order:4; flex:0 1 auto; font-size:12px; color:var(--dtc-text-muted,#64748b); }
     .cashier-payment-page .dtc-docpay-table td:nth-child(6)::before { content:'Request: '; }
     .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(2) { order:3; flex:1 0 100%; padding-top:4px !important; font-size:12px; font-weight:600; }
     .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(3),
-    .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(4) { order:4; flex:0 0 auto; font-size:11px; font-weight:400; color:var(--dtc-text-muted,#64748b); white-space:nowrap !important; }
+    .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(4) { order:4; flex:0 0 auto; font-size:12px; font-weight:400; color:var(--dtc-text-muted,#64748b); white-space:nowrap !important; }
     .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(6) { order:2; flex:0 0 auto; align-self:flex-start; padding-top:3px !important; }
     .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(6)::before { content:none; }
     .cashier-payment-page .dtc-payments-table td:nth-child(7),
-    .cashier-payment-page .dtc-docpay-table td:nth-child(4) { order:6; flex:1 1 80px; padding-top:2px !important; font-size:18px; font-weight:700; }
+    .cashier-payment-page .dtc-docpay-table td:nth-child(4) { order:6; flex:1 1 80px; padding-top:2px !important; font-size:18px; font-weight:600; }
     .cashier-payment-page .dtc-payments-table td:nth-child(8),
     .cashier-payment-page .dtc-docpay-table td:nth-child(7) { order:6; flex:0 1 auto; padding-top:2px !important; margin-left:auto !important; }
-    .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(4) { order:6; flex:0 0 auto; align-self:center; padding-top:2px !important; font-size:11px; font-weight:400; white-space:nowrap !important; }
-    .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(5) { order:6; flex:0 0 auto; align-self:center; padding-top:2px !important; font-size:16px; font-weight:700; }
+    .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(4) { order:6; flex:0 0 auto; align-self:center; padding-top:2px !important; font-size:12px; font-weight:400; white-space:nowrap !important; }
+    .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(5) { order:6; flex:0 0 auto; align-self:center; padding-top:2px !important; font-size:16px; font-weight:600; }
     .cashier-payment-page .dtc-docpay-bundle-table td:nth-child(7) { order:6; flex:0 0 auto; padding-top:2px !important; margin-left:auto !important; }
     .cashier-payment-page .dtc-pay-actions { flex-wrap:wrap; justify-content:flex-end; gap:6px; }
     .cashier-payment-page .dtc-pay-actions button, .cashier-payment-page .dtc-docpay-action { min-height:44px; min-width:70px; }
@@ -82,27 +87,27 @@
 }
 .cashier-payment-review .dpr-summary > div { min-width:0; padding:14px 18px; }
 .cashier-payment-review .dpr-summary > div + div { border-left:1px solid var(--dtc-border); }
-.cashier-payment-review .dpr-label { display:block; margin-bottom:4px; color:var(--dtc-text-muted); font-size:11px; font-weight:600; letter-spacing:.5px; text-transform:uppercase; }
-.cashier-payment-review .dpr-fee { color:var(--dtc-text); font-size:24px; font-weight:800; line-height:1.1; }
+.cashier-payment-review .dpr-label { display:block; margin-bottom:4px; color:var(--dtc-text-muted); font-size:12px; font-weight:600; letter-spacing: 0; text-transform: none; }
+.cashier-payment-review .dpr-fee { color:var(--dtc-text); font-size:24px; font-weight:600; line-height:1.1; }
 .cashier-payment-review .dpr-val { color:var(--dtc-text); font-size:14px; font-weight:600; }
 .cashier-payment-review .dpr-layout { display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(0, 1fr); gap:18px; align-items:start; }
 .cashier-payment-review .dpr-aside { position:sticky; top:14px; }
 .cashier-payment-review .dpr-section { padding:18px 20px; }
 .cashier-payment-review .dpr-section + .dpr-section { border-top:1px solid var(--dtc-border); }
-.cashier-payment-review .dpr-section h6 { display:flex; align-items:center; gap:9px; margin:0 0 14px; padding-bottom:10px; border-bottom:1px solid var(--dtc-border); color:var(--dtc-text-secondary); font-size:11px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; }
+.cashier-payment-review .dpr-section h6 { display:flex; align-items:center; gap:9px; margin:0 0 14px; padding-bottom:10px; border-bottom:1px solid var(--dtc-border); color:var(--dtc-text-secondary); font-size:12px; font-weight:600; letter-spacing: 0; text-transform: none; }
 .cashier-payment-review .dpr-section h6::before { content:""; width:3px; height:13px; border-radius:3px; background:var(--dtc-primary); }
 .cashier-payment-review .dpr-rows { display:grid; grid-template-columns:150px minmax(0, 1fr); gap:9px 14px; margin:0; font-size:13.5px; }
 .cashier-payment-review .dpr-rows dt { color:var(--dtc-text-secondary); font-size:12px; font-weight:500; }
 .cashier-payment-review .dpr-rows dd { margin:0; color:var(--dtc-text); font-weight:500; line-height:1.45; overflow-wrap:anywhere; }
-.cashier-payment-review .dpr-primary-value { display:block; color:var(--dtc-text); font-weight:700; }
-.cashier-payment-review .dpr-sub { display:block; color:var(--dtc-text-secondary); font-size:11.5px; font-weight:400; }
+.cashier-payment-review .dpr-primary-value { display:block; color:var(--dtc-text); font-weight:600; }
+.cashier-payment-review .dpr-sub { display:block; color:var(--dtc-text-secondary); font-size:12px; font-weight:400; }
 .cashier-payment-review .dpr-document-list { display:flex; flex-direction:column; gap:7px; }
 .cashier-payment-review .dpr-document-item { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 8px; }
 .cashier-payment-review .dpr-document-fee { color:var(--dtc-text-secondary); font-size:12px; font-weight:500; }
-.cashier-payment-review .dpr-request-status { padding:2px 7px; border-radius:999px; background:var(--dtc-surface-muted,var(--dtc-primary-soft)); color:var(--dtc-text-secondary); font-size:10px; font-weight:600; white-space:nowrap; }
+.cashier-payment-review .dpr-request-status { padding:2px 7px; border-radius:999px; background:var(--dtc-surface-muted,var(--dtc-primary-soft)); color:var(--dtc-text-secondary); font-size:12px; font-weight:600; white-space:nowrap; }
 .cashier-payment-review .dpr-ref { display:inline-flex; align-items:center; flex-wrap:wrap; gap:6px; }
-.cashier-payment-review .dpr-ref code { padding:5px 9px; border:1px solid var(--dtc-border); border-radius:7px; background:var(--dtc-primary-soft); color:var(--dtc-primary); font-size:12px; font-weight:700; letter-spacing:.25px; }
-.cashier-payment-review .dpr-copy { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:34px; padding:5px 9px; border:1px solid var(--dtc-border); border-radius:7px; background:var(--dtc-surface); color:var(--dtc-text-secondary); font-size:11px; font-weight:600; line-height:1; cursor:pointer; transition:background .15s ease,border-color .15s ease,color .15s ease; }
+.cashier-payment-review .dpr-ref code { padding:5px 9px; border:1px solid var(--dtc-border); border-radius:7px; background:var(--dtc-primary-soft); color:var(--dtc-primary); font-size:12px; font-weight:600; letter-spacing:.25px; }
+.cashier-payment-review .dpr-copy { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:34px; padding:5px 9px; border:1px solid var(--dtc-border); border-radius:7px; background:var(--dtc-surface); color:var(--dtc-text-secondary); font-size:12px; font-weight:600; line-height:1; cursor:pointer; transition:background .15s ease,border-color .15s ease,color .15s ease; }
 .cashier-payment-review .dpr-copy svg { width:13px; height:13px; }
 .cashier-payment-review .dpr-copy:hover { border-color:var(--dtc-primary); background:var(--dtc-primary-soft); color:var(--dtc-primary); }
 .cashier-payment-review .dpr-copy:focus-visible { outline:2px solid var(--dtc-primary); outline-offset:2px; }
@@ -132,7 +137,7 @@ body.dtc-dark .cashier-payment-review .dpr-hint.is-ok { color:#4ADE80; }
 .cashier-payment-review .dpr-reject[open] summary::before { content:"－ "; }
 .cashier-payment-review .dpr-reject form { margin-top:12px; }
 .cashier-payment-review .dpr-done { padding:26px 20px; text-align:center; }
-.cashier-payment-review .dpr-done h5 { margin:0 0 6px; color:var(--dtc-text); font-size:16px; font-weight:700; }
+.cashier-payment-review .dpr-done h5 { margin:0 0 6px; color:var(--dtc-text); font-size:16px; font-weight:600; }
 .cashier-payment-review .dpr-done p { margin:0; color:var(--dtc-text-secondary); font-size:13.5px; }
 .cashier-payment-review .dpr-action-btn { width:100%; min-height:46px; margin-top:2px; border-radius:9px; font-weight:600; }
 .cashier-payment-review { padding-bottom:24px; }
@@ -145,7 +150,7 @@ body.dtc-dark .cashier-payment-review .dpr-hint.is-ok { color:#4ADE80; }
     .cashier-payment-review .dpr-summary > div:first-child { grid-column:1 / -1; border-bottom:1px solid var(--dtc-border); }
     .cashier-payment-review .dpr-summary > div:nth-child(3) { border-left:1px solid var(--dtc-border); }
     .cashier-payment-review .dpr-rows { grid-template-columns:minmax(82px, .38fr) minmax(0, 1fr); gap:11px 12px; align-items:start; font-size:12.5px; }
-    .cashier-payment-review .dpr-rows dt { margin:0; padding-top:1px; font-size:11.5px; }
+    .cashier-payment-review .dpr-rows dt { margin:0; padding-top:1px; font-size:12px; }
     .cashier-payment-review .dpr-rows dd { font-size:12.5px; }
     .cashier-payment-review .dpr-section { padding:14px 16px; }
     .cashier-payment-review .dpr-section h6 { margin-bottom:12px; }

@@ -33,6 +33,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Portal\ProfileController;
 use App\Http\Controllers\TransactionHistoryController;
+use App\Http\Controllers\PaymentReportController;
 use App\Http\Controllers\PortalActivationController;
 use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
@@ -118,6 +119,12 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
     Route::delete('/notifications/read',        [NotificationController::class, 'destroyRead'])->name('notifications.destroyRead');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    Route::middleware('role:admin|cashier')->prefix('reports/payments')->name('reports.payments.')->group(function () {
+        Route::get('/', [PaymentReportController::class, 'index'])->name('index');
+        Route::get('/pdf', [PaymentReportController::class, 'pdf'])->name('pdf');
+        Route::get('/csv', [PaymentReportController::class, 'csv'])->name('csv');
+    });
 
     // Staff account settings. Student-facing accounts keep the /portal/profile
     // routes below so their portal URLs remain unchanged.
@@ -206,6 +213,8 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
     Route::get('/enrollments', [RegistrarEnrollmentController::class, 'index'])->name('enrollments.index');
     Route::get('/enrollments/{enrollment}', [RegistrarEnrollmentController::class, 'show'])->name('enrollments.show');
+    Route::post('/enrollments/{enrollment}/subject-replacement', [RegistrarEnrollmentController::class, 'returnForSubjectReplacement'])->name('enrollments.subject-replacement');
+    Route::post('/subjects/{subject}/equivalencies', [ProgramController::class, 'storeEquivalency'])->name('subjects.equivalencies.store');
     Route::post('/enrollments/{enrollment}/approve', [RegistrarEnrollmentController::class, 'approve'])->name('enrollments.approve');
     Route::post('/enrollments/{enrollment}/reject', [RegistrarEnrollmentController::class, 'reject'])->name('enrollments.reject');
     Route::get('/enrollments/{enrollment}/cor', [RegistrarEnrollmentController::class, 'showCor'])->name('enrollments.cor.show');
@@ -280,12 +289,18 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::get('/dashboard', [PortalDashboardController::class, 'index'])->name('dashboard');
     Route::get('/transactions', [TransactionHistoryController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{transaction}', [TransactionHistoryController::class, 'show'])->where('transaction', '[EDA]-[0-9]+')->name('transactions.show');
+    Route::get('/transactions/{transaction}/receipt', [TransactionHistoryController::class, 'receipt'])->where('transaction', '[EDA]-[0-9]+')->name('transactions.receipt');
+    Route::get('/transactions/export/pdf', [TransactionHistoryController::class, 'exportPdf'])->middleware('role:student|alumni')->name('transactions.export.pdf');
+    Route::get('/transactions/export/csv', [TransactionHistoryController::class, 'exportCsv'])->middleware('role:student|alumni')->name('transactions.export.csv');
     Route::get('/application', [PortalApplicationController::class, 'show'])->name('application.show');
 
     Route::get('/enrollment/create', [EnrollmentController::class, 'create'])->name('enrollment.create');
     Route::post('/enrollment', [EnrollmentController::class, 'store'])->name('enrollment.store');
     Route::get('/enrollment', [EnrollmentController::class, 'index'])->name('enrollment.index');
     Route::get('/enrollment/{enrollment}/payment-info', [EnrollmentController::class, 'paymentInfo'])->name('enrollment.payment-info');
+    Route::get('/enrollment/{enrollment}/revise', [EnrollmentController::class, 'showReplacement'])->name('enrollment.revise');
+    Route::post('/enrollment/{enrollment}/revise', [EnrollmentController::class, 'submitReplacement'])->name('enrollment.revise.submit');
+    Route::post('/enrollment/replacement-requests/{replacementRequest}/refund', [EnrollmentController::class, 'requestEnrollmentRefund'])->name('enrollment.replacement.refund');
     Route::middleware('role:student|alumni')->group(function () {
     Route::get('/payments/documents/{documentRequest}', [\App\Http\Controllers\PortalPaymentController::class, 'document'])->name('payments.document');
     Route::get('/payments/appointments/{appointment}', [\App\Http\Controllers\PortalPaymentController::class, 'appointment'])->name('payments.appointment');

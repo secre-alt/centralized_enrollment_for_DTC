@@ -44,7 +44,8 @@
         body.appendChild(title); body.appendChild(message);
         var actions = document.createElement('div'); actions.className = 'notice-floating-actions';
         view = document.createElement('a'); view.textContent = 'View';
-        var close = document.createElement('button'); close.type = 'button'; close.textContent = 'Dismiss';
+        var close = document.createElement('button'); close.type = 'button'; close.textContent = '\u00d7';
+        close.className = 'notice-floating-close';
         close.setAttribute('aria-label', 'Dismiss incoming notification');
         close.addEventListener('click', dismiss);
         actions.appendChild(view); actions.appendChild(close);

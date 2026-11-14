@@ -102,7 +102,6 @@
 
     <div class="dtc-review-footer dtc-receipt-footer">
         <div class="dtc-review-footer-default">
-            <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Close</button>
             <div class="dtc-review-footer-right">
                 <button type="button" class="dtc-btn dtc-btn-primary" onclick="window.printReceiptModal()">
                     <i data-lucide="printer"></i> Print Receipt

@@ -1,0 +1,63 @@
+.payment-reports { display: flex; flex-direction: column; gap: 24px; color: var(--dtc-text); font-size: 14px; line-height: 24px; }
+.pr-panel { min-width: 0; border: 1px solid var(--dtc-border); border-radius: 12px; background: var(--dtc-surface); }
+.pr-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; padding: 24px; }
+.pr-field { flex: 1 1 160px; min-width: 0; }
+.pr-field label { display: block; margin: 0 0 8px; font-size: 13px; font-weight: 500; }
+.pr-field .form-control { width: 100%; height: 44px; padding: 8px 12px; border: 1px solid var(--dtc-border); border-radius: 8px; background: var(--dtc-surface); color: var(--dtc-text); font-size: 14px; }
+.pr-filter-actions { display: flex; align-items: center; gap: 16px; }
+.payment-reports .btn { min-height: 44px; border-radius: 8px; padding: 10px 16px; font-size: 14px; line-height: 22px; }
+.pr-range { flex-basis: 100%; margin: 0; font-size: 13px; }
+.pr-range span, .pr-note, .pr-section-heading > span { color: var(--dtc-text-secondary); }
+.pr-note { margin: 0; font-size: 13px; line-height: 20px; }
+.pr-warning { margin: 0; padding: 16px; border-left: 3px solid #b77900; background: var(--dtc-surface-soft); font-size: 13px; }
+.pr-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.pr-stat { padding: 24px; }
+.pr-stat h2 { margin: 0 0 12px; font-size: 13px; font-weight: 500; line-height: 20px; color: var(--dtc-text-secondary); }
+.pr-stat p { margin: 0; font-size: clamp(20px, 2vw, 28px); font-weight: 500; line-height: 36px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.pr-net { border-top: 3px solid var(--dtc-primary); padding-top: 22px; }
+.pr-net p { color: var(--dtc-on-primary-soft); }
+.pr-chart { padding: 24px; }
+.pr-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; }
+.pr-section-heading h2 { margin: 0; font-size: 18px; font-weight: 500; line-height: 28px; }
+.pr-section-heading > span { font-size: 13px; }
+.pr-chart-canvas { position: relative; width: 100%; height: 280px; }
+.pr-chart-data { margin-top: 16px; }
+.pr-chart-data summary { width: fit-content; padding: 8px 0; color: var(--dtc-on-primary-soft); cursor: pointer; }
+.pr-table-heading { margin: 0; padding: 24px; }
+.pr-table-scroll { overflow-x: auto; }
+.payment-reports table { width: 100%; border-collapse: collapse; }
+.payment-reports th { padding: 12px 16px; background: var(--dtc-surface-soft); color: var(--dtc-text-secondary); font-size: 12px; font-weight: 500; text-align: left; white-space: nowrap; }
+.payment-reports td { padding: 16px; border-top: 1px solid var(--dtc-border); font-size: 13px; vertical-align: top; overflow-wrap: anywhere; }
+.pr-transactions { min-width: 1040px; }
+.pr-transactions td:nth-child(1), .pr-transactions td:nth-child(2) { width: 148px; }
+.payment-reports .pr-amount { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.payment-reports .pr-empty { padding: 32px 24px; margin: 0; text-align: center; color: var(--dtc-text-secondary); }
+.pr-pagination { padding: 16px 24px; border-top: 1px solid var(--dtc-border); }
+.pr-pagination .pagination { flex-wrap: wrap; margin: 0; }
+.payment-reports a { color: var(--dtc-on-primary-soft); }
+.payment-reports a.btn-primary { color: #fff; }
+.payment-reports :is(input, select, button, a, summary, [tabindex]):focus-visible { outline: 2px solid var(--dtc-on-primary-soft); outline-offset: 3px; }
+.payment-reports [hidden] { display: none !important; }
+.payment-reports[aria-busy="true"] .pr-stats, .payment-reports[aria-busy="true"] .pr-chart { opacity: .6; }
+@media (max-width: 1100px) { .pr-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767.98px) {
+    .pr-transactions { display: block; min-width: 0; }
+    .pr-transactions thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .pr-transactions tbody, .pr-transactions tr { display: block; }
+    .pr-transactions tr { padding: 16px; border-top: 1px solid var(--dtc-border); }
+    .payment-reports .pr-transactions td { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; width: auto; padding: 4px 0; border: 0; text-align: left; white-space: normal; }
+    .pr-transactions td::before { content: attr(data-label); color: var(--dtc-text-secondary); font-size: 12px; }
+    .pr-transactions td > span { min-width: 0; overflow-wrap: anywhere; }
+    .payment-reports .pr-transactions .pr-empty { display: block; padding: 16px 0; text-align: center; }
+    .pr-transactions .pr-empty::before { content: none; }
+}
+@media (max-width: 575.98px) {
+    .payment-reports { gap: 20px; }
+    .pr-filters, .pr-chart, .pr-stat, .pr-table-heading { padding: 16px; }
+    .pr-field { flex-basis: calc(50% - 16px); }
+    .pr-field:first-child, .pr-filter-actions { flex-basis: 100%; }
+    .pr-stat p { font-size: 20px; line-height: 28px; }
+    .pr-net { padding-top: 14px; }
+    .pr-stats { gap: 12px; }
+    .pr-chart-canvas { height: 240px; }
+}

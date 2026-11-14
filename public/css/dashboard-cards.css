@@ -1,29 +1,52 @@
 /* Dashboard-only layouts follow available content width, including sidebar changes. */
 .dashboard-kpis { container-type: inline-size; }
 .dashboard-kpis .dtc-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.dashboard-kpis .dtc-stat-card { padding: 14px; min-height: 112px; border-radius: 14px; }
-.dashboard-kpis .dtc-stat-card-top { flex-direction: row; align-items: center; gap: 10px; }
-.dashboard-kpis .dtc-stat-icon { width: 32px; height: 32px; flex-basis: 32px; border-radius: 9px; }
+.dashboard-kpis .dtc-stat-card {
+  min-height: 112px;
+    padding: 16px;
+    border-radius: 12px;
+}
+.dashboard-kpis .dtc-stat-card-top {
+ flex-direction: row; align-items: center;
+    gap: 12px;
+}
+.dashboard-kpis .dtc-stat-icon {
+ width: 32px; height: 32px; flex-basis: 32px;
+    background: transparent !important;
+    color: var(--dtc-text-secondary) !important;
+    border-radius: 8px;
+}
 .dashboard-kpis .dtc-stat-copy { width: auto; }
 .dashboard-kpis .dtc-stat-icon :is(svg, [data-lucide]) { width: 16px; height: 16px; }
-.dashboard-kpis .dtc-stat-label { font-size: 10px !important; letter-spacing: .035em; line-height: 1.5; }
-.dashboard-kpis .dtc-stat-value { margin-top: 4px; font-size: 22px !important; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.dashboard-kpis .dtc-stat-note { margin-top: 8px; padding: 0; font-size: 11px; color: var(--dtc-text-secondary); }
-.dashboard-kpis .dtc-stat-link { margin-top: 10px; padding: 6px 10px; min-height: 32px; max-width: 100%; border-radius: 999px; background: var(--dtc-primary-soft); color: var(--dtc-on-primary-soft) !important; font-size: 11px; }
-.dashboard-kpis .dtc-stat-warning .dtc-stat-link { background: var(--dtc-warning-soft, #fef3c7); color: #854d0e !important; }
-.dashboard-kpis .dtc-stat-danger .dtc-stat-link { background: var(--dtc-danger-soft, #fee2e2); color: #b91c1c !important; }
-.dashboard-kpis .dtc-stat-info .dtc-stat-link { background: #ede9fe; color: #6d28d9 !important; }
-body.dtc-dark .dashboard-kpis .dtc-stat-warning .dtc-stat-link { background: #392b14; color: #fde68a !important; }
-body.dtc-dark .dashboard-kpis .dtc-stat-danger .dtc-stat-link { background: #3e1c29; color: #fda4af !important; }
-body.dtc-dark .dashboard-kpis .dtc-stat-info .dtc-stat-link { background: #2b2050; color: #c4b5fd !important; }
-.dashboard-kpis .dtc-stat-featured { background: var(--dtc-primary-soft); }
+.dashboard-kpis .dtc-stat-label { font-size: 12px !important; letter-spacing: 0; line-height: 1.5; }
+.dashboard-kpis .dtc-stat-value {
+ margin-top: 4px;  line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+    font-size: 28px !important;
+    font-weight: 500;
+}
+.dashboard-kpis .dtc-stat-note { margin-top: 8px; padding: 0; font-size: 12px; color: var(--dtc-text-secondary); }
+.dashboard-kpis .dtc-stat-link {
+ margin-top: 10px;  min-height: 32px; max-width: 100%;   color: var(--dtc-on-primary-soft) !important; font-size: 12px;
+    margin: 12px 0 0;
+    padding: 4px 0;
+    background: transparent;
+    border-radius: 4px;
+}
+.dashboard-kpis .dtc-stat-featured {
+    background: var(--dtc-surface);
+    border-left: 3px solid var(--dtc-primary);
+}
 .dashboard-kpis .dtc-stat-featured .dtc-stat-value { font-size: clamp(24px, 3cqi, 30px) !important; }
 .dashboard-kpis .kpi-revenue, .dashboard-kpis .kpi-collection, .dashboard-kpis .kpi-payments, .dashboard-kpis .kpi-students, .dashboard-kpis .kpi-alumni, .dashboard-kpis .kpi-rejected { grid-column: 1 / -1; }
 .dashboard-kpis .kpi-revenue { order: -1; }
 .dashboard-kpis .kpi-alumni { order: 5; }
 .dashboard-kpis .kpi-rejected { order: 5; }
-.dtc-stat-metrics { display: flex; flex-wrap: wrap; gap: 10px 22px; width: 100%; border-top: 1px solid var(--dtc-border); padding-top: 10px; margin: 12px 0 0; }
-.dtc-stat-metrics dt { font-size: 11px; font-weight: 400; color: var(--dtc-text-secondary); }
+.dtc-stat-metrics {
+ display: flex; flex-wrap: wrap;  width: 100%; border-top: 1px solid var(--dtc-border);  margin: 12px 0 0;
+    gap: 12px 24px;
+    padding-top: 12px;
+}
+.dtc-stat-metrics dt { font-size: 12px; font-weight: 400; color: var(--dtc-text-secondary); }
 .dtc-stat-metrics dd { margin: 4px 0 0; font-size: 14px; font-weight: 600; color: var(--dtc-text); overflow-wrap: anywhere; }
 @container (min-width: 600px) {
     .dashboard-kpis .dtc-kpi-grid { gap: 12px; }

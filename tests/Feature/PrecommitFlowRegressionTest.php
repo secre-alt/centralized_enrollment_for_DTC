@@ -81,7 +81,7 @@ class PrecommitFlowRegressionTest extends TestCase
         $student = $this->makeUserWithRole('student');
         $appointment = Appointment::factory()->create(['user_id' => $student->id, 'appointment_slot_id' => $this->slot()->id, 'status' => 'confirmed']);
         $this->actingAs($student)->get(route('portal.appointments.index'))->assertOk()
-            ->assertSee('Appointment confirmed')->assertDontSee('class="dr-track"', false)->assertDontSee('Preparing');
+            ->assertSee('· Confirmed')->assertDontSee('class="dr-track"', false)->assertDontSee('Preparing');
         $this->document($student, ['appointment_id' => $appointment->id, 'status' => 'processing']);
         $this->get(route('portal.appointments.index'))->assertOk()->assertSee('class="dr-track"', false)->assertSee('Preparing');
     }

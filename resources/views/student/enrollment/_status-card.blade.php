@@ -3,6 +3,16 @@
     $isApproved = $enrollment->status === 'approved';
     $isEnrolled = $isApproved && $enrollment->is_paid;
     $isRejected = $enrollment->status === 'rejected';
+    $replacementRequest = $enrollment->replacementRequests
+        ->sortByDesc('id')
+        ->first();
+    $isReplacementRequired = $enrollment->status === 'pending'
+        && $replacementRequest
+        && $replacementRequest->status === 'open';
+    $isReplacementSubmitted = $enrollment->status === 'pending'
+        && $replacementRequest
+        && in_array($replacementRequest->status, ['submitted', 'approved'], true);
+    $isRefundRequested = $replacementRequest && $replacementRequest->status === 'refund_requested';
     $refundFullyConfirmed = $isRejected && $enrollment->is_paid && (bool) ($enrollment->refund_fully_confirmed ?? false);
     $canPay = in_array($enrollment->status, ['pending', 'approved'], true);
     $isRegistrarReview = $enrollment->status === 'pending' && $enrollment->is_paid;
@@ -11,7 +21,7 @@
     $isPaymentMismatch = $canPay && !$enrollment->is_paid && $payment && $payment->status === 'verified';
     $hasOutstandingTermPayment = $canPay && !$enrollment->is_paid && (bool) ($enrollment->has_outstanding_term_payment ?? false);
     $isPaymentDue = $canPay && !$enrollment->is_paid && !$isPaymentReview && !$isPaymentRejected && !$isPaymentMismatch && !$hasOutstandingTermPayment;
-    $state = $isEnrolled ? 'success' : ($isRejected ? 'danger' : (($isRegistrarReview || $isPaymentReview) ? 'info' : (($isPaymentDue || $isPaymentRejected || $isPaymentMismatch || $hasOutstandingTermPayment) ? 'warning' : 'neutral')));
+    $state = $isEnrolled ? 'success' : ($isRejected ? 'danger' : ($isReplacementRequired ? 'warning' : (($isRegistrarReview || $isPaymentReview) ? 'info' : (($isPaymentDue || $isPaymentRejected || $isPaymentMismatch || $hasOutstandingTermPayment) ? 'warning' : 'neutral'))));
     $paymentStep = $enrollment->is_paid ? 'done' : ($canPay ? 'current' : 'upcoming');
     $registrarStep = $isApproved ? 'done' : ($isRegistrarReview ? 'current' : 'upcoming');
     $enrolledStep = $isEnrolled ? 'done' : 'upcoming';
@@ -41,6 +51,8 @@
                 Payment action needed
             @elseif($isPaymentReview)
                 In review
+            @elseif($isReplacementRequired)
+                Subject replacement required
             @elseif($isRegistrarReview)
                 In review
             @elseif($isPaymentDue)
@@ -121,7 +133,7 @@
                 <span class="dtc-icon-swatch dtc-enrollment-callout-icon" aria-hidden="true">
                     @if($isRejected || $isPaymentRejected)
                     <i data-lucide="circle-alert"></i>
-                    @elseif($isRegistrarReview || $isPaymentReview)
+                    @elseif($isRegistrarReview || $isPaymentReview || $isReplacementRequired)
                     <i data-lucide="clock-3"></i>
                     @else
                     <i data-lucide="wallet"></i>
@@ -133,8 +145,11 @@
                     <strong>Payment confirmed</strong>
                     <span>You are officially enrolled for this semester.</span>
                 @elseif($isRejected)
-                    <strong>Enrollment needs attention</strong>
-                    <span>{{ $enrollment->remarks ?: 'Contact the Registrar for guidance.' }}@if($enrollment->is_paid) @if($refundFullyConfirmed) The Cashier confirmed the full refund; you may submit a fresh enrollment request for this term.@else Payment was already collected. Contact the Cashier to arrange and confirm a full refund before paying again.@endif @endif</span>
+                    <strong>{{ $enrollment->is_paid ? ($refundFullyConfirmed ? 'Enrollment rejected · refund confirmed' : 'Enrollment rejected · Cashier follow-up needed') : 'Enrollment needs attention' }}</strong>
+                    <span>Registrar’s reason: {{ $enrollment->remarks ?: 'No reason recorded. Contact the Registrar for clarification.' }}</span>
+                    @if($enrollment->is_paid)
+                        @include('student.enrollment._refund-next-steps')
+                    @endif
                 @elseif($isPaymentRejected)
                     <strong>Payment proof needs correction</strong>
                     <span>{{ $payment->rejection_reason ?: 'Review your payment details and submit corrected proof.' }}</span>
@@ -147,6 +162,15 @@
                 @elseif($isPaymentReview)
                     <strong>Payment under review</strong>
                     <span>The Cashier is checking your payment. No action needed.</span>
+                @elseif($isReplacementRequired)
+                    <strong>Subject Replacement Required</strong>
+                    <span>{{ $replacementRequest->reason }} Your verified payment remains attached to this enrollment.</span>
+                @elseif($isReplacementSubmitted)
+                    <strong>Revised enrollment submitted</strong>
+                    <span>Your updated class selections are back with the Registrar for review. Your verified payment remains attached.</span>
+                @elseif($isRefundRequested)
+                    <strong>Refund request pending Cashier reconciliation</strong>
+                    <span>{{ $replacementRequest->student_reason }} Your original payment has not been marked refunded.</span>
                 @elseif($isRegistrarReview)
                     <strong>Registrar review in progress</strong>
                     <span>Your payment is confirmed. The Registrar is reviewing your selected subjects.</span>
@@ -204,4 +228,33 @@
             @endif
         </div>
     </div>
+
+    @if($isReplacementRequired || $isReplacementSubmitted || $isRefundRequested)
+        <div class="card-body border-top">
+            @if($isReplacementRequired)
+                <h3 class="h6">Subject Replacement Required</h3>
+                <p>{{ $replacementRequest->reason }}</p>
+                <ul>
+                    @foreach($replacementRequest->items as $item)
+                        <li>{{ $item->originalSubject->subject_code }} — {{ $item->originalSubject->subject_name }}</li>
+                    @endforeach
+                </ul>
+                <p class="small text-muted">Payment status: verified. Your degree program is unchanged.</p>
+                <a href="{{ route('portal.enrollment.revise', $enrollment) }}" class="btn btn-primary">Replace subject / revise enrollment</a>
+            @elseif($isReplacementSubmitted)
+                <h3 class="h6">Revision history</h3>
+                <p class="mb-1">Revision request #{{ $replacementRequest->id }}: {{ ucfirst($replacementRequest->status) }}</p>
+                @foreach($replacementRequest->items as $item)
+                    @if($item->selectedSchedule)
+                        <p class="mb-1">{{ $item->originalSubject->subject_code }} → Section {{ $item->selectedSchedule->section_code }}
+                            ({{ $item->selectedSchedule->courseSubject->subject_code }})
+                            (hosted by {{ $item->selectedSchedule->hostingProgram->name ?? $item->selectedSchedule->courseSubject->program->name }})</p>
+                    @endif
+                @endforeach
+            @else
+                <h3 class="h6">Refund request</h3>
+                <p class="mb-0">Your request is pending Cashier confirmation. The original verified payment and receipt remain in your payment history.</p>
+            @endif
+        </div>
+    @endif
 </article>

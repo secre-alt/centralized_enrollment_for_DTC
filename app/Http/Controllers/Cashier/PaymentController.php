@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cashier;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Enrollment;
+use App\Models\EnrollmentReplacementRequest;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Models\StudentProfile;
@@ -27,6 +28,14 @@ class PaymentController extends Controller
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'receipt' => ['nullable', 'integer', 'min:1'],
+            'review' => ['nullable', 'integer', 'min:1'],
+            'program_id' => ['nullable', 'integer', 'exists:programs,id'],
+            'school_year' => ['nullable', 'string', 'max:30'],
+            'year_level' => ['nullable', 'integer', 'min:1'],
+            'semester' => ['nullable', 'integer', 'min:1'],
+            'method' => ['nullable', 'in:gcash,walk_in'],
+            'submitted_from' => ['nullable', 'date_format:Y-m-d'],
+            'submitted_to' => array_merge(['nullable', 'date_format:Y-m-d'], $request->filled('submitted_from') ? ['after_or_equal:submitted_from'] : []),
             'filter' => ['nullable', 'in:all,walk_in,gcash_pending,verified,rejected,unpaid,refund_follow_up,refunded'],
         ]);
         $query = Enrollment::with(['user', 'program', 'payment'])
@@ -48,6 +57,22 @@ class PaymentController extends Controller
             });
         }
 
+        foreach (['program_id', 'school_year', 'year_level', 'semester'] as $field) {
+            if (isset($filters[$field])) {
+                $query->where($field, $filters[$field]);
+            }
+        }
+        if (isset($filters['method'])) {
+            $query->whereHas('payment', fn ($payment) => $payment->where('payment_method', $filters['method']));
+        }
+        // Enrollment submission dates use the application's Manila storage convention.
+        if (isset($filters['submitted_from'])) {
+            $query->whereDate('enrollments.created_at', '>=', $filters['submitted_from']);
+        }
+        if (isset($filters['submitted_to'])) {
+            $query->whereDate('enrollments.created_at', '<=', $filters['submitted_to']);
+        }
+
         $filter = $filters['filter'] ?? 'all';
 
         $query = match ($filter) {
@@ -65,7 +90,7 @@ class PaymentController extends Controller
             default         => $query,
         };
 
-        $enrollments = $query->latest()->paginate(\App\Support\TablePagination::perPage(20))->appends($request->except('receipt'));
+        $enrollments = $query->latest()->paginate(\App\Support\TablePagination::perPage(20))->appends($request->except(['receipt', 'review']));
         $enrollments->each(function ($row) {
             $row->has_outstanding_term_payment = Payment::outstandingForTerm($row)->exists();
             $refundStatuses = Payment::where('enrollment_id', $row->id)
@@ -80,14 +105,25 @@ class PaymentController extends Controller
             ? Enrollment::whereKey($request->integer('receipt'))->whereIn('id', Payment::select('enrollment_id')->where('status', 'verified'))->first()
             : null;
 
-        return view('cashier.payments.index', compact('enrollments', 'filter', 'receiptEnrollment'));
+        $reviewEnrollment = $request->filled('review')
+            ? Enrollment::find($request->integer('review'))
+            : null;
+
+        $programs = \App\Models\Program::orderBy('name')->get(['id', 'name']);
+        $academicFilters = [];
+        foreach (['school_year', 'year_level', 'semester'] as $field) {
+            $academicFilters[$field] = Enrollment::whereNotNull($field)->where($field, '!=', '')
+                ->distinct()->orderBy($field)->pluck($field);
+        }
+
+        return view('cashier.payments.index', compact('enrollments', 'filter', 'receiptEnrollment', 'reviewEnrollment', 'programs', 'academicFilters'));
     }
 
     // ── show() ────────────────────────────────────────────────────
 
     public function show(Enrollment $enrollment)
     {
-        $enrollment->load(['user', 'program', 'payment.verifier']);
+        $enrollment->load(['user', 'program', 'payment.verifier', 'replacementRequests']);
 
         $latestPayment = Payment::where('enrollment_id', $enrollment->id)
             ->latest()
@@ -400,6 +436,16 @@ class PaymentController extends Controller
                 'refunded_at' => now(),
             ]);
 
+            $remainingRefunds = Payment::where('enrollment_id', $enrollment->id)
+                ->where('status', 'verified')
+                ->where('refund_status', '!=', 'refunded')
+                ->exists();
+            if (! $remainingRefunds) {
+                EnrollmentReplacementRequest::where('enrollment_id', $enrollment->id)
+                    ->where('status', 'refund_requested')
+                    ->update(['status' => 'refunded', 'resolved_at' => now()]);
+            }
+
             return $lockedPayment->fresh(['enrollment.user']);
         });
 
@@ -407,7 +453,7 @@ class PaymentController extends Controller
             $payment->enrollment->user,
             'enrollment-refund-confirmed:'.$payment->id,
             'Refund Confirmed',
-            'The Cashier recorded confirmation of the refund for your rejected enrollment. You may submit a new enrollment request for this academic term.',
+            'The Cashier recorded confirmation of the refund for your enrollment. Your original verified payment remains in your history.',
             'success',
             route('portal.enrollment.index'),
             'View enrollment status'

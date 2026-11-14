@@ -108,7 +108,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="font-weight-bold">Pre-Enrollment Application</span>
                 @if($application)
-                    <span class="dtc-status-badge is-{{ $applicationBadges[$application->status]['tone'] ?? 'neutral' }}" style="font-weight:700;">
+                    <span class="dtc-status-badge is-{{ $applicationBadges[$application->status]['tone'] ?? 'neutral' }}" style="font-weight:600;">
                         {{ $applicationBadges[$application->status]['label'] ?? ucwords(str_replace('_',' ',$application->status)) }}
                     </span>
                 @endif
@@ -120,7 +120,7 @@
                             <div  class="u-eyebrow">
                                 Reference Number
                             </div>
-                            <div style="font-size:14px; font-weight:700;">
+                            <div style="font-size:14px; font-weight:600;">
                                 {{ $application->reference_no }}
                             </div>
                         </div>
@@ -128,7 +128,7 @@
                             <div  class="u-eyebrow">
                                 Program
                             </div>
-                            <div style="font-size:14px; font-weight:700;">
+                            <div style="font-size:14px; font-weight:600;">
                                 {{ $application->program->name ?? 'Not provided' }}
                             </div>
                         </div>
@@ -259,7 +259,7 @@
                             <div  class="u-text-sm-bold">
                                 {{ $notif->title }}
                             </div>
-                            <div style="font-size:11px; color:var(--dtc-text-muted); margin-top:2px;">
+                            <div style="font-size:12px; color:var(--dtc-text-muted); margin-top:2px;">
                                 {{ $notif->created_at->format('M d, Y') }}
                             </div>
                         </div>
@@ -289,7 +289,7 @@
                 <a href="{{ route('notifications.index') }}" class="quick-action-btn">
                     <i data-lucide="bell"></i> Notifications
                     @if($unreadCount > 0)
-                        <span class="badge badge-danger ml-auto" style="font-size:10px;">{{ $unreadCount }}</span>
+                        <span class="badge badge-danger ml-auto" style="font-size:12px;">{{ $unreadCount }}</span>
                     @endif
                 </a>
             </div>

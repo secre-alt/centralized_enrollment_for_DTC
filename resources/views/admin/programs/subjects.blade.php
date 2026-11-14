@@ -34,22 +34,35 @@
                       action="{{ route('admin.programs.subjects.store', $program) }}">
                     @csrf
                     <div class="form-group">
-                        <label>Subject Code</label>
-                        <input type="text" name="subject_code" class="form-control"
+                        <label for="admin-programs-subjects-subject-code-1">Subject Code</label>
+                        <input id="admin-programs-subjects-subject-code-1" type="text" name="subject_code" class="form-control"
                                placeholder="e.g. IS101"
                                value="{{ old('subject_code') }}" required>
                     </div>
                     <div class="form-group">
-                        <label>Subject Name</label>
-                        <input type="text" name="subject_name" class="form-control"
+                        <label for="admin-programs-subjects-subject-name-2">Subject Name</label>
+                        <input id="admin-programs-subjects-subject-name-2" type="text" name="subject_name" class="form-control"
                                placeholder="e.g. Introduction to Computing"
                                value="{{ old('subject_name') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-programs-subjects-units">Units</label>
+                        <input id="admin-programs-subjects-units" type="number" name="units" class="form-control"
+                               step="0.5" min="0.5" max="6" value="{{ old('units', 3) }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-programs-subjects-classification">Academic Classification</label>
+                        <select id="admin-programs-subjects-classification" name="classification" class="form-control" required>
+                            <option value="major">Major</option>
+                            <option value="minor">Minor</option>
+                            <option value="general_education">General education</option>
+                        </select>
                     </div>
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
-                                <label>Year Level</label>
-                                <select name="year_level" class="form-control" required>
+                                <label for="admin-programs-subjects-year-level-3">Year Level</label>
+                                <select id="admin-programs-subjects-year-level-3" name="year_level" class="form-control" required>
                                     <option value="1">1st Year</option>
                                     <option value="2">2nd Year</option>
                                     <option value="3">3rd Year</option>
@@ -59,8 +72,8 @@
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <label>Semester</label>
-                                <select name="semester" class="form-control" required>
+                                <label for="admin-programs-subjects-semester-4">Semester</label>
+                                <select id="admin-programs-subjects-semester-4" name="semester" class="form-control" required>
                                     <option value="1">1st Sem</option>
                                     <option value="2">2nd Sem</option>
                                 </select>
@@ -85,8 +98,8 @@
                 @if($filtered->isNotEmpty())
                 <div class="card mb-3">
                     <div class="card-header"
-                         style="background:var(--dtc-surface-soft); font-size:12px; font-weight:700;
-                                color:var(--dtc-text-secondary); text-transform:uppercase; letter-spacing:0.5px;">
+                         style="background:var(--dtc-surface-soft); font-size:12px; font-weight:600;
+                                color:var(--dtc-text-secondary); text-transform: none; letter-spacing: 0;">
                         Year {{ $year }} — Semester {{ $sem }}
                         <span style="float:right; color:#0F4CDB;">
                             {{ $filtered->count() }} subjects
@@ -107,7 +120,7 @@
                                 <tr>
                                     <td>
                                         <span style="background:#EEF2FF; color:#0F4CDB;
-                                                     font-size:12px; font-weight:700;
+                                                     font-size:12px; font-weight:600;
                                                      padding:3px 10px; border-radius:20px;">
                                             {{ $subject->subject_code }}
                                         </span>

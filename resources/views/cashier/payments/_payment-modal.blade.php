@@ -2,7 +2,7 @@
      Include this once per page anywhere a `.dtc-payment-btn` (with a
      `data-url` pointing at the enrollment's cashier payment show route)
      may appear — e.g. the cashier payments index table. --}}
-<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true"@if(isset($reviewEnrollment) && $reviewEnrollment) data-auto-review-url="{{ route('cashier.payments.show', $reviewEnrollment) }}"@endif>
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content dtc-review-modal-content" id="paymentModalContent">
             <div class="dtc-review-loading">
@@ -32,9 +32,7 @@
         </div>';
 
     // Open modal + lazy-load its content from the existing "show" route.
-    $(document).on('click', '.dtc-payment-btn', function () {
-        var url = $(this).data('url');
-
+    function openPayment(url) {
         $modalContent.html(loadingMarkup);
         $modal.modal('show');
 
@@ -47,7 +45,16 @@
                 window.dtcHttpFailure(xhr.status);
                 $modalContent.html(errorMarkup);
             });
+    }
+
+    $(document).on('click', '.dtc-payment-btn', function () {
+        openPayment($(this).data('url'));
     });
+
+    var autoReviewUrl = $modal.data('auto-review-url');
+    if (autoReviewUrl) {
+        $(function () { openPayment(autoReviewUrl); });
+    }
 
     // Reset to the loading state once the modal has fully closed, so the
     // next enrollment doesn't briefly flash the previous one's details.

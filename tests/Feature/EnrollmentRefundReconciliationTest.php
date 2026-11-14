@@ -64,6 +64,21 @@ class EnrollmentRefundReconciliationTest extends TestCase
         return Enrollment::where('user_id', $student->id)->latest('id')->firstOrFail();
     }
 
+    public function test_paid_rejection_explains_the_next_step_until_cashier_confirmation(): void
+    {
+        $student = $this->makeUserWithRole('student');
+        [, $enrollment, $payment] = $this->rejectedPaidEnrollment($student);
+        foreach (['portal.enrollment.index', 'portal.enrollment.payment-info'] as $route) {
+            $url = $route === 'portal.enrollment.index' ? route($route) : route($route, $enrollment);
+            $this->actingAs($student)->get($url)->assertOk()
+                ->assertSee('Next step: visit the Cashier')->assertSee('Refund not yet confirmed.')
+                ->assertDontSee('Start a new enrollment request');
+        }
+        $payment->update(['refund_status' => 'refunded', 'refund_amount' => $payment->amount, 'refund_reference' => 'CONFIRMED-TEST', 'refunded_at' => now(), 'refunded_by' => $this->makeUserWithRole('cashier')->id]);
+        $this->get(route('portal.enrollment.index'))->assertOk()->assertSee('Start a new enrollment request');
+        $this->assertSame('verified', $payment->fresh()->status);
+    }
+
     public function test_rejected_verified_payment_is_preserved_and_marked_for_refund_follow_up(): void
     {
         $student = $this->makeUserWithRole('student');
@@ -168,7 +183,7 @@ class EnrollmentRefundReconciliationTest extends TestCase
         $this->actingAs($admin)->get(route('admin.dashboard'))
             ->assertOk()
             ->assertViewHas('totalRevenue', fn ($total) => (float) $total === 500.0);
-        $this->get(route('admin.reports.payment'))->assertOk();
+        $this->followingRedirects()->get(route('admin.reports.payment'))->assertOk()->assertSee('Payment Reports');
     }
 
     public function test_competing_gcash_submissions_for_the_same_term_cannot_both_create_payment_attempts(): void

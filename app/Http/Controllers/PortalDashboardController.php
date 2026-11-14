@@ -43,7 +43,7 @@ class PortalDashboardController extends Controller
         $hasConfiguredTerm = $currentSchoolYear && isset($semesterNumbers[$currentSemester]);
 
         $enrollment = Enrollment::where('user_id', $user->id)
-            ->with('payment')
+            ->with(['payment', 'replacementRequests'])
             ->when($hasConfiguredTerm, fn ($query) => $query
                 ->where('school_year', $currentSchoolYear)
                 ->where('semester', $semesterNumbers[$currentSemester]))
@@ -112,6 +112,19 @@ class PortalDashboardController extends Controller
 
         if ($enrollment->status === 'pending') {
             if ($enrollment->is_paid) {
+                $replacementRequest = $enrollment->replacementRequests
+                    ->where('status', 'open')
+                    ->sortByDesc('id')
+                    ->first();
+                if ($replacementRequest) {
+                    return [
+                        'label' => 'Subject Replacement Required',
+                        'desc' => $replacementRequest->reason.' Your verified payment remains attached.',
+                        'url' => route('portal.enrollment.revise', $enrollment),
+                        'icon' => 'rotate-ccw',
+                    ];
+                }
+
                 return [
                     'label' => 'Wait for Registrar Approval',
                     'desc'  => 'Your payment is confirmed and the Registrar is reviewing your selected subjects.',
@@ -149,6 +162,26 @@ class PortalDashboardController extends Controller
         }
 
         if ($enrollment->status === 'rejected') {
+            $refundRequest = $enrollment->replacementRequests
+                ->sortByDesc('id')
+                ->first();
+            if ($refundRequest?->status === 'refund_requested') {
+                return [
+                    'label' => 'Refund Pending Cashier Reconciliation',
+                    'desc' => 'Your original verified payment is preserved. The Cashier must confirm the actual refund.',
+                    'url' => route('portal.enrollment.index'),
+                    'icon' => 'hourglass',
+                ];
+            }
+            if ($refundRequest?->status === 'refunded') {
+                return [
+                    'label' => 'Refund Confirmed',
+                    'desc' => 'The Cashier recorded the full refund. Your original payment receipt remains in your history.',
+                    'url' => route('portal.enrollment.index'),
+                    'icon' => 'check-circle',
+                ];
+            }
+
             return $enrollment->is_paid
                 ? [
                     'label' => 'Contact Cashier for Refund',
@@ -249,7 +282,7 @@ class PortalDashboardController extends Controller
 
         // Progress, subjects and actions must all refer to the same enrollment term.
         $latestEnrollment = Enrollment::where('user_id', $user->id)
-            ->with('payment')
+            ->with(['payment', 'replacementRequests'])
             ->when($hasConfiguredTerm, fn ($query) => $query
                 ->where('school_year', $currentSchoolYear)
                 ->where('semester', $semesterNumbers[$currentSemester]))
@@ -263,8 +296,13 @@ class PortalDashboardController extends Controller
         $unreadCount      = $user->unreadNotificationsCount();
 
         $subjects = collect();
+        $offeringAssignments = collect();
         if ($latestEnrollment) {
             $subjects = CourseSubject::whereIn('id', $latestEnrollment->subject_ids ?? [])->get();
+            $offeringAssignments = $latestEnrollment->subjectOfferings()
+                ->with(['classSchedule.courseSubject.program', 'classSchedule.hostingProgram'])
+                ->get()
+                ->keyBy('curriculum_subject_id');
         }
 
         $nextAppointment = $this->nextConfirmedAppointment($user->id);
@@ -341,7 +379,13 @@ class PortalDashboardController extends Controller
                 ],
                 [
                     'label'    => 'Registrar Review',
-                    'sublabel' => $latestEnrollment->status === 'rejected' ? 'Decision: rejected' : ($latestEnrollment->status === 'approved' ? 'Approved' : ($latestEnrollment->is_paid ? 'Await review' : 'After payment verification')),
+                    'sublabel' => $latestEnrollment->status === 'rejected'
+                        ? 'Decision: rejected'
+                        : ($latestEnrollment->status === 'approved'
+                            ? 'Approved'
+                            : ($latestEnrollment->replacementRequests->contains('status', 'open')
+                                ? 'Subject Replacement Required'
+                                : ($latestEnrollment->is_paid ? 'Await review' : 'After payment verification'))),
                     'done'     => $latestEnrollment->status === 'approved',
                     'active'   => $latestEnrollment->status === 'pending' && $latestEnrollment->is_paid,
                     'rejected' => $latestEnrollment->status === 'rejected',
@@ -375,6 +419,7 @@ class PortalDashboardController extends Controller
         return view('portal.student.dashboard', compact(
             'latestEnrollment', 'totalEnrollments', 'approvedCount',
             'paidCount', 'unreadCount', 'subjects', 'nextAppointment',
+            'offeringAssignments',
             'timeline', 'completedSteps', 'announcements', 'nextSteps', 'fee',
             'studentProfile', 'currentSchoolYear', 'currentSemester', 'semesterStartsOn',
             'semesterEndsOn', 'termStatus', 'currentTermEnrollment',
@@ -417,6 +462,17 @@ class PortalDashboardController extends Controller
 
         if ($enrollment->status === 'pending') {
             if ($enrollment->is_paid) {
+                $replacementRequest = $enrollment->replacementRequests
+                    ->where('status', 'open')
+                    ->sortByDesc('id')
+                    ->first();
+                if ($replacementRequest) {
+                    return [
+                        ['icon' => 'rotate-ccw', 'label' => 'Subject Replacement Required', 'desc' => $replacementRequest->reason.' Your verified payment remains attached.', 'url' => route('portal.enrollment.revise', $enrollment), 'active' => true],
+                        ['icon' => 'bell', 'label' => 'Check Notifications', 'desc' => 'Your payment and enrollment remain on the existing record.', 'url' => route('notifications.index'), 'active' => false],
+                    ];
+                }
+
                 return [
                     ['icon' => 'scan-search', 'label' => 'Await Registrar Review', 'desc' => 'Your payment is confirmed and the Registrar is reviewing your subjects.', 'url' => route('portal.enrollment.index'), 'active' => true],
                     ['icon' => 'bell', 'label' => 'Check Notifications', 'desc' => 'You will be notified when the Registrar makes a decision.', 'url' => route('notifications.index'), 'active' => false],
@@ -443,6 +499,22 @@ class PortalDashboardController extends Controller
 
         if ($enrollment->status === 'rejected') {
             if ($enrollment->is_paid) {
+                $refundRequest = $enrollment->replacementRequests
+                    ->sortByDesc('id')
+                    ->first();
+                if ($refundRequest?->status === 'refund_requested') {
+                    return [
+                        ['icon' => 'hourglass', 'label' => 'Refund Pending Cashier Reconciliation', 'desc' => 'The original verified payment is preserved and is not marked refunded yet.', 'url' => route('portal.enrollment.index'), 'active' => true],
+                        ['icon' => 'receipt', 'label' => 'View Payment History', 'desc' => 'Review the original payment and refund status.', 'url' => route('portal.enrollment.index'), 'active' => false],
+                    ];
+                }
+                if ($refundRequest?->status === 'refunded') {
+                    return [
+                        ['icon' => 'check-circle', 'label' => 'Refund Confirmed', 'desc' => 'The Cashier recorded the full external refund.', 'url' => route('portal.enrollment.index'), 'active' => true],
+                        ['icon' => 'receipt', 'label' => 'View Payment History', 'desc' => 'Review your original receipt and refund reference.', 'url' => route('portal.enrollment.index'), 'active' => false],
+                    ];
+                }
+
                 return [
                     ['icon' => 'circle-alert', 'label' => 'Contact Cashier for Refund', 'desc' => 'The Registrar rejected this paid enrollment. Refunds are handled outside this system.', 'url' => route('portal.enrollment.index'), 'active' => true],
                     ['icon' => 'file-text', 'label' => 'Review Enrollment History', 'desc' => 'See the Registrar’s decision and feedback.', 'url' => route('portal.enrollment.index'), 'active' => false],

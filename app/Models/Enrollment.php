@@ -43,6 +43,16 @@ class Enrollment extends Model
         return $this->hasMany(CreditedSubject::class);
     }
 
+    public function replacementRequests()
+    {
+        return $this->hasMany(EnrollmentReplacementRequest::class);
+    }
+
+    public function subjectOfferings()
+    {
+        return $this->hasMany(EnrollmentSubjectOffering::class);
+    }
+
     /**
      * Resolve the student's admission classification for display
      * (regular / transferee / shiftee / returnee / cross_enrollee).

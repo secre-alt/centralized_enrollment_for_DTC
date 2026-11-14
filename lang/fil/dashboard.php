@@ -52,6 +52,7 @@ return [
     'all_users' => 'Lahat ng User',
     'download_enrollment_report' => 'I-download ang Ulat ng Enrollment',
     'download_payment_report' => 'I-download ang Ulat ng Bayad',
+    'payment_reports' => 'Mga Ulat ng Bayad',
     'recent_enrollments' => 'Mga Kamakailang Enrollment',
     'student_name' => 'Pangalan ng Estudyante',
     'course' => 'Kurso',

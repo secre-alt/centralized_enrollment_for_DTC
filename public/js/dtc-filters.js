@@ -13,7 +13,9 @@
 
         function sync() {
             var count = 0;
-            fields.forEach(function (el) { if (el.value && el.value.trim() !== '') count++; });
+            fields.forEach(function (el) {
+                if (el.value && el.value.trim() !== '' && el.value !== el.getAttribute('data-dtc-filter-default')) count++;
+            });
 
             if (badge) {
                 badge.textContent = count;

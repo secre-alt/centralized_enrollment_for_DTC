@@ -142,6 +142,21 @@ class ApplicationCancellationTest extends TestCase
         $this->assertSame('pending', $request->fresh()->status);
     }
 
+    public function test_application_confirmation_uses_only_the_shared_flash_toast(): void
+    {
+        $application = $this->makeApplication(['status' => 'submitted']);
+        $token = str_repeat('f', 64);
+        $application->update(['confirmation_token_hash' => hash('sha256', $token), 'confirmation_token_expires_at' => now()->addDay()]);
+        $response = $this->withSession([
+            'application_confirmation_token' => $token, 'success' => 'Application submitted.',
+        ])->get(route('public.application.success'))->assertOk()->assertSee($application->reference_no);
+        $this->assertSame(1, substr_count($response->getContent(), 'window.dtcToast.show({'));
+        $response->assertDontSee('dtc-application-toast-')->assertDontSee('window.dtcToast.success(');
+
+        $this->withSession(['success' => null])->get(route('public.application.success'))->assertOk()
+            ->assertDontSee('window.dtcToast.show({', false)->assertDontSee('window.dtcToast.success(', false);
+    }
+
     public function test_cancelled_status_and_pending_review_are_reflected_on_authorized_screens(): void
     {
         $registrar = $this->makeUserWithRole('registrar');

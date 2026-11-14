@@ -407,7 +407,14 @@ class SettingsController extends Controller
     /** GET /admin/settings/audit-logs */
     public function auditLogs(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'action' => ['nullable', 'string', 'max:255'],
+            'actor_id' => ['nullable', 'integer', 'exists:users,id'],
+        ] + \App\Support\ListDateRange::rules($request));
         $logs = \App\Models\AuditLog::with('user')
+            ->when($filters['actor_id'] ?? null, fn ($query, $actor) => $query->where('user_id', $actor))
+            ->tap(fn ($query) => \App\Support\ListDateRange::apply($query, $filters, 'audit_logs.created_at'))
             ->when($request->filled('search'), fn ($q) =>
                 $q->where(function ($q) use ($request) {
                     $q->where('description', 'like', '%' . $request->search . '%')
@@ -425,6 +432,7 @@ class SettingsController extends Controller
             'settings'    => $this->settings(),
             'activeTab'   => 'audit',
             'logs'        => $logs,
+            'actors'      => \App\Models\User::whereIn('id', \App\Models\AuditLog::select('user_id')->whereNotNull('user_id'))->orderBy('name')->get(['id', 'name', 'email']),
             'actionTypes' => \App\Models\AuditLog::select('action')->distinct()->orderBy('action')->pluck('action'),
         ]);
     }

@@ -21,16 +21,16 @@
 
         {{-- User Profile Card --}}
         <div class="card mb-3"
-             style="background:linear-gradient(135deg,#0F4CDB,#1a5feb); border:none;">
+             style="background:var(--dtc-primary); border:none;">
             <div class="card-body p-4">
                 <div style="display:flex; align-items:center; gap:16px;">
                     <x-dtc.user-avatar :user="$user" style="width:56px; height:56px; border-radius:50%;
                                 background:rgba(255,255,255,0.2); display:flex;
                                 align-items:center; justify-content:center;
-                                color:#fff; font-weight:800; font-size:22px; flex-shrink:0;
+                                color:#fff; font-weight:600; font-size:22px; flex-shrink:0;
                                 border:2px solid rgba(255,255,255,0.3);" />
                     <div>
-                        <div style="font-size:16px; font-weight:700; color:#fff;">
+                        <div style="font-size:16px; font-weight:600; color:#fff;">
                             {{ $user->name }}
                         </div>
                         <div style="font-size:13px; color:rgba(255,255,255,0.75);">
@@ -81,30 +81,30 @@
                             @csrf @method('PUT')
 
                             <div class="form-group">
-                                <label class="dtc-form-label">Full Name</label>
+                                <label for="admin-users-edit-name-1" class="dtc-form-label">Full Name</label>
                                 <div class="dtc-input-icon-group">
                                     <i data-lucide="user" class="dtc-input-icon"></i>
-                                    <input type="text" name="name"
+                                    <input id="admin-users-edit-name-1" type="text" name="name"
                                            class="form-control dtc-input-with-icon"
                                            value="{{ old('name', $user->name) }}" required>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="dtc-form-label">Email Address</label>
+                                <label for="admin-users-edit-email-2" class="dtc-form-label">Email Address</label>
                                 <div class="dtc-input-icon-group">
                                     <i data-lucide="mail" class="dtc-input-icon"></i>
-                                    <input type="email" name="email"
+                                    <input id="admin-users-edit-email-2" type="email" name="email"
                                            class="form-control dtc-input-with-icon"
                                            value="{{ old('email', $user->email) }}" required>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="dtc-form-label">Role</label>
+                                <label for="admin-users-edit-field-3" class="dtc-form-label">Role</label>
                                 <div class="dtc-input-icon-group">
                                     <i data-lucide="shield" class="dtc-input-icon"></i>
-                                    <input type="text" class="form-control dtc-input-with-icon"
+                                    <input id="admin-users-edit-field-3" type="text" class="form-control dtc-input-with-icon"
                                            value="{{ ucfirst(str_replace('_',' ', $user->roles->first()?->name ?? '—')) }}"
                                            readonly disabled
                                            style="background:var(--dtc-surface-soft); color:var(--dtc-text-muted); cursor:not-allowed;">
@@ -115,8 +115,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="dtc-form-label">Account Status</label>
-                                <div class="d-flex" style="gap:10px;">
+                                <div class="dtc-form-label font-weight-bold" id="account-status-heading">Account Status</div>
+                                <div class="d-flex" style="gap:10px;" role="radiogroup" aria-labelledby="account-status-heading">
                                     @foreach(['active','pending','locked'] as $status)
                                     <label class="dtc-status-option-label">
                                         <input type="radio" name="status" value="{{ $status }}"
@@ -165,7 +165,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="dtc-form-label">New Password</label>
+                                <label for="pw-new" class="dtc-form-label">New Password</label>
                                 <div class="dtc-input-icon-group">
                                     <i data-lucide="lock" class="dtc-input-icon"></i>
                                     <input type="password" name="password" id="pw-new"
@@ -176,7 +176,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="dtc-form-label">Confirm Password</label>
+                                <label for="pw-confirm" class="dtc-form-label">Confirm Password</label>
                                 <div class="dtc-input-icon-group">
                                     <i data-lucide="lock" class="dtc-input-icon"></i>
                                     <input type="password" name="password_confirmation" id="pw-confirm"

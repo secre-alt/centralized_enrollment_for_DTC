@@ -99,7 +99,8 @@ test('admin generation fills both fields, copies only on request, and confirms b
     const event = app.event(); app.form.events.submit(event);
     assert.equal(event.prevented, true);
     assert.equal(app.submit.disabled, undefined);
-    assert.match(app.prompt().message, /Test User/);
+    assert.match(app.prompt().message, /\{subject\}/);
+    assert.equal(app.prompt().subject, 'Test User');
     app.prompt().onConfirm(); assert.equal(app.submit.disabled, true);
     const duplicate = app.event(); app.form.events.submit(duplicate); assert.equal(duplicate.prevented, true);
     app.pageEvents.pageshow(); assert.equal(app.submit.disabled, undefined);

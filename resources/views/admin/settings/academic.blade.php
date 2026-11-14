@@ -57,8 +57,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Academic Year</label>
-                                <input type="text" name="current_school_year" class="form-control"
+                                <label for="admin-settings-academic-current-school-year-1">Academic Year</label>
+                                <input id="admin-settings-academic-current-school-year-1" type="text" name="current_school_year" class="form-control"
                                        placeholder="e.g. 2026-2027"
                                        value="{{ old('current_school_year', $settings->current_school_year ?? '2026-2027') }}">
                                 <small class="form-text" style="color:var(--dtc-text-muted);">
@@ -67,8 +67,8 @@
                             </div>
 
                             <div class="form-group mb-0">
-                                <label>Semester</label>
-                                <select name="current_semester" class="form-control">
+                                <label for="admin-settings-academic-current-semester-2">Semester</label>
+                                <select id="admin-settings-academic-current-semester-2" name="current_semester" class="form-control">
                                     @php $currentSem = old('current_semester', $settings->current_semester ?? '1st'); @endphp
                                     <option value="1st"    {{ $currentSem === '1st'    ? 'selected' : '' }}>1st Semester</option>
                                     <option value="2nd"    {{ $currentSem === '2nd'    ? 'selected' : '' }}>2nd Semester</option>
@@ -108,7 +108,7 @@
 
                             <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:16px;">
                                 <div style="max-width:320px;">
-                                    <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">
+                                    <h3 style="font-size:15px; font-weight:600; color:var(--dtc-text); margin:0;">
                                         Accept Enrollment Applications
                                     </h3>
                                     <p style="font-size:12px; color:var(--dtc-text-secondary); margin:4px 0 0;">
@@ -139,8 +139,8 @@
                             </div>
 
                             <div class="form-group mb-0">
-                                <label>College Registrar Name</label>
-                                <input type="text" name="registrar_name" class="form-control"
+                                <label for="admin-settings-academic-registrar-name-3">College Registrar Name</label>
+                                <input id="admin-settings-academic-registrar-name-3" type="text" name="registrar_name" class="form-control"
                                        placeholder="e.g. Marynol Virgie P. Lofranco, LPT"
                                        value="{{ old('registrar_name', $settings->registrar_name ?? '') }}">
                                 <small class="form-text" style="color:var(--dtc-text-muted);">
@@ -161,7 +161,7 @@
                                     <i data-lucide="graduation-cap"></i>
                                 </div>
                                 <div>
-                                    <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">
+                                    <h3 style="font-size:15px; font-weight:600; color:var(--dtc-text); margin:0;">
                                         Programs &amp; Subjects
                                     </h3>
                                     <p style="font-size:12px; color:var(--dtc-text-secondary); margin:2px 0 0;">

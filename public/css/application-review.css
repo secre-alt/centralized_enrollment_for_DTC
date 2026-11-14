@@ -1,8 +1,8 @@
 .app-review-header { display: grid; gap: 14px; margin-bottom: 10px; }
 .app-review-header-main { min-width: 0; }
 .app-review-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
-.app-review-title-row h1 { margin: 0; color: var(--dtc-text, #1e293b); font-size: clamp(22px, 2vw, 28px); font-weight: 700; line-height: 1.3; letter-spacing: -.4px; }
-.app-review-title-row .badge { padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.4; }
+.app-review-title-row h1 { margin: 0; color: var(--dtc-text, #1e293b); font-size: clamp(22px, 2vw, 28px); font-weight: 600; line-height: 1.3; letter-spacing: -.4px; }
+.app-review-title-row .badge { padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.4; }
 .app-review-ref { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 8px 0 0; color: var(--dtc-text-secondary, #64748b); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 .app-review-ref strong { color: var(--dtc-text, #1e293b); font-weight: 500; }
 .app-review-context { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--dtc-border, #e2e8f0); }
@@ -52,7 +52,7 @@ body.dtc-dark .application-review-page .application-decision--reject:hover { bac
 .application-document-actions { display: flex; flex: 0 0 auto; gap: 8px; }
 .application-document-title { margin: 0; color: var(--dtc-text, #1e293b); font-size: 14px; font-weight: 600; line-height: 1.5; }
 .application-document-filename { margin: 5px 0 0; color: var(--dtc-text-secondary, #64748b); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
-.application-document-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; color: var(--dtc-text-secondary, #64748b); font-size: 11px; line-height: 1.6; }
+.application-document-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; color: var(--dtc-text-secondary, #64748b); font-size: 12px; line-height: 1.6; }
 .application-document-download { display: inline-flex; flex: 0 0 auto; justify-content: center; align-items: center; gap: 8px; min-height: 42px; padding: 9px 14px; border: 1px solid var(--dtc-border, #e2e8f0); border-radius: 9px; background: var(--dtc-surface-soft, #f8fafc); color: var(--dtc-on-primary-soft, #0f4cdb); font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
 .application-document-download :is(i, svg) { width: 15px; height: 15px; flex-shrink: 0; }
 .application-document-download:hover { color: var(--dtc-on-primary-soft, #0f4cdb); background: var(--dtc-primary-soft, #eff6ff); border-color: currentColor; text-decoration: none; }

@@ -75,7 +75,11 @@
                 </thead>
                 <tbody>
                     @forelse ($subjects as $subject)
-                        @php $sched = $subject->schedules->first(); @endphp
+                        @php
+                            $assignment = $offeringAssignments[$subject->id] ?? null;
+                            $sched = $assignment?->classSchedule ?? $subject->schedules->whereNull('section_code')->first();
+                            $displaySubject = $assignment?->classSchedule->courseSubject ?? $subject;
+                        @endphp
                         <tr>
                             <td class="u-text-sm-secondary-primary cor-schedule" data-cor-label="Time / day">
                                 @if($sched)
@@ -86,9 +90,16 @@
                             </td>
                             <td class="u-text-sm-secondary-primary cor-room" data-cor-label="Room">{{ $sched->room ?? 'TBA' }}</td>
                             <td class="u-text-sm-secondary-primary cor-code">
-                                <span class="dtc-status-badge is-neutral">{{ $subject->subject_code }}</span>
+                                <span class="dtc-status-badge is-neutral">{{ $displaySubject->subject_code }}</span>
                             </td>
-                            <td class="u-text-sm-secondary-primary cor-subject-name">{{ $subject->subject_name }}</td>
+                            <td class="u-text-sm-secondary-primary cor-subject-name">
+                                {{ $displaySubject->subject_name }}
+                                @if($assignment)
+                                    <small class="d-block text-muted">
+                                        Section {{ $sched->section_code }} · Hosted by {{ $sched->hostingProgram->name ?? $sched->courseSubject->program->name }}
+                                    </small>
+                                @endif
+                            </td>
                             <td class="u-text-sm-secondary-primary cor-units" data-cor-label="Units">{{ rtrim(rtrim(number_format($subject->units, 1), '0'), '.') }}</td>
                             <td class="u-text-sm-secondary-primary cor-instructor" data-cor-label="Instructor">{{ $sched->instructor_name ?? 'TBA' }}</td>
                         </tr>

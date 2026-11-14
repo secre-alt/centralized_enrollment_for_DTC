@@ -220,7 +220,7 @@ class AppointmentFlowTest extends TestCase
             ->assertSee('Transcript of Records')
             ->assertSee('Diploma')
             ->assertSee('Certification')
-            ->assertSee('Total due');
+            ->assertSee('Total fees');
     }
 
     /** @test */

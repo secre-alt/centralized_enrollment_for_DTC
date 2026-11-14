@@ -49,7 +49,7 @@
 }
 
 .dtc-modal-header {
-    background: linear-gradient(135deg, #0F4CDB, #1a5feb);
+    background: #0f4cdb;
     padding: 22px 28px;
     display: flex;
     align-items: center;
@@ -80,7 +80,7 @@
     background: rgba(255,255,255,0.2);
     border: 2px solid rgba(255,255,255,0.3);
     color: #fff;
-    font-weight: 800;
+    font-weight: 600;
 }
 
 .dtc-modal-header-text {
@@ -90,7 +90,7 @@
 
 .dtc-modal-header-text h5 {
     color: #fff;
-    font-weight: 700;
+    font-weight: 600;
     margin: 0 0 2px;
     font-size: 16.5px;
     line-height: 1.3;
@@ -155,7 +155,7 @@
 
 .dtc-form-hint {
     color: var(--dtc-text-muted);
-    font-size: 11px;
+    font-size: 12px;
     margin-top: 5px;
     display: block;
 }
@@ -200,7 +200,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
     background: var(--dtc-surface-soft);
 }
 
@@ -236,7 +236,7 @@
     border-radius: 10px;
     padding: 10px 8px;
     text-align: center;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
     background: var(--dtc-surface-soft);
     cursor: pointer;
     display: flex;
@@ -252,7 +252,7 @@
 }
 
 .dtc-status-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--dtc-text);
     line-height: 1.2;
@@ -777,7 +777,7 @@ body.dtc-dark .alert-danger {
     background: #d97706;
     color: #fff;
     border: none;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .dtc-btn-reset:hover,
@@ -796,7 +796,7 @@ body.dtc-dark .alert-danger {
 .dtc-pw-match-hint {
     display: block;
     min-height: 16px;
-    font-size: 11px;
+    font-size: 12px;
     margin-top: 5px;
     transition: color 0.15s;
 }
@@ -899,7 +899,7 @@ body.dtc-dark .card-header ul.nav-tabs {
         border-top: 1px solid var(--dtc-border, #dbe3ee) !important;
         padding-top: 10px !important;
     }
-    #users-table-wrapper .users-directory td[data-label="Joined"] { flex-wrap: wrap; align-content: center; gap: 0 4px; font-size: 11px !important; }
+    #users-table-wrapper .users-directory td[data-label="Joined"] { flex-wrap: wrap; align-content: center; gap: 0 4px; font-size: 12px !important; }
     #users-table-wrapper .users-directory td[data-label="Joined"]::before { content: 'Joined'; }
     #users-table-wrapper .users-directory td[data-label="Actions"] { justify-content: flex-end; }
     #users-table-wrapper .users-directory td[data-label="Actions"] .u-actions-gap { display: flex; align-items: center; gap: 8px; }
@@ -942,7 +942,7 @@ body.dtc-dark .card-header ul.nav-tabs {
 #editUserModal .form-group { margin-bottom: 18px; }
 #editUserModal .dtc-form-label { margin-bottom: 7px; font-size: 12px; }
 #editUserModal .form-control { height: 44px; border-radius: 9px; }
-#editUserModal .dtc-form-hint { display: block; margin-top: 7px; font-size: 11px; line-height: 1.5; }
+#editUserModal .dtc-form-hint { display: block; margin-top: 7px; font-size: 12px; line-height: 1.5; }
 #editUserModal .dtc-security-info { margin-bottom: 20px !important; padding: 12px; font-size: 12px; }
 #editUserModal .dtc-input-icon-group { position: relative; }
 #reset-password-form .form-control { padding-right: 48px; }
@@ -965,4 +965,91 @@ body.dtc-dark #editUserModal .dtc-modal-header-avatar { color: #93c5fd; }
     #editUserModal .dtc-modal-body { padding: 20px 16px; }
     #editUserModal .dtc-modal-footer { padding: 14px 16px; }
     #editUserModal .dtc-modal-footer .btn { flex: 1 1 0; min-width: 0; }
+}
+
+/* Manage Users: keep the shared DTC grid and quieter account directory chrome. */
+.users-management { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.users-management > .users-role-stats { margin: 0 !important; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.users-management .users-role-stats > div { max-width: none; width: auto; padding: 0; margin: 0 !important; }
+.users-management .users-role-stats .dtc-stat-card { padding: 16px; min-height: 88px; height: 100%; border: 1px solid var(--dtc-border) !important; border-radius: 12px; box-shadow: none; }
+.users-management .users-role-stats .dtc-stat-card-top { gap: 12px; align-items: center; }
+.users-management .users-role-stats .dtc-stat-icon { width: 32px; height: 32px; min-width: 32px; border: 0; border-radius: 8px; color: var(--dtc-text-secondary) !important; background: var(--dtc-surface-soft) !important; }
+.users-management .users-role-stats .dtc-stat-icon svg { width: 20px; height: 20px; }
+.users-management .users-role-stats .dtc-stat-label { font-size: 12px; font-weight: 400; line-height: 20px; color: var(--dtc-text-secondary); }
+.users-management .users-role-stats .dtc-stat-value { margin: 0; font-size: 24px; font-weight: 500; line-height: 28px; font-variant-numeric: tabular-nums; }
+.users-management > .dtc-fl { margin: 0; }
+.users-management .dtc-fl-toolbar { margin: 0; }
+.users-management .dtc-fl-toolbar .dtc-fl-search { flex: 1 1 0; min-width: 0; max-width: none; }
+.users-management .users-directory-panel { margin: 0; border-radius: 12px; overflow: hidden; box-shadow: none; }
+.users-management .users-directory-panel > .card-header { padding: 16px 24px; min-height: 64px; }
+.users-management .users-directory-panel > .card-header > span:first-child { font-size: 18px; font-weight: 500 !important; }
+.users-management #users-table-wrapper .card-body { padding: 0 !important; }
+.users-management .users-directory { border: 0 !important; }
+.users-management .users-directory :is(th, td) { border-left: 0 !important; border-right: 0 !important; padding: 16px; }
+.users-management .users-directory th { border-top: 0 !important; font-size: 12px; font-weight: 500; }
+.users-management .users-directory td { vertical-align: middle; }
+.users-management .users-directory .u-text-sm-bold-primary { font-weight: 500 !important; }
+.users-management .users-role-badge { padding: 4px 8px; border-radius: 4px; background: var(--dtc-surface-soft) !important; color: var(--dtc-text-secondary) !important; font-size: 12px; font-weight: 400 !important; }
+.users-management .users-directory .dtc-status-badge { font-size: 12px; font-weight: 500; }
+.users-management .users-directory .btn-edit-user { background: var(--dtc-surface-soft); color: var(--dtc-on-primary-soft); border-color: var(--dtc-border); box-shadow: none; }
+body:has(.users-management) .add-user-btn { min-height: 44px; border-radius: 8px; box-shadow: none !important; }
+.users-management #createUserModal .dtc-modal-header { background: var(--dtc-surface); color: var(--dtc-text); border-bottom: 1px solid var(--dtc-border); padding: 24px; }
+.users-management #createUserModal .dtc-modal-header :is(h5, p) { color: inherit; }
+.users-management #createUserModal .dtc-modal-header-icon { color: var(--dtc-text-secondary); background: var(--dtc-surface-soft); }
+.users-management :is(#createUserModal, #editUserModal) .dtc-form-label { font-weight: 500; }
+@media (max-width: 1199.98px) { .users-management > .users-role-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767.98px) {
+    .users-management { gap: 20px; }
+    .users-management > .users-role-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .users-management .users-role-stats .dtc-stat-card { padding: 12px; min-height: 80px; }
+    .users-management .users-role-stats .dtc-stat-icon { display: flex; width: 24px; height: 24px; min-width: 24px; }
+    .users-management .users-role-stats .dtc-stat-icon svg { width: 18px; height: 18px; }
+    .users-management .users-role-stats .dtc-stat-card-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .users-management .users-role-stats .dtc-stat-label { min-height: 40px; }
+    .users-management .users-directory-panel > .card-header { padding: 16px; }
+    .users-management #users-table-wrapper .users-directory tbody { padding: 12px; }
+    .users-management #users-table-wrapper .users-directory tbody > tr { margin-bottom: 12px; border-radius: 8px; background: var(--dtc-surface); }
+    .users-management #createUserModal .dtc-modal-header { padding: 16px; }
+}
+@media (max-width: 767.98px) {
+    body:has(.users-management) .add-user-btn .add-user-text { display: inline; }
+    body:has(.users-management) .add-user-btn svg { margin-right: 8px !important; }
+    .users-management #users-table-wrapper .table-responsive { padding: 0; }
+}
+
+/* Keep controls aligned independently of program guidance. */
+.users-management #usersFilterPanel .dtc-fl-panel { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr) 128px auto; align-items: start; gap: 16px; margin: 16px 0 0; padding: 16px; border-radius: 12px; }
+.users-management #usersFilterPanel .dtc-fl-field > label,
+.users-management #usersFilterPanel [data-table-rows-field] { display: block; margin: 0; color: var(--dtc-text-secondary); font-size: 12px; font-weight: 500; line-height: 20px; }
+.users-management #usersFilterPanel .dtc-fl-field > label { margin-bottom: 8px; }
+.users-management #usersFilterPanel :is(.form-control, [data-table-rows-select]) { width: 100%; height: 44px !important; min-height: 44px; padding: 8px 12px !important; border: 1px solid var(--dtc-border); border-radius: 8px; background: var(--dtc-surface-soft); color: var(--dtc-text); font-size: 14px; }
+.users-management #usersFilterPanel [data-table-rows-select] { display: block; margin: 8px 0 0; }
+.users-management #usersFilterPanel :is(select.form-control, select[data-table-rows-select]) {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 44px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 16px center !important;
+    background-size: 16px 16px !important;
+}
+.users-management #usersFilterPanel [data-table-rows-control] { display: block; margin: 0; padding: 0; border: 0; background: transparent; }
+.users-management #usersFilterPanel .dtc-fl-actions { padding-top: 28px; gap: 8px; }
+.users-management #usersFilterPanel .dtc-fl-actions .btn { min-height: 44px; padding: 10px 16px; border-radius: 8px; box-shadow: none !important; }
+.users-management #filter-program-hint { display: block; margin-top: 8px; font-size: 12px; line-height: 20px; }
+.users-management .users-role-stats .dtc-stat-icon { flex: 0 0 32px; width: 32px !important; height: 32px !important; padding: 0 !important; background: var(--dtc-surface-soft) !important; color: var(--dtc-text-secondary) !important; }
+.users-management .users-role-stats .dtc-stat-icon svg { color: inherit !important; }
+@media (max-width: 1199.98px) {
+    .users-management #usersFilterPanel .dtc-fl-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .users-management #usersFilterPanel .dtc-fl-actions { grid-column: 1 / -1; padding-top: 0; }
+}
+@media (max-width: 767.98px) {
+    .users-management .users-role-stats .dtc-stat-card-top { gap: 4px; }
+    .users-management .users-role-stats .dtc-stat-icon { flex: 0 0 24px; width: 24px !important; height: 24px !important; margin-bottom: 4px; }
+    .users-management .users-role-stats .dtc-stat-label { min-height: 40px; line-height: 20px; }
+    .users-management .users-role-stats .dtc-stat-value { line-height: 28px; }
+    .users-management #usersFilterPanel .dtc-fl-field:has(#filter-program) { grid-column: 1 / -1; }
+}
+@media (max-width: 359.98px) {
+    .users-management > .users-role-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

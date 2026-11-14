@@ -18,6 +18,10 @@ class DocumentRequestController extends Controller
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:200'],
             'status' => ['nullable', 'in:all,submitted,processing,ready,released,cancelled'],
+            'document_type' => ['nullable', 'in:tor,true_copy,certification,diploma'],
+            'payment_status' => ['nullable', 'in:unpaid,pending_verification,verified,rejected,no_payment_required'],
+            'pickup_from' => ['nullable', 'date_format:Y-m-d'],
+            'pickup_to' => array_merge(['nullable', 'date_format:Y-m-d'], $request->filled('pickup_from') ? ['after_or_equal:pickup_from'] : []),
         ]);
         $search = trim($filters['search'] ?? '');
         $status = $filters['status'] ?? 'all';
@@ -30,6 +34,29 @@ class DocumentRequestController extends Controller
                     ->orWhere('purpose', 'like', '%'.$search.'%')
                     ->orWhere('document_type', 'like', '%'.$search.'%');
                 if ($documentTypes) $matches->orWhereIn('document_type', $documentTypes);
+            });
+        }
+        if (! empty($filters['document_type'])) {
+            $query->where('document_type', $filters['document_type']);
+        }
+        if (! empty($filters['payment_status'])) {
+            if ($filters['payment_status'] === 'no_payment_required') {
+                $query->where('fee', 0)->where('is_paid', false)->where('payment_status', '!=', 'verified');
+            } else {
+                $query->where('payment_status', $filters['payment_status']);
+                if ($filters['payment_status'] === 'unpaid') {
+                    $query->where(fn ($paid) => $paid->whereNull('fee')->orWhere('fee', '!=', 0)->orWhere('is_paid', true));
+                }
+            }
+        }
+        if (! empty($filters['pickup_from']) || ! empty($filters['pickup_to'])) {
+            $query->whereHas('appointment.slot', function ($slots) use ($filters) {
+                if (! empty($filters['pickup_from'])) {
+                    $slots->where('date', '>=', $filters['pickup_from']);
+                }
+                if (! empty($filters['pickup_to'])) {
+                    $slots->where('date', '<=', $filters['pickup_to']);
+                }
             });
         }
         $statusCounts = (clone $query)->selectRaw('status, COUNT(*) AS aggregate')->groupBy('status')->pluck('aggregate', 'status');

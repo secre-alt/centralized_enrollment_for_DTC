@@ -360,7 +360,7 @@
                                 Registrar reviewed your application
                             </div>
                         </div>
-                        <div style="font-size: 11px; color: var(--dtc-text-muted); margin-bottom: 8px;">
+                        <div style="font-size: 12px; color: var(--dtc-text-muted); margin-bottom: 8px;">
                             <i data-lucide="clock" style="width: 11px; height: 11px; margin-right: 3px;"></i>
                             {{ $application->reviewed_at->format('M d, Y · h:i A') }}
                         </div>
@@ -389,7 +389,7 @@
                         <div style="font-size: 12px; color: #856404; margin-bottom: 8px;">
                             Please contact the Registrar's Office to address the required corrections.
                         </div>
-                        <div style="font-size: 11px; color: #856404; font-style: italic;">
+                        <div style="font-size: 12px; color: #856404; font-style: italic;">
                             "{{ $application->remarks }}"
                         </div>
                     </div>

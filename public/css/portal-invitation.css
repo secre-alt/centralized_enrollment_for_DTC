@@ -2,14 +2,14 @@
 .portal-invitation-page .card { border: 1px solid var(--dtc-border); border-radius: 14px; box-shadow: none; }
 .portal-invitation-page .card > .card-body { padding: 24px; }
 .invitation-record-heading { margin-bottom: 20px; }
-.invitation-record-heading p { margin: 0 0 6px; color: var(--dtc-text-secondary); font-size: 11px; }
+.invitation-record-heading p { margin: 0 0 6px; color: var(--dtc-text-secondary); font-size: 12px; }
 .invitation-record-heading h2 { margin: 0; color: var(--dtc-text); font-size: 18px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
 .invitation-record-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; margin: 0 0 20px; }
-.invitation-record-summary dt { margin-bottom: 4px; font-size: 11px; font-weight: 400; color: var(--dtc-text-secondary); }
+.invitation-record-summary dt { margin-bottom: 4px; font-size: 12px; font-weight: 400; color: var(--dtc-text-secondary); }
 .invitation-record-summary dd { margin: 0; font-size: 13px; color: var(--dtc-text); line-height: 1.6; overflow-wrap: anywhere; }
 .invitation-program { grid-column: 1 / -1; }
 .invitation-delivery { padding: 16px; margin-bottom: 20px; border: 1px solid var(--dtc-border); border-radius: 10px; background: var(--dtc-surface-soft); }
-.invitation-delivery h3 { margin: 0 0 6px; font-size: 11px; font-weight: 500; color: var(--dtc-text-secondary); }
+.invitation-delivery h3 { margin: 0 0 6px; font-size: 12px; font-weight: 500; color: var(--dtc-text-secondary); }
 .invitation-delivery p { margin: 8px 0 0; font-size: 12px; color: var(--dtc-text-secondary); line-height: 1.7; }
 .invitation-delivery .invitation-email { margin: 0; color: var(--dtc-text); font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
 .invitation-confirm { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; margin: 0 0 16px; padding: 6px 0; cursor: pointer; color: var(--dtc-text); font-size: 12px; font-weight: 400 !important; line-height: 1.7; }

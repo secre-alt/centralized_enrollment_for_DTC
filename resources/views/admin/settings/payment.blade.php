@@ -49,8 +49,8 @@
                             @method('PUT')
 
                             <div class="form-group">
-                                <label>Enrollment Fee (&#8369;)</label>
-                                <input type="number"
+                                <label for="admin-settings-payment-enrollment-fee-1">Enrollment Fee (&#8369;)</label>
+                                <input id="admin-settings-payment-enrollment-fee-1" type="number"
                                        name="enrollment_fee"
                                        step="0.01"
                                        min="0"
@@ -78,8 +78,8 @@
                             @endforeach
 
                             <div class="form-group">
-                                <label>GCash Account Name</label>
-                                <input type="text"
+                                <label for="admin-settings-payment-gcash-name-2">GCash Account Name</label>
+                                <input id="admin-settings-payment-gcash-name-2" type="text"
                                        name="gcash_name"
                                        value="{{ old('gcash_name', $settings->gcash_name ?? '') }}"
                                        class="form-control"
@@ -87,8 +87,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label>GCash Number</label>
-                                <input type="text"
+                                <label for="admin-settings-payment-gcash-number-3">GCash Number</label>
+                                <input id="admin-settings-payment-gcash-number-3" type="text"
                                        name="gcash_number"
                                        value="{{ old('gcash_number', $settings->gcash_number ?? '') }}"
                                        class="form-control"
@@ -97,8 +97,8 @@
                             </div>
 
                             <div class="form-group mb-0">
-                                <label>Payment Deadline (days after approval)</label>
-                                <input type="number"
+                                <label for="admin-settings-payment-payment-deadline-4">Payment Deadline (days after approval)</label>
+                                <input id="admin-settings-payment-payment-deadline-4" type="number"
                                        name="payment_deadline"
                                        min="1"
                                        value="{{ old('payment_deadline', $settings->payment_deadline ?? '') }}"
@@ -148,9 +148,9 @@
                             @csrf
 
                             <div class="form-group">
-                                <label>Upload New QR Image</label>
+                                <label for="admin-settings-payment-gcash-qr-5">Upload New QR Image</label>
                                 <div class="u-text-xs-hint">PNG or JPG, max 2 MB.</div>
-                                <input type="file"
+                                <input id="admin-settings-payment-gcash-qr-5" type="file"
                                        name="gcash_qr"
                                        accept=".jpg,.jpeg,.png"
                                        class="form-control-file"

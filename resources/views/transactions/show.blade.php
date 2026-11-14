@@ -33,6 +33,13 @@
         <span class="dtc-status-badge is-{{ $tone }}">{{ $status }}</span>
     </div>
 
+    @if(!$isStaff)
+        @if($receiptEligible)
+            <a class="btn btn-primary ph-receipt" href="{{ route('portal.transactions.receipt', $transaction->transaction_key) }}">Download official receipt (PDF)</a>
+        @elseif($transaction->status === 'verified')
+            <p class="ph-summary-note">An official receipt download is available once the receipt number, verified amount, and verification date have been recorded. Contact the Cashier if you need assistance.</p>
+        @endif
+    @endif
     @if(!$isStaff && $transaction->status === 'rejected' && $transaction->rejection_reason)
         <div class="ph-note is-danger" role="alert"><i data-lucide="alert-circle" aria-hidden="true"></i><span>{{ $transaction->rejection_reason }}</span></div>
     @endif
@@ -42,8 +49,9 @@
             <div><dt>Payer</dt><dd>{{ $transaction->payer }}<small>{{ $transaction->email }}</small></dd></div>
         @endif
         <div><dt>For</dt><dd>{{ $transaction->related }}</dd></div>
-        <div><dt>Method</dt><dd>{{ $transaction->method ? ucfirst(str_replace('_', ' ', $transaction->method)) : '—' }}</dd></div>
+        <div><dt>Method</dt><dd>{{ ['walk_in' => 'Cash', 'cash' => 'Cash', 'gcash' => 'GCash', 'gcash_qr' => 'GCash'][$transaction->method] ?? ($transaction->method ?: '—') }}</dd></div>
         <div><dt>Reference no.</dt><dd class="dtc-payment-reference">{{ $transaction->reference ?: '—' }}</dd></div>
+        @if($transaction->receipt_no)<div><dt>Official receipt no.</dt><dd class="dtc-payment-reference">{{ $transaction->receipt_no }}</dd></div>@endif
         <div><dt>Recorded</dt><dd>{{ $fmt($transaction->occurred_at) ?? '—' }}</dd></div>
         <div><dt>Verified</dt><dd>{{ $fmt($transaction->verified_at) ?? 'Not yet' }}</dd></div>
         @if(in_array($transaction->refund_status, ['pending', 'refunded'], true))

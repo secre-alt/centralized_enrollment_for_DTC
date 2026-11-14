@@ -2,13 +2,12 @@
 @include('partials.navbar')
 @section('title', 'Notifications')
 @section('content_header')
-<div class="notice-heading">
-    <div><h4 class="mb-1 font-weight-bold u-text">Notifications</h4><p class="u-text-secondary-sm mb-0">Updates and next steps, all in one place.</p></div>
-    <div class="notice-heading-actions">
+<x-dtc.page-header title="Notifications" subtitle="Updates and next steps, all in one place">
+    <x-slot name="actions">
         <button type="button" class="notice-button" data-notice-all data-url="{{ route('notifications.markAllRead') }}" @disabled(!$unreadCount)><i data-lucide="check-check" aria-hidden="true"></i>Mark all as read</button>
         <button type="button" class="notice-button notice-button--muted" data-notice-delete-read data-url="{{ route('notifications.destroyRead') }}" @disabled(!$readCount)><i data-lucide="trash-2" aria-hidden="true"></i>Delete read</button>
-    </div>
-</div>
+    </x-slot>
+</x-dtc.page-header>
 @endsection
 @section('content')
 <section class="notice-page" aria-label="Your notifications">

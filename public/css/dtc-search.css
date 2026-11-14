@@ -35,7 +35,7 @@
     background: #F8FAFC;
     outline: none;
     width: 300px;
-    transition: all 0.2s;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s;
 }
 
 .navbar-search-input:focus {
@@ -63,7 +63,7 @@
     background: #F1F5F9;
     border: 1px solid #E2E8F0;
     border-radius: 5px;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     color: #94A3B8;
     padding: 2px 6px;
@@ -82,7 +82,7 @@
     height: 20px;
     cursor: pointer;
     color: #64748B;
-    font-size: 10px;
+    font-size: 12px;
     align-items: center;
     justify-content: center;
     transition: background 0.2s;
@@ -125,11 +125,11 @@
 
 /* ── Section label ───────────────────────────────────────── */
 .search-section-label {
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     color: #94A3B8;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
     margin-bottom: 10px;
 }
 
@@ -196,7 +196,7 @@
     color: #374151;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
-    transition: all 0.2s;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s, opacity 0.2s;
 }
 
 .search-recent-chip:hover {
@@ -271,7 +271,7 @@
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14px;
     flex-shrink: 0;
 }
@@ -291,7 +291,7 @@
 }
 
 .search-result-desc {
-    font-size: 11px;
+    font-size: 12px;
     color: #64748B;
     margin-top: 2px;
     white-space: nowrap;
@@ -300,7 +300,7 @@
 }
 
 .search-result-badge {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 20px;

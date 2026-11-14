@@ -1,0 +1,84 @@
+/* Document booking: one page grid, quiet summary, and consistent option rows. */
+.dtc-booking-header, .dtc-booking-page { max-width: none; width: 100%; margin: 0; }
+.dtc-booking-header .dr-back { min-height: 32px; margin: 0 0 8px; padding: 0; gap: 8px; }
+.dtc-booking-header h1 { font-weight: 500; }
+.dtc-booking-header p { margin-top: 8px; max-width: 64ch; font-size: 14px; line-height: 24px; }
+.dtc-booking-page .dr-grid { grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; }
+.dtc-booking-page .dr-form { min-width: 0; }
+.dtc-booking-page .dr-steps { margin: 0 0 24px; }
+.dtc-booking-page .dr-steps button { min-height: 56px; gap: 8px; }
+.dtc-booking-page .dr-steps-dot { width: 28px; height: 28px; border-width: 1px; font-weight: 500; }
+.dtc-booking-page .dr-steps li.is-current .dr-steps-dot { box-shadow: none; }
+.dtc-booking-page .dr-steps-name { font-size: 13px; line-height: 20px; }
+.dtc-booking-page .dr-sheet { border-radius: 12px; }
+.dtc-booking-page .dr-sec { padding: 24px; }
+.dtc-booking-page .dr-sec-title { margin-bottom: 4px; font-size: 18px; line-height: 28px; font-weight: 500; }
+.dtc-booking-page .dr-sec-hint { margin-bottom: 16px; font-size: 14px; line-height: 24px; }
+.dtc-booking-page .dr-document-progress { height: 4px; margin-bottom: 16px; }
+.dtc-booking-page .dr-document-progress span { background: var(--dr-brand); }
+.dtc-booking-page .dr-opts { gap: 12px; }
+.dtc-booking-page .dr-opt { border-width: 1px; border-radius: 8px; }
+.dtc-booking-page .dr-document-choice { grid-template-columns: 24px minmax(0, 1fr) auto 20px; gap: 12px; min-height: 76px; padding: 16px; }
+.dtc-booking-page .dr-opt-icon { width: 24px; height: 24px; border-radius: 0; background: transparent; color: var(--dr-ink-2); }
+.dtc-booking-page .dr-opt-icon svg { width: 20px; height: 20px; stroke-width: 1.5; }
+.dtc-booking-page .dr-opt-name { font-size: 14px; font-weight: 500; line-height: 24px; }
+.dtc-booking-page .dr-opt-desc { font-size: 13px; line-height: 20px; }
+.dtc-booking-page .dr-opt-price { padding: 0; border: 0; border-radius: 0; background: transparent !important; font-size: 14px; font-weight: 500; }
+.dtc-booking-page .dr-opt-price small { display: block; margin: 0; font-size: 12px; line-height: 20px; }
+.dtc-booking-page .dr-opt-mark { width: 20px; height: 20px; border-width: 1px; }
+.dtc-booking-page .dr-document-options .dr-opt-input:checked ~ .dr-document-choice .dr-opt-icon { color: var(--dtc-on-primary-soft); background: transparent; }
+.dtc-booking-page .dr-document-options .dr-opt:has(.dr-opt-input:checked) { background: var(--dr-brand-soft); }
+.dtc-booking-page .dr-document-quantity { margin: 0 16px 16px 52px; padding-top: 12px; gap: 12px; }
+.dtc-booking-page .dr-quantity-control { border-radius: 8px; }
+.dtc-booking-page .dr-document-subtotal strong { font-size: 14px; font-weight: 500; }
+.dtc-booking-page .dr-aside { position: static; display: grid; align-content: start; gap: 16px; padding-top: 80px; }
+.dtc-booking-page .dr-slip { border: 1px solid transparent; border-radius: 12px; background: var(--dr-slip); color: #fff; box-shadow: none; }
+.dtc-booking-page .dr-slip-body { padding: 24px; }
+.dtc-booking-page .dr-slip-title { margin-bottom: 16px; color: #fff; font-size: 16px; line-height: 24px; font-weight: 500; }
+.dtc-booking-page .dr-slip-rows { gap: 16px; }
+.dtc-booking-page .dr-slip-row { gap: 4px; line-height: 20px; }
+.dtc-booking-page .dr-slip-row dt { color: rgba(255,255,255,.78); font-size: 12px; }
+.dtc-booking-page .dr-slip-row dd { color: #fff; font-size: 14px; font-weight: 400; }
+.dtc-booking-page .dr-slip-row dd.is-empty { color: rgba(255,255,255,.65); }
+.dtc-booking-page .dr-slip-tear { margin: 0 24px; border-top: 1px solid rgba(255,255,255,.24); }
+.dtc-booking-page .dr-slip-tear::before, .dtc-booking-page .dr-slip-tear::after { content: none; }
+.dtc-booking-page .dr-slip-total { padding: 20px 24px 0; gap: 16px; align-items: center; }
+.dtc-booking-page .dr-slip-total-label { color: rgba(255,255,255,.86); font-size: 13px; }
+.dtc-booking-page .dr-slip-count { color: rgba(255,255,255,.78); font-size: 12px; }
+.dtc-booking-page .dr-slip-total-amount { color: var(--dr-gold); font-size: 24px; font-weight: 500; letter-spacing: 0; }
+.dtc-booking-page .dr-slip-total-amount.is-free { font-size: 14px; line-height: 20px; text-align: right; }
+.dtc-booking-page .dr-slip-total:has(.is-free) .dr-slip-count { display: none; }
+.dtc-booking-page .dr-slip-foot { padding: 20px 24px 24px; gap: 12px; }
+.dtc-booking-page .dr-slip-foot .dr-btn { min-height: 44px; border-radius: 8px; background: var(--dr-gold); color: #1b2540; font-size: 14px; font-weight: 500; }
+.dtc-booking-page .dr-slip-foot .dr-btn:hover { background: #ffd257; }
+.dtc-booking-page .dr-slip-note { margin-top: 12px; color: rgba(255,255,255,.72); font-size: 12px; }
+.dtc-booking-page .dr-slip-back { color: rgba(255,255,255,.86); }
+.dtc-booking-page .dr-next { border-radius: 12px; }
+.dtc-booking-page .dr-next summary { padding: 0 20px; font-weight: 500; }
+.dtc-booking-page .dr-next-list { padding: 0 20px 20px; gap: 16px; }
+.dtc-booking-page .dr-fees { padding: 16px 20px; }
+@media (max-width: 1199.98px) and (min-width: 992px) {
+    .dtc-booking-page .dr-grid { grid-template-columns: minmax(0, 1fr) 280px; }
+}
+@media (max-width: 991.98px) {
+    .dtc-booking-page.dr-create:has(#bkForm) { padding-bottom: 0; }
+    .dtc-booking-page .dr-grid { grid-template-columns: minmax(0, 1fr); }
+    .dtc-booking-page .dr-aside { display: grid; padding: 0; }
+    .dtc-booking-page .dr-slip { position: static; inset: auto; width: 100%; z-index: auto; border-radius: 12px; }
+    .dtc-booking-page .dr-slip-total { position: static; flex-direction: row; padding: 12px 16px 0; }
+    .dtc-booking-page .dr-slip-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+    .dtc-booking-page .dr-slip-total-amount { font-size: 20px; }
+    .dtc-booking-page .dr-slip-total-amount.is-free { font-size: 14px; }
+}
+@media (max-width: 575.98px) {
+    .dtc-booking-page .dr-sec { padding: 16px; }
+    .dtc-booking-page .dr-document-choice { grid-template-columns: minmax(0, 1fr) auto 20px; gap: 8px; padding: 12px; }
+    .dtc-booking-page .dr-document-choice .dr-opt-icon { display: none; }
+    .dtc-booking-page .dr-document-choice .dr-opt-text { grid-column: 1; }
+    .dtc-booking-page .dr-document-choice .dr-opt-price { grid-column: 2; }
+    .dtc-booking-page .dr-document-choice .dr-opt-mark { grid-column: 3; }
+    .dtc-booking-page .dr-opt-name { font-size: 13px; line-height: 20px; }
+    .dtc-booking-page .dr-opt-desc { font-size: 12px; }
+    .dtc-booking-page .dr-document-quantity { margin: 0 12px 12px; }
+    .dtc-booking-page .dr-steps-name { font-size: 12px; }
+}

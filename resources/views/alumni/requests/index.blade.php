@@ -35,6 +35,8 @@
     $payLabel = ['unpaid' => 'Unpaid', 'pending_verification' => 'Payment under review', 'verified' => 'Paid', 'rejected' => 'Payment not verified'];
 @endphp
 
+@push('css')<link rel="stylesheet" href="{{ asset('css/dtc-filters.css') }}">@endpush
+@push('js')<script src="{{ asset('js/dtc-filters.js') }}"></script>@endpush
 @section('content')
 <div class="dr dr-index dr-alumni-history" id="request-history">
 
@@ -63,11 +65,27 @@
 
     </details>
 
+@php
+    $listFilterCount = collect(['document_type', 'date_from', 'date_to'])->filter(fn ($key) => request()->filled($key))->count();
+@endphp
+<form method="GET" action="{{ route('portal.documents.index') }}" class="dtc-fl dtc-fl-expanded" data-dtc-filters aria-label="Filter your document requests">
+    <div class="dtc-fl-toolbar">
+        <div class="dtc-pay-search dtc-fl-search"><i data-lucide="search" class="dtc-pay-search-icon" aria-hidden="true"></i><input type="search" name="search" class="dtc-pay-search-input" value="{{ request('search') }}" placeholder="Search request ID, purpose, receipt or reference" aria-label="Search your document requests" data-dtc-filter-search></div>
+        <button type="button" class="dtc-fl-toggle {{ $listFilterCount ? 'has-filters' : '' }}" data-toggle="collapse" data-target="#historyFilterPanel" aria-controls="historyFilterPanel" aria-expanded="{{ $listFilterCount ? 'true' : 'false' }}" data-dtc-filter-toggle><i data-lucide="sliders-horizontal" aria-hidden="true"></i><span>Filters</span><span class="dtc-fl-count" data-dtc-filter-count @if(!$listFilterCount) hidden @endif>{{ $listFilterCount }}</span></button>
+    </div>
+    <div class="collapse {{ $listFilterCount ? 'show' : '' }}" id="historyFilterPanel"><div class="dtc-fl-panel">
+@include('partials.list-select-filters', ['selectPrefix' => 'history', 'selectFilters' => [
+'document_type' => ['label' => 'Document type', 'all' => 'All documents', 'options' => ['tor' => 'Transcript of Records', 'true_copy' => 'True Copy of Records', 'certification' => 'Certification', 'diploma' => 'Diploma']],
+]])
+@include('partials.list-date-filters', ['datePrefix' => 'history', 'dateLabel' => 'Request submitted'])
+<div class="dtc-fl-actions"><button type="submit" class="btn btn-primary">Apply</button><a class="dtc-fl-clear" href="{{ route('portal.documents.index') }}">Clear all</a></div>
+    </div></div>
+</form>
     <h2 class="dr-section-title">Your requests</h2>
 
     @if ($items->isEmpty())
         <div class="dr-empty">
-            <h2>No requests yet</h2>
+            <h2>{{ request()->anyFilled(['search', 'document_type', 'date_from', 'date_to']) ? 'No requests match your filters' : 'No requests yet' }}</h2>
             <p>Your requests will appear here.</p>
             <a href="{{ route('portal.documents.create') }}" class="dr-btn dr-btn--primary">
                 <i data-lucide="plus" aria-hidden="true"></i> Request a document

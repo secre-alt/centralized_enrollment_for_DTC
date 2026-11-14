@@ -3,6 +3,10 @@
 
 @section('title', 'Enroll Now')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('css/enrollment-create.css') }}">
+@endpush
+
 @section('content')
 <div class="row justify-content-center dtc-enrollment-create">
     <div class="col-lg-8 dtc-enrollment-create-main">
@@ -27,13 +31,13 @@
                     {{-- Program --}}
                     @if ($lockedProgram)
                         <div class="form-group">
-                            <label>Program</label>
+                            <div class="font-weight-bold mb-2">Program</div>
                             <p class="dtc-enrollment-locked-program">{{ $lockedProgram->name }}</p>
                             <input type="hidden" name="program_id" id="program_id" value="{{ $lockedProgram->id }}">
                         </div>
                     @else
                         <div class="form-group">
-                            <label>Program</label>
+                            <label for="program_id">Program</label>
                             <select name="program_id" id="program_id" class="form-control" required>
                                 <option value="">— Select Program —</option>
                                 @foreach ($programs as $program)
@@ -68,7 +72,7 @@
                     <div class="row dtc-enrollment-term-row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Year Level</label>
+                                <label for="year_level">Year Level</label>
                                 <select name="year_level" id="year_level" class="form-control" required>
                                     <option value="1" {{ old('year_level') == 1 ? 'selected' : '' }}>1st Year</option>
                                     <option value="2" {{ old('year_level') == 2 ? 'selected' : '' }}>2nd Year</option>
@@ -79,7 +83,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Semester</label>
+                                <label for="semester">Semester</label>
                                 <select name="semester" id="semester" class="form-control" required>
                                     <option value="1" {{ old('semester') == 1 ? 'selected' : '' }}>1st Semester</option>
                                     <option value="2" {{ old('semester') == 2 ? 'selected' : '' }}>2nd Semester</option>
@@ -142,11 +146,11 @@
 
     {{-- Info Panel --}}
     <div class="col-lg-4 dtc-enrollment-guide-column">
-        <div class="card u-primary-gradient-btn dtc-enrollment-guide-card"
+        <div class="card dtc-enrollment-guide-card"
              >
             <div class="card-body p-4">
                 <h5 class="dtc-enrollment-guide-title">
-                    <i data-lucide="info" class="mr-2"></i> After You Submit
+                    <i data-lucide="info" class="mr-2"></i> After you submit
                 </h5>
                 <p class="dtc-enrollment-guide-intro">Payment is verified before the Registrar reviews your subjects.</p>
                 <div class="dtc-enrollment-guide-steps">
@@ -207,9 +211,9 @@ function loadSubjects() {
 
             container.innerHTML = `
                 <div style="border:1.5px solid var(--dtc-border); border-radius:12px; overflow:hidden;">
-                    <div style="background:var(--dtc-surface-soft); padding:10px 16px; font-size:11px;
-                                font-weight:700; color:var(--dtc-text-secondary); text-transform:uppercase;
-                                letter-spacing:0.5px; border-bottom:1px solid var(--dtc-border);">
+                    <div style="background:var(--dtc-surface-soft); padding:10px 16px; font-size:12px;
+                                font-weight:600; color:var(--dtc-text-secondary); text-transform: none;
+                                letter-spacing: 0; border-bottom:1px solid var(--dtc-border);">
                         ${subjects.length} Subject${subjects.length > 1 ? 's' : ''} Available
                     </div>
                     ${subjects.map(s => `
@@ -273,7 +277,7 @@ function loadAllSubjects() {
             container.innerHTML = groups.map(group => `
                 <div style="border:1.5px solid var(--dtc-border); border-radius:12px; overflow:hidden; margin-bottom:14px;">
                     <div style="background:var(--dtc-surface-soft); padding:10px 16px; font-size:12px;
-                                font-weight:700; color:var(--dtc-text); border-bottom:1px solid var(--dtc-border);">
+                                font-weight:600; color:var(--dtc-text); border-bottom:1px solid var(--dtc-border);">
                         ${YEAR_LABELS[group.year_level] || ('Year ' + group.year_level)} — ${SEM_LABELS[group.semester] || ('Semester ' + group.semester)}
                     </div>
                     ${group.subjects.map(s => `

@@ -33,10 +33,10 @@
 
         {{-- Filters --}}
         @php
-            $auditFilterCount = filled(request('action')) ? 1 : 0;
+            $auditFilterCount = collect(['action', 'actor_id', 'date_from', 'date_to'])->filter(fn ($key) => request()->filled($key))->count();
             $auditHasFilters  = $auditFilterCount > 0 || filled(request('search'));
         @endphp
-        <form method="GET" action="{{ route('admin.settings.audit') }}" class="dtc-fl" data-dtc-filters aria-label="Filter audit logs">
+        <form method="GET" action="{{ route('admin.settings.audit') }}" class="dtc-fl dtc-fl-expanded" data-dtc-filters aria-label="Filter audit logs">
             <div class="dtc-fl-toolbar">
                 <div class="dtc-pay-search dtc-fl-search">
                     <i data-lucide="search" class="dtc-pay-search-icon" aria-hidden="true"></i>
@@ -64,6 +64,11 @@
                             @endforeach
                         </select>
                     </div>
+@include('partials.list-select-filters', ['selectPrefix' => 'audit', 'selectFilters' => [
+'actor_id' => ['label' => 'Actor', 'all' => 'All actors', 'options' => $actors->mapWithKeys(fn ($actor) => [$actor->id => $actor->name.' ('.$actor->email.')'])],
+]])
+@include('partials.list-date-filters', ['datePrefix' => 'audit', 'dateLabel' => 'Logged'])
+
                     <div class="dtc-fl-field">
                         <label for="audit-per-page">Rows per page</label>
                         <select name="per_page" id="audit-per-page" class="form-control">
@@ -105,9 +110,9 @@
                                     <td data-label="User" class="audit-user">
                                         <div class="u-flex-center-gap-12">
                                             <x-dtc.user-avatar :user="$log->user" :name="$log->user?->name ?? 'System'" style="width:30px; height:30px; border-radius:50%;
-                                                        background:linear-gradient(135deg,var(--dtc-primary),#1a5feb);
+                                                        background:var(--dtc-primary);
                                                         display:flex; align-items:center; justify-content:center;
-                                                        color:#fff; font-weight:700; font-size:12px; flex-shrink:0;" />
+                                                        color:#fff; font-weight:600; font-size:12px; flex-shrink:0;" />
                                             <span class="u-text-sm-bold-primary">
                                                 {{ $log->user->name ?? 'System' }}
                                             </span>

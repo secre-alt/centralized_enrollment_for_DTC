@@ -57,8 +57,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Minimum Password Length</label>
-                                <input type="number" name="min_password_length" class="form-control" min="8" max="32"
+                                <label for="admin-settings-security-min-password-length-1">Minimum Password Length</label>
+                                <input id="admin-settings-security-min-password-length-1" type="number" name="min_password_length" class="form-control" min="8" max="32"
                                        value="{{ old('min_password_length', $settings->min_password_length ?? 8) }}">
                                 <small class="form-text" style="color:var(--dtc-text-muted);">
                                     Applies to new accounts and password resets. Between 8 and 32 characters.
@@ -67,7 +67,7 @@
 
                             <div class="d-flex align-items-center justify-content-between flex-wrap mt-3" style="gap:16px;">
                                 <div style="max-width:320px;">
-                                    <h3 style="font-size:14px; font-weight:700; color:var(--dtc-text); margin:0;">
+                                    <h3 style="font-size:14px; font-weight:600; color:var(--dtc-text); margin:0;">
                                         Require Special Characters
                                     </h3>
                                     <p style="font-size:12px; color:var(--dtc-text-secondary); margin:4px 0 0;">
@@ -97,8 +97,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Session Timeout (minutes)</label>
-                                <input type="number" name="session_timeout" class="form-control" min="5" max="1440"
+                                <label for="admin-settings-security-session-timeout-2">Session Timeout (minutes)</label>
+                                <input id="admin-settings-security-session-timeout-2" type="number" name="session_timeout" class="form-control" min="5" max="1440"
                                        value="{{ old('session_timeout', $settings->session_timeout ?? 60) }}">
                                 <small class="form-text" style="color:var(--dtc-text-muted);">
                                     Users are signed out automatically after this many minutes of inactivity.
@@ -106,8 +106,8 @@
                             </div>
 
                             <div class="form-group mb-0">
-                                <label>Max Login Attempts</label>
-                                <input type="number" name="max_login_attempts" class="form-control" min="3" max="20"
+                                <label for="admin-settings-security-max-login-attempts-3">Max Login Attempts</label>
+                                <input id="admin-settings-security-max-login-attempts-3" type="number" name="max_login_attempts" class="form-control" min="3" max="20"
                                        value="{{ old('max_login_attempts', $settings->max_login_attempts ?? 5) }}">
                                 <small class="form-text" style="color:var(--dtc-text-muted);">
                                     Sign-in attempts for the same email and IP are temporarily limited after this many attempts.

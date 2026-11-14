@@ -98,6 +98,11 @@ class SecurityAuditRemediationTest extends TestCase
             'gender' => 'female',
             'birthdate' => '2005-01-01',
             'email' => 'new-applicant@example.test',
+            'country' => 'Philippines',
+            'current_address' => '123 Main Street',
+            'city' => 'Danao',
+            'education_status' => 'Graduated',
+            'most_recent_school' => 'Danao National High School',
             'ack_enrollment' => 'on',
         ]);
 

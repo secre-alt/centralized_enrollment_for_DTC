@@ -6,18 +6,13 @@
 @section('title', 'Manage Users')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h4 class="mb-0 font-weight-bold u-text" >Manage Users</h4>
-            <p class="mb-0 u-text-secondary-sm" >
-                Create and manage system user accounts
-            </p>
-        </div>
-        <button type="button" class="btn btn-primary btn-sm add-user-btn" data-toggle="modal" data-target="#createUserModal">
-            <i data-lucide="user-plus" class="mr-1"></i> 
-            <span class="add-user-text">Add New User</span>
+<x-dtc.page-header title="Manage Users" subtitle="Create and manage system user accounts">
+    <x-slot name="actions">
+        <button type="button" class="btn btn-primary add-user-btn" data-toggle="modal" data-target="#createUserModal" aria-label="Add new user">
+            <i data-lucide="user-plus" class="mr-1" aria-hidden="true"></i><span class="add-user-text">Add New User</span>
         </button>
-    </div>
+    </x-slot>
+</x-dtc.page-header>
 @endsection
 
 @push('css')
@@ -29,6 +24,7 @@
 @endpush
 
 @section('content')
+<div class="users-management">
 
 
 @if ($errors->any())
@@ -36,7 +32,7 @@
 @endif
 
 {{-- Stats Row --}}
-<div class="row mb-2">
+<div class="row mb-2 users-role-stats">
     @php
         $roleStatConfig = [
             'admin'         => ['icon' => 'user-check',    'color' => 'primary'],
@@ -59,7 +55,7 @@
 
 {{-- Search & Filter --}}
 @php
-    $userFilterCount = collect(['role', 'status'])->filter(fn ($k) => filled(request($k)))->count();
+    $userFilterCount = collect(['role', 'status', 'program_id'])->filter(fn ($k) => filled(request($k)))->count();
     $userHasFilters  = $userFilterCount > 0 || filled(request('search'));
 @endphp
 <form method="GET" action="{{ route('admin.users.index') }}" id="users-filter-form" class="dtc-fl" data-dtc-filters aria-label="Filter users">
@@ -101,6 +97,17 @@
                     @endforeach
                 </select>
             </div>
+            <div class="dtc-fl-field">
+                <label for="filter-program">Student program</label>
+                <select name="program_id" id="filter-program" class="form-control" data-dtc-filter aria-describedby="filter-program-hint">
+                    <option value="">All programs</option>
+                    @foreach($programs as $program)
+                        <option value="{{ $program->id }}" @selected((string) request('program_id') === (string) $program->id)>{{ $program->code }} — {{ $program->name }}</option>
+                    @endforeach
+                </select>
+                <small id="filter-program-hint" class="u-text-secondary">Selecting a program shows student accounts only.</small>
+            </div>
+            @include('partials.table-rows', ['tableRecords' => $users, 'tableId' => 'users-directory-table', 'fixedRows' => true])
             <div class="dtc-fl-actions">
                 <button type="submit" class="btn btn-primary">Apply</button>
                 <a href="{{ route('admin.users.index') }}" class="dtc-fl-clear" data-dtc-clear @if(!$userHasFilters) hidden @endif>Clear all</a>
@@ -110,7 +117,7 @@
 </form>
 
 {{-- Users Table --}}
-<div class="card">
+<div class="card users-directory-panel">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span class="font-weight-bold u-text">All Users</span>
         <span class="u-text-secondary-sm" id="users-count">{{ $users->total() }} total</span>
@@ -119,8 +126,8 @@
     <div id="users-table-wrapper">
     <div class="card-body p-0">
         <div class="table-responsive">
-        @include('partials.table-rows', ['tableRecords' => $users])
-<table class="table table-bordered mb-0 users-directory" aria-label="User accounts">
+
+<table id="users-directory-table" class="table mb-0 users-directory" aria-label="User accounts">
             <thead>
                 <tr>
                     <th>User</th>
@@ -140,7 +147,7 @@
                     data-status="{{ strtolower($user->status) }}">
                     <td>
                         <div  class="u-flex-center-gap-12">
-                            <x-dtc.user-avatar :user="$user" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--dtc-primary);color:#fff;flex-shrink:0;font-weight:700;" />
+                            <x-dtc.user-avatar :user="$user" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--dtc-primary);color:#fff;flex-shrink:0;font-weight:600;" />
 
                             <div  class="u-text-sm-bold-primary">
                                 {{ $user->name }}
@@ -165,8 +172,8 @@
                                 ][$role->name] ?? ['tone'=>'neutral'];
                             @endphp
 
-                            <span class="dtc-status-badge is-{{ $rc['tone'] ?? 'neutral' }}"
-                                  style="font-weight:700;">
+                            <span class="dtc-status-badge users-role-badge"
+                                  style="font-weight:600;">
                                 {{ ucwords(str_replace('_',' ', $role->name)) }}
                             </span>
                         @endforeach
@@ -259,7 +266,7 @@
 </div>
 
 <!-- CREATE USER MODAL -->
-<div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="create-user-title" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content dtc-modal-content">
 
@@ -269,7 +276,7 @@
                     <i data-lucide="user-plus"></i>
                 </div>
                 <div class="dtc-modal-header-text">
-                    <h5>Add New User</h5>
+                    <h5 id="create-user-title">Add New User</h5>
                     <p>Create an account and assign a role</p>
                 </div>
                 <button type="button" class="dtc-modal-close" data-dismiss="modal" aria-label="Close">
@@ -284,10 +291,10 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="dtc-form-label">Full Name</label>
+                                <label class="dtc-form-label" for="create-user-name">Full Name</label>
                                 <div class="dtc-input-icon-group">
                                     <i data-lucide="user" class="dtc-input-icon"></i>
-                                    <input type="text" name="name" class="form-control dtc-input-with-icon"
+                                    <input type="text" name="name" id="create-user-name" autocomplete="name" class="form-control dtc-input-with-icon"
                                            value="{{ old('name') }}"
                                            placeholder="Enter full name" required>
                                 </div>
@@ -295,10 +302,10 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="dtc-form-label">Email Address</label>
+                                <label class="dtc-form-label" for="create-user-email">Email Address</label>
                                 <div class="dtc-input-icon-group">
                                     <i data-lucide="mail" class="dtc-input-icon"></i>
-                                    <input type="email" name="email" class="form-control dtc-input-with-icon"
+                                    <input type="email" name="email" id="create-user-email" autocomplete="email" class="form-control dtc-input-with-icon"
                                            value="{{ old('email') }}"
                                            placeholder="Enter email address" required>
                                 </div>
@@ -307,10 +314,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="dtc-form-label">Temporary Password</label>
+                        <label class="dtc-form-label" for="create-user-password">Temporary Password</label>
                         <div class="dtc-input-icon-group">
                             <i data-lucide="lock" class="dtc-input-icon"></i>
-                            <input type="password" name="password" class="form-control dtc-input-with-icon"
+                            <input type="password" name="password" id="create-user-password" class="form-control dtc-input-with-icon"
                                    placeholder="Min. 6 characters" autocomplete="new-password" minlength="6" required>
                         </div>
                         <small class="dtc-form-hint">
@@ -319,8 +326,8 @@
                     </div>
 
                     <div class="form-group mb-0">
-                        <label class="dtc-form-label dtc-form-label-block">Assign Role</label>
-                        <div class="row">
+                        <div class="dtc-form-label dtc-form-label-block" id="create-role-label">Assign Role</div>
+                        <div class="row" role="radiogroup" aria-labelledby="create-role-label">
                             @php
                                 // Only staff roles may be manually created.
                                 // Students enter via Pre-Enrollment or Import.
@@ -335,8 +342,8 @@
                             @foreach($roles->whereIn('name', $staffRoles) as $role)
                             @php $rc = $staffRoleConfig[$role->name] ?? ['tone'=>'neutral','icon'=>'user']; @endphp
                             <div class="col-6 col-md-4 mb-2">
-                                <label class="dtc-role-option-label">
-                                    <input type="radio" name="role" value="{{ $role->name }}"
+                                <label class="dtc-role-option-label" for="create-role-{{ $role->name }}">
+                                    <input type="radio" id="create-role-{{ $role->name }}" name="role" value="{{ $role->name }}"
                                            class="create-role-radio dtc-sr-only">
                                     <div class="create-role-option">
                                         <div class="dtc-icon-swatch is-{{ $rc['tone'] }} dtc-role-icon" data-role="{{ $role->name }}">
@@ -417,20 +424,20 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="dtc-form-label">Full Name</label>
+                                        <label class="dtc-form-label" for="edit-name">Full Name</label>
                                         <div class="dtc-input-icon-group">
                                             <i data-lucide="user" class="dtc-input-icon"></i>
-                                            <input type="text" name="name" id="edit-name"
+                                            <input type="text" name="name" id="edit-name" autocomplete="name"
                                                    class="form-control dtc-input-with-icon" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="dtc-form-label">Email Address</label>
+                                        <label class="dtc-form-label" for="edit-email">Email Address</label>
                                         <div class="dtc-input-icon-group">
                                             <i data-lucide="mail" class="dtc-input-icon"></i>
-                                            <input type="email" name="email" id="edit-email"
+                                            <input type="email" name="email" id="edit-email" autocomplete="email"
                                                    class="form-control dtc-input-with-icon" required>
                                         </div>
                                     </div>
@@ -440,7 +447,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="dtc-form-label">Role</label>
+                                        <label class="dtc-form-label" for="edit-role">Role</label>
                                         <div class="dtc-input-icon-group" id="edit-role-select-wrap">
                                             <i data-lucide="user-check" class="dtc-input-icon"></i>
                                             <select name="role" id="edit-role"
@@ -457,7 +464,7 @@
                                             <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;background:var(--dtc-surface-soft);border:1px solid var(--dtc-border);font-size:13px;color:var(--dtc-text-muted);">
                                                 <i data-lucide="lock" style="width:14px;height:14px;flex-shrink:0;"></i>
                                                 <span id="edit-role-readonly-label">---</span>
-                                                <span style="margin-left:auto;font-size:11px;">Managed by system</span>
+                                                <span style="margin-left:auto;font-size:12px;">Managed by system</span>
                                             </div>
                                             <small class="dtc-form-hint">Role changes are managed by the Registrar.</small>
                                         </div>
@@ -465,11 +472,11 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-0">
-                                        <label class="dtc-form-label dtc-form-label-block">Account Status</label>
-                                        <div style="display:flex;gap:8px;">
+                                        <div class="dtc-form-label dtc-form-label-block" id="edit-status-label">Account Status</div>
+                                        <div style="display:flex;gap:8px;" role="radiogroup" aria-labelledby="edit-status-label">
                                             @foreach(['active','pending','locked'] as $status)
-                                            <label class="dtc-status-option-label">
-                                                <input type="radio" name="status" value="{{ $status }}" class="edit-status-radio dtc-sr-only">
+                                            <label class="dtc-status-option-label" for="edit-status-{{ $status }}">
+                                                <input type="radio" id="edit-status-{{ $status }}" name="status" value="{{ $status }}" class="edit-status-radio dtc-sr-only">
                                                 <div class="edit-status-option">
                                                     <i data-lucide="{{ $status === 'active' ? 'check-circle' : ($status === 'locked' ? 'lock' : 'clock') }}" style="color:{{ $status === 'active' ? 'var(--dtc-success)' : ($status === 'locked' ? 'var(--dtc-danger)' : 'var(--dtc-warning)') }};"></i>
                                                     <div class="dtc-status-label">{{ ucfirst($status) }}</div>
@@ -542,6 +549,7 @@
     </div>
 </div>
 
+</div>
 @endsection
 {{-- Styles live in public/css/admin-users.css (loaded via plugins.adminUsers) --}}
 
@@ -642,6 +650,7 @@ document.addEventListener('click', function (e) {
     var searchInput  = document.querySelector('input[name="search"]');
     var roleSelect   = document.querySelector('select[name="role"]');
     var statusSelect = document.querySelector('select[name="status"]');
+    var programSelect = document.getElementById('filter-program');
     var wrapper      = document.getElementById('users-table-wrapper');
     var countEl      = document.getElementById('users-count');
     var baseUrl      = '{{ route("admin.users.index") }}';
@@ -684,6 +693,7 @@ document.addEventListener('click', function (e) {
         p.set('search', searchInput.value.trim());
         p.set('role',   roleSelect.value);
         p.set('status', statusSelect.value);
+        p.set('program_id', programSelect.value);
         p.set('per_page', document.querySelector('[data-table-rows-select]')?.value || new URLSearchParams(location.search).get('per_page') || '15');
         return baseUrl + '?' + p.toString();
     }
@@ -699,6 +709,7 @@ document.addEventListener('click', function (e) {
     // Dropdowns - instant
     roleSelect.addEventListener('change',   fetchResults);
     statusSelect.addEventListener('change', fetchResults);
+    programSelect.addEventListener('change', fetchResults);
 
     // Filter form submit (Enter key or Filter button)
     searchInput.closest('form').addEventListener('submit', function (e) {

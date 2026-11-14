@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
-use App\Models\Payment;
-use App\Models\User;
+use App\Http\Requests\PaymentReportRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
@@ -19,17 +18,8 @@ class ReportController extends Controller
         return $pdf->download('DTC_Enrollment_Report_' . date('Ymd') . '.pdf');
     }
 
-    public function paymentReport()
+    public function paymentReport(PaymentReportRequest $request)
     {
-       $payments = Payment::with('enrollment.user', 'enrollment.program', 'cashier', 'verifier')
-        ->latest()
-        ->get();
-        $grossCollection = $payments->where('status', 'verified')->sum('amount');
-        $totalRefunds = $payments->where('refund_status', 'refunded')->sum('refund_amount');
-        $totalRevenue = $grossCollection - $totalRefunds;
-        $verifiedCount = $payments->where('status', 'verified')->count();
-        $pdf = Pdf::loadView('admin.reports.payment', compact('payments', 'grossCollection', 'totalRefunds', 'totalRevenue', 'verifiedCount'))
-            ->setPaper('a4', 'landscape');
-        return $pdf->download('DTC_Payment_Report_' . date('Ymd') . '.pdf');
+        return redirect()->route('reports.payments.index', $request->filters()->query());
     }
 }

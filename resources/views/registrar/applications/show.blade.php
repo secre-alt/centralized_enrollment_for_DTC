@@ -575,8 +575,8 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <label>Reason / Remarks</label>
-                    <textarea name="remarks" class="form-control" rows="3" maxlength="500" required></textarea>
+                    <label for="registrar-applications-show-remarks-1">Reason / Remarks</label>
+                    <textarea id="registrar-applications-show-remarks-1" name="remarks" class="form-control" rows="3" maxlength="500" required></textarea>
                 </div>
                 <div class="modal-footer dtc-balanced-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -598,8 +598,8 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <label>Revision Instructions / Required Corrections</label>
-                    <textarea name="remarks" class="form-control" rows="3" maxlength="500" required></textarea>
+                    <label for="registrar-applications-show-remarks-2">Revision Instructions / Required Corrections</label>
+                    <textarea id="registrar-applications-show-remarks-2" name="remarks" class="form-control" rows="3" maxlength="500" required></textarea>
                 </div>
                 <div class="modal-footer dtc-balanced-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

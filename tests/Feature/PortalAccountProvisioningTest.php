@@ -226,7 +226,7 @@ class PortalAccountProvisioningTest extends TestCase
         $token = Mail::sent(PortalAccountInvitationMail::class)->first()->activationUrl;
         $rawToken = basename(parse_url($token, PHP_URL_PATH));
 
-        $this->get(route('portal.activation.show', $rawToken))->assertOk()->assertSee('Choose your password');
+        $this->get(route('portal.activation.show', $rawToken))->assertOk()->assertSee('Set password');
         $this->post(route('portal.activation.store'), [
             'token' => $rawToken, 'password' => 'A-long-strong-pass-123', 'password_confirmation' => 'A-long-strong-pass-123',
         ])->assertRedirect(route('login'));

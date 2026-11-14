@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +25,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate(['program_id' => ['nullable', 'integer', 'exists:programs,id']]);
         // Single grouped query — no N+6 Blade queries
         $roleCounts = DB::table('model_has_roles')
             ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
@@ -35,6 +37,7 @@ class UserController extends Controller
 
         // Search + filter — all server-side
         $query = User::with('roles')
+            ->when($request->filled('program_id'), fn ($q) => $q->role('student')->whereHas('studentProfile', fn ($profile) => $profile->where('program_id', $request->integer('program_id'))))
             ->when($request->filled('search'), fn($q) =>
                 $q->where(fn($q2) =>
                     $q2->where('name',  'like', '%' . $request->search . '%')
@@ -52,8 +55,9 @@ class UserController extends Controller
         // withQueryString() ensures pagination links preserve ?search=&role=&status=
         $users = $query->paginate(\App\Support\TablePagination::perPage(15))->withQueryString();
         $roles = Role::all();
+        $programs = Program::orderBy('code')->get(['id', 'code', 'name']);
 
-        return view('admin.users.index', compact('users', 'roles', 'roleCounts'));
+        return view('admin.users.index', compact('users', 'roles', 'roleCounts', 'programs'));
     }
 
     // ── store ────────────────────────────────────────────────────────────────

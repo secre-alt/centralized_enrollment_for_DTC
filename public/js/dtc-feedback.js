@@ -300,7 +300,6 @@
     }, true);
 
     if (confirmModal) {
-        confirmModal.querySelector('#dtcConfirmClose').addEventListener('click', closeConfirmModal);
         confirmModal.querySelector('#dtcConfirmCancel').addEventListener('click', closeConfirmModal);
         confirmModal.querySelector('#dtcConfirmOk').addEventListener('click', function () {
             if (this.disabled) return;

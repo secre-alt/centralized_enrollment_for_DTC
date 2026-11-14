@@ -45,26 +45,26 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Institution Name</label>
-                                <input type="text" name="institution_name" class="form-control"
+                                <label for="admin-settings-general-institution-name-1">Institution Name</label>
+                                <input id="admin-settings-general-institution-name-1" type="text" name="institution_name" class="form-control"
                                        value="{{ old('institution_name', $settings->institution_name ?? 'Danao Technological College') }}">
                             </div>
 
                             <div class="form-group">
-                                <label>System Name</label>
-                                <input type="text" name="system_name" class="form-control"
+                                <label for="admin-settings-general-system-name-2">System Name</label>
+                                <input id="admin-settings-general-system-name-2" type="text" name="system_name" class="form-control"
                                        value="{{ old('system_name', $settings->system_name ?? 'DTC Enrollment Management System (EMS)') }}">
                             </div>
 
                             <div class="form-group">
-                                <label>Tagline</label>
-                                <input type="text" name="tagline" class="form-control"
+                                <label for="admin-settings-general-tagline-3">Tagline</label>
+                                <input id="admin-settings-general-tagline-3" type="text" name="tagline" class="form-control"
                                        value="{{ old('tagline', $settings->tagline ?? 'Excellence in Education, Service to the Community.') }}">
                             </div>
 
                             <div class="form-group">
-                                <label>Address</label>
-                                <input type="text" name="address" class="form-control"
+                                <label for="admin-settings-general-address-4">Address</label>
+                                <input id="admin-settings-general-address-4" type="text" name="address" class="form-control"
                                        value="{{ old('address', $settings->address ?? 'Sta. Rosa St., Danao City, Cebu, Philippines') }}">
                             </div>
                             <h4 class="h6 mt-4">Registrar contact</h4>
@@ -91,18 +91,18 @@
                                 <h3>System Logo &amp; Favicon</h3>
                             </div>
 
-                            <label class="mb-2">System Logo</label>
+                            <label class="mb-2" for="settings-general-logo">System Logo</label>
                             <div class="d-flex align-items-center" style="gap:16px; margin-bottom:20px;">
                                 <div class="settings-upload-box">
                                     <img src="{{ $settings->logo_url ?? asset('images/DTC-LOGO.webp') }}" alt="System Logo">
                                 </div>
                                 <div>
-                                    <div style="font-size:11px; color:var(--dtc-text-muted); margin-bottom:8px;">
+                                    <div style="font-size:12px; color:var(--dtc-text-muted); margin-bottom:8px;">
                                         Recommended size:<br>512 x 512px (PNG)
                                     </div>
                                     <label class="btn btn-sm btn-secondary mb-1" style="cursor:pointer;">
                                         <i data-lucide="arrow-up" class="mr-1"></i> Change Logo
-                                        <input type="file" name="logo" accept="image/png" hidden>
+                                        <input type="file" id="settings-general-logo" name="logo" accept="image/png" hidden>
                                     </label>
                                     <br>
                                     <button type="button" class="btn btn-link btn-sm p-0 dtc-remove-logo" style="color:#DC2626; font-size:12px;">
@@ -111,18 +111,18 @@
                                 </div>
                             </div>
 
-                            <label class="mb-2">Favicon</label>
+                            <label class="mb-2" for="settings-general-favicon">Favicon</label>
                             <div class="d-flex align-items-center" style="gap:16px;">
                                 <div class="settings-upload-box" style="max-width:64px;">
                                     <img src="{{ $settings->favicon_url ?? asset('images/DTC-LOGO.webp') }}" alt="Favicon">
                                 </div>
                                 <div>
-                                    <div style="font-size:11px; color:var(--dtc-text-muted); margin-bottom:8px;">
+                                    <div style="font-size:12px; color:var(--dtc-text-muted); margin-bottom:8px;">
                                         Recommended size:<br>32 x 32px (PNG)
                                     </div>
                                     <label class="btn btn-sm btn-secondary mb-1" style="cursor:pointer;">
                                         <i data-lucide="arrow-up" class="mr-1"></i> Change Favicon
-                                        <input type="file" name="favicon" accept="image/png" hidden>
+                                        <input type="file" id="settings-general-favicon" name="favicon" accept="image/png" hidden>
                                     </label>
                                     <br>
                                     <button type="button" class="btn btn-link btn-sm p-0 dtc-remove-favicon" style="color:#DC2626; font-size:12px;">
@@ -146,26 +146,26 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Default Language</label>
+                                <label for="admin-settings-general-default-language-5">Default Language</label>
                                 <div  class="u-text-xs-hint">Select the default system language.</div>
-                                <select name="default_language" class="form-control">
+                                <select id="admin-settings-general-default-language-5" name="default_language" class="form-control">
                                     <option value="en" {{ ($settings->default_language ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
                                     <option value="fil" {{ ($settings->default_language ?? '') === 'fil' ? 'selected' : '' }}>Filipino</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label>Default Timezone</label>
+                                <label for="admin-settings-general-default-timezone-6">Default Timezone</label>
                                 <div  class="u-text-xs-hint">Select the default timezone.</div>
-                                <select name="default_timezone" class="form-control">
+                                <select id="admin-settings-general-default-timezone-6" name="default_timezone" class="form-control">
                                     <option value="Asia/Manila" {{ ($settings->default_timezone ?? 'Asia/Manila') === 'Asia/Manila' ? 'selected' : '' }}>(GMT+08:00) Asia/Manila</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label>Date Format</label>
+                                <label for="admin-settings-general-date-format-7">Date Format</label>
                                 <div  class="u-text-xs-hint">Choose the default date format.</div>
-                                <select name="date_format" class="form-control">
+                                <select id="admin-settings-general-date-format-7" name="date_format" class="form-control">
                                     <option value="m/d/Y"  {{ ($settings->date_format ?? 'm/d/Y')  === 'm/d/Y'  ? 'selected' : '' }}>MM/DD/YYYY</option>
                                     <option value="d/m/Y"  {{ ($settings->date_format ?? '')        === 'd/m/Y'  ? 'selected' : '' }}>DD/MM/YYYY</option>
                                     <option value="Y-m-d"  {{ ($settings->date_format ?? '')        === 'Y-m-d'  ? 'selected' : '' }}>YYYY-MM-DD</option>
@@ -173,18 +173,18 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Time Format</label>
+                                <label for="admin-settings-general-time-format-8">Time Format</label>
                                 <div  class="u-text-xs-hint">Choose the default time format.</div>
-                                <select name="time_format" class="form-control">
+                                <select id="admin-settings-general-time-format-8" name="time_format" class="form-control">
                                     <option value="12" {{ ($settings->time_format ?? '12') === '12' ? 'selected' : '' }}>12-hour (AM/PM)</option>
                                     <option value="24" {{ ($settings->time_format ?? '')   === '24' ? 'selected' : '' }}>24-hour</option>
                                 </select>
                             </div>
 
                             <div class="form-group mb-0">
-                                <label>Items Per Page</label>
+                                <label for="admin-settings-general-items-per-page-9">Items Per Page</label>
                                 <div  class="u-text-xs-hint">Set default number of items in tables.</div>
-                                <select name="items_per_page" class="form-control">
+                                <select id="admin-settings-general-items-per-page-9" name="items_per_page" class="form-control">
                                     @foreach (['10', '25', '50', '100'] as $n)
                                         <option value="{{ $n }}" {{ ($settings->items_per_page ?? '10') === $n ? 'selected' : '' }}>{{ $n }}</option>
                                     @endforeach
@@ -242,7 +242,7 @@
                                     <i data-lucide="wrench"></i>
                                 </div>
                                 <div>
-                                    <h3 style="font-size:15px; font-weight:700; color:var(--dtc-text); margin:0;">Maintenance Mode</h3>
+                                    <h3 style="font-size:15px; font-weight:600; color:var(--dtc-text); margin:0;">Maintenance Mode</h3>
                                     <p style="font-size:12px; color:var(--dtc-text-secondary); margin:2px 0 0; max-width:520px;">
                                         Enable maintenance mode to restrict access to the system while performing updates.
                                         Only administrators will be able to access the system.

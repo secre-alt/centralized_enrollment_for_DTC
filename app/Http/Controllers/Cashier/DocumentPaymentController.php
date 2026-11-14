@@ -19,6 +19,11 @@ class DocumentPaymentController extends Controller
 {
     public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:200'],
+            'method' => ['nullable', 'in:gcash,walk_in'],
+            'document_type' => ['nullable', 'in:tor,true_copy,certification,diploma'],
+        ] + \App\Support\ListDateRange::rules($request));
         $filter = $request->query('status', 'all');
         $allowed = ['all', 'unpaid', 'pending_verification', 'rejected', 'verified'];
         abort_unless(in_array($filter, $allowed, true), 404);
@@ -39,6 +44,10 @@ class DocumentPaymentController extends Controller
                 });
             })
             ->latest();
+        if (isset($filters['method'])) $query->where('payment_method', $filters['method']);
+        if (isset($filters['document_type'])) $query->where('document_type', $filters['document_type']);
+        \App\Support\ListDateRange::apply($query, $filters, 'document_requests.created_at');
+        $countQuery = clone $query;
         if ($filter !== 'all') {
             $query->where('payment_status', $filter);
         }
@@ -47,6 +56,13 @@ class DocumentPaymentController extends Controller
         $bundlesQuery = AppointmentPayment::with(['appointment.user', 'appointment.slot', 'appointment.documentRequests'])
             ->where('is_document_bundle', true)
             ->whereHas('appointment');
+        if (isset($filters['method'])) $bundlesQuery->where('payment_method', $filters['method']);
+        if (isset($filters['document_type'])) {
+            $bundlesQuery->whereHas('appointment.documentRequests', fn ($documents) => $documents->where('document_type', $filters['document_type']));
+        }
+        \App\Support\ListDateRange::apply($bundlesQuery, $filters, 'appointment_payments.created_at');
+        // Preserve counts across status choices while respecting the other filters.
+        $bundleCountQuery = clone $bundlesQuery;
         if ($filter !== 'all') {
             $bundlesQuery->where(function ($query) use ($filter) {
                 if ($filter === 'unpaid') $query->where('payment_method', 'walk_in')->where('status', 'pending');
@@ -62,17 +78,19 @@ class DocumentPaymentController extends Controller
                 })->orWhere('reference_number', 'like', '%' . $search . '%');
             });
         }
+        if ($search !== '') {
+            $bundleCountQuery->where(function ($query) use ($search) {
+                $query->whereHas('appointment.user', fn ($users) => $users->where('name', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%'))
+                    ->orWhere('reference_number', 'like', '%'.$search.'%');
+            });
+        }
         $bundles = $bundlesQuery->latest()->paginate(\App\Support\TablePagination::perPage(10), ['*'], 'bundles_page')->withQueryString();
-        $counts = DocumentRequest::query()->where(fn ($q) => $q->where('fee', '>', 0)->orWhere('is_paid', true))
-            ->where('status', '!=', 'cancelled')
-            ->whereDoesntHave('appointment.payments', fn ($payments) => $payments->where('is_document_bundle', true))
+        $counts = $countQuery->reorder()
             ->selectRaw('payment_status, COUNT(*) as total')
             ->groupBy('payment_status')
             ->pluck('total', 'payment_status')
             ->all();
-        $bundleCounts = AppointmentPayment::query()
-            ->where('is_document_bundle', true)
-            ->whereHas('appointment')
+        $bundleCounts = $bundleCountQuery->reorder()
             ->selectRaw('payment_method, status, COUNT(*) as total')
             ->groupBy('payment_method', 'status')
             ->get();

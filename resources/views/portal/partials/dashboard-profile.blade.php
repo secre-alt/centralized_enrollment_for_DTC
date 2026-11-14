@@ -22,7 +22,7 @@
         <div class="dtc-profile-heading">
             @include('portal.partials.dashboard-avatar')
             <div class="dtc-profile-name">
-                <span>Hello,</span>
+                <span>{{ $profileRoleLabel }}</span>
                 <h2>{{ auth()->user()->name }}</h2>
             </div>
             <span class="dtc-profile-badge is-{{ $profileTone }}"><span aria-hidden="true"></span>{{ $isApplicantProfile ? $profileApplicationStatus : ($isAlumniProfile ? 'Alumni' : ($profileComplete ? 'Officially enrolled' : $appStatusLabel)) }}</span>

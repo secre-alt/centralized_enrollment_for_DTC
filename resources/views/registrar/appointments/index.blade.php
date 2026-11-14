@@ -82,9 +82,9 @@
                         <td data-reg-label="Student">
                             <div class="u-flex-center-gap-10">
                                 <x-dtc.user-avatar :user="$payment->appointment->user" style="width:30px;height:30px;border-radius:50%;
-                                            background:linear-gradient(135deg,#0F4CDB,#1a5feb);
+                                            background:var(--dtc-primary);
                                             display:flex;align-items:center;justify-content:center;
-                                            color:#fff;font-weight:700;font-size:11px;flex-shrink:0;" />
+                                            color:#fff;font-weight:600;font-size:12px;flex-shrink:0;" />
                                 <div>
                                     <div class="u-text-sm-bold-primary">{{ $payment->appointment->user->name }}</div>
                                     <div class="u-text-xs-secondary">{{ $payment->appointment->user->email }}</div>
@@ -100,12 +100,12 @@
                             {{ \Carbon\Carbon::parse($payment->appointment->slot->date)->format('M d, Y') }}
                         </td>
                         <td data-reg-label="Reference No.">
-                            <span style="font-size:12px;font-weight:700;font-family:monospace;
-                                         color:var(--dtc-text);letter-spacing:0.5px;">
+                            <span style="font-size:12px;font-weight:600;font-family:monospace;
+                                         color:var(--dtc-text);letter-spacing: 0;">
                                 {{ $payment->reference_number }}
                             </span>
                         </td>
-                        <td data-reg-label="Submitted" style="font-size:11px;color:var(--dtc-text-muted);">
+                        <td data-reg-label="Submitted" style="font-size:12px;color:var(--dtc-text-muted);">
                             {{ $payment->created_at->diffForHumans() }}
                         </td>
                         <td data-reg-label="Actions">
@@ -171,19 +171,19 @@
                                                     </div>
                                                 </div>
                                                 <div class="form-group mb-0">
-                                                    <label style="font-size:13px;font-weight:600;color:var(--dtc-text);">
+                                                    <label for="registrar-appointments-index-rejection-reason-1" style="font-size:13px;font-weight:600;color:var(--dtc-text);">
                                                         Rejection Reason <span style="color:var(--dtc-danger);">*</span>
                                                     </label>
-                                                    <textarea name="rejection_reason"
+                                                    <textarea id="registrar-appointments-index-rejection-reason-1" name="rejection_reason"
                                                               class="form-control" rows="3" required
                                                               placeholder="e.g. Reference number does not match our records..."></textarea>
                                                 </div>
                                             </div>
-                                            <div class="modal-footer">
+                                            <div class="modal-footer dtc-action-footer">
                                                 <button type="button" class="btn btn-secondary"
-                                                        data-dismiss="modal">Back</button>
+                                                        data-dismiss="modal">Keep payment</button>
                                                 <button type="button" class="btn btn-danger" data-dtc-confirm data-dtc-confirm-tone="danger" data-dtc-confirm-title="Reject payment?" data-dtc-confirm-message="The GCash payment from {subject} will be rejected with the entered reason." data-dtc-confirm-subject="{{ $payment->appointment->user->name }}" data-dtc-confirm-ok="Reject" data-dtc-confirm-form="#reject-appointment-payment-{{ $payment->id }}">
-                                                    Reject Payment
+                                                    Reject payment
                                                 </button>
                                             </div>
                                         </form>
@@ -218,7 +218,7 @@
                 {{ $tab['label'] }}
                 @if(isset($counts[$tab['key']]) && $counts[$tab['key']] > 0)
                     <span style="background:rgba(0,0,0,0.15); border-radius:20px;
-                                 padding:1px 7px; margin-left:4px; font-size:10px;">
+                                 padding:1px 7px; margin-left:4px; font-size:12px;">
                         {{ $counts[$tab['key']] }}
                     </span>
                 @endif
@@ -252,9 +252,9 @@
                         <td data-reg-label="Student">
                             <div class="u-flex-center-gap-10 rg-appointment-student">
                                 <x-dtc.user-avatar :user="$appointment->user" style="width:34px;height:34px;border-radius:50%;
-                                            background:linear-gradient(135deg,#0F4CDB,#1a5feb);
+                                            background:var(--dtc-primary);
                                             display:flex;align-items:center;justify-content:center;
-                                            color:#fff;font-weight:700;font-size:12px;flex-shrink:0;" />
+                                            color:#fff;font-weight:600;font-size:12px;flex-shrink:0;" />
                                 <div class="rg-appointment-student-info">
                                     <div class="u-text-sm-bold-primary rg-appointment-student-name">{{ $appointment->user->name }}</div>
                                     <div class="u-text-xs-secondary rg-appointment-student-email">{{ $appointment->user->email }}</div>
@@ -341,7 +341,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <span class="dtc-status-badge is-secondary" style="font-size:10px;">Unavailable</span>
+                                        <span class="dtc-status-badge is-secondary" style="font-size:12px;">Unavailable</span>
                                     @endif
 
                                     {{-- Cancel --}}
@@ -353,7 +353,7 @@
                                         <i data-lucide="x"></i><span class="rg-appointment-action-label">Cancel</span>
                                     </button>
                                 @else
-                                    <span style="font-size:11px;color:var(--dtc-text-muted);">—</span>
+                                    <span style="font-size:12px;color:var(--dtc-text-muted);">—</span>
                                 @endif
                             </div>
 
@@ -374,17 +374,17 @@
                                                     <strong>{{ $appointment->user->name }}</strong>'s appointment.
                                                 </p>
                                                 <div class="form-group">
-                                                    <label>Reason / Remarks</label>
-                                                    <textarea name="remarks" class="form-control" rows="3"
+                                                    <label for="registrar-appointments-index-remarks-2">Reason / Remarks</label>
+                                                    <textarea id="registrar-appointments-index-remarks-2" name="remarks" class="form-control" rows="3"
                                                               required
                                                               placeholder="e.g. Slot unavailable, rescheduling required..."></textarea>
                                                 </div>
                                             </div>
-                                            <div class="modal-footer">
+                                            <div class="modal-footer dtc-action-footer">
                                                 <button type="button" class="btn btn-secondary"
-                                                        data-dismiss="modal">Back</button>
+                                                        data-dismiss="modal">Keep appointment</button>
                                                 <button type="button" class="btn btn-danger" data-dtc-confirm data-dtc-confirm-tone="danger" data-dtc-confirm-title="Cancel appointment?" data-dtc-confirm-message="The appointment for {subject} will be cancelled with the entered reason." data-dtc-confirm-subject="{{ $appointment->user->name }}" data-dtc-confirm-ok="Cancel" data-dtc-confirm-cancel="Keep Appointment" data-dtc-confirm-form="#cancel-appointment-{{ $appointment->id }}">
-                                                    Confirm Cancel
+                                                    Cancel appointment
                                                 </button>
                                             </div>
                                         </form>
@@ -434,7 +434,7 @@
 <style>
 .dtc-tab-active {
     box-shadow: inset 0 0 0 2px currentColor;
-    font-weight: 800 !important;
+    font-weight: 600 !important;
 }
 </style>
 @endsection

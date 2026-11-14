@@ -14,6 +14,9 @@
     @include('admin.reports._report-styles')
 </head>
 <body>
+<div class="footer">
+    DTC Enrollment Management System — Confidential Document — {{ now()->format('Y') }}
+</div>
 
 <table class="brand">
     <tr>
@@ -68,9 +71,7 @@
     </tbody>
 </table>
 
-<div class="footer">
-    DTC Enrollment Management System — Confidential Document — {{ now()->format('Y') }}
-</div>
+
 
 </body>
 </html>

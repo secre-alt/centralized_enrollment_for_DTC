@@ -127,7 +127,7 @@
             if (admin && confirmation && !confirmed && window.dtcConfirm) {
                 event.preventDefault();
                 const name = form.dataset.passwordAccount || (document.getElementById('edit-modal-name') || {}).textContent || 'this account';
-                window.dtcConfirm.open({ trigger: event.submitter || submits[0], title: 'Reset user password?', message: 'Reset the password for ' + name + '? The user must change it at their next login.',
+                window.dtcConfirm.open({ trigger: event.submitter || submits[0], title: 'Reset user password?', message: 'Reset the password for {subject}? The user must change it at their next login.', subject: name,
                     okLabel: 'Reset password', tone: 'warning', onConfirm: function () { confirmed = true; form.requestSubmit(); } });
                 return;
             }
