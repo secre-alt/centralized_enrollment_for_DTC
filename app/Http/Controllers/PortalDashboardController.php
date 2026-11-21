@@ -111,6 +111,11 @@ class PortalDashboardController extends Controller
         }
 
         if ($enrollment->status === 'pending') {
+            if ($enrollment->requires_section_assignment) {
+                return ['label' => 'Wait for Section Assignment',
+                    'desc' => 'The Registrar must assign your full subject load before payment. Do not pay yet.',
+                    'url' => route('portal.enrollment.index'), 'icon' => 'calendar'];
+            }
             if ($enrollment->is_paid) {
                 $replacementRequest = $enrollment->replacementRequests
                     ->where('status', 'open')
@@ -355,15 +360,16 @@ class PortalDashboardController extends Controller
                 ],
                 [
                     'label'    => 'Pay Fee',
-                    'sublabel' => $latestEnrollment->is_paid
+                    'sublabel' => $latestEnrollment->requires_section_assignment ? 'Wait for Registrar section assignment' : ($latestEnrollment->is_paid
                         ? 'Payment confirmed'
                         : ($latestEnrollment->payment && $latestEnrollment->payment->status === 'pending'
                             ? 'Payment proof awaiting Cashier verification'
                             : ($latestEnrollment->payment && $latestEnrollment->payment->status === 'rejected'
                                 ? 'Payment proof rejected — submit corrected proof'
-                                : 'Pay before Registrar review')),
+                                : 'Pay before Registrar review'))),
                     'done'     => $latestEnrollment->is_paid || $latestEnrollment->payment?->status === 'pending',
                     'active'   => in_array($latestEnrollment->status, ['pending', 'approved'], true)
+                        && ! $latestEnrollment->requires_section_assignment
                         && ! $latestEnrollment->is_paid
                         && $latestEnrollment->payment?->status !== 'pending',
                 ],
@@ -454,6 +460,11 @@ class PortalDashboardController extends Controller
 
     private function getNextSteps($enrollment, $fee): array
     {
+        if ($enrollment?->status === 'pending' && $enrollment->requires_section_assignment) {
+            return [['icon' => 'calendar', 'label' => 'Wait for Section Assignment',
+                'desc' => 'The Registrar must assign your full load before payment. Do not pay yet.',
+                'url' => route('portal.enrollment.index'), 'active' => true]];
+        }
         if (!$enrollment) {
             return [
                 ['icon' => 'file-text',      'label' => 'Submit Application',  'desc' => 'Fill out and submit your enrollment form.',        'url' => route('portal.enrollment.create'), 'active' => true],

@@ -8,7 +8,7 @@
         <div>
             <h4 class="mb-0 font-weight-bold u-text" >Programs & Subjects</h4>
             <p class="mb-0 u-text-secondary-sm" >
-                Manage academic programs and their subjects
+                Manage academic programs and their subjects · <a href="#timetable-workspace">Draft timetables</a>
             </p>
         </div>
         <button type="button" class="dtc-btn dtc-btn-primary dtc-header-btn" aria-label="Add program" data-toggle="modal" data-target="#addProgramModal">
@@ -129,6 +129,8 @@
     @include('admin.programs.partials.subjects-card')
 </div>
 
+@include('admin.programs.partials.timetable')
+
 {{-- ============ ADD PROGRAM MODAL ============ --}}
 <div class="modal fade" id="addProgramModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -201,7 +203,7 @@
     </div>
 </div>
 
-@if($errors->any())
+@if($errors->any() && !old('_timetable_form'))
 <script>
     $(function(){
         @if($errors->has('subject_code') || $errors->has('subject_name') || $errors->has('classification') || $errors->has('year_level') || $errors->has('semester'))

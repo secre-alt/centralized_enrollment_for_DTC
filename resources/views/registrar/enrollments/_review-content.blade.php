@@ -7,6 +7,11 @@
         && ! $hasOpenReplacement;
     $unclassifiedSubjects = $subjects->reject(fn ($subject) => in_array($subject->classification, ['major', 'minor', 'general_education'], true));
     $sectionAssignments = $enrollment->subjectOfferings()->with('classSchedule')->get()->keyBy('curriculum_subject_id');
+    $canAssignBeforePayment = $enrollment->status === 'pending' && $enrollment->requires_section_assignment
+        && !$enrollment->is_paid && !$enrollment->payments()->exists() && !$hasOpenReplacement;
+    $canRecoverRejection = $enrollment->status === 'rejected' && $enrollment->is_paid && $enrollment->payment?->status === 'verified'
+        && ! $enrollment->replacementRequests->contains(fn ($case) => in_array($case->status, ['open', 'refund_requested', 'refunded'], true))
+        && ! $enrollment->payments()->where(fn ($payments) => $payments->where('refund_status', 'refunded')->orWhereNotNull('refunded_at')->orWhereNotNull('refunded_by')->orWhereNotNull('refund_reference')->orWhereNotNull('refund_amount'))->exists();
 @endphp
 
 <div id="review-content">
@@ -21,7 +26,9 @@
             </div>
         </div>
         <div class="dtc-review-header-right">
-            @if($canReview)
+            @if($canAssignBeforePayment)
+                <span class="dtc-status-badge is-warning">Sections needed before payment</span>
+            @elseif($canReview)
                 <span class="dtc-status-badge is-success"><span class="dtc-status-dot"></span> Paid — Ready for Review</span>
             @elseif($hasOpenReplacement)
                 <span class="dtc-status-badge is-warning"><span class="dtc-status-dot"></span> Subject Replacement Required</span>
@@ -134,7 +141,7 @@
                             <span class="dtc-status-badge is-neutral" style="margin-left:auto; font-size:12px;">Y{{ $subject->year_level }} · Sem {{ $subject->semester }}</span>
                         @endif
                     </div>
-                    @if($canReview)
+                    @if($canReview || $canAssignBeforePayment)
                         @if($sectionAssignments->has($subject->id))
                             <p class="dtc-review-section-assignment">Section: {{ $sectionAssignments[$subject->id]->classSchedule?->section_code ?: 'Needs reconciliation' }}</p>
                         @else
@@ -156,6 +163,19 @@
             </div>
         </div>
 
+        @if(($canReview || $canAssignBeforePayment) && $subjects->contains(fn ($subject) => ! $sectionAssignments->has($subject->id)))
+            <div class="dtc-review-section dtc-equivalency-setup-note">
+                <strong>{{ $canAssignBeforePayment ? 'Assign selected subjects' : 'Missing section records' }}</strong>
+                @if($canAssignBeforePayment)
+                    <p>Assign the full selected load before payment. Seats, term, subject identity and timetable conflicts are checked together. This does not approve the enrollment.</p>
+                @else
+                    <p>Select the sections above, then record them for reconciliation. This keeps enrollment pending; it does not confirm available seats while other assignments are unknown. Repeat for the other affected records before approving.</p>
+                @endif
+                @unless($canAssignBeforePayment)
+                    <button type="submit" form="approve-enrollment-{{ $enrollment->id }}" name="record_sections" value="1" class="dtc-btn dtc-btn-secondary">Record sections</button>
+                @endunless
+            </div>
+        @endif
         @if($replacementRequest)
             <div class="alert alert-warning" role="status">
                 <strong>Subject Replacement Required</strong>
@@ -164,7 +184,7 @@
             </div>
         @endif
 
-        @if($canReview && ! $replacementRequest)
+        @if(($canReview && ! $replacementRequest) || $canRecoverRejection)
             <div class="dtc-review-section">
                 <div class="dtc-review-section-title">
                     <span><i data-lucide="rotate-ccw"></i> Return for Subject Replacement</span>
@@ -173,6 +193,15 @@
                 <p class="text-muted">A section change alone does not make the student Irregular. The final assignments, approved equivalencies and preserved load classification determine the treatment. Returning subjects does not reject the enrollment or start a refund.</p>
                 <form id="return-subject-replacement-{{ $enrollment->id }}" method="POST" action="{{ route('registrar.enrollments.subject-replacement', $enrollment) }}">
                     @csrf
+                    @if($canRecoverRejection)
+                        <div class="alert alert-warning">
+                            <strong>Correct a rejection caused by unavailable subjects</strong>
+                            <p>Original rejection: {{ $enrollment->remarks ?: 'No reason recorded' }}</p>
+                            <p>Confirm with the Cashier that no refund has been issued. This cancels the pending refund follow-up and returns the same paid enrollment to the student. Recorded refunds and student refund requests cannot be recovered here.</p>
+                            <input type="hidden" name="recover_rejection" value="1">
+                            <label><input type="checkbox" name="confirm_no_refund" value="1" required> I confirmed with the Cashier that no external refund has been issued.</label>
+                        </div>
+                    @endif
                     <div class="form-group">
                         <span class="d-block font-weight-bold mb-2">Unavailable subject(s)</span>
                         @foreach($subjects as $subject)
@@ -467,10 +496,17 @@
     </div>
 
     {{-- ── Footer ─────────────────────────────────────────────────────── --}}
-    @if($canReview)
+    @if($canReview || $canAssignBeforePayment)
     <div class="dtc-review-footer rg-enrollment-decisions">
 
         <div class="dtc-review-footer-default">
+
+            @if($canAssignBeforePayment)
+                <form id="approve-enrollment-{{ $enrollment->id }}" method="POST" action="{{ route('registrar.enrollments.approve', $enrollment) }}" class="dtc-review-footer-right">
+                    @csrf
+                    <button type="submit" name="record_sections" value="1" class="dtc-btn dtc-btn-primary">Assign sections</button>
+                </form>
+            @endif
 
             @if($canReview)
             <div class="dtc-review-footer-right">

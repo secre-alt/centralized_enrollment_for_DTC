@@ -33,6 +33,8 @@
         $appStatusLabel = 'Enrolled';
     } elseif ($latestEnrollment->status === 'approved') {
         $appStatusLabel = 'Approved';
+    } elseif ($latestEnrollment->requires_section_assignment) {
+        $appStatusLabel = 'Sections Needed';
     } elseif ($latestEnrollment->status === 'pending') {
         $appStatusLabel = 'In Progress';
     } elseif ($latestEnrollment->status === 'rejected') {
@@ -40,9 +42,11 @@
     } else {
         $appStatusLabel = 'Status Unavailable';
     }
-    if ($latestEnrollment && $latestEnrollment->is_paid) {
+    if ($latestEnrollment?->requires_section_assignment) {
+        $paymentStatusLabel = 'Wait for Sections';
+    } elseif ($latestEnrollment && $latestEnrollment->is_paid) {
         $paymentStatusLabel = 'Confirmed';
-    } elseif (!$latestEnrollment || $latestEnrollment->status !== 'approved') {
+    } elseif (!$latestEnrollment || !in_array($latestEnrollment->status, ['pending', 'approved'], true)) {
         $paymentStatusLabel = 'Not Required';
     } elseif ($latestEnrollment->payment && $latestEnrollment->payment->status === 'pending') {
         $paymentStatusLabel = 'Awaiting Verification';

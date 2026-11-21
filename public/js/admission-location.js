@@ -92,18 +92,18 @@ function initializeAdmissionLocations() {
     function match(rows, field) {
         return rows.find(row => row.name.toLocaleLowerCase() === field.value.trim().toLocaleLowerCase());
     }
-    function persist(field) {
-        field.dispatchEvent(new Event('change', { bubbles: true }));
+    function persist(field, locationReset = false) {
+        field.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { locationReset } }));
     }
     function clearFrom(index) {
         for (let i = index; i < fields.length; i++) {
             fields[i].value = '';
             codes[i].value = '';
-            persist(fields[i]);
+            persist(fields[i], true);
         }
         barangay.value = '';
         barangayCode.value = '';
-        persist(barangay);
+        persist(barangay, true);
     }
     function refresh(preserveRestoredValue) {
         const countryValue = country.value.trim().toLowerCase();
@@ -178,7 +178,17 @@ function initializeAdmissionLocations() {
             refresh();
         }
         field.addEventListener('input', update);
-        field.addEventListener('change', update);
+        field.addEventListener('change', function () {
+            update();
+            // Advance only a confirmed catalog choice, never draft restoration or partial typing.
+            if (document.activeElement !== field || !countryIsLocal) return;
+            const confirmed = index === 1
+                ? Boolean(codes[1].value || codes[2].value)
+                : Boolean(codes[index].value);
+            if (!confirmed) return;
+            const next = fields.slice(index + 1).find(item => !item.disabled && !item.closest('.wiz-field').hidden) || barangay;
+            if (!next.disabled && !next.closest('.wiz-field').hidden) next.focus();
+        });
     });
     country.addEventListener('input', refresh);
     country.addEventListener('blur', normalizeCountry);

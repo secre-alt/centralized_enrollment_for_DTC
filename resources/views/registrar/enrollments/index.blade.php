@@ -7,7 +7,7 @@
     <div>
         <h4 class="mb-0 font-weight-bold u-text" >Pending Enrollments</h4>
         <p class="mb-0 u-text-secondary-sm" >
-            Payment-verified enrollments awaiting your subject review.
+            Section assignments before payment and paid enrollments awaiting subject review.
         </p>
     </div>
 @endsection
@@ -110,7 +110,11 @@
                         @endif
                     </td>
                     <td data-reg-label="Status">
-                        <x-dtc.status-badge :status="$enrollment->status" />
+                        @if($enrollment->requires_section_assignment)
+                            <span class="dtc-status-badge is-warning">Sections needed</span>
+                        @else
+                            <x-dtc.status-badge :status="$enrollment->status" />
+                        @endif
                     </td>
 
                     <td data-reg-label="Submitted"  class="u-text-secondary-sm">
@@ -125,7 +129,7 @@
                 @empty
                 <tr>
                     <td colspan="7" class="text-center py-4 u-text-muted" >
-                        No payment-verified enrollments are awaiting review.
+                        No enrollments are awaiting section assignment or paid subject review.
                     </td>
                 </tr>
                 @endforelse

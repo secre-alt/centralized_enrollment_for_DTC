@@ -50,6 +50,15 @@ class EnrollmentRefundReconciliationTest extends TestCase
     private function submitFreshEnrollment($student, Program $program): Enrollment
     {
         $subject = CourseSubject::factory()->for($program)->yearSem(1, 1)->create();
+        // Keep these financial tests focused on refund reconciliation: the new
+        // submission must have a published section before payment is available.
+        $group = \App\Models\TimetableDraft::create(['program_id' => $program->id, 'year_level' => 1,
+            'school_year' => '2026-2027', 'semester' => 1, 'group_code' => 'REFUND 1A', 'capacity' => 30,
+            'status' => 'published', 'configuration' => [], 'created_by' => $this->makeUserWithRole('admin')->id]);
+        \App\Models\ClassSchedule::create(['timetable_draft_id' => $group->id, 'course_subject_id' => $subject->id,
+            'hosting_program_id' => $program->id, 'section_code' => 'REFUND 1A', 'school_year' => '2026-2027',
+            'semester' => 1, 'capacity' => 30, 'is_active' => true, 'requires_irregular' => false,
+            'day_pattern' => 'MWF', 'time_start' => '08:00', 'time_end' => '09:00', 'room' => '1T']);
         $this->actingAs($student)
             ->post(route('portal.enrollment.store'), [
                 'program_id' => $program->id,
@@ -61,7 +70,10 @@ class EnrollmentRefundReconciliationTest extends TestCase
             ->assertRedirect(route('portal.enrollment.index'))
             ->assertSessionHas('success');
 
-        return Enrollment::where('user_id', $student->id)->latest('id')->firstOrFail();
+        $created = Enrollment::where('user_id', $student->id)->latest('id')->firstOrFail();
+        $this->assertFalse($created->requires_section_assignment);
+
+        return $created;
     }
 
     public function test_paid_rejection_explains_the_next_step_until_cashier_confirmation(): void

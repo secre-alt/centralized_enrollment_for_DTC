@@ -3,7 +3,7 @@
 @section('title', 'Online Admission Application')
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/application-wizard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/application-wizard.css') }}?v={{ filemtime(public_path('css/application-wizard.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/physical-requirements.css') }}">
 @stop
 
@@ -171,9 +171,14 @@
                         <div class="wiz-name-composite wiz-name-composite--first">
                             <div class="wiz-field wiz-name-honorific">
                                 <label for="honorific">Honorific</label>
-                                <input type="text" name="honorific" id="honorific" placeholder="e.g. Mr."
+                                <input type="text" name="honorific" id="honorific" placeholder="e.g. Mr." list="honorific-options"
                                     class="wiz-input @error('honorific') wiz-invalid @enderror"
                                     value="{{ old('honorific') }}" autocomplete="honorific-prefix" maxlength="20">
+                                <datalist id="honorific-options">
+                                    <option value="Mr."></option>
+                                    <option value="Ms."></option>
+                                    <option value="Mrs."></option>
+                                </datalist>
                                 @error('honorific')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                             </div>
                             <div class="wiz-field wiz-name-required" id="field-first_name">
@@ -194,9 +199,17 @@
                             </div>
                             <div class="wiz-field wiz-name-suffix">
                                 <label for="suffix">Suffix</label>
-                                <input type="text" name="suffix" id="suffix" placeholder="e.g. Jr."
+                                <input type="text" name="suffix" id="suffix" placeholder="e.g. Jr." list="suffix-options"
                                     class="wiz-input @error('suffix') wiz-invalid @enderror"
                                     value="{{ old('suffix') }}" autocomplete="honorific-suffix" maxlength="20">
+                                <datalist id="suffix-options">
+                                    <option value="Jr."></option>
+                                    <option value="Sr."></option>
+                                    <option value="II"></option>
+                                    <option value="III"></option>
+                                    <option value="IV"></option>
+                                    <option value="V"></option>
+                                </datalist>
                                 @error('suffix')<span class="wiz-err-msg"><i data-lucide="alert-circle"></i>{{ $message }}</span>@enderror
                             </div>
                         </div>
@@ -871,7 +884,7 @@
 </script>
 <script>window.dtcApplicationEducationLevels = @json(\App\Support\ApplicationEducation::LEVELS);</script>
 <script src="{{ asset('js/dtc-name-normalizer.js') }}" defer></script>
-<script src="{{ asset('js/application-wizard.js') }}" defer></script>
+<script src="{{ asset('js/application-wizard.js') }}?v={{ filemtime(public_path('js/application-wizard.js')) }}" defer></script>
 @php
     $locationCatalog = app(\App\Services\PsgcLocationCatalog::class);
     $locationRegions = $locationCatalog->regions();
@@ -906,10 +919,8 @@
     };
 @endphp
 <script>
-    /* Tell the wizard which step to open first.
-       Runs after application-wizard.js because it is defer-loaded
-       but this inline script runs after DOMContentLoaded as well. */
-    document.addEventListener('DOMContentLoaded', function () {
+    /* The deferred wizard restores its draft before applying server errors. */
+    window.addEventListener('admission-wizard-ready', function () {
         if (window._wizGoTo) {
             @if ($errors->any())
                 window._wizGoTo({{ $errorStep ?? 1 }}, true);
@@ -935,8 +946,6 @@
                     }
                     else document.getElementById('serverErrors')?.focus();
                 }, 0);
-            @else
-                window._wizGoTo(1, true);
             @endif
         }
     });

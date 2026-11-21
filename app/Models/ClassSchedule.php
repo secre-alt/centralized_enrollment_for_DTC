@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ClassSchedule extends Model
 {
     protected $fillable = [
+        'timetable_draft_id',
         'course_subject_id',
         'hosting_program_id',
         'section_code',

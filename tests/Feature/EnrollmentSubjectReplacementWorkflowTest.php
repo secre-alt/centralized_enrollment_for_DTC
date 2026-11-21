@@ -28,6 +28,36 @@ class EnrollmentSubjectReplacementWorkflowTest extends TestCase
         Setting::set('current_semester', '1st');
     }
 
+    public function test_rejected_paid_load_can_be_recovered_only_before_refund_with_explicit_confirmation(): void
+    {
+        $registrar = $this->makeUserWithRole('registrar');
+        $student = $this->makeUserWithRole('student');
+        $subject = CourseSubject::factory()->create(['classification' => 'minor']);
+        [$enrollment, $payment] = $this->paidEnrollment($student, $subject->program, $subject);
+        $enrollment->update(['status' => 'rejected', 'remarks' => 'The class is full.']);
+        $payment->update(['refund_status' => 'pending']);
+        $payload = ['affected_subject_ids' => [$subject->id], 'reason' => 'Correct rejection: return the full subject for replacement.', 'recover_rejection' => '1'];
+        $url = route('registrar.enrollments.subject-replacement', $enrollment);
+        $this->actingAs($registrar)->post($url, $payload)->assertSessionHasErrors('confirm_no_refund');
+        $this->assertSame('rejected', $enrollment->fresh()->status);
+        $this->post($url, $payload + ['confirm_no_refund' => '1'])->assertSessionHasNoErrors();
+        $this->assertSame('pending', $enrollment->fresh()->status);
+        $this->assertSame('verified', $payment->fresh()->status);
+        $this->assertSame('not_required', $payment->fresh()->refund_status);
+        $this->assertSame('The class is full.', $enrollment->fresh()->remarks);
+        $this->assertSame(1, $enrollment->payments()->count());
+        $this->assertDatabaseHas('audit_logs', ['action' => 'enrollment.rejection_recovered', 'user_id' => $registrar->id]);
+        $this->post($url, $payload + ['confirm_no_refund' => '1'])->assertSessionHasErrors('enrollment');
+        $this->assertSame(1, $enrollment->replacementRequests()->count());
+        [$refunded, $refundedPayment] = $this->paidEnrollment($student, $subject->program, $subject);
+        $refunded->update(['status' => 'rejected']);
+        $refundedPayment->update(['refund_status' => 'refunded', 'refunded_at' => now()]);
+        $this->post(route('registrar.enrollments.subject-replacement', $refunded), $payload + ['confirm_no_refund' => '1'])->assertSessionHasErrors('enrollment');
+        $this->assertSame('rejected', $refunded->fresh()->status);
+        $this->assertSame('refunded', $refundedPayment->fresh()->refund_status);
+        $this->actingAs($student)->post($url, $payload + ['confirm_no_refund' => '1'])->assertForbidden();
+    }
+
     public function test_workflow_tests_use_the_isolated_testing_database(): void
     {
         $this->assertSame('testing', app()->environment());

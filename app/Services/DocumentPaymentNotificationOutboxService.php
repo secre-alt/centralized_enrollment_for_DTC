@@ -96,7 +96,7 @@ class DocumentPaymentNotificationOutboxService
         Log::warning('Document payment notification outbox delivery failed.', [
             'outbox_id' => $id,
             'attempt' => $attempt,
-            'exception' => get_class($exception),
+            'exception_type' => get_class($exception),
         ]);
     }
 }

@@ -11,6 +11,6 @@
             <li>After the refund is completed, the Cashier must record its reference and confirmation here. Return to this page to check the status before submitting a new request or paying again.</li>
         </ol>
         <p><strong>Refund not yet confirmed.</strong> Rejection does not mean the payment has been refunded. Do not pay again while reconciliation is pending.</p>
-        <p>If the issue is an unavailable subject, ask the Registrar for academic guidance. This rejected enrollment cannot be edited as a subject replacement.</p>
+        <p>If the rejection was caused by full or unavailable subjects, contact the Registrar before arranging a refund. The Registrar can check with the Cashier whether this enrollment can be returned for subject replacement without another payment. You cannot reopen it yourself.</p>
     @endif
 </section>

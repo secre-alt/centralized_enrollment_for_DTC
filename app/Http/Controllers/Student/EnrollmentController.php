@@ -60,12 +60,14 @@ class EnrollmentController extends Controller
             ]);
         }
 
-        // student / alumni branch — unchanged
+        // Existing institutional program is authoritative for ordinary enrollment.
+        $officialProgramId = $user->studentProfile?->program_id;
+        $officialProgram = $officialProgramId ? Program::find($officialProgramId) : null;
         $programs = Program::all();
 
         return view('student.enrollment.create', [
             'programs' => $programs,
-            'lockedProgram' => null,
+            'lockedProgram' => $officialProgram,
             'application' => null,
             'fee' => $fee,
         ]);
@@ -87,6 +89,7 @@ class EnrollmentController extends Controller
             ->with([
                 'program',
                 'payment',
+                'subjectOfferings.classSchedule.courseSubject',
                 'replacementRequests.items.originalSubject',
                 'replacementRequests.items.selectedSchedule.courseSubject.program',
             ])
@@ -164,6 +167,14 @@ class EnrollmentController extends Controller
         $enrollment = DB::transaction(function () use ($user, $validated, $isIrregular, $term) {
             \App\Models\User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
+            $officialProfile = $user->studentProfile()->lockForUpdate()->first();
+            if (! $user->hasRole('new_applicant') && $officialProfile?->program_id
+                && (int) $officialProfile->program_id !== (int) $validated['program_id']) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'program_id' => 'Enroll in your recorded degree program. Contact the Registrar to approve and record a program change first.',
+                ]);
+            }
+
             $existingEnrollment = Enrollment::where('user_id', $user->id)
                 ->where('school_year', $term['school_year'])
                 ->where('semester', $term['semester'])
@@ -194,7 +205,7 @@ class EnrollmentController extends Controller
                 }
             }
 
-            return Enrollment::create([
+            $created = Enrollment::create([
                 'user_id' => $user->id,
                 'program_id' => $validated['program_id'],
                 'year_level' => $validated['year_level'],
@@ -204,12 +215,29 @@ class EnrollmentController extends Controller
                 'subject_ids' => $validated['subject_ids'],
                 'status' => 'pending',
                 'is_paid' => false,
+                'requires_section_assignment' => true,
             ]);
-        });
+            app(\App\Services\EnrollmentSectionAssignmentService::class)->assignPublishedGroup($created);
+
+            return $created;
+        }, 3);
 
         if (! $enrollment) {
             return redirect()->route('portal.dashboard')
                 ->with('error', 'You already have an active enrollment for the current academic term.');
+        }
+
+        if ($enrollment->requires_section_assignment) {
+            foreach (\App\Models\User::role(['registrar', 'admin'])->get() as $reviewer) {
+                \App\Services\NotificationService::sendForEvent($reviewer, 'enrollment-sections-needed:'.$enrollment->id,
+                    'Enrollment Needs Sections', $user->name.' needs section assignment before payment for enrollment #'.$enrollment->id.'.',
+                    'info', route('registrar.enrollments.show', $enrollment));
+            }
+            \App\Services\NotificationService::sendUserUpdateSafely($user, 'enrollment-submitted:'.$enrollment->id,
+                'Sections Needed', 'Your enrollment was received. The Registrar must assign your complete subject load before payment. Do not pay yet.',
+                'info', route('portal.enrollment.index'), 'View enrollment status');
+
+            return redirect()->route('portal.enrollment.index')->with('success', 'Enrollment received. Wait for Registrar section assignment before paying.');
         }
 
         // Payment is the first review step; notify Cashiers when the request is submitted.
@@ -551,6 +579,9 @@ class EnrollmentController extends Controller
                 if (! in_array($lockedEnrollment->status, ['pending', 'approved'], true)) {
                     return 'not_payable';
                 }
+                if ($lockedEnrollment->requires_section_assignment) {
+                    return 'sections_needed';
+                }
                 if ($lockedEnrollment->is_paid) {
                     return 'paid';
                 }
@@ -609,6 +640,7 @@ class EnrollmentController extends Controller
         if (is_string($result)) {
             $message = [
                 'not_payable' => 'This enrollment is not eligible for payment.',
+                'sections_needed' => 'Wait for Registrar section assignment before paying. No payment proof was saved.',
                 'paid' => 'This enrollment has already been paid.',
                 'refund_unresolved' => 'A previous verified payment for this academic term has not been refunded. Contact the Cashier; no new payment can be made until the refund is confirmed.',
                 'prior_payment' => 'Another payment for this academic term is already pending or verified. Contact the Cashier to resolve it before paying again.',

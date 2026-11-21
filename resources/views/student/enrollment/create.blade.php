@@ -125,7 +125,7 @@
                                 Enrollment Fee: ₱{{ number_format($fee, 2) }} (fixed rate)
                             </div>
                             <div class="dtc-enrollment-payment-copy">
-                                Pay first; the Registrar reviews your subjects after the Cashier verifies payment.
+                                Wait for section assignment before paying. Final Registrar review follows Cashier payment verification.
                             </div>
                             <div class="dtc-enrollment-payment-options" aria-label="Available payment options">
                                 <span><i data-lucide="smartphone" aria-hidden="true"></i> GCash</span>
@@ -152,10 +152,11 @@
                 <h5 class="dtc-enrollment-guide-title">
                     <i data-lucide="info" class="mr-2"></i> After you submit
                 </h5>
-                <p class="dtc-enrollment-guide-intro">Payment is verified before the Registrar reviews your subjects.</p>
+                <p class="dtc-enrollment-guide-intro">Sections are assigned before payment. Final academic review follows verified payment.</p>
                 <div class="dtc-enrollment-guide-steps">
                    @foreach([
-                    ['icon'=>'wallet', 'text'=>'Pay the ₱' . number_format($fee, 2) . ' fee at the Cashier or submit GCash proof.'],
+                    ['icon'=>'calendar', 'text'=>'A published group is assigned when your full load fits. Otherwise, wait for Registrar section assignment before paying.'],
+                    ['icon'=>'wallet', 'text'=>'Once sections are assigned, pay the ₱' . number_format($fee, 2) . ' fee at the Cashier or submit GCash proof.'],
                     ['icon'=>'badge-check', 'text'=>'The Cashier verifies your payment and issues a receipt.'],
                     ['icon'=>'scan-search', 'text'=>'The Registrar reviews your selected subjects and decides on your enrollment.'],
                 ] as $step)

@@ -31,8 +31,9 @@ class EnrollmentController extends Controller
 
         $query = Enrollment::with('user', 'program', 'payment')
             ->where('status', 'pending')
-            ->where('is_paid', true)
-            ->whereHas('payment', fn ($payment) => $payment->where('status', 'verified'));
+            ->where(fn ($review) => $review->where('requires_section_assignment', true)
+                ->orWhere(fn ($paid) => $paid->where('is_paid', true)
+                    ->whereHas('payment', fn ($payment) => $payment->where('status', 'verified'))));
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
             $query->where(function ($matches) use ($search) {
@@ -177,6 +178,7 @@ class EnrollmentController extends Controller
         $validated = $request->validate([
             'section_choices' => ['nullable', 'array'],
             'section_choices.*' => ['nullable', 'integer', 'min:1'],
+            'record_sections' => ['sometimes', 'accepted'],
         ]);
         $enrollment = DB::transaction(function () use ($enrollment, $validated, $replacementService) {
             $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
@@ -184,7 +186,10 @@ class EnrollmentController extends Controller
                 ->latest('id')
                 ->first();
 
-            if ($lockedEnrollment->status !== 'pending' || ! $lockedEnrollment->is_paid || ! $payment || ! $payment->isVerified() || $payment->refund_status !== 'not_required') {
+            $prepaymentAssignment = ! empty($validated['record_sections'])
+                && $lockedEnrollment->status === 'pending' && $lockedEnrollment->requires_section_assignment
+                && ! $lockedEnrollment->is_paid && ! $lockedEnrollment->payments()->exists();
+            if (! $prepaymentAssignment && ($lockedEnrollment->requires_section_assignment || $lockedEnrollment->status !== 'pending' || ! $lockedEnrollment->is_paid || ! $payment || ! $payment->isVerified() || $payment->refund_status !== 'not_required')) {
                 throw ValidationException::withMessages([
                     'enrollment' => 'The Cashier must verify payment before the Registrar can review this enrollment.',
                 ]);
@@ -199,7 +204,20 @@ class EnrollmentController extends Controller
                 ]);
             }
 
-            $replacementService->validateApprovalLoad($lockedEnrollment, $validated['section_choices'] ?? []);
+            $replacementService->validateApprovalLoad($lockedEnrollment, $validated['section_choices'] ?? [], ! empty($validated['record_sections']) && ! $prepaymentAssignment);
+            if (! empty($validated['record_sections'])) {
+                if ($prepaymentAssignment) {
+                    $lockedEnrollment->requires_section_assignment = false;
+                }
+                $lockedEnrollment->save();
+                \App\Models\AuditLog::create([
+                    'user_id' => auth()->id(), 'action' => 'enrollment.sections_reconciled',
+                    'description' => 'Recorded section assignments for enrollment #'.$lockedEnrollment->id.'; enrollment remains pending.',
+                    'metadata' => ['enrollment_id' => $lockedEnrollment->id, 'assignments' => $lockedEnrollment->subjectOfferings()->pluck('class_schedule_id', 'curriculum_subject_id')->all()],
+                ]);
+
+                return $lockedEnrollment;
+            }
 
             $user = $lockedEnrollment->user;
             if ($user->hasRole('new_applicant')) {
@@ -230,6 +248,23 @@ class EnrollmentController extends Controller
 
             return $lockedEnrollment->fresh(['user', 'program']);
         }, 3);
+
+        if (! empty($validated['record_sections'])) {
+            if (! $enrollment->is_paid) {
+                NotificationService::sendUserUpdateSafely($enrollment->user, 'enrollment-sections-ready:'.$enrollment->id,
+                    'Sections Assigned', 'The Registrar assigned your full subject load. You may now pay the enrollment fee. Final academic approval still follows payment verification.',
+                    'success', route('portal.enrollment.payment-info', $enrollment), 'View payment instructions');
+                foreach (User::role(['cashier', 'admin'])->get() as $cashier) {
+                    NotificationService::sendForEvent($cashier, 'enrollment-sections-ready:'.$enrollment->id,
+                        'Enrollment Ready for Payment', 'Sections are assigned for enrollment #'.$enrollment->id.'. Payment may now be recorded.',
+                        'info', route('cashier.payments.show', $enrollment));
+                }
+
+                return redirect()->route('registrar.enrollments.show', $enrollment)->with('success', 'Sections assigned. The student can now pay; enrollment remains pending.');
+            }
+            return redirect()->route('registrar.enrollments.show', $enrollment)
+                ->with('success', 'Sections recorded for reconciliation. Enrollment is still pending. Resolve other unknown assignments before approving.');
+        }
 
         // ── Notify Student ────────────────────────────────────────────
         NotificationService::sendUserUpdateSafely(
@@ -349,10 +384,43 @@ class EnrollmentController extends Controller
             'unavailable_schedule_ids' => ['nullable', 'array'],
             'unavailable_schedule_ids.*' => ['nullable', 'integer', 'exists:class_schedules,id'],
             'reason' => ['required', 'string', 'min:10', 'max:2000'],
+            'recover_rejection' => ['sometimes', 'accepted'],
+            'confirm_no_refund' => $request->has('recover_rejection') ? ['required', 'accepted'] : ['sometimes', 'accepted'],
         ]);
 
         $replacementRequest = DB::transaction(function () use ($enrollment, $validated) {
+            User::whereKey($enrollment->user_id)->lockForUpdate()->firstOrFail();
             $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            $recovering = ! empty($validated['recover_rejection']);
+            if ($recovering) {
+                if (Enrollment::where('user_id', $lockedEnrollment->user_id)
+                    ->where('id', '!=', $lockedEnrollment->id)
+                    ->where('school_year', $lockedEnrollment->school_year)->where('semester', $lockedEnrollment->semester)
+                    ->whereIn('status', ['pending', 'approved'])->lockForUpdate()->exists()) {
+                    throw ValidationException::withMessages(['enrollment' => 'Another active enrollment exists for this term. Reconcile it before recovering this rejection.']);
+                }
+                $payments = Payment::where('enrollment_id', $lockedEnrollment->id)->orderBy('id')->lockForUpdate()->get();
+                if ($lockedEnrollment->status !== 'rejected' || ! $lockedEnrollment->is_paid
+                    || ! $payments->last()?->isVerified()
+                    || $payments->contains(fn ($payment) => $payment->refund_status === 'refunded'
+                        || $payment->refunded_at !== null || $payment->refunded_by !== null
+                        || $payment->refund_reference !== null || $payment->refund_amount !== null)
+                    || $lockedEnrollment->replacementRequests()->whereIn('status', ['open', 'refund_requested', 'refunded'])->exists()) {
+                    throw ValidationException::withMessages(['enrollment' => 'This rejection cannot be recovered. Confirm the refund and revision state with the Cashier.']);
+                }
+                \App\Models\AuditLog::create([
+                    'user_id' => auth()->id(), 'action' => 'enrollment.rejection_recovered',
+                    'description' => 'Returned rejected paid enrollment #'.$lockedEnrollment->id.' for subject replacement.',
+                    'metadata' => ['enrollment_id' => $lockedEnrollment->id, 'old_status' => 'rejected', 'new_status' => 'pending',
+                        'original_rejection_reason' => $lockedEnrollment->remarks, 'correction_reason' => $validated['reason'],
+                        'affected_subject_ids' => $validated['affected_subject_ids'],
+                        'prior_refund_statuses' => $payments->pluck('refund_status', 'id')->all(), 'confirmed_no_external_refund' => true],
+                ]);
+                // Cancel only the uncompleted reconciliation flag; collections and receipts remain intact.
+                Payment::whereIn('id', $payments->where('status', 'verified')->pluck('id'))
+                    ->where('refund_status', 'pending')->update(['refund_status' => 'not_required']);
+                $lockedEnrollment->update(['status' => 'pending']);
+            }
             $verifiedPayment = Payment::where('enrollment_id', $lockedEnrollment->id)
                 ->where('status', 'verified')
                 ->lockForUpdate()

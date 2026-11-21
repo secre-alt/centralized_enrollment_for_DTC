@@ -58,6 +58,15 @@
         input.addEventListener('keydown', event => {
             if (event.key === 'Escape') { close(); return; }
             if (event.key === 'Tab') { close(); return; }
+            if (event.key === 'Enter' && !popup.hidden && active < 0) {
+                const exact = matches.find(value => value.toLocaleLowerCase() === input.value.trim().toLocaleLowerCase());
+                if (exact) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    select(exact);
+                    return;
+                }
+            }
             if (event.key === 'Enter' && !popup.hidden && active >= 0) {
                 event.preventDefault();
                 event.stopPropagation();

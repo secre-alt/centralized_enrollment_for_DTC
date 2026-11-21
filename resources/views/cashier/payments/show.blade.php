@@ -17,6 +17,10 @@
     </div>
 @endsection
 
+@push('js')
+<script src="{{ asset('js/cashier-payment-actions.js') }}"></script>
+@endpush
+
 @section('content')
 <div class="row justify-content-center">
     <div class="col-lg-7">

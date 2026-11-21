@@ -29,14 +29,15 @@ class SidebarWorkCounts
         if ($user->hasAnyRole(['admin', 'registrar'])) {
             $counts['registrar.applications.index'] = Application::where('status', 'submitted')->count();
             $counts['registrar.enrollments.index'] = Enrollment::where('status', 'pending')
-                ->where('is_paid', true)
-                ->whereHas('payment', fn ($query) => $query->where('status', 'verified'))
+                ->where(fn ($review) => $review->where('requires_section_assignment', true)
+                    ->orWhere(fn ($paid) => $paid->where('is_paid', true)->whereHas('payment', fn ($query) => $query->where('status', 'verified'))))
                 ->count();
             $counts['registrar.appointments.index'] = Appointment::where('status', 'pending')->count();
             $counts['registrar.documents.index'] = DocumentRequest::where('status', 'submitted')->count();
         }
         if ($user->hasAnyRole(['admin', 'cashier'])) {
             $counts['cashier.payments.index'] = Enrollment::whereIn('status', ['pending', 'approved'])->where('is_paid', false)
+                ->where('requires_section_assignment', false)
                 ->whereDoesntHave('payment', fn ($query) => $query->where('status', 'verified'))->count()
                 + Enrollment::where('status', 'rejected')->where('is_paid', true)
                     ->whereHas('payments', fn ($query) => $query->where('status', 'verified')->where('refund_status', 'pending'))->count();

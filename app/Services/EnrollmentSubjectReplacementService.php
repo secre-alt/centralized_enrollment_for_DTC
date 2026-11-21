@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 class EnrollmentSubjectReplacementService
 {
     /** Called inside the enrollment approval transaction; never guesses a section. */
-    public function validateApprovalLoad(Enrollment $enrollment, array $sectionChoices = []): void
+    public function validateApprovalLoad(Enrollment $enrollment, array $sectionChoices = [], bool $recordForReconciliation = false): void
     {
         $ids = array_map('intval', $enrollment->subject_ids ?? []);
         if (! $ids || count($ids) !== count(array_unique($ids))) {
@@ -55,7 +55,7 @@ class EnrollmentSubjectReplacementService
             $item = new EnrollmentReplacementItem(['original_subject_id' => $id]);
             $item->setRelation('originalSubject', $subjects[$id]);
             $item->original_schedule_id = $unavailable->first(fn ($row) => (int) $row->original_subject_id === $id && (int) $row->original_schedule_id === (int) $scheduleId)?->original_schedule_id;
-            $this->assertOfferingEligible($enrollment, $item, $schedule);
+            $this->assertOfferingEligible($enrollment, $item, $schedule, $recordForReconciliation);
             if ((string) $schedule->time_start >= (string) $schedule->time_end) {
                 throw ValidationException::withMessages(['enrollment' => 'A section has invalid class times. Correct its schedule before approval.']);
             }
@@ -158,6 +158,10 @@ class EnrollmentSubjectReplacementService
         $query = Enrollment::query()
             ->where('school_year', $schedule->school_year)
             ->where('semester', $schedule->semester)
+            // New unpaid holds explicitly reserve no seats. Legacy unknown
+            // assignments still require reconciliation (default false).
+            ->where(fn ($occupancy) => $occupancy->where('requires_section_assignment', false)
+                ->orWhere('status', 'approved')->orWhere('is_paid', true)->orWhereHas('payments')->orWhereHas('subjectOfferings'))
             ->whereIn('status', ['pending', 'approved'])
             ->when($excludingEnrollment, fn ($query) => $query->where('id', '!=', $excludingEnrollment->id))
             ->where(function ($query) use ($curriculumSubjectIds) {
@@ -187,7 +191,8 @@ class EnrollmentSubjectReplacementService
     public function assertOfferingEligible(
         Enrollment $enrollment,
         EnrollmentReplacementItem $item,
-        ClassSchedule $schedule
+        ClassSchedule $schedule,
+        bool $recordForReconciliation = false
     ): ?CourseSubjectEquivalency {
         if ((int) $schedule->id === (int) $item->original_schedule_id) {
             throw ValidationException::withMessages([
@@ -234,7 +239,15 @@ class EnrollmentSubjectReplacementService
             ]);
         }
 
-        $this->assertCapacityAvailable($schedule, $enrollment);
+        if ($recordForReconciliation) {
+            // Explicit Registrar reconciliation records assignments, not approval
+            // or a declaration that unknown legacy occupancy is available.
+            if ($this->remainingSeats($schedule, $enrollment) <= 0) {
+                throw ValidationException::withMessages(['section_choices' => 'Recorded assignments already fill this section. Reconcile the offering before recording more.']);
+            }
+        } else {
+            $this->assertCapacityAvailable($schedule, $enrollment);
+        }
 
         return $equivalency;
     }
@@ -261,13 +274,17 @@ class EnrollmentSubjectReplacementService
         }
 
         $assignedSeats = EnrollmentSubjectOffering::query()
-            ->where('class_schedule_id', $schedule->id)
-            ->where('enrollment_id', '!=', $enrollment->id)
-            ->whereHas('enrollment', fn ($query) => $query->whereIn('status', ['pending', 'approved']))
+            ->join('enrollments', 'enrollments.id', '=', 'enrollment_subject_offerings.enrollment_id')
+            ->where('enrollment_subject_offerings.class_schedule_id', $schedule->id)
+            ->where('enrollment_subject_offerings.enrollment_id', '!=', $enrollment->id)
+            ->whereIn('enrollments.status', ['pending', 'approved'])
             // Submission holds the offering lock. Use a current read rather than a
             // repeatable-read snapshot created before another student committed.
             ->lockForUpdate()
-            ->count();
+            // Join the enrollment in the SAME locking read. A whereHas/EXISTS
+            // subquery can retain an older snapshot and miss an enrollment that
+            // was itself created while this request waited for the seat lock.
+            ->get(['enrollment_subject_offerings.id'])->count();
 
         return max(0, (int) $schedule->capacity - $assignedSeats);
     }

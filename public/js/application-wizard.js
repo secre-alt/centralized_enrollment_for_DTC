@@ -88,6 +88,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function goTo(n, skipValidation) {
         if (!skipValidation && n > current && !validateStep(current)) return;
         current = Math.max(1, Math.min(TOTAL, n));
+        const draft = loadDraft();
+        draft.__step = current;
+        saveDraft(draft);
 
         panels.forEach(function (p, i) { p.classList.toggle('active', i + 1 === current); });
         steps.forEach(function (s, i) {
@@ -285,7 +288,12 @@ document.addEventListener('DOMContentLoaded', function () {
             clearFieldError(el);
         }
         el.addEventListener('input',  clear);
-        function check() {
+        function check(event) {
+            // Clearing dependent address fields is not a user validation attempt.
+            if (event.detail && event.detail.locationReset) {
+                clearFieldError(el);
+                return;
+            }
             if (el.disabled || el.closest('.d-none')) return;
             const message = validationMessage(el);
             if (message) showFieldError(el, message);
@@ -726,6 +734,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window._wizGoTo = goTo;
+    function restoreStep() {
+        const savedStep = loadDraft().__step;
+        goTo(Number.isInteger(savedStep) && savedStep >= 1 && savedStep <= TOTAL ? savedStep : 1, true);
+    }
 
 
 
@@ -928,4 +940,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    restoreStep();
+    window.dispatchEvent(new Event('admission-wizard-ready'));
 });

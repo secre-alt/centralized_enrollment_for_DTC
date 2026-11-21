@@ -170,7 +170,9 @@
                         @endif
                     </td>
                     <td>
-                        @if ($enrollment->has_outstanding_term_payment && ! $enrollment->is_paid)
+                        @if ($enrollment->requires_section_assignment)
+                            <span class="dtc-status-badge is-warning">Sections needed</span>
+                        @elseif ($enrollment->has_outstanding_term_payment && ! $enrollment->is_paid)
                             <x-dtc.status-badge status="Payment Blocked" />
                         @elseif ($enrollment->status === 'rejected' && $enrollment->has_verified_payment)
                             @if ($enrollment->has_pending_refund)
@@ -198,7 +200,7 @@
                             <button type="button" class="dtc-review-btn dtc-payment-btn dtc-header-btn"
                                     data-url="{{ route('cashier.payments.show', $enrollment) }}">
                                 <i data-lucide="banknote"></i>
-                                <span class="dtc-header-btn-label">{{ $enrollment->has_outstanding_term_payment && ! $enrollment->is_paid ? 'Resolve prior payment' : ($enrollment->status === 'rejected' ? 'Refund details' : ($enrollment->payment?->isVerified() ? 'Details' : ($enrollment->payment?->isPending() ? 'Review' : 'Process'))) }}</span>
+                                <span class="dtc-header-btn-label">@if($enrollment->requires_section_assignment) Details @else {{ $enrollment->has_outstanding_term_payment && ! $enrollment->is_paid ? 'Resolve prior payment' : ($enrollment->status === 'rejected' ? 'Refund details' : ($enrollment->payment?->isVerified() ? 'Details' : ($enrollment->payment?->isPending() ? 'Review' : 'Process'))) }} @endif</span>
                             </button>
                             @if ($enrollment->is_paid)
                                 <button type="button" class="dtc-review-btn dtc-receipt-btn dtc-header-btn"

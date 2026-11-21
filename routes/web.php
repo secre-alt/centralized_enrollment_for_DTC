@@ -171,6 +171,9 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
     // ── PROGRAMS & SUBJECTS ────────────────────────────────────────────────────
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
+    Route::post('/timetables/resources', [\App\Http\Controllers\Admin\TimetableController::class, 'resource'])->name('timetables.resources');
+    Route::post('/timetables', [\App\Http\Controllers\Admin\TimetableController::class, 'store'])->name('timetables.store');
+    Route::put('/timetables/{draft}', [\App\Http\Controllers\Admin\TimetableController::class, 'update'])->name('timetables.update');
     Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
     Route::delete('/programs/{program}', [ProgramController::class, 'destroy'])->name('programs.destroy');
     Route::get('/programs/{program}/subjects', [ProgramController::class, 'subjects'])->name('programs.subjects');

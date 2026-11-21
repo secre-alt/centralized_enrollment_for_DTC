@@ -14,6 +14,7 @@
 </div>
 
 @push('js')
+<script src="{{ asset('js/cashier-payment-actions.js') }}"></script>
 <script>
 (function () {
     var $modal        = $('#paymentModal');
@@ -62,24 +63,6 @@
         $modalContent.html(loadingMarkup);
     });
 
-    // Reveal the inline reject-reason panel (event delegation - this
-    // content is injected dynamically, so listeners are bound on document).
-    $(document).on('click', '#paymentModalContent .dtc-review-reject-trigger', function () {
-        var targetId = $(this).data('target');
-        $('#' + targetId).addClass('is-open').slideDown(160);
-
-        var $footer = $(this).closest('.dtc-review-footer');
-        $footer.find('.dtc-review-footer-default').hide();
-        $footer.find('.dtc-review-footer-reject').fadeIn(160);
-    });
-
-    $(document).on('click', '#paymentModalContent .dtc-review-reject-cancel', function () {
-        $('#paymentModalContent .dtc-review-reject-panel').slideUp(160).removeClass('is-open');
-
-        var $footer = $(this).closest('.dtc-review-footer');
-        $footer.find('.dtc-review-footer-reject').hide();
-        $footer.find('.dtc-review-footer-default').fadeIn(160);
-    });
 })();
 </script>
 @endpush

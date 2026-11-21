@@ -14,7 +14,8 @@
         && in_array($replacementRequest->status, ['submitted', 'approved'], true);
     $isRefundRequested = $replacementRequest && $replacementRequest->status === 'refund_requested';
     $refundFullyConfirmed = $isRejected && $enrollment->is_paid && (bool) ($enrollment->refund_fully_confirmed ?? false);
-    $canPay = in_array($enrollment->status, ['pending', 'approved'], true);
+    $sectionsNeeded = $enrollment->status === 'pending' && $enrollment->requires_section_assignment;
+    $canPay = !$sectionsNeeded && in_array($enrollment->status, ['pending', 'approved'], true);
     $isRegistrarReview = $enrollment->status === 'pending' && $enrollment->is_paid;
     $isPaymentReview = $canPay && !$enrollment->is_paid && $payment && $payment->status === 'pending';
     $isPaymentRejected = $canPay && !$enrollment->is_paid && $payment && $payment->status === 'rejected';
@@ -25,6 +26,7 @@
     $paymentStep = $enrollment->is_paid ? 'done' : ($canPay ? 'current' : 'upcoming');
     $registrarStep = $isApproved ? 'done' : ($isRegistrarReview ? 'current' : 'upcoming');
     $enrolledStep = $isEnrolled ? 'done' : 'upcoming';
+    if ($sectionsNeeded) $state = 'warning';
 @endphp
 
 <article class="card dtc-enrollment-status-card mb-3">
@@ -55,6 +57,8 @@
                 Subject replacement required
             @elseif($isRegistrarReview)
                 In review
+            @elseif($sectionsNeeded)
+                Sections needed
             @elseif($isPaymentDue)
                 Payment due
             @elseif($hasOutstandingTermPayment)
@@ -74,6 +78,20 @@
     </div>
 
     <div class="dtc-enrollment-progress-zone">
+        @if($enrollment->subjectOfferings->isNotEmpty())
+            <details class="mb-3">
+                <summary>Assigned sections and timetable</summary>
+                <div class="table-responsive mt-3" role="region" aria-label="Assigned sections" tabindex="0">
+                    <table class="table mb-0">
+                        <thead><tr><th>Subject</th><th>Group</th><th>Meetings</th><th>Room</th></tr></thead>
+                        <tbody>@foreach($enrollment->subjectOfferings as $assignment)
+                            @php $section = $assignment->classSchedule; @endphp
+                            <tr><td>{{ $section?->courseSubject?->subject_code }}</td><td>{{ $section?->section_code }}</td><td>{{ $section?->day_pattern }} {{ $section?->time_start }}–{{ $section?->time_end }}</td><td>{{ $section?->room }}</td></tr>
+                        @endforeach</tbody>
+                    </table>
+                </div>
+            </details>
+        @endif
         <h3 class="dtc-enrollment-zone-label">Progress</h3>
         <ol class="dtc-enrollment-progress" aria-label="Enrollment progress">
             <li class="dtc-enrollment-progress-step is-done {{ $isEnrolled ? 'has-complete-connector' : '' }}">
@@ -174,6 +192,9 @@
                 @elseif($isRegistrarReview)
                     <strong>Registrar review in progress</strong>
                     <span>Your payment is confirmed. The Registrar is reviewing your selected subjects.</span>
+                @elseif($sectionsNeeded)
+                    <strong>Wait for Registrar section assignment</strong>
+                    <span>No complete published group could be assigned to your selected load. The Registrar will record suitable sections. Do not pay yet; this page will show when payment is available.</span>
                 @elseif($isPaymentDue)
                     <strong>Payment needed first</strong>
                     <span>Pay the enrollment fee at the Cashier or submit GCash proof. Registrar review begins after payment is verified.</span>

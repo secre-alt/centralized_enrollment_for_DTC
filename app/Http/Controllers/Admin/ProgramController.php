@@ -45,7 +45,14 @@ class ProgramController extends Controller
             return view('admin.programs.partials.subjects-card', compact('selectedProgram', 'subjects', 'allSubjects', 'hostingPrograms'));
         }
 
-        return view('admin.programs.index', compact('programs', 'selectedProgram', 'subjects', 'allSubjects', 'hostingPrograms'));
+        $timetableResources = \App\Models\TimetableResource::orderBy('kind')->orderBy('name')->get();
+        $timetableDrafts = \App\Models\TimetableDraft::with('program')->latest()->paginate(10, ['*'], 'timetables_page')->withQueryString();
+        $timetableDraft = $request->filled('timetable') ? \App\Models\TimetableDraft::findOrFail($request->integer('timetable')) : null;
+        $timetableSubjects = $timetableDraft ? app(\App\Services\TimetableService::class)->subjects($timetableDraft) : collect();
+        $timetableChoices = $timetableDraft && $timetableDraft->is_demo
+            ? app(\App\Services\TimetableService::class)->resources($timetableDraft) : $timetableResources->toArray();
+
+        return view('admin.programs.index', compact('programs', 'selectedProgram', 'subjects', 'allSubjects', 'hostingPrograms', 'timetableResources', 'timetableDrafts', 'timetableDraft', 'timetableSubjects', 'timetableChoices'));
     }
 
     public function store(Request $request)
@@ -76,6 +83,14 @@ class ProgramController extends Controller
 
     public function destroy(Program $program)
     {
+        return app(\App\Services\TimetableService::class)->locked(fn () => $this->removeProgram($program));
+    }
+
+    private function removeProgram(Program $program)
+    {
+        if (\App\Models\TimetableDraft::where('program_id', $program->id)->exists()) {
+            throw ValidationException::withMessages(['program' => 'This program has timetable history and cannot be removed.']);
+        }
         $program->delete();
         return redirect()->route('admin.programs.index')
             ->with('success', 'Program removed.');
@@ -114,6 +129,14 @@ class ProgramController extends Controller
 
     public function updateSubject(Request $request, CourseSubject $subject)
     {
+        return app(\App\Services\TimetableService::class)->locked(fn () => $this->persistSubject($request, $subject));
+    }
+
+    private function persistSubject(Request $request, CourseSubject $subject)
+    {
+        if ($subject->schedules()->whereNotNull('timetable_draft_id')->exists()) {
+            throw ValidationException::withMessages(['subject' => 'This subject is part of a published timetable. Its curriculum details cannot be changed through this form.']);
+        }
         $validated = $request->validate([
             'subject_code' => ['required', 'string', 'max:20'],
             'subject_name' => ['required', 'string', 'max:255'],
@@ -131,6 +154,14 @@ class ProgramController extends Controller
 
     public function destroySubject(CourseSubject $subject)
     {
+        return app(\App\Services\TimetableService::class)->locked(fn () => $this->removeSubject($subject));
+    }
+
+    private function removeSubject(CourseSubject $subject)
+    {
+        if ($subject->schedules()->whereNotNull('timetable_draft_id')->exists()) {
+            throw ValidationException::withMessages(['subject' => 'This subject has published timetable history and cannot be removed.']);
+        }
         $programId = $subject->program_id;
         $subject->delete();
 
@@ -143,6 +174,15 @@ class ProgramController extends Controller
     // per subject for now (updateOrCreate keeps it that way).
 
     public function storeSchedule(
+        Request $request,
+        CourseSubject $subject,
+        \App\Services\EnrollmentSubjectReplacementService $replacementService
+    )
+    {
+        return app(\App\Services\TimetableService::class)->locked(fn () => $this->persistSchedule($request, $subject, $replacementService));
+    }
+
+    private function persistSchedule(
         Request $request,
         CourseSubject $subject,
         \App\Services\EnrollmentSubjectReplacementService $replacementService
@@ -168,6 +208,13 @@ class ProgramController extends Controller
             'room' => $validated['room'] ?? 'TBA',
             'instructor_name' => $validated['instructor_name'] ?? null,
         ];
+
+        app(\App\Services\TimetableService::class)->assertManualSchedule(
+            array_merge($validated, $scheduleData),
+            (int) ($validated['hosting_program_id'] ?? $subject->program_id),
+            trim((string) Setting::get('current_school_year', '')),
+            ['1st' => 1, '2nd' => 2, 'Summer' => 3][(string) Setting::get('current_semester', '')] ?? null
+        );
 
         if (! empty($validated['section_code'])) {
             if (empty($validated['capacity'])) {
@@ -207,6 +254,9 @@ class ProgramController extends Controller
                     ->first();
 
                 if ($schedule) {
+                    if ($schedule->timetable_draft_id) {
+                        throw ValidationException::withMessages(['schedule' => 'This offering belongs to a published timetable and cannot be edited through the manual schedule form.']);
+                    }
                     $assignedSeats = $schedule->enrollmentSelections()
                         ->whereHas('enrollment', fn ($query) => $query->whereIn('status', ['pending', 'approved']))
                         ->count();
@@ -261,6 +311,9 @@ class ProgramController extends Controller
 
     public function destroySchedule(\App\Models\ClassSchedule $schedule)
     {
+        if ($schedule->timetable_draft_id) {
+            throw ValidationException::withMessages(['schedule' => 'Published timetable offerings cannot be deleted through the manual schedule form.']);
+        }
         if ($schedule->enrollmentSelections()->exists()) {
             throw ValidationException::withMessages([
                 'schedule' => 'This section has enrollment history and cannot be deleted. Deactivate it instead.',

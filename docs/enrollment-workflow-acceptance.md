@@ -1,6 +1,22 @@
 # Paid enrollment workflow: implementation and acceptance
 
+## New submission follow-up: sections before payment
+
+The user approved automatic complete-group assignment from published timetables and chose a prepayment Registrar section-assignment hold when no complete group fits. See [draft timetable generation](draft-timetable-generation.md#automatic-assignment-and-prepayment-section-hold) for the implementation and limits. This supersedes unconditional cashier-first instructions for new unassigned submissions; final academic approval still requires verified payment. Existing records are not backfilled or newly held.
+
+Manual acceptance must cover a successful whole-group assignment, a full group and a mixed-year load waiting for Registrar assignment, payment blocked through direct requests while held, complete manual assignment releasing payment without approving/promoting the student, and the existing paid review/replacement/refund paths. An explicit unpaid hold reserves no seats; assigned pending enrollments do occupy seats. Legacy unknown assignments remain reconciliation blockers. No seat expiry is invented.
+
+Automatic-assignment follow-up verification (November 18, 2026): the final full suite passed **623 tests, 7,346 assertions**. The focused automatic-assignment/concurrency/refund suite passed **18 tests, 214 assertions**. Both first-time empty-index and returning-student older-snapshot concurrency cases passed; the existing paid-replacement offering-lock proof and timetable-publication proof remain covered. Forty-two shared modal fixtures and the enrollment revision DOM fixture passed. Authenticated manual acceptance above remains unperformed. These results supersede earlier follow-up counts for the current implementation; older counts below describe their respective historical changes.
+
 ## Repository audit and implementation map
+
+### Additional concurrency regression checks (November 19, 2026)
+
+`EnrollmentTransitionConcurrencyTest` runs real independent PHP controller workers against committed fixtures in `dtc_testing`. Before releasing a parent-held row lock, every case requires both worker connection IDs to appear in `information_schema.innodb_trx` with `LOCK WAIT`. It covers competing manual prepayment section assignments for one seat, duplicate approval, duplicate rejection recovery, recovery versus new same-term submission, recovery versus full-refund confirmation, and duplicate full-refund confirmation. Assertions check the surviving academic state, assignment/revision counts, and original verified payment identity and collection details. These are controlled simultaneous requests, not exhaustive proofs of every possible interleaving or HTTP middleware acceptance checks.
+
+The payment-preservation assertion exposed legacy MySQL implicit `ON UPDATE` behavior on `payments.paid_at`. Migration `2026_11_19_000001_preserve_payment_collection_timestamp.php` explicitly retains a creation default without automatic updates, preserving stored dates. Apply it with `php artisan migrate` before using the fix outside the test database. Its rollback deliberately keeps this protection. No existing collection date is reconstructed or guessed.
+
+Verification: the full sequential MySQL suite passed **629 tests, 7,465 assertions**, including all six new two-process cases and the existing replacement, automatic-assignment and timetable-publication concurrency tests. Targeted Pint and PHP syntax checks passed for the new files. No operational migration or authenticated browser acceptance was performed for this follow-up.
 
 The existing application already has paid-enrollment revision requests, directed equivalency approvals, term-specific class offerings, section assignments, refund reconciliation, notifications, and COR rendering. The implementation extends those paths rather than adding a second enrollment or payment workflow.
 
@@ -62,6 +78,14 @@ Normal deployment applies pending migrations with `php artisan migrate --force` 
 Admins must configure subject classification, current-term sections/capacity and explicit cross-program load treatment. Authorized Registrar staff record directed equivalencies. Resolve unknown active section assignments before offering seats; missing section/capacity data does not imply unlimited availability.
 
 ## Policy decisions and limits
+
+Gap corrections (15 November 2026): the Registrar can now explicitly record missing sections for reconciliation using the existing review form without approving the enrollment. Known committed capacity, term, academic identity, duplicates and schedule checks remain enforced; ordinary approval/replacement still blocks on other unknown active assignments. Recovery takes the same user lock as creation and refuses another active enrollment for the recovered term. Returning students with a recorded institutional program are restricted to that program in both the form and POST. No program is inferred for a missing profile and no shifting policy is invented. See `enrollment-flow-audit-2026-11-15.md` and `EnrollmentGapRegressionTest` for the two-full-subject scenario and coverage limits.
+
+### Recovering an incorrect paid rejection
+
+Recovery verification: the recovery-specific test passed (18 assertions). The full run executed 590 tests with 6,873 assertions and reported one error in `DocumentRequestPaymentTrackingTest::test_outbox_retry_after_acknowledgement_failure_creates_only_one_notification` (`TestResponse` called `getMessage()` on a string). That outbox test passed alone (8 assertions); a clean full-suite pass is not claimed. Blade compilation and targeted whitespace checks passed. Authenticated recovery/refund race acceptance remains outstanding; no operational record was reopened during implementation.
+
+Registrar staff can use the existing subject-replacement form on a rejected paid enrollment to correct a rejection caused by unavailable subjects. They must select affected subjects, enter a correction reason and explicitly confirm that they checked with the Cashier that no external refund was issued. The server locks the enrollment and payment records, rejects recorded refund evidence or an existing student refund request, restores pending academic status and cancels only uncompleted refund-follow-up flags. Original verified collections, receipts, official program, subject selections, assignments and rejection remarks remain preserved. The audit entry `enrollment.rejection_recovered` records the actor, original reason, correction reason, affected subjects and prior refund flags; the replacement request records original sections and its actor/time. All recovery changes roll back if subject or offering validation fails. Repeat submissions cannot create another open request. The student then uses the existing replacement/refund decision flow. This action does not infer a correction from free-text rejection reasons, issue a refund, or reopen approved historical enrollments. No migration is needed.
 
 Full-class review guidance: the paid review notice links directly to the existing subject-replacement form and explains that only affected subjects should be returned. The rejection panel and confirmation explicitly distinguish ending the paid enrollment (Cashier reconciliation) from returning subjects (payment preserved, student replacement choice). A section change alone does not imply Irregular treatment. Existing rejected records are not reopened or rewritten by this presentation change.
 

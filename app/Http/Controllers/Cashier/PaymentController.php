@@ -154,6 +154,10 @@ class PaymentController extends Controller
             User::whereKey($enrollment->user_id)->lockForUpdate()->firstOrFail();
             $lockedEnrollment = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
 
+            if ($lockedEnrollment->requires_section_assignment) {
+                throw ValidationException::withMessages(['payment' => 'The Registrar must assign the complete subject load before payment can be recorded.']);
+            }
+
             if (! in_array($lockedEnrollment->status, ['pending', 'approved'], true)) {
                 throw ValidationException::withMessages(['payment' => 'This enrollment is not eligible for payment.']);
             }
@@ -275,7 +279,7 @@ class PaymentController extends Controller
                 abort(422, 'This payment is no longer eligible for verification.');
             }
 
-            if (! in_array($lockedEnrollment->status, ['pending', 'approved'], true) || $lockedEnrollment->is_paid) {
+            if ($lockedEnrollment->requires_section_assignment || ! in_array($lockedEnrollment->status, ['pending', 'approved'], true) || $lockedEnrollment->is_paid) {
                 abort(422, 'This enrollment is no longer eligible for payment verification.');
             }
 

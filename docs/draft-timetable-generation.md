@@ -1,0 +1,74 @@
+# Draft timetable generation
+
+## Scope
+
+The Admin's existing **Programs & Subjects** screen includes **Draft timetables**. Published offerings feed the existing Registrar approval and paid-subject replacement paths. New enrollment submissions now attempt automatic complete-group assignment; see the follow-up below. No new student enrollment page is introduced.
+
+Rooms (for example 1T, 1C, COMPLAB) are shared physical resources, not student groups or program restrictions. A draft identifies a separate group such as BSTM 1A, its official program/year, its size and its own academic term. Room names must be entered consistently: 1T and T1 must not be registered as two different physical rooms. Instructor names likewise need one resource record per person. No fictional operational rooms, future buildings or curriculum records are seeded.
+
+## Operation
+
+1. Apply `2026_11_17_000001_create_timetable_drafts.php` through the normal deployment procedure (`php artisan migrate`). It creates the scheduling mutex, resource records, draft/history records and an optional source-draft link on existing class schedules. It does not backfill or modify existing schedules, enrollments or payments. The implementation does not run this migration on the operational database.
+2. In **Programs & Subjects → Draft timetables**, configure active rooms with verified seat capacity and a facility type, and instructors with availability for each weekday. Both times blank means unavailable. Room capacities are shared across departments; no program owns exclusive access to a room.
+3. For the pilot, select the actual Tourism program, first year and group BSTM 1A. Choose **Demonstration** and enter an illustrative group size no greater than the fictional demo room's 40 seats. The configured school year/semester are captured. The program must already have curriculum subjects for that year and semester.
+4. Demonstration mode uses a fictional DEMO 1T room, a fictional instructor and a 60-minute MWF pattern for each subject. These are explicitly illustrative, independent of subject units, and must not be interpreted as approved contact hours. Demonstrations never create live resources or offerings and cannot be published.
+5. For real scheduling, choose **Normal draft**. Enter each subject's instructor, meeting days, minutes per meeting and required facility. Generate suggestions, adjust individual assignments and save the review. Generating again replaces the draft's previous suggestions. Saving a review retains unresolved items visibly.
+6. Confirm review and publish the saved timetable. Publication reruns all checks against current resources and committed offerings. All subjects must be resolved. The original academic term remains authoritative even if the current-term settings change later.
+
+Only Admin can use these management routes, matching the existing schedule management permissions. The reviewer/publication actor and time are recorded on the draft. Granting Registrar publication permission would require a separate access-policy decision.
+
+## Scheduling rules
+
+- Teaching starts no earlier than 8 AM. The draft chooses a latest end of 5, 6 or 7 PM, and the instructor must also be available. No meeting overlaps noon–1 PM.
+- MWF, TTh, individual weekdays and Saturday/Sunday are supported. Durations are explicit; no unit-to-contact-hour conversion, NSTP/ROTC duration or instructor workload policy is inferred.
+- A deterministic first-fit search considers starts every 30 minutes, suitable active rooms, instructor availability and the group's other meetings. It checks published/manual active offerings across programs in the draft's term. Review can place exact times manually, subject to the same checks.
+- Room, instructor or group overlap is invalid. Group matching uses hosting program plus group code. Room capacity must meet the full group's size; the required facility must match the room's configured type. A conservative exact facility match may need manual resource/requirement adjustment.
+- Unknown legacy terms using a shared resource block publication until reconciled. Invalid meeting days or times on a relevant active offering also block publication. Clearly different terms and inactive offerings do not consume timetable resources.
+- Drafts do not reserve rooms or seats. Another draft can propose the same time; the first valid publication wins, and the later publication must be reviewed again.
+- Publication, resource edits and existing manual schedule writes share a transactional mutex. Committed schedule conflicts use locking reads after that lock, including when the request has an earlier MySQL repeatable-read snapshot. Bounded three-attempt transaction retries are retained.
+- A repeated publication is denied, and publication errors roll back all newly created offerings. Published offerings have defined capacity, the group's section code, the draft's hosting program and term, and `is_active=true`. Curriculum identity and existing equivalency requirements remain unchanged.
+- Published timetable offerings, their subject details and referenced resources cannot be changed through these forms. Program deletion with timetable history is blocked. An audited amendment/deactivation workflow is not yet provided; do not edit live records directly to work around those restrictions.
+
+## Limits and verification
+
+This is a draft generator, not an optimal timetable solver. Failure to find a placement is not proof that no valid timetable exists. Staff may adjust requirements or times and review again. There is no invented faculty qualification, prerequisite, maximum-load or travel-time policy.
+
+The existing class-offering model supports one contiguous time interval repeated on the chosen weekdays. A split weekend meeting such as 8 AM–noon and 1–3 PM cannot be represented as one valid block across lunch. Such subjects must remain unresolved until a multi-meeting offering design and the actual approved contact hours are supplied. Different durations or rooms on different days also require that later extension.
+
+Automated coverage is in `TimetableDraftTest` (all four programs sharing rooms/instructors, demonstration isolation, review/publication, validation, terms and permissions) and `TimetablePublishConcurrencyTest` (two real PHP/MySQL publishers both observed waiting on the same mutex, with earlier repeatable-read snapshots). The existing replacement concurrency test remains unchanged. Run database suites sequentially against `dtc_testing` only.
+
+Manual acceptance still required: open the authenticated Admin screen in light/dark desktop/mobile modes; configure real resources; create the BSTM 1A demonstration; generate and review a normal draft; confirm published offerings appear in Registrar review and replacement options; verify existing student/Cashier flows. Browser layout fixtures do not establish this authenticated role acceptance.
+
+## Automatic assignment and prepayment section hold
+
+The user chose this fallback: **when no published group fits the complete selected load, retain the enrollment for Registrar section assignment before payment**. This takes precedence over the earlier unconditional cashier-first submission guidance. Final academic approval still follows verified payment.
+
+- New submissions are created inside the existing user/enrollment transaction, initially with `requires_section_assignment=true`. The automatic service tries normal, published groups matching the enrollment's own program, year and term in saved-draft ID order. It assigns only selected curriculum subjects, together in one eligible group. It does not automatically mix groups, select a different curriculum subject, establish equivalencies or change the official program.
+- The existing complete-load validator checks current offering capacity, term, activity, subject identity, schedules, duplicates and load treatment. Assignment preserves an existing Irregular flag. All section mappings are recorded atomically; an invalid group is skipped without partial assignments. Assignment audit metadata identifies the student, source timetable and offerings. Final approval and payment are not created by this operation.
+- If no complete group fits (including mixed-year irregular loads), the new enrollment remains pending on a section-assignment hold. It has no reserved seats. Student status, payment and dashboard screens explain that payment must wait; the Registrar queue/dashboard/sidebar count include the held enrollment.
+- The Registrar uses **Assign sections** in the existing review screen. This validates and records the entire load, releases the hold and notifies the student and Cashier. It does not approve enrollment, promote an applicant or create a profile/payment. The Registrar may choose compatible sections individually through this explicit academic review. Existing unknown legacy occupancy must still be reconciled first.
+- Student GCash upload, Cashier collection and GCash verification enforce the hold server-side. Crafted requests cannot clear it. Recording sections again after release is rejected until the existing paid-reconciliation rules apply.
+- `2026_11_18_000001_add_section_assignment_hold_to_enrollments.php` is additive and defaults existing records to false. It does not guess historical section assignments or retroactively block legacy payment flows. Only explicit new unpaid holds without payments or any assignments are excluded from unknown occupancy; inconsistent held records with payments/assignments remain conservative blockers.
+- Successful assigned pending enrollments occupy offering seats using the existing pending/approved rule. No seat expiry, automatic abandonment cancellation, waitlist priority or new refund entitlement is invented. Staff intervention remains necessary for held enrollments; publishing another group does not silently change an existing enrollment.
+- Occupancy now joins assignments and enrollments in the same current locking row read and counts the returned IDs. A nested `whereHas`/`EXISTS` read could miss a newly created enrollment under an older repeatable-read snapshot, even after waiting for an offering lock. The new two-process automatic-assignment tests exercise earlier snapshots and last-seat contention with both an empty enrollment index and historical enrollments. Both requests must reach controlled lock waits before release. Curriculum validation is deliberately held; an empty-index insertion can also wait on enrollment gap locks. The worker establishes its snapshot inside the real controller transaction, preserving the controller's bounded deadlock retries. The original two-process offering-lock replacement proof remains separate and unchanged.
+
+Apply both pending timetable migrations through the normal deployment procedure. No migration is run against the operational database to verify this follow-up. New automated coverage: `EnrollmentAutomaticSectionsTest`, `EnrollmentAutomaticSectionsConcurrencyTest` and its isolated worker. Authenticated manual acceptance must additionally exercise the prepayment hold, Registrar assignment, student timetable display, payment release and subsequent paid academic review.
+
+### Draft scheduler verification (before automatic assignment)
+
+- Final full MySQL suite: **612 tests, 7,214 assertions passed**. Log: `storage/framework/testing/timetable-final-suite.log` (ignored local artifact).
+- All **17 timetable tests** passed in the preceding focused run, including the two-process publication test. That combined run also included one failing existing outbox test, described below.
+- `node tests/browser/timetables.cjs`: passed representative field/action layout checks at 320, 768 and 1440 pixels in light/dark themes. The sandboxed Edge launch timed out; the same local fixture passed with the browser launched outside the sandbox. This is not an authenticated portal test.
+- PHP syntax, targeted Pint, Blade compilation, admin route middleware inspection and `git diff --check` passed.
+- The first full run (607 tests before the final test additions) and an isolated rerun failed `DocumentRequestPaymentTrackingTest::test_outbox_retry_after_acknowledgement_failure_creates_only_one_notification`: expected `delivered`, actual `pending`. It passed in the final full run without changes to that payment path. This remains an intermittent existing-test failure requiring separate investigation; one passing rerun does not establish its reliability.
+- No migration, demo fixture or operational scheduling data was applied to the main application database. Database suites ran sequentially against `dtc_testing`.
+
+### Automatic-assignment verification — November 18, 2026
+
+- Final full suite: **623 tests, 7,346 assertions passed** against `dtc_testing`. Log: `storage/framework/testing/automatic-sections-final-suite.log` (ignored local artifact).
+- Focused automatic-assignment, two-process contention and refund suite: **18 tests, 214 assertions passed**. This includes first-time enrollment with an empty index, returning students with historical enrollments, older snapshots, complete-group fallback, payment holds, Registrar assignment, payment release and original-payment preservation.
+- The first full follow-up run identified two refund-test prerequisites that no longer matched new submissions. Their fixtures now provide published sections while retaining every refund/payment assertion. A new held-enrollment regression also verifies that an earlier unresolved payment warning remains visible alongside the section hold, without changing that original payment.
+- The existing two-process paid-replacement proof and two-process timetable-publication test passed in the final full run. Automatic-assignment workers use the actual controller transaction and its bounded retries, not an extra wrapping transaction that suppresses deadlock retries.
+- Existing Edge fixtures passed: 42 shared modal layouts across three widths/two themes, and enrollment revision confirmation/reset/safe-text checks. These fixtures do not establish authenticated acceptance of the new section-assignment form or every live portal.
+- Targeted PHP syntax/formatting, Blade compilation and `git diff --check` passed. No new dependency or asset build is required. Apply the additive migration through the normal deployment process; it was not applied to the operational database for verification.
+- Split weekend meetings and an audited published-timetable amendment workflow remain outside this follow-up. Institutional prerequisite, overload, withdrawal, seat-expiry and refund policies are not invented.

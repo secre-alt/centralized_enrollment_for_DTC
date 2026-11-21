@@ -9,7 +9,10 @@ class Enrollment extends Model
 {
     use HasFactory;
 
+    protected $attributes = ['requires_section_assignment' => false];
+
     protected $fillable = [
+        'requires_section_assignment',
         'user_id',
         'program_id',
         'year_level',
@@ -23,6 +26,7 @@ class Enrollment extends Model
     ];
 
     protected $casts = [
+        'requires_section_assignment' => 'boolean',
         'subject_ids' => 'array',
         'is_paid' => 'boolean',
         'is_irregular' => 'boolean',

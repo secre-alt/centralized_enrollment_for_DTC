@@ -6,6 +6,7 @@ This is the existing Danao Technological College Enrollment Management System. P
 
 - Inspect `git status`, relevant code, migrations, routes, views and tests before editing. Preserve unrelated local modifications, including untracked files.
 - Make focused changes using existing architecture and naming. Do not replace modules, add dependencies or introduce new workflow pages without a concrete need.
+- Treat requests to design, mock up, preview, or discuss a UI as design-only. Present a proposal or mockup first without changing application code. Implement only when the user explicitly requests implementation; a request such as "can you design a bottom nav?" does not authorize implementation.
 - Do not stage, commit, push, reset, discard changes, delete operational data or run destructive seeders unless explicitly authorized.
 - Proceed with authorized inspection, reversible implementation and verification without repeatedly requesting permission. Ask for missing business decisions only when they affect correctness; continue independent work.
 - Do not spawn sub-agents unless the user explicitly requests delegation or parallel agent work.

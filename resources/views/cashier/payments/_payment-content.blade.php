@@ -6,6 +6,9 @@
 @endphp
 
 <div id="payment-content">
+    @if($enrollment->requires_section_assignment)
+        <div class="alert alert-warning" role="status"><strong>Sections needed before payment</strong><p class="mb-0">The Registrar must assign the complete subject load first. Do not collect payment yet.</p></div>
+    @endif
 
     {{-- ── Header ─────────────────────────────────────────────────────── --}}
     <div class="dtc-review-header">
@@ -123,13 +126,13 @@
             </div>
         </div>
 
-        @if (! $enrollment->is_paid)
+        @if (! $enrollment->requires_section_assignment && ! $enrollment->is_paid)
             <div class="dtc-payment-info-notice">
                 <span>Cashier payment verification sends this enrollment to the Registrar for subject review.</span>
             </div>
         @endif
 
-        @if (! $enrollment->is_paid && $latestPayment && $latestPayment->isPending() && $latestPayment->isGcash())
+        @if (! $enrollment->requires_section_assignment && ! $enrollment->is_paid && $latestPayment && $latestPayment->isPending() && $latestPayment->isGcash())
             {{-- ── GCash Review Branch ─────────────────────────────── --}}
             <div class="dtc-review-section">
                 <div class="dtc-review-section-title">
@@ -164,7 +167,7 @@
                 </form>
             </div>
 
-        @elseif (! $enrollment->is_paid && $outstandingTermPayments->isEmpty() && (! $latestPayment || $latestPayment->isRejected()))
+        @elseif (! $enrollment->requires_section_assignment && ! $enrollment->is_paid && $outstandingTermPayments->isEmpty() && (! $latestPayment || $latestPayment->isRejected()))
             {{-- ── Walk-in Branch (also shown after a GCash rejection) ── --}}
             <form method="POST" action="{{ route('cashier.payments.store', $enrollment) }}" id="walkinForm-{{ $enrollment->id }}">
                 @csrf
@@ -182,7 +185,7 @@
     </div>
 
     {{-- ── Footer ─────────────────────────────────────────────────────── --}}
-    @if (! $enrollment->is_paid && (($latestPayment && $latestPayment->isPending() && $latestPayment->isGcash()) || ($outstandingTermPayments->isEmpty() && (! $latestPayment || $latestPayment->isRejected()))))
+    @if (! $enrollment->requires_section_assignment && ! $enrollment->is_paid && (($latestPayment && $latestPayment->isPending() && $latestPayment->isGcash()) || ($outstandingTermPayments->isEmpty() && (! $latestPayment || $latestPayment->isRejected()))))
     <div class="dtc-review-footer">
 
         <div class="dtc-review-footer-default">

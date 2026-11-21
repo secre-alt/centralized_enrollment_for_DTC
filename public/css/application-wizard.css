@@ -2677,6 +2677,13 @@ body.dtc-dark .admission-wizard .location-suggestions [role="option"]:hover, bod
 .admission-wizard .wiz-address-section .wiz-address-postal { display: grid; grid-column: 1 / -1; align-items: start; gap: var(--wiz-gap); }
 .admission-wizard .wiz-address-section .wiz-address-postal > .wiz-field { margin-bottom: 0; }
 
+/* Outer card breathing room; preserve the original content spacing. */
+.admission-wizard #suffix { background-image: none; }
+.admission-wizard #suffix::-webkit-calendar-picker-indicator { display: none !important; }
+.admission-wizard .admission-card { padding: 40px 48px 44px; }
+@media (max-width: 767px) {
+    .admission-wizard .admission-card { padding: 28px 20px 32px; }
+}
 /* Admission spacing: 24px rows, 32px sections, 6px supporting text. */
 .admission-wizard .wiz-panel-header { padding-bottom: 24px; }
 .admission-wizard .wiz-panel-sub { margin: 6px 0 0; }

@@ -13,8 +13,8 @@ class DashboardController extends Controller
     public function index()
     {
         $pendingEnrollments  = Enrollment::where('status', 'pending')
-            ->where('is_paid', true)
-            ->whereHas('payment', fn ($query) => $query->where('status', 'verified'))
+            ->where(fn ($review) => $review->where('requires_section_assignment', true)
+                ->orWhere(fn ($paid) => $paid->where('is_paid', true)->whereHas('payment', fn ($query) => $query->where('status', 'verified'))))
             ->count();
         $pendingAppointments = Appointment::where('status', 'pending')->count();
         $pendingApplications = Application::whereIn('status', ['submitted', 'under_review'])->count();
