@@ -142,7 +142,6 @@
                                                     data-dtc-confirm-tone="danger"
                                                     data-dtc-confirm-form="#del-subject-{{ $subject->id }}">
                                                 <i data-lucide="trash-2"></i>
-                                                <span class="dtc-mobile-action-label">Remove Subject</span>
                                             </button>
                                         </form>
                                     </td>

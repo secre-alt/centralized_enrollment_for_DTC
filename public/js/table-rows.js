@@ -50,8 +50,11 @@
                 const url = new URL(location.href);
                 url.searchParams.set('per_page', select.value);
                 history.replaceState(null, '', url.href);
-                scan();
-                render(); return;
+                const update = function () { scan(); render(); };
+                if (window.dtcApplyLocalFilters) {
+                    window.dtcApplyLocalFilters(select.closest('form, .dtc-fl') || control, update);
+                } else update();
+                return;
             }
             const url = new URL(location.href);
             // Include current filter values, even if the user has not applied them yet.
@@ -65,6 +68,9 @@
             Array.from(url.searchParams.keys()).forEach(key => {
                 if (key !== 'per_page' && (key === 'page' || key.endsWith('_page'))) url.searchParams.delete(key);
             });
+            if (window.dtcSetFilterLoading) {
+                window.dtcSetFilterLoading(select.closest('form, .dtc-fl') || control, true);
+            }
             location.assign(url.href);
         });
         if (!server) {

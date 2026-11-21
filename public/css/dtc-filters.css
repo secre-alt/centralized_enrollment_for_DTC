@@ -3,6 +3,11 @@
    Markup: .dtc-fl > .dtc-fl-toolbar (search + .dtc-fl-toggle) + .collapse > .dtc-fl-panel. */
 
 .dtc-fl { min-width: 0; margin-bottom: 16px; }
+.dtc-filter-loading { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--dtc-text-secondary); font-size: 13px; }
+.dtc-filter-loading[hidden] { display: none; }
+.dtc-filter-loading::before { content: ''; width: 16px; height: 16px; border: 2px solid var(--dtc-border); border-top-color: var(--dtc-primary); border-radius: 50%; animation: dtc-filter-spin .8s linear infinite; }
+@keyframes dtc-filter-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .dtc-filter-loading::before { animation: none; } }
 
 .dtc-fl-toolbar { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
 .dtc-fl-toolbar .dtc-fl-search { flex: 1 1 auto; margin-bottom: 0; max-width: 420px; }
@@ -45,7 +50,11 @@ body.dtc-dark .dtc-fl-toggle.has-filters { border-color: rgba(108, 155, 255, .45
 @media (max-width: 767.98px) {
     .dtc-fl-toolbar { align-items:center; }
     .dtc-fl-toolbar .dtc-fl-search { max-width:none; min-width:0; }
-    .dtc-fl-toggle { padding: 0 12px; }
+    .dtc-fl-toggle { min-width: 44px; justify-content: center; padding: 0 12px; }
+    .dtc-fl-toggle span:not(.dtc-fl-count) {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
     .dtc-fl-panel { grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
     .dtc-fl-actions { grid-column:1 / -1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
     .dtc-fl-actions .btn, .dtc-fl-actions .dtc-fl-clear {

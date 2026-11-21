@@ -71,7 +71,6 @@
                                         data-name="{{ $program->name }}"
                                         data-code="{{ $program->code }}">
                                     <i data-lucide="pencil"></i>
-                                    <span class="dtc-mobile-action-label">Edit program</span>
                                 </button>
                                 <form id="del-program-{{ $program->id }}"
                                       method="POST"
@@ -87,7 +86,6 @@
                                             data-dtc-confirm-tone="danger"
                                             data-dtc-confirm-form="#del-program-{{ $program->id }}">
                                         <i data-lucide="trash-2"></i>
-                                        <span class="dtc-mobile-action-label">Delete program</span>
                                     </button>
                                 </form>
                             </div>

@@ -170,7 +170,7 @@
                 <form method="POST" action="{{ route('registrar.appointments.slots.status', $slot) }}" id="slot-status-{{ $slot->id }}">
                     @csrf @method('PUT')
                     <input type="hidden" name="status" value="{{ ($slot->status ?? 'open') === 'open' ? 'closed' : 'open' }}">
-                    <button class="dtc-icon-btn" type="button" title="{{ ($slot->status ?? 'open') === 'open' ? 'Close slot' : 'Reopen slot' }}" data-dtc-confirm data-dtc-confirm-tone="neutral" data-dtc-confirm-title="{{ ($slot->status ?? 'open') === 'open' ? 'Close appointment slot?' : 'Reopen appointment slot?' }}" data-dtc-confirm-message="Changing this slot affects future bookings. Existing appointments remain on record." data-dtc-confirm-ok="{{ ($slot->status ?? 'open') === 'open' ? 'Close Slot' : 'Reopen Slot' }}" data-dtc-confirm-form="#slot-status-{{ $slot->id }}"><i data-lucide="{{ ($slot->status ?? 'open') === 'open' ? 'lock' : 'lock-open' }}"></i><span class="dtc-mobile-action-label">{{ ($slot->status ?? 'open') === 'open' ? 'Close slot' : 'Reopen slot' }}</span></button>
+                    <button class="dtc-icon-btn" type="button" title="{{ ($slot->status ?? 'open') === 'open' ? 'Close slot' : 'Reopen slot' }}" data-dtc-confirm data-dtc-confirm-tone="neutral" data-dtc-confirm-title="{{ ($slot->status ?? 'open') === 'open' ? 'Close appointment slot?' : 'Reopen appointment slot?' }}" data-dtc-confirm-message="Changing this slot affects future bookings. Existing appointments remain on record." data-dtc-confirm-ok="{{ ($slot->status ?? 'open') === 'open' ? 'Close Slot' : 'Reopen Slot' }}" data-dtc-confirm-form="#slot-status-{{ $slot->id }}"><i data-lucide="{{ ($slot->status ?? 'open') === 'open' ? 'lock' : 'lock-open' }}"></i></button>
                 </form>
                 {{-- Edit --}}
                 <button type="button"
@@ -184,7 +184,6 @@
                         data-slot-booked="{{ $booked }}"
                         data-slot-url="{{ route('registrar.appointments.slots.update', $slot) }}">
                     <i data-lucide="pencil"></i>
-                    <span class="dtc-mobile-action-label">Edit slot</span>
                 </button>
 
                 {{-- Delete --}}
@@ -203,7 +202,6 @@
                             data-dtc-confirm-tone="danger"
                             data-dtc-confirm-form="#del-slot-{{ $slot->id }}">
                         <i data-lucide="trash-2"></i>
-                        <span class="dtc-mobile-action-label">Delete slot</span>
                     </button>
                 </form>
             </div>

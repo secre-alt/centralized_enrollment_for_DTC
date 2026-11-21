@@ -269,6 +269,7 @@
     var currentRequest = null;
 
     function setLoading(on) {
+        window.dtcSetFilterLoading(searchInput.closest('form'), on);
         wrapper.style.opacity       = on ? '0.45' : '1';
         wrapper.style.pointerEvents = on ? 'none' : '';
     }
@@ -295,6 +296,7 @@
             setLoading(false);
         };
         xhr.onerror = function () { setLoading(false); window.dtcHttpFailure(0); };
+        xhr.onabort = function () { setLoading(false); };
         xhr.send();
         currentRequest = xhr;
     }

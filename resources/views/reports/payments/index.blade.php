@@ -34,7 +34,7 @@
         <div class="pr-field pr-custom"><label for="pr-to">Through</label><input class="form-control" id="pr-to" type="date" name="to" min="2000-01-01" max="2100-12-31" value="{{ old('to', $filters->query()['to']) }}"></div>
         <div class="pr-filter-actions"><button class="btn btn-primary" type="submit" id="pr-apply">Apply filters</button><a href="{{ route('reports.payments.index') }}">Reset</a></div>
         <p class="pr-range">{{ $filters->rangeLabel() }} <span>· {{ $filters->typeLabel() }} · {{ $filters->methodLabel() }}</span></p>
-        <p id="pr-loading" role="status" hidden>Updating report…</p>
+        <p id="pr-loading" class="dtc-filter-loading" role="status" hidden>Updating report…</p>
     </form>
 
     @if($summary['undated_count'])<p class="pr-warning" role="status">{{ number_format($summary['undated_count']) }} verified payment/refund {{ $summary['undated_count'] === 1 ? 'record has' : 'records have' }} no required event timestamp across the selected payment type and method. These records cannot be placed in a date range and are excluded.</p>@endif

@@ -98,7 +98,6 @@
                                         data-semester="{{ $subject->semester }}"
                                         data-classification="{{ $subject->classification }}">
                                     <i data-lucide="pencil"></i>
-                                    <span class="dtc-mobile-action-label">Edit subject</span>
                                 </button>
                                 <button type="button"
                                         class="dtc-icon-btn js-edit-schedule"
@@ -115,7 +114,6 @@
                                         data-hosting-program="{{ $selectedProgram->id }}"
                                         data-requires-irregular="">
                                     <i data-lucide="calendar-clock"></i>
-                                    <span class="dtc-mobile-action-label">Add section</span>
                                 </button>
                                 @foreach($subject->schedules->whereNotNull('section_code') as $offering)
                                     <button type="button"
@@ -133,7 +131,6 @@
                                             data-hosting-program="{{ $offering->hosting_program_id ?: $subject->program_id }}"
                                             data-requires-irregular="{{ is_null($offering->requires_irregular) ? '' : (int) $offering->requires_irregular }}">
                                         <i data-lucide="pencil"></i>
-                                        <span class="dtc-mobile-action-label">Edit section {{ $offering->section_code }}</span>
                                     </button>
                                 @endforeach
                                 <button type="button"
@@ -144,7 +141,6 @@
                                         title="Record an approved subject equivalency"
                                         data-url="{{ route('registrar.subjects.equivalencies.store', $subject) }}">
                                     <i data-lucide="badge-check"></i>
-                                    <span class="dtc-mobile-action-label">Equivalency</span>
                                 </button>
                                 <form id="del-sub-card-{{ $subject->id }}"
                                       method="POST"
@@ -160,7 +156,6 @@
                                             data-dtc-confirm-tone="danger"
                                             data-dtc-confirm-form="#del-sub-card-{{ $subject->id }}">
                                         <i data-lucide="trash-2"></i>
-                                        <span class="dtc-mobile-action-label">Remove subject</span>
                                     </button>
                                 </form>
                             </div>

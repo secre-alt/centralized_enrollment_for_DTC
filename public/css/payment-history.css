@@ -77,7 +77,11 @@
 /* ── Mobile: each payment becomes one tappable card ─────── */
 @media (max-width: 767.98px) {
     .ph-toolbar .ph-search { max-width: none; }
-    .ph-filter-toggle { padding: 0 12px; }
+    .ph-filter-toggle { min-width: 44px; justify-content: center; padding: 0 12px; }
+    .ph-filter-toggle span:not(.ph-filter-count) {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
     .ph-advanced { grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
     .ph-advanced-actions { grid-column: 1 / -1; }
     .ph-advanced-actions .btn { flex: 1 1 auto; min-height: 44px; }
@@ -150,7 +154,6 @@
 .ph-detail .ph-facts > div { padding:15px 20px; }
 @media (max-width:767.98px) {
     .dtc-payment-history .ph-filter-toggle { min-width:44px; justify-content:center; }
-    .dtc-payment-history .ph-filter-toggle span:not(.ph-filter-count) { display:inline; }
     .dtc-payment-history .ph-advanced { grid-template-columns:repeat(2,minmax(0,1fr)); padding:14px; }
     .dtc-payment-history .ph-advanced-actions { grid-column:1/-1; }
     .ph-table-scroll { overflow:visible; padding:0 16px; }

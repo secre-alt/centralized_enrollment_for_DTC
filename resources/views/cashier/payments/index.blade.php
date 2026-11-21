@@ -283,6 +283,10 @@
     var index = rows.map(function (r) { return r.textContent.replace(/\s+/g, ' ').toLowerCase(); });
 
     function apply() {
+        window.dtcApplyLocalFilters(input.closest('form'), filterRows);
+    }
+
+    function filterRows() {
         var terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
         var shown = 0;
         rows.forEach(function (row, i) {

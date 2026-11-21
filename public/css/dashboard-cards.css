@@ -81,3 +81,23 @@
     .dashboard-kpis .dtc-kpi-grid { grid-template-columns: minmax(0, 1fr); }
     .dashboard-kpis .dtc-stat-card { min-height: 0; }
 }
+
+/* Admin metrics share a quiet treatment without changing their grid slots. */
+.dashboard-kpis .admin-kpis .dtc-stat-card {
+    padding: 16px;
+    border: 1px solid var(--dtc-border-soft);
+    box-shadow: none;
+    background: var(--dtc-surface);
+}
+.dashboard-kpis .dtc-kpi-grid.admin-kpis .dtc-stat-icon {
+    background: var(--dtc-surface-soft) !important;
+    color: var(--dtc-text-secondary) !important;
+}
+.dashboard-kpis .admin-kpis .dtc-stat-icon :is(svg, [data-lucide]) { color: inherit !important; }
+.dashboard-kpis .admin-kpis .dtc-stat-label { color: var(--dtc-text-secondary); font-weight: 400; line-height: 20px; }
+.dashboard-kpis .admin-kpis .dtc-stat-value { font-size: 28px !important; font-weight: 600; line-height: 32px; }
+.dashboard-kpis .admin-kpis .dtc-stat-note { color: var(--dtc-text-muted); line-height: 20px; }
+.dashboard-kpis .admin-kpis .dtc-stat-metrics { border-color: var(--dtc-border-soft); }
+.dashboard-kpis .admin-kpis .dtc-stat-metrics dt { line-height: 20px; }
+.dashboard-kpis .admin-kpis .dtc-stat-link { font-weight: 500; line-height: 20px; }
+.dashboard-kpis .admin-kpis .kpi-students .dtc-stat-copy { min-width: 0; }

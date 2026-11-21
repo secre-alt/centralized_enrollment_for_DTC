@@ -9,7 +9,7 @@
 <x-dtc.page-header title="Manage Users" subtitle="Create and manage system user accounts">
     <x-slot name="actions">
         <button type="button" class="btn btn-primary add-user-btn" data-toggle="modal" data-target="#createUserModal" aria-label="Add new user">
-            <i data-lucide="user-plus" class="mr-1" aria-hidden="true"></i><span class="add-user-text">Add New User</span>
+            <span class="add-user-text">Add New User</span>
         </button>
     </x-slot>
 </x-dtc.page-header>
@@ -31,27 +31,16 @@
     <div class="alert alert-danger">{{ $errors->first() }}</div>
 @endif
 
-{{-- Stats Row --}}
-<div class="row mb-2 users-role-stats">
-    @php
-        $roleStatConfig = [
-            'admin'         => ['icon' => 'user-check',    'color' => 'primary'],
-            'registrar'     => ['icon' => 'id-card',        'color' => 'success'],
-            'cashier'       => ['icon' => 'receipt',  'color' => 'warning'],
-            'student'       => ['icon' => 'graduation-cap',  'color' => 'info'],
-            'alumni'        => ['icon' => 'award',          'color' => 'danger'],
-            'new_applicant' => ['icon' => 'user-plus',      'color' => 'neutral'],
-        ];
-    @endphp
-    @foreach($roleStatConfig as $role => $cfg)
-    <div class="col-lg-2 col-md-4 col-6 mb-3">
-        <x-dtc.stat-card
-            icon="{{ $cfg['icon'] }}" color="{{ $cfg['color'] }}"
-            label="{{ ucwords(str_replace('_',' ', $role)) }}"
-            value="{{ $roleCounts[$role] ?? 0 }}" />
-    </div>
-    @endforeach
-</div>
+<section class="users-role-summary" aria-label="Users by role">
+    <dl class="users-role-grid">
+        @foreach(['admin', 'registrar', 'cashier', 'student', 'alumni', 'new_applicant'] as $role)
+            <div class="users-role-count">
+                <dt>{{ ucwords(str_replace('_', ' ', $role)) }}</dt>
+                <dd>{{ $roleCounts[$role] ?? 0 }}</dd>
+            </div>
+        @endforeach
+    </dl>
+</section>
 
 {{-- Search & Filter --}}
 @php
@@ -197,7 +186,7 @@
                                     aria-label="Edit {{ $user->name }}"
                                     data-id="{{ $user->id }}"
                                     data-url="{{ route('admin.users.edit', $user) }}">
-                                <i data-lucide="pencil"></i><span class="dtc-mobile-action-label">Edit user</span>
+                                <i data-lucide="pencil"></i>
                             </button>
 
                             @if($user->id !== auth()->id())
@@ -218,7 +207,6 @@
                                         data-dtc-confirm-tone="danger"
                                         data-dtc-confirm-form="#del-user-{{ $user->id }}">
                                     <i data-lucide="trash-2"></i>
-                                    <span class="dtc-mobile-action-label">Delete user</span>
                                 </button>
                             </form>
                             @endif
@@ -659,6 +647,7 @@ document.addEventListener('click', function (e) {
     var currentRequest = null;
 
     function setLoading(on) {
+        window.dtcSetFilterLoading(searchInput.closest('form'), on);
         wrapper.style.opacity      = on ? '0.45' : '1';
         wrapper.style.pointerEvents = on ? 'none' : '';
     }
@@ -685,6 +674,7 @@ document.addEventListener('click', function (e) {
             setLoading(false);
         };
         xhr.onerror = function () { setLoading(false); window.dtcHttpFailure(0); };
+        xhr.onabort = function () { setLoading(false); };
         xhr.send();
         currentRequest = xhr;
     }

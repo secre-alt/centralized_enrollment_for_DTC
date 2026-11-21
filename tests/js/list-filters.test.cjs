@@ -15,8 +15,8 @@ test('filter counts ignore the default status and track dates and actor changes'
         querySelector: selector => selector === '[data-dtc-filter-count]' ? badge : selector === '[data-dtc-filter-search]' ? { value: '' } : { classList: { toggle() {} } },
         addEventListener: (event, callback) => { listeners[event] = callback; },
     };
-    const document = { addEventListener: (event, callback) => callback(), querySelectorAll: () => [form] };
-    vm.runInNewContext(fs.readFileSync(path.join(root, 'public/js/dtc-filters.js'), 'utf8'), { document });
+    const document = { addEventListener: (event, callback) => { if (event === 'DOMContentLoaded') callback(); }, querySelectorAll: () => [form] };
+    vm.runInNewContext(fs.readFileSync(path.join(root, 'public/js/dtc-filters.js'), 'utf8'), { document, window: { addEventListener() {} } });
     assert.equal(badge.textContent, 1);
     fields[0].value = 'verified';
     fields[1].value = '42';

@@ -969,14 +969,17 @@ body.dtc-dark #editUserModal .dtc-modal-header-avatar { color: #93c5fd; }
 
 /* Manage Users: keep the shared DTC grid and quieter account directory chrome. */
 .users-management { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
-.users-management > .users-role-stats { margin: 0 !important; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
-.users-management .users-role-stats > div { max-width: none; width: auto; padding: 0; margin: 0 !important; }
-.users-management .users-role-stats .dtc-stat-card { padding: 16px; min-height: 88px; height: 100%; border: 1px solid var(--dtc-border) !important; border-radius: 12px; box-shadow: none; }
-.users-management .users-role-stats .dtc-stat-card-top { gap: 12px; align-items: center; }
-.users-management .users-role-stats .dtc-stat-icon { width: 32px; height: 32px; min-width: 32px; border: 0; border-radius: 8px; color: var(--dtc-text-secondary) !important; background: var(--dtc-surface-soft) !important; }
-.users-management .users-role-stats .dtc-stat-icon svg { width: 20px; height: 20px; }
-.users-management .users-role-stats .dtc-stat-label { font-size: 12px; font-weight: 400; line-height: 20px; color: var(--dtc-text-secondary); }
-.users-management .users-role-stats .dtc-stat-value { margin: 0; font-size: 24px; font-weight: 500; line-height: 28px; font-variant-numeric: tabular-nums; }
+.users-role-summary { margin-bottom: 24px; border: 1px solid var(--dtc-border); border-radius: 12px; background: var(--dtc-surface); overflow: hidden; }
+.users-role-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; }
+.users-role-count { display: flex; flex-direction: column; gap: 4px; padding: 16px; min-width: 0; }
+.users-role-count + .users-role-count { border-left: 1px solid var(--dtc-border-soft); }
+.users-role-count dt { color: var(--dtc-text-secondary); font-size: 12px; font-weight: 400; line-height: 20px; }
+.users-role-count dd { order: -1; margin: 0; color: var(--dtc-text); font-size: 24px; font-weight: 600; line-height: 28px; font-variant-numeric: tabular-nums; }
+@media (max-width: 1199.98px) {
+    .users-role-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .users-role-count:nth-child(3n + 1) { border-left: 0; }
+    .users-role-count:nth-child(n + 4) { border-top: 1px solid var(--dtc-border-soft); }
+}
 .users-management > .dtc-fl { margin: 0; }
 .users-management .dtc-fl-toolbar { margin: 0; }
 .users-management .dtc-fl-toolbar .dtc-fl-search { flex: 1 1 0; min-width: 0; max-width: none; }
@@ -997,15 +1000,8 @@ body:has(.users-management) .add-user-btn { min-height: 44px; border-radius: 8px
 .users-management #createUserModal .dtc-modal-header :is(h5, p) { color: inherit; }
 .users-management #createUserModal .dtc-modal-header-icon { color: var(--dtc-text-secondary); background: var(--dtc-surface-soft); }
 .users-management :is(#createUserModal, #editUserModal) .dtc-form-label { font-weight: 500; }
-@media (max-width: 1199.98px) { .users-management > .users-role-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 767.98px) {
     .users-management { gap: 20px; }
-    .users-management > .users-role-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .users-management .users-role-stats .dtc-stat-card { padding: 12px; min-height: 80px; }
-    .users-management .users-role-stats .dtc-stat-icon { display: flex; width: 24px; height: 24px; min-width: 24px; }
-    .users-management .users-role-stats .dtc-stat-icon svg { width: 18px; height: 18px; }
-    .users-management .users-role-stats .dtc-stat-card-top { flex-direction: column; align-items: flex-start; gap: 8px; }
-    .users-management .users-role-stats .dtc-stat-label { min-height: 40px; }
     .users-management .users-directory-panel > .card-header { padding: 16px; }
     .users-management #users-table-wrapper .users-directory tbody { padding: 12px; }
     .users-management #users-table-wrapper .users-directory tbody > tr { margin-bottom: 12px; border-radius: 8px; background: var(--dtc-surface); }
@@ -1037,19 +1033,10 @@ body:has(.users-management) .add-user-btn { min-height: 44px; border-radius: 8px
 .users-management #usersFilterPanel .dtc-fl-actions { padding-top: 28px; gap: 8px; }
 .users-management #usersFilterPanel .dtc-fl-actions .btn { min-height: 44px; padding: 10px 16px; border-radius: 8px; box-shadow: none !important; }
 .users-management #filter-program-hint { display: block; margin-top: 8px; font-size: 12px; line-height: 20px; }
-.users-management .users-role-stats .dtc-stat-icon { flex: 0 0 32px; width: 32px !important; height: 32px !important; padding: 0 !important; background: var(--dtc-surface-soft) !important; color: var(--dtc-text-secondary) !important; }
-.users-management .users-role-stats .dtc-stat-icon svg { color: inherit !important; }
 @media (max-width: 1199.98px) {
     .users-management #usersFilterPanel .dtc-fl-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .users-management #usersFilterPanel .dtc-fl-actions { grid-column: 1 / -1; padding-top: 0; }
 }
 @media (max-width: 767.98px) {
-    .users-management .users-role-stats .dtc-stat-card-top { gap: 4px; }
-    .users-management .users-role-stats .dtc-stat-icon { flex: 0 0 24px; width: 24px !important; height: 24px !important; margin-bottom: 4px; }
-    .users-management .users-role-stats .dtc-stat-label { min-height: 40px; line-height: 20px; }
-    .users-management .users-role-stats .dtc-stat-value { line-height: 28px; }
     .users-management #usersFilterPanel .dtc-fl-field:has(#filter-program) { grid-column: 1 / -1; }
-}
-@media (max-width: 359.98px) {
-    .users-management > .users-role-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

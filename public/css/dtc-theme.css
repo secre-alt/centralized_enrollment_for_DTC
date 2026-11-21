@@ -2462,7 +2462,7 @@ body.dtc-dark .page-item .page-link {
         align-items: stretch;
     }
 .dtc-header-btn .dtc-header-btn-label {
-        display: inline;
+        display: none;
     }
     .dtc-header-btn {
         padding: 8px 12px !important;
@@ -4756,8 +4756,9 @@ body.dtc-dark .dtc-next-action.is-static {
    GLOBAL: content_header action button — keep readable labels on mobile
    Wrap any content_header primary button's label text in
    <span class="dtc-header-btn-label">...</span> and add the class
-   dtc-header-btn to the button/link itself. Mobile actions retain their
-   labels and wrap beneath page titles when space is limited.
+   dtc-header-btn to the button/link itself. Below 576px the label
+   collapses so only the icon shows, saving horizontal space next to
+   page titles that are already tight on phones.
    Usage:
      <a href="..." class="dtc-btn dtc-btn-primary dtc-header-btn">
          <i class="fas fa-plus"></i>

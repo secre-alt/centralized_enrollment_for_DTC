@@ -449,6 +449,16 @@ return [
                 'asset' => true,
                 'location' => 'js/table-rows.js',
             ],
+            [
+                'type' => 'css',
+                'asset' => true,
+                'location' => 'css/dtc-filters.css',
+            ],
+            [
+                'type' => 'js',
+                'asset' => true,
+                'location' => 'js/dtc-filters.js',
+            ],
         ],
     ],
         // Scoped to admin/users/index and admin/settings/backup only,

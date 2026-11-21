@@ -20,7 +20,7 @@
         <input type="hidden" name="state" value="{{ $state }}">
         <div class="dtc-fl-toolbar">
             <div class="notice-search"><i data-lucide="search" aria-hidden="true"></i><input type="search" name="search" value="{{ request('search') }}" maxlength="200" placeholder="Search notifications" aria-label="Search notifications"></div>
-            <button type="button" class="dtc-fl-toggle" data-toggle="collapse" data-target="#noticeFilters" aria-controls="noticeFilters" aria-expanded="{{ request('category') ? 'true' : 'false' }}"><i data-lucide="sliders-horizontal" aria-hidden="true"></i>Filters</button>
+            <button type="button" class="dtc-fl-toggle" data-toggle="collapse" data-target="#noticeFilters" aria-controls="noticeFilters" aria-expanded="{{ request('category') ? 'true' : 'false' }}"><i data-lucide="sliders-horizontal" aria-hidden="true"></i><span>Filters</span></button>
             <button type="submit" class="sr-only">Search notifications</button>
         </div>
         <div id="noticeFilters" class="collapse {{ request('category') ? 'show' : '' }}">
@@ -55,7 +55,7 @@
                             <div class="notice-actions">
                                 @if($notification->link)<a class="notice-open" href="{{ route('notifications.open', $notification) }}">View update<i data-lucide="arrow-up-right" aria-hidden="true"></i></a>@endif
                                 <button type="button" class="notice-state" data-notice-state data-url="{{ route('notifications.state', $notification) }}" data-read="{{ $notification->isRead() ? '1' : '0' }}">{{ $notification->isRead() ? 'Mark unread' : 'Mark as read' }}</button>
-                                <button type="button" class="notice-delete" data-notice-delete data-url="{{ route('notifications.destroy', $notification) }}" aria-label="Delete notification: {{ $notification->title }}"><i data-lucide="trash-2" aria-hidden="true"></i><span class="dtc-mobile-action-label">Delete</span></button>
+                                <button type="button" class="notice-delete" data-notice-delete data-url="{{ route('notifications.destroy', $notification) }}" aria-label="Delete notification: {{ $notification->title }}"><i data-lucide="trash-2" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     </li>

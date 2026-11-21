@@ -19,7 +19,7 @@ test('collection tables show 5 or 10 rows, navigate, and reset on a limit change
     const control = { dataset: { server: 'false' }, nextElementSibling: table, querySelector: key => controls[key] };
     let ready; let savedUrl;
     const context = vm.createContext({
-        URL, URLSearchParams, location: { href: 'https://example.test/list?search=Juan', search: '?search=Juan' },
+        URL, URLSearchParams, window: {}, location: { href: 'https://example.test/list?search=Juan', search: '?search=Juan' },
         history: { replaceState(a, b, url) { savedUrl = url; } },
         document: { body: {}, querySelectorAll: key => key === '[data-table-rows-control]' ? [control] : [],
             addEventListener(name, fn) { ready = fn; } },
@@ -50,7 +50,7 @@ test('server limit changes retain filters and reset all named paginator pages', 
     const control = { dataset: { server: 'true' }, nextElementSibling: table,
         querySelector(key) { return key === '[data-table-rows-select]' ? select : {}; } };
     const context = vm.createContext({
-        URL, URLSearchParams,
+        URL, URLSearchParams, window: {},
         location: { href: 'https://example.test/list?status=active&role=student&page=3&subjects_page=4',
             pathname: '/list', search: '?status=active&role=student&page=3&subjects_page=4',
             assign(url) { destination = new URL(url); } },

@@ -237,7 +237,9 @@
         };
 
         buttons.forEach(function (b) {
-            b.addEventListener('click', function () { apply(b.getAttribute('data-filter')); });
+            b.addEventListener('click', function () {
+                window.dtcApplyLocalFilters(filters, function () { apply(b.getAttribute('data-filter')); });
+            });
         });
 
         // Links like #request-history from elsewhere in the app keep working; #ready opens the Ready filter.
