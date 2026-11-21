@@ -152,7 +152,8 @@ body.dtc-dark .rg-rejection-panel textarea.dtc-form-control { width:100%; min-he
 }
 /* Appointment queue: balanced navigation and explicit booking actions. */
 .registrar-workspace .rg-appointment-toolbar { display:block; }
-.rg-appointments .rg-appointment-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; width:100%; }
+.rg-appointments .rg-appointment-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:100%; margin-bottom:16px; }
+.rg-appointments .rg-appointment-tab :is(i, svg) { width:16px; height:16px; }
 .rg-appointments .rg-appointment-tab { display:flex; align-items:center; justify-content:center; gap:6px; min-height:42px; padding:8px !important; border:1px solid var(--dtc-border); border-radius:8px; color:var(--dtc-text-secondary); background:transparent; font-size:12px; font-weight:600; text-decoration:none; }
 .rg-appointments .rg-appointment-tab.is-active { background:var(--dtc-primary); border-color:var(--dtc-primary); color:#fff; }
 .rg-appointments .rg-appointment-tab:focus-visible { outline:2px solid var(--dtc-primary); outline-offset:3px; }

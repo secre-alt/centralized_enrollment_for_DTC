@@ -201,20 +201,20 @@
 @endif
 
 {{-- ── Status Filter Tabs ─────────────────────────────────────────────────── --}}
-<div class="card rg-appointment-queue">
-    <div class="card-header rg-appointment-toolbar">
         <nav class="rg-appointment-tabs" aria-label="Appointment status">
             @foreach([
-                ['key' => 'pending',   'label' => 'Pending',   'icon' => 'hourglass',      'badge' => 'is-warning'],
-                ['key' => 'confirmed', 'label' => 'Confirmed', 'icon' => 'check-circle',   'badge' => 'is-success'],
-                ['key' => 'cancelled', 'label' => 'Cancelled', 'icon' => 'x-circle',       'badge' => 'is-danger'],
-                ['key' => 'all',       'label' => 'All',       'icon' => 'list',            'badge' => 'is-info'],
+                ['key' => 'pending',   'label' => 'Pending'],
+                ['key' => 'confirmed', 'label' => 'Confirmed'],
+                ['key' => 'cancelled', 'label' => 'Cancelled'],
+                ['key' => 'all',       'label' => 'All'],
             ] as $tab)
             <a href="{{ route('registrar.appointments.index', array_merge(request()->only(['search', 'per_page']), ['status' => $tab['key']])) }}"
                aria-current="{{ $status === $tab['key'] ? 'page' : 'false' }}"
                class="rg-appointment-tab {{ $status === $tab['key'] ? 'is-active' : '' }}"
                >
-                <i data-lucide="{{ $tab['icon'] }}" style="width:11px;height:11px;"></i>
+                @if($tab['key'] === 'all')
+                    <i data-lucide="list" aria-hidden="true"></i>
+                @endif
                 {{ $tab['label'] }}
                 @if(isset($counts[$tab['key']]) && $counts[$tab['key']] > 0)
                     <span style="background:rgba(0,0,0,0.15); border-radius:20px;
@@ -225,6 +225,8 @@
             </a>
             @endforeach
         </nav>
+<div class="card rg-appointment-queue">
+    <div class="card-header rg-appointment-toolbar">
         <div class="rg-appointment-options">
             <span class="u-text-secondary-sm">{{ $appointments->total() }} {{ $appointments->total() === 1 ? 'booking' : 'bookings' }}</span>
 
