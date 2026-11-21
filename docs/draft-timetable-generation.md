@@ -19,6 +19,16 @@ Only Admin can use these management routes, matching the existing schedule manag
 
 ## Scheduling rules
 
+### Timetable review presentation
+
+The workspace now includes a compact saved-schedule table with subject, meeting time, room, instructor and review status. Its count includes subjects with no saved proposal as needing attention. The table scrolls within the card on small screens; it describes saved assignments rather than unsaved editor values.
+
+Publishing is visibly unavailable until every subject has a saved placement. Editing requirements or assignments clears the review confirmation and disables publication until the edits are saved or regenerated; restored validation input also requires saving. The server continues to enforce the existing review, conflict, permission and publication checks. This client-side guard does not replace them or introduce a new scheduling workflow.
+
+Rooms and instructors referenced by published proposals render as read only, matching the existing server restriction. Publication messages now explain complete-group automatic assignment for eligible new submissions and the need for Registrar intervention on existing section holds. Normal-draft creation no longer displays demonstration-only instructions. Validation responses preserve the selected closing hour and mode. No migration or frontend build is required; the review guard is served from `public/js/timetable-review.js`.
+
+Verification for this presentation follow-up: the full sequential MySQL suite passed **630 tests, 7,479 assertions** (`storage/framework/testing/timetable-polish-final.log`). The focused timetable suite passed **18 tests, 207 assertions**, including the real publication concurrency test. Two JavaScript review-state tests passed. The Edge layout fixture passed three widths in light/dark themes, including the saved-summary table, and its preview was visually inspected. PHP syntax, targeted Pint, JavaScript syntax and whitespace checks passed. The layout fixture is representative HTML, not a fresh authenticated Admin browser journey; that manual visual check remains outstanding.
+
 - Teaching starts no earlier than 8 AM. The draft chooses a latest end of 5, 6 or 7 PM, and the instructor must also be available. No meeting overlaps noon–1 PM.
 - MWF, TTh, individual weekdays and Saturday/Sunday are supported. Durations are explicit; no unit-to-contact-hour conversion, NSTP/ROTC duration or instructor workload policy is inferred.
 - A deterministic first-fit search considers starts every 30 minutes, suitable active rooms, instructor availability and the group's other meetings. It checks published/manual active offerings across programs in the draft's term. Review can place exact times manually, subject to the same checks.

@@ -95,7 +95,9 @@ class TimetableController extends Controller
             return $draft;
         });
 
-        return $this->back($draft, 'Draft created. Demonstration presets are illustrative, not approved teaching requirements.');
+        return $this->back($draft, $draft->is_demo
+            ? 'Demonstration created with fictional presets. It cannot be published.'
+            : 'Draft created. Enter teaching requirements, then generate suggestions.');
     }
 
     public function update(Request $request, TimetableDraft $draft, TimetableService $service)
@@ -138,7 +140,7 @@ class TimetableController extends Controller
             $draft->update(['proposals' => $data['action'] === 'generate' ? $service->generate($draft) : $service->review($draft, $rows)]);
         });
 
-        return $this->back($draft, $data['action'] === 'publish' ? 'Timetable published. Offerings are now available to the existing enrollment review and replacement flows.' : 'Draft saved. Review the assignments and unresolved items.');
+        return $this->back($draft, $data['action'] === 'publish' ? 'Timetable published. Eligible new enrollments can use this group for automatic section assignment. Existing holds still need Registrar assignment.' : 'Draft saved. Review the assignments and unresolved items.');
     }
 
     private function back(TimetableDraft $draft, string $message)

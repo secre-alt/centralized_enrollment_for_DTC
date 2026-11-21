@@ -33,8 +33,8 @@
                     <label for="tt-year">Year level<select id="tt-year" name="year_level" class="form-control">@foreach(range(1,4) as $year)<option value="{{ $year }}" @selected((int)old('year_level',1) === $year)>Year {{ $year }}</option>@endforeach</select></label>
                     <label for="tt-group">Student group<input id="tt-group" name="group_code" class="form-control" maxlength="30" placeholder="e.g. BSTM 1A" value="{{ old('group_code') }}" required></label>
                     <label for="tt-seats">Group size<input id="tt-seats" name="capacity" type="number" class="form-control" min="1" max="1000" value="{{ old('capacity') }}" required></label>
-                    <label for="tt-mode">Mode<select id="tt-mode" name="is_demo" class="form-control"><option value="1" @selected(old('is_demo','1') === '1')>Demonstration — cannot publish</option><option value="0" @selected(old('is_demo') === '0')>Normal draft — configured resources</option></select></label>
-                    <label for="tt-close">Latest class end<select id="tt-close" name="closing_hour" class="form-control"><option value="17">5 PM</option><option value="18">6 PM</option><option value="19">7 PM</option></select></label>
+                    <label for="tt-mode">Mode<select id="tt-mode" name="is_demo" class="form-control"><option value="1" @selected((string)old('is_demo','1') === '1')>Demonstration — cannot publish</option><option value="0" @selected((string)old('is_demo') === '0')>Normal draft — configured resources</option></select></label>
+                    <label for="tt-close">Latest class end<select id="tt-close" name="closing_hour" class="form-control">@foreach([17=>'5 PM',18=>'6 PM',19=>'7 PM'] as $hour=>$label)<option value="{{ $hour }}" @selected((int)old('closing_hour',17) === $hour)>{{ $label }}</option>@endforeach</select></label>
                 </div>
                 <p class="tt-help">Extended hours also require instructor availability. NSTP, ROTC and laboratory contact hours must be entered explicitly; units do not determine meeting duration.</p>
                 <div class="tt-actions"><button type="submit" class="dtc-btn dtc-btn-primary">Create draft</button></div>
@@ -58,18 +58,32 @@
                 $draft = $timetableDraft;
                 $proposalRows = collect($draft->proposals ?? [])->keyBy('subject_id');
                 $resourceChoices = collect($timetableChoices);
-                $unresolved = collect($draft->proposals ?? [])->filter(fn($row) => !empty($row['issue']))->count();
+                $unresolved = $timetableSubjects->filter(fn($subject) => !$proposalRows->has($subject->id) || !empty($proposalRows->get($subject->id)['issue']))->count();
+                $canPublish = $timetableSubjects->isNotEmpty() && $unresolved === 0;
             @endphp
             <div class="tt-draft-heading"><div><h5>{{ $draft->group_code }} <span class="tt-help">{{ $draft->is_demo ? 'Demonstration only' : ucfirst($draft->status) }}</span></h5><p class="tt-help mb-0">{{ $draft->program->name }} · Year {{ $draft->year_level }} · {{ $draft->school_year }} · Semester {{ $draft->semester }} · {{ $draft->capacity }} students</p></div></div>
             @if($draft->is_demo)<p class="tt-notice">Demonstration data. The room, instructor, availability and meeting requirements below are fictional presets and cannot become live offerings.</p>@endif
             @if($draft->status === 'published')
-                <p class="tt-notice">Published {{ $draft->published_at->timezone('Asia/Manila')->format('M j, Y g:i A') }}. These offerings are available to existing enrollment workflows. Automatic student assignment is a later stage.</p>
+                <p class="tt-notice">Published {{ $draft->published_at->timezone('Asia/Manila')->format('M j, Y g:i A') }}. Eligible new enrollments can be assigned to this group automatically when the complete selected load fits. Existing enrollments waiting for sections still need Registrar assignment. Published timetables are read only.</p>
             @else
                 <p class="tt-help">Enter requirements, then generate suggestions. Edit individual room/time assignments and save the review. Generation uses a first-fit search; an unresolved item may need a manual adjustment rather than another room. MWF means Monday, Wednesday and Friday; TTH means Tuesday and Thursday.</p>
                 <p class="tt-help">Each offering currently supports one time block repeated on its meeting days. A split morning/afternoon class needs an approved meeting model before publication; do not enter it as an uninterrupted block across lunch.</p>
             @endif
-            <form method="POST" action="{{ route('admin.timetables.update', $draft) }}">
+            <section class="tt-saved-summary" aria-labelledby="tt-saved-title">
+                <h6 id="tt-saved-title">Saved schedule</h6>
+                <p class="tt-help">{{ $timetableSubjects->count() - $unresolved }} of {{ $timetableSubjects->count() }} subjects placed · {{ $unresolved }} need attention. This summary shows saved assignments.</p>
+                <div class="tt-table-wrap" role="region" aria-label="Saved subject assignments" tabindex="0">
+                    <table class="tt-table"><thead><tr><th>Subject</th><th>Days / time</th><th>Room</th><th>Instructor</th><th>Review</th></tr></thead><tbody>
+                    @foreach($timetableSubjects as $subject)
+                        @php $savedRow = $proposalRows->get($subject->id, []); @endphp
+                        <tr><th scope="row">{{ $subject->subject_code }}</th><td>{{ $savedRow['pattern'] ?? 'Not set' }}<br>{{ $savedRow['start'] ?? '—' }}–{{ $savedRow['end'] ?? '—' }}</td><td>{{ $resourceChoices->firstWhere('id', $savedRow['room_id'] ?? null)['name'] ?? 'Unassigned' }}</td><td>{{ $resourceChoices->firstWhere('id', $savedRow['instructor_id'] ?? null)['name'] ?? 'Unassigned' }}</td><td>{{ empty($savedRow) ? 'Needs assignment' : ($savedRow['issue'] ?? 'Placed') }}</td></tr>
+                    @endforeach
+                    </tbody></table>
+                </div>
+            </section>
+            <form id="tt-edit-form" method="POST" action="{{ route('admin.timetables.update', $draft) }}">
                 @csrf @method('PUT')
+                @if(old('rows') !== null)<span data-restored-edits hidden></span>@endif
                 <input type="hidden" name="_timetable_form" value="1">
                 <fieldset @disabled($draft->status === 'published')>
                     @foreach($timetableSubjects as $index => $subject)
@@ -95,15 +109,18 @@
                 </fieldset>
             </form>
             @if(!$draft->is_demo && $draft->status === 'draft')
-                <form method="POST" action="{{ route('admin.timetables.update', $draft) }}" class="tt-publish">
+                <form method="POST" action="{{ route('admin.timetables.update', $draft) }}" class="tt-publish" data-ready="{{ $canPublish ? '1' : '0' }}">
                     @csrf @method('PUT')<input type="hidden" name="action" value="publish">
                     <input type="hidden" name="_timetable_form" value="1">
-                    <p class="tt-help">{{ $unresolved }} unresolved items in the saved draft. Publication rechecks current resources and live offerings. Save any edits above first.</p>
-                    <label class="tt-confirm"><input type="checkbox" name="reviewed" value="1" required> I reviewed the saved timetable, teaching requirements and resource details</label>
-                    <div class="tt-actions"><button type="submit" class="dtc-btn dtc-btn-primary">Publish saved timetable</button></div>
+                    <h6>Publish reviewed schedule</h6>
+                    <p class="tt-help">{{ $canPublish ? 'All subjects are placed. Review the saved schedule before publishing.' : 'Generate or save assignments and resolve every subject before publishing.' }} Publication rechecks current room, instructor and group conflicts.</p>
+                    <p id="tt-unsaved" class="tt-notice" role="status" hidden>Unsaved changes. Save review or generate suggestions before publishing.</p>
+                    <label class="tt-confirm"><input type="checkbox" name="reviewed" value="1" required @disabled(!$canPublish)> I reviewed the saved timetable, teaching requirements and resource details</label>
+                    <div class="tt-actions"><button type="submit" class="dtc-btn dtc-btn-primary" @disabled(!$canPublish)>Publish saved timetable</button></div>
                 </form>
             @endif
         @endif
     </div>
 </section>
 @push('css')<link rel="stylesheet" href="{{ asset('css/timetables.css') }}">@endpush
+@push('js')<script src="{{ asset('js/timetable-review.js') }}" defer></script>@endpush

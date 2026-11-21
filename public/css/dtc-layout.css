@@ -185,3 +185,37 @@ body .main-sidebar.sidebar-no-expand .nav-sidebar > .nav-item > .nav-link.active
 html body .wrapper .content-wrapper :is(h1, h2, h3, h4, h5, h6, [role="heading"], .dtc-page-title, .card-title, .dtc-empty-title) { font-weight: 700 !important; }
 html body .content-wrapper > .content-header :is(.dtc-page-title, h1, h4) { font-weight: 700 !important; }
 html body .users-management .users-directory-panel > .card-header > span:first-child { font-weight: 700 !important; }
+
+/* Match the page and subject header actions, including AJAX-loaded subjects. */
+.dtc-mobile-action-label { display: none; }
+@media (max-width: 767.98px) {
+    .content-wrapper .dtc-header-btn { min-height: 44px; white-space: normal; }
+    .content-wrapper .dtc-header-btn .dtc-header-btn-label { display: inline; }
+    .content-wrapper .dtc-header-btn > :is(i, svg) { display: none; }
+    .content-wrapper :is(.dtc-mobile-action-label, .rg-appointment-action-label) { display: inline; }
+    .content-wrapper :is(.dtc-icon-btn, .btn-edit-user, .notice-delete, .ph-view):has(.dtc-mobile-action-label, .rg-appointment-action-label) {
+        width: auto; height: auto; min-height: 44px; min-width: 0;
+        padding: 10px 12px; flex: 0 1 auto; gap: 8px;
+        font-size: 13px; line-height: 20px; text-align: center;
+    }
+    .content-wrapper :is(.dtc-icon-btn, .btn-edit-user, .notice-delete, .ph-view):has(.dtc-mobile-action-label, .rg-appointment-action-label) > :is(i, svg) { display: none; }
+    .content-wrapper .u-actions-gap { flex-wrap: wrap; gap: 8px; }
+    .content-wrapper .u-actions-gap > form { margin: 0; }
+    .content-wrapper :is(.dtc-fl-toggle, .ph-filter-toggle) > :is(i, svg) { display: none; }
+}
+.content-wrapper .dtc-btn.dtc-program-add {
+    min-height: 44px;
+    padding: 10px 16px !important;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 20px;
+    gap: 8px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+.content-wrapper .dtc-program-add :is(i, svg) { width: 18px; height: 18px; }
+@media (max-width: 767.98px) {
+    .content-wrapper .dtc-program-add .dtc-header-btn-label { display: inline; }
+    .content-wrapper .dtc-program-add :is(i, svg) { display: none; }
+    .content-wrapper .dtc-subjects-header { flex-wrap: wrap !important; gap: 12px; }
+}

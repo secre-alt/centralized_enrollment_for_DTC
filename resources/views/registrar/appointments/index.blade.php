@@ -116,6 +116,7 @@
                                    class="dtc-icon-btn"
                                    title="View proof of payment">
                                     <i data-lucide="eye"></i>
+                                    <span class="dtc-mobile-action-label">View proof</span>
                                 </a>
 
                                 {{-- Verify --}}
@@ -134,6 +135,7 @@
                                             data-dtc-confirm-tone="success"
                                             data-dtc-confirm-form="#verify-pay-{{ $payment->id }}">
                                         <i data-lucide="check-circle"></i>
+                                        <span class="dtc-mobile-action-label">Verify payment</span>
                                     </button>
                                 </form>
 
@@ -144,6 +146,7 @@
                                         data-toggle="modal"
                                         data-target="#rejectPayModal{{ $payment->id }}">
                                     <i data-lucide="x-circle"></i>
+                                    <span class="dtc-mobile-action-label">Reject payment</span>
                                 </button>
                             </div>
 

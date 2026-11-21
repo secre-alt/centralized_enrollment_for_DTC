@@ -22,7 +22,7 @@
         @endif
     </div>
     @if($selectedProgram)
-    <button type="button" class="dtc-btn dtc-btn-primary dtc-header-btn" aria-label="Add subject" data-toggle="modal" data-target="#addSubjectModal">
+    <button type="button" class="dtc-btn dtc-btn-primary dtc-header-btn dtc-program-add" aria-label="Add subject" data-toggle="modal" data-target="#addSubjectModal">
         <i data-lucide="plus"></i>
         <span class="dtc-header-btn-label">Add Subject</span>
     </button>
@@ -98,6 +98,7 @@
                                         data-semester="{{ $subject->semester }}"
                                         data-classification="{{ $subject->classification }}">
                                     <i data-lucide="pencil"></i>
+                                    <span class="dtc-mobile-action-label">Edit subject</span>
                                 </button>
                                 <button type="button"
                                         class="dtc-icon-btn js-edit-schedule"
@@ -114,6 +115,7 @@
                                         data-hosting-program="{{ $selectedProgram->id }}"
                                         data-requires-irregular="">
                                     <i data-lucide="calendar-clock"></i>
+                                    <span class="dtc-mobile-action-label">Add section</span>
                                 </button>
                                 @foreach($subject->schedules->whereNotNull('section_code') as $offering)
                                     <button type="button"
@@ -131,6 +133,7 @@
                                             data-hosting-program="{{ $offering->hosting_program_id ?: $subject->program_id }}"
                                             data-requires-irregular="{{ is_null($offering->requires_irregular) ? '' : (int) $offering->requires_irregular }}">
                                         <i data-lucide="pencil"></i>
+                                        <span class="dtc-mobile-action-label">Edit section {{ $offering->section_code }}</span>
                                     </button>
                                 @endforeach
                                 <button type="button"
@@ -141,6 +144,7 @@
                                         title="Record an approved subject equivalency"
                                         data-url="{{ route('registrar.subjects.equivalencies.store', $subject) }}">
                                     <i data-lucide="badge-check"></i>
+                                    <span class="dtc-mobile-action-label">Equivalency</span>
                                 </button>
                                 <form id="del-sub-card-{{ $subject->id }}"
                                       method="POST"
@@ -156,6 +160,7 @@
                                             data-dtc-confirm-tone="danger"
                                             data-dtc-confirm-form="#del-sub-card-{{ $subject->id }}">
                                         <i data-lucide="trash-2"></i>
+                                        <span class="dtc-mobile-action-label">Remove subject</span>
                                     </button>
                                 </form>
                             </div>
@@ -263,7 +268,7 @@
                 <div class="modal-footer dtc-balanced-footer">
                     <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="dtc-btn dtc-btn-primary">
-                        <i data-lucide="plus"></i> Add Subject
+                        Add Subject
                     </button>
                 </div>
             </form>

@@ -46,13 +46,16 @@ class ProgramController extends Controller
         }
 
         $timetableResources = \App\Models\TimetableResource::orderBy('kind')->orderBy('name')->get();
+        $lockedTimetableResources = \App\Models\TimetableDraft::where('status', 'published')->get(['proposals'])
+            ->flatMap(fn ($draft) => collect($draft->proposals ?? [])->flatMap(fn ($row) => [$row['room_id'] ?? null, $row['instructor_id'] ?? null]))
+            ->filter()->map(fn ($id) => (string) $id)->unique()->all();
         $timetableDrafts = \App\Models\TimetableDraft::with('program')->latest()->paginate(10, ['*'], 'timetables_page')->withQueryString();
         $timetableDraft = $request->filled('timetable') ? \App\Models\TimetableDraft::findOrFail($request->integer('timetable')) : null;
         $timetableSubjects = $timetableDraft ? app(\App\Services\TimetableService::class)->subjects($timetableDraft) : collect();
         $timetableChoices = $timetableDraft && $timetableDraft->is_demo
             ? app(\App\Services\TimetableService::class)->resources($timetableDraft) : $timetableResources->toArray();
 
-        return view('admin.programs.index', compact('programs', 'selectedProgram', 'subjects', 'allSubjects', 'hostingPrograms', 'timetableResources', 'timetableDrafts', 'timetableDraft', 'timetableSubjects', 'timetableChoices'));
+        return view('admin.programs.index', compact('programs', 'selectedProgram', 'subjects', 'allSubjects', 'hostingPrograms', 'timetableResources', 'lockedTimetableResources', 'timetableDrafts', 'timetableDraft', 'timetableSubjects', 'timetableChoices'));
     }
 
     public function store(Request $request)

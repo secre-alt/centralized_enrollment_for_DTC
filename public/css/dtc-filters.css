@@ -58,7 +58,6 @@ body.dtc-dark .dtc-fl-toggle.has-filters { border-color: rgba(108, 155, 255, .45
 }
 
 @media (max-width: 380px) {
-    .dtc-fl-toggle span:not(.dtc-fl-count) { display: none; }
     .dtc-fl-panel { grid-template-columns: 1fr; }
 }
 

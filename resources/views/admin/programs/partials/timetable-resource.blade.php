@@ -1,6 +1,7 @@
 @php
     $resourceConfig = $resource?->configuration ?? [];
     $resourceKey = $resource ? (string) $resource->id : 'new-'.$resourceKind;
+    $resourceLocked = $resource && in_array((string) $resource->id, $lockedTimetableResources, true);
 @endphp
 <form method="POST" action="{{ route('admin.timetables.resources') }}" class="tt-resource-form">
     @csrf
@@ -8,6 +9,8 @@
     <input type="hidden" name="kind" value="{{ $resourceKind }}">
     <input type="hidden" name="id" value="{{ $resource?->id }}">
     <input type="hidden" name="timetable" value="{{ $timetableDraft?->id }}">
+    @if($resourceLocked)<p class="tt-notice">Read only: used by a published timetable. Published resource details cannot be amended here.</p>@endif
+    <fieldset @disabled($resourceLocked)>
     <div class="tt-grid">
         <label for="tt-name-{{ $resourceKey }}">{{ $resourceKind === 'room' ? 'Room name' : 'Instructor name' }}
             <input id="tt-name-{{ $resourceKey }}" name="name" class="form-control" value="{{ $resource?->name }}" maxlength="50" required placeholder="{{ $resourceKind === 'room' ? 'e.g. 1T or COMPLAB' : 'Full name' }}">
@@ -43,5 +46,6 @@
             @endforeach
         </div>
     @endif
-    <div class="tt-actions"><button class="dtc-btn dtc-btn-secondary" type="submit">Save {{ $resourceKind }}</button></div>
+    @unless($resourceLocked)<div class="tt-actions"><button class="dtc-btn dtc-btn-secondary" type="submit">Save {{ $resourceKind }}</button></div>@endunless
+    </fieldset>
 </form>

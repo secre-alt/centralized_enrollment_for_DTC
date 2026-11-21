@@ -11,7 +11,7 @@
                 Manage academic programs and their subjects · <a href="#timetable-workspace">Draft timetables</a>
             </p>
         </div>
-        <button type="button" class="dtc-btn dtc-btn-primary dtc-header-btn" aria-label="Add program" data-toggle="modal" data-target="#addProgramModal">
+        <button type="button" class="dtc-btn dtc-btn-primary dtc-header-btn dtc-program-add" aria-label="Add program" data-toggle="modal" data-target="#addProgramModal">
             <i data-lucide="plus"></i>
             <span class="dtc-header-btn-label">Add Program</span>
         </button>
@@ -71,6 +71,7 @@
                                         data-name="{{ $program->name }}"
                                         data-code="{{ $program->code }}">
                                     <i data-lucide="pencil"></i>
+                                    <span class="dtc-mobile-action-label">Edit program</span>
                                 </button>
                                 <form id="del-program-{{ $program->id }}"
                                       method="POST"
@@ -86,6 +87,7 @@
                                             data-dtc-confirm-tone="danger"
                                             data-dtc-confirm-form="#del-program-{{ $program->id }}">
                                         <i data-lucide="trash-2"></i>
+                                        <span class="dtc-mobile-action-label">Delete program</span>
                                     </button>
                                 </form>
                             </div>
@@ -160,7 +162,7 @@
                 <div class="modal-footer dtc-balanced-footer">
                     <button type="button" class="dtc-btn dtc-btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="dtc-btn dtc-btn-primary">
-                        <i data-lucide="plus"></i> Add Program
+                        Add Program
                     </button>
                 </div>
             </form>

@@ -157,7 +157,7 @@
                             @endif
                         </td>
                         <td class="ph-date">{{ $date ? $date->format('M j, Y') : '—' }}</td>
-                        <td class="ph-action"><a class="ph-view" href="{{ $href }}" aria-label="View details for {{ $item->transaction_key }}"><i data-lucide="chevron-right" aria-hidden="true"></i></a></td>
+                        <td class="ph-action"><a class="ph-view" href="{{ $href }}" aria-label="View details for {{ $item->transaction_key }}"><i data-lucide="chevron-right" aria-hidden="true"></i><span class="dtc-mobile-action-label">Details</span></a></td>
                     </tr>
                 @endforeach
                 </tbody>

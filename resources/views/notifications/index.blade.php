@@ -55,7 +55,7 @@
                             <div class="notice-actions">
                                 @if($notification->link)<a class="notice-open" href="{{ route('notifications.open', $notification) }}">View update<i data-lucide="arrow-up-right" aria-hidden="true"></i></a>@endif
                                 <button type="button" class="notice-state" data-notice-state data-url="{{ route('notifications.state', $notification) }}" data-read="{{ $notification->isRead() ? '1' : '0' }}">{{ $notification->isRead() ? 'Mark unread' : 'Mark as read' }}</button>
-                                <button type="button" class="notice-delete" data-notice-delete data-url="{{ route('notifications.destroy', $notification) }}" aria-label="Delete notification: {{ $notification->title }}"><i data-lucide="trash-2" aria-hidden="true"></i></button>
+                                <button type="button" class="notice-delete" data-notice-delete data-url="{{ route('notifications.destroy', $notification) }}" aria-label="Delete notification: {{ $notification->title }}"><i data-lucide="trash-2" aria-hidden="true"></i><span class="dtc-mobile-action-label">Delete</span></button>
                             </div>
                         </div>
                     </li>

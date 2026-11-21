@@ -350,11 +350,13 @@
                                         data-credited-units="{{ $credit->credited_units }}"
                                         data-remarks="{{ $credit->remarks }}">
                                     <i data-lucide="pencil"></i>
+                                    <span class="dtc-mobile-action-label">Edit</span>
                                 </button>
                                 <form method="POST" action="{{ route('registrar.enrollments.credited-subjects.destroy', $credit) }}" id="remove-credit-{{ $credit->id }}">
                                     @csrf @method('DELETE')
                                     <button type="button" class="dtc-icon-btn danger" title="Remove" data-dtc-confirm data-dtc-confirm-tone="danger" data-dtc-confirm-title="Remove credited subject?" data-dtc-confirm-message="This credited subject record will be removed." data-dtc-confirm-ok="Remove Subject" data-dtc-confirm-form="#remove-credit-{{ $credit->id }}">
                                         <i data-lucide="trash-2"></i>
+                                        <span class="dtc-mobile-action-label">Remove</span>
                                     </button>
                                 </form>
                             </div>

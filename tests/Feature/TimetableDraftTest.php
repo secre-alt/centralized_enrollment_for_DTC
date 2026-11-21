@@ -62,6 +62,20 @@ class TimetableDraftTest extends TestCase
         return $this->put(route('admin.timetables.update', $draft), $extra + ['action' => 'publish', 'reviewed' => 1]);
     }
 
+    public function test_workspace_shows_saved_assignments_and_published_resource_locks(): void
+    {
+        [$room, $instructor] = $this->resources();
+        [$draft, $subject] = $this->setupDraft();
+        $url = route('admin.programs.index', ['timetable' => $draft->id]);
+        $this->get($url)->assertOk()->assertSee('0 of 1 subjects placed')->assertSee('Needs assignment');
+        $this->save($draft, [$this->row($subject, $room, $instructor)])->assertSessionHasNoErrors();
+        $this->get($url)->assertOk()->assertSee('1 of 1 subjects placed')->assertSee('Saved schedule')
+            ->assertSee('timetable-review.js');
+        $this->publish($draft)->assertSessionHasNoErrors();
+        $this->get($url)->assertOk()->assertSee('Read only: used by a published timetable')
+            ->assertSee('Eligible new enrollments can be assigned')->assertDontSee('Automatic student assignment is a later stage');
+    }
+
     public function test_demonstration_uses_only_fictional_resources_and_cannot_publish(): void
     {
         [$draft] = $this->setupDraft('BSTM', ['is_demo' => 1]);

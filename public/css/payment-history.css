@@ -113,7 +113,6 @@
 }
 
 @media (max-width: 380px) {
-    .ph-filter-toggle span:not(.ph-filter-count) { display: none; }
     .ph-advanced { grid-template-columns: 1fr; }
 }
 

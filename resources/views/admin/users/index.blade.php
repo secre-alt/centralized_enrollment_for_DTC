@@ -197,7 +197,7 @@
                                     aria-label="Edit {{ $user->name }}"
                                     data-id="{{ $user->id }}"
                                     data-url="{{ route('admin.users.edit', $user) }}">
-                                <i data-lucide="pencil"></i>
+                                <i data-lucide="pencil"></i><span class="dtc-mobile-action-label">Edit user</span>
                             </button>
 
                             @if($user->id !== auth()->id())
@@ -218,6 +218,7 @@
                                         data-dtc-confirm-tone="danger"
                                         data-dtc-confirm-form="#del-user-{{ $user->id }}">
                                     <i data-lucide="trash-2"></i>
+                                    <span class="dtc-mobile-action-label">Delete user</span>
                                 </button>
                             </form>
                             @endif
