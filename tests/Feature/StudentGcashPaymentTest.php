@@ -67,7 +67,8 @@ class StudentGcashPaymentTest extends TestCase
             ->firstOrFail();
         $this->assertSame(route('cashier.payments.show', $enrollment), $notification->link);
         $this->assertSame('enrollment-gcash-payment-pending:'.$payment->id, $notification->event_key);
-        $this->actingAs($cashier)->get($notification->link)->assertOk();
+        $this->actingAs($cashier)->get($notification->link)
+            ->assertRedirect(route('cashier.payments.index', ['review' => $enrollment->id]));
         $this->assertDatabaseHas('user_notifications', [
             'user_id' => $secondCashier->id,
             'event_key' => 'enrollment-gcash-payment-pending:'.$payment->id,
