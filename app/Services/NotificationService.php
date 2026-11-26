@@ -99,21 +99,9 @@ class NotificationService
     ): bool {
         try {
             $notification = DB::transaction(function () use ($user, $eventKey, $title, $message, $type, $link) {
-                $notification = self::sendForEvent($user, $eventKey, $title, $message, $type, $link);
-                if ($notification->wasRecentlyCreated && $user->email) {
-                    $notification->forceFill(['email_status' => 'pending'])->save();
-                }
-                return $notification;
+                return self::prepareUserUpdate($user, $eventKey, $title, $message, $type, $link);
             });
-
-            // Dispatch after the workflow commits, so rollback cannot emit an email.
-            if (DB::transactionLevel() > 0) {
-                DB::afterCommit(fn () => self::queueWorkflowEmail($notification->id, $user, $actionLabel));
-            } else {
-                return self::queueWorkflowEmail($notification->id, $user, $actionLabel);
-            }
-
-            return true;
+            return self::dispatchWorkflowEmail($notification, $user, $actionLabel);
         } catch (\Throwable $exception) {
             Log::warning('Could not deliver a user workflow update.', [
                 'user_id' => $user->id,
@@ -125,12 +113,36 @@ class NotificationService
         }
     }
 
+    /** Caller includes this strict persistence step in its workflow transaction. */
+    public static function prepareUserUpdate(User $user, string $eventKey, string $title, string $message, string $type, ?string $link): UserNotification
+    {
+        $notification = self::sendForEvent($user, $eventKey, $title, $message, $type, $link);
+        if ($notification->wasRecentlyCreated) {
+            $notification->forceFill(['email_status' => filter_var($user->email, FILTER_VALIDATE_EMAIL) ? 'pending' : 'invalid_recipient'])->save();
+        }
+        return $notification;
+    }
+
+    public static function dispatchWorkflowEmail(UserNotification $notification, User $user, string $actionLabel = 'View in DTC EMS'): bool
+    {
+        if (DB::transactionLevel() > 0) {
+            DB::afterCommit(fn () => self::queueWorkflowEmail($notification->id, $user, $actionLabel));
+            return true;
+        }
+        return self::queueWorkflowEmail($notification->id, $user, $actionLabel);
+    }
+
     private static function queueWorkflowEmail(int $id, User $user, string $actionLabel): bool
     {
         try {
-            $notification = DB::transaction(function () use ($id) {
+            $notification = DB::transaction(function () use ($id, $user) {
                 $notification = UserNotification::whereKey($id)->lockForUpdate()->firstOrFail();
-                if (!in_array($notification->email_status, ['pending', 'enqueue_failed'], true)) {
+                if (!in_array($notification->email_status, ['pending', 'enqueue_failed', 'invalid_recipient'], true)) {
+                    return null;
+                }
+                if ($notification->user_id !== $user->id) throw new \LogicException('Workflow recipient mismatch.');
+                if (!filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+                    $notification->forceFill(['email_status' => 'invalid_recipient'])->save();
                     return null;
                 }
                 $notification->forceFill(['email_status' => 'enqueueing'])->save();

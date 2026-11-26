@@ -38,6 +38,11 @@ class AppointmentPayment extends Model
         return $this->belongsTo(User::class, 'verified_by');
     }
 
+    public function documentPaymentProofs()
+    {
+        return $this->hasMany(DocumentPaymentProof::class);
+    }
+
     public function isPending(): bool  { return $this->status === 'pending'; }
     public function isVerified(): bool { return $this->status === 'verified'; }
     public function isRejected(): bool { return $this->status === 'rejected'; }

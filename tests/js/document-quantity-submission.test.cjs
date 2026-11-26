@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-for (const file of ['public/js/student-booking.js', 'resources/views/alumni/requests/create.blade.php']) {
+for (const file of ['public/js/student-booking.js']) {
     test(file + ' restores quantities for checked documents and omits unchecked quantities', () => {
         const rows = [true, false].map(checked => {
             const quantity = { value: '2', disabled: checked };

@@ -14,4 +14,9 @@ class OfficeClosure extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function appointmentDisruptions()
+    {
+        return $this->hasMany(AppointmentDisruption::class);
+    }
 }

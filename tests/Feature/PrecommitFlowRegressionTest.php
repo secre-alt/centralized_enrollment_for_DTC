@@ -86,17 +86,17 @@ class PrecommitFlowRegressionTest extends TestCase
         $this->get(route('portal.appointments.index'))->assertOk()->assertSee('class="dr-track"', false)->assertSee('Preparing');
     }
 
-    public function test_cancelled_ready_paid_pickup_allows_self_service_rebooking_and_prevents_duplicates(): void
+    public function test_retired_pickup_booking_preserves_cancelled_history_and_prevents_duplicates(): void
     {
         $alumni = $this->makeUserWithRole('alumni');
         $slot = $this->slot();
         $old = Appointment::factory()->create(['user_id' => $alumni->id, 'appointment_slot_id' => $slot->id, 'status' => 'cancelled']);
         $request = $this->document($alumni, ['appointment_id' => $old->id, 'status' => 'ready', 'is_paid' => true, 'payment_status' => 'verified']);
-        $this->actingAs($alumni)->get(route('portal.documents.index'))->assertOk()->assertSee('Choose a new pickup time')->assertDontSee('Contact the Registrar to rebook.');
+        $this->actingAs($alumni)->get(route('portal.documents.index'))->assertOk()->assertSee('No appointment is required.')->assertDontSee('data-pickup-form', false);
         $url = route('portal.documents.pickup-appointment', $request);
-        $this->post($url, ['appointment_slot_id' => $slot->id])->assertSessionHasNoErrors()->assertRedirect(route('portal.documents.index'));
+        $this->post($url, ['appointment_slot_id' => $slot->id])->assertSessionHasErrors('appointment_slot_id');
         $newId = $request->fresh()->appointment_id;
-        $this->assertNotSame($old->id, $newId);
+        $this->assertSame($old->id, $newId);
         $this->assertSame('cancelled', $old->fresh()->status);
         $this->post($url, ['appointment_slot_id' => $slot->id])->assertSessionHasErrors('appointment_slot_id');
         $this->assertSame($newId, $request->fresh()->appointment_id);
@@ -123,7 +123,7 @@ class PrecommitFlowRegressionTest extends TestCase
         $old = Appointment::factory()->create(['user_id' => $alumni->id, 'appointment_slot_id' => $slot->id, 'status' => 'cancelled']);
         $request = $this->document($alumni, ['appointment_id' => $old->id, 'status' => 'ready', 'is_paid' => true, 'payment_status' => 'verified']);
         $this->actingAs($alumni)->get(route('portal.documents.index'))->assertOk()
-            ->assertSee('Contact the Registrar for available pickup times.')->assertDontSee('data-pickup-form', false);
+            ->assertSee('No appointment is required.')->assertDontSee('data-pickup-form', false);
         $this->post(route('portal.documents.pickup-appointment', $request), ['appointment_slot_id' => $slot->id])->assertSessionHasErrors('appointment_slot_id');
     }
 }

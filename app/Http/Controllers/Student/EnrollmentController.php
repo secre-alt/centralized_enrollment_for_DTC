@@ -24,6 +24,7 @@ class EnrollmentController extends Controller
     {
         $user = Auth::user();
         $fee = Setting::get('enrollment_fee', 500);
+        $term = $this->configuredAcademicTerm();
 
         if ($user->hasRole('new_applicant')) {
             // Fetch the single approved application for this user
@@ -39,7 +40,6 @@ class EnrollmentController extends Controller
             }
 
             // An earlier term's approved enrollment must not block this term.
-            $term = $this->configuredAcademicTerm();
             $existingEnrollment = Enrollment::where('user_id', $user->id)
                 ->whereIn('status', ['pending', 'approved'])
                 ->when($term, fn ($query) => $query
@@ -57,6 +57,7 @@ class EnrollmentController extends Controller
                 'application' => $application,
                 'programs' => null,   // signals the Blade to render locked UI
                 'fee' => $fee,
+                'term' => $term,
             ]);
         }
 
@@ -70,6 +71,7 @@ class EnrollmentController extends Controller
             'lockedProgram' => $officialProgram,
             'application' => null,
             'fee' => $fee,
+            'term' => $term,
         ]);
     }
 

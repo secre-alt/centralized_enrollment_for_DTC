@@ -250,12 +250,14 @@ body.dtc-dark .rg-rejection-panel textarea.dtc-form-control { width:100%; min-he
 }
 .registrar-workspace.rg-documents .dq-chips { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; width:100%; padding:0; }
 .registrar-workspace.rg-documents .dq-chip { display:flex; align-items:center; justify-content:center; gap:6px; height:auto; min-height:42px; padding:8px 6px; border-radius:8px; font-size:12px; }
+.registrar-workspace.rg-documents .dq-history-appointment { margin-top:7px; line-height:1.5; }
 @media(max-width:767.98px) {
     .registrar-workspace.rg-documents .dq-chips { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .registrar-workspace.rg-documents .dq-chip:first-child { grid-column:1/-1; }
     .registrar-workspace.rg-documents .dq-chip { min-height:44px; }
     .registrar-workspace.rg-documents .dq-table tbody tr.dq-row { padding:16px; gap:14px 10px; }
     .registrar-workspace.rg-documents .dq-purpose { white-space:normal; overflow:visible; }
+    .registrar-workspace.rg-documents .dq-history-appointment { padding-top:8px; border-top:1px solid var(--dtc-border); }
     .registrar-workspace.rg-documents .dq-update { min-height:44px; font-size:12px; border-radius:8px; padding:8px 12px; }
 }
 /* Academic-record toolbar sits outside the record list. */
@@ -313,3 +315,27 @@ body.dtc-dark .rg-rejection-panel textarea.dtc-form-control { width:100%; min-he
     .registrar-workspace.rg-import-center .rg-record-table td[data-reg-label="Status"]::before { display:block; }
 }
 .rg-documents a.dq-chip { text-decoration:none; }
+
+.dq-status-label { margin-bottom:8px; font-size:12px; font-weight:600; }
+.dq-status-change { display:flex; align-items:center; gap:10px; min-height:44px; padding:10px 12px; border:1px solid var(--dtc-border); border-radius:8px; background:var(--dtc-surface); color:var(--dtc-text-secondary); }
+.dq-status-change strong { color:var(--dtc-text); }
+.dq-status-arrow { color:var(--dtc-text-muted); }
+
+/* Physical handover stays in the request list. */
+.dq-release .modal-title { font-size:18px; font-weight:600; }
+.dq-release .modal-body { padding:20px; }
+.dq-release-claimant { display:grid; gap:3px; margin-bottom:20px; overflow-wrap:anywhere; }
+.dq-release-claimant span, .dq-release-choice small { font-size:12px; color:var(--dtc-text-secondary); }
+.dq-release fieldset { min-width:0; margin:0; padding:0; border:0; }
+.dq-release legend { font-size:13px; font-weight:600; margin-bottom:10px; }
+.dq-release-choice { display:flex; align-items:flex-start; gap:12px; padding:12px; margin:0 0 8px; border:1px solid var(--dtc-border); border-radius:10px; cursor:pointer; }
+.dq-release-choice > span { display:grid; gap:4px; min-width:0; overflow-wrap:anywhere; }
+.dq-release-choice strong { font-size:14px; font-weight:600; }
+.dq-release-choice:has(input:checked) { border-color:var(--dtc-primary); background:var(--dtc-primary-soft); }
+.dq-release-choice:has(input:disabled) { cursor:default; color:var(--dtc-text-muted); }
+.dq-release input[type=checkbox] { flex:0 0 auto; width:17px; height:17px; margin-top:3px; accent-color:var(--dtc-primary); }
+.dq-release input:focus-visible { outline:2px solid var(--dtc-primary); outline-offset:3px; }
+.dq-release-confirm { display:flex; gap:12px; margin:18px 0 0; padding-top:16px; border-top:1px solid var(--dtc-border); font-size:13px; line-height:1.6; font-weight:400; cursor:pointer; }
+.dq-release .modal-footer { gap:8px; }
+.dq-release .modal-footer .btn { min-height:44px; margin:0; padding:10px 14px; white-space:nowrap; }
+@media(max-width:575.98px) { .dq-release .modal-footer .btn { flex:1; } }

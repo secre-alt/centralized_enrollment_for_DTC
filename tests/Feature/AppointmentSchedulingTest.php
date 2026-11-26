@@ -81,11 +81,10 @@ class AppointmentSchedulingTest extends TestCase
         $slot = AppointmentSlot::factory()->create(['date' => '2026-10-19', 'start_time' => '08:00:00', 'end_time' => '09:00:00', 'max_bookings' => 5]);
         OfficeClosure::create(['start_date' => '2026-10-19', 'end_date' => '2026-10-19', 'title' => 'Office closure', 'type' => 'office_closure', 'is_confirmed' => true, 'is_active' => true]);
 
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $document = \App\Models\DocumentRequest::create(['user_id' => $student->id, 'document_type' => 'tor', 'status' => 'ready', 'fee' => 0]);
+        $this->actingAs($student)->post(route('portal.claiming-appointments.store'), [
             'appointment_slot_id' => $slot->id,
-            'document_type' => 'transcript',
-            'purpose' => 'Employment',
-            'payment_method' => 'walk_in',
+            'document_ids' => [$document->id],
         ])->assertSessionHasErrors('appointment_slot_id');
         $this->assertDatabaseMissing('appointments', ['appointment_slot_id' => $slot->id, 'user_id' => $student->id]);
     }

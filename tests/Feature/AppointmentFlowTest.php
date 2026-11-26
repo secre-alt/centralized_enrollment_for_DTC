@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\AppointmentPayment;
 use App\Models\AppointmentSlot;
 use App\Models\DocumentRequest;
+use App\Models\DocumentPaymentProof;
 use App\Models\UserNotification;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,7 +17,7 @@ use Tests\TestCase;
 
 class AppointmentFlowTest extends TestCase
 {
-    use RefreshDatabase, SeedsRoles;
+    use RefreshDatabase, SeedsRoles, \Tests\SeedsHistoricalDocumentAppointments;
 
     protected function setUp(): void
     {
@@ -43,17 +44,12 @@ class AppointmentFlowTest extends TestCase
     {
         Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
         Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
-        Setting::set('gcash_name', 'DTC test account');
-        Setting::set('gcash_number', '09123456789');
         foreach (['student', 'alumni'] as $role) {
-            $user = $this->makeUserWithRole($role);
             $prefix = $role === 'alumni' ? 'portal.documents' : 'portal.appointments';
-            $this->actingAs($user)->get(route($prefix.'.create'))->assertOk()
-                ->assertSee('Copy number')->assertSee('Copy amount')->assertSee('Save QR')
-                ->assertSee('data-copy-value="09123456789"', false)
-                ->assertSee('data-document-copy-amount', false);
+            $this->actingAs($this->makeUserWithRole($role))->get(route($prefix.'.create'))->assertOk()
+                ->assertSee('data-document-submission', false)->assertSee('Copies')->assertSee('Pay separately for each document')
+                ->assertDontSee('name="appointment_slot_id"', false);
             $this->get(route($prefix.'.gcash.qr', ['download' => 1]))->assertOk()->assertDownload('DTC-GCash-QR.png');
-            $this->get(route($prefix.'.gcash.qr'))->assertOk();
         }
     }
 
@@ -63,7 +59,7 @@ class AppointmentFlowTest extends TestCase
         $cashier = $this->makeUserWithRole('cashier');
         Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
         Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $this->makeSlot()->id,
             'documents' => [1 => ['document_type' => 'diploma', 'copies' => 1], 2 => ['document_type' => 'certification', 'copies' => 1]],
             'payment_method' => 'gcash', 'reference_number' => 'OPTIONAL-RECEIPT', 'proof_of_payment' => $this->fakeProof(),
@@ -80,7 +76,7 @@ class AppointmentFlowTest extends TestCase
     {
         foreach (['student', 'alumni'] as $role) {
             $owner = $this->makeUserWithRole($role);
-            $this->actingAs($owner)->post(route('portal.appointments.store'), [
+            $this->actingAs($owner)->historicalSubmission( [
                 'appointment_slot_id' => $this->makeSlot()->id,
                 'documents' => [['document_type' => 'diploma', 'copies' => 1], ['document_type' => 'certification', 'copies' => 1]],
                 'payment_method' => 'walk_in',
@@ -104,6 +100,7 @@ class AppointmentFlowTest extends TestCase
     {
         $student = $this->makeUserWithRole('student');
         $response = $this->actingAs($student)->postJson(route('portal.appointments.store'), [
+            'operation_key' => (string) \Illuminate\Support\Str::uuid(),
             'appointment_slot_id' => $this->makeSlot()->id,
             'documents' => [1 => ['document_type' => 'diploma']], 'payment_method' => 'walk_in',
         ])->assertUnprocessable();
@@ -113,21 +110,16 @@ class AppointmentFlowTest extends TestCase
 
     public function test_alumni_can_select_later_document_options_without_selecting_the_first_option(): void
     {
-        $alumni = $this->makeUserWithRole('alumni');
-        $this->actingAs($alumni)->post(route('portal.documents.store'), [
-            'appointment_slot_id' => $this->makeSlot()->id,
-            'documents' => [1 => ['document_type' => 'diploma', 'copies' => 2], 3 => ['document_type' => 'true_copy', 'copies' => 1]],
-            'payment_method' => 'walk_in',
-        ])->assertRedirect(route('portal.documents.index'))->assertSessionHasNoErrors();
-        $appointment = Appointment::where('user_id', $alumni->id)->firstOrFail();
-        $this->assertSame(2, $appointment->documentRequests()->count());
-        $this->assertSame('diploma', $appointment->document_type);
+        $owner = $this->makeUserWithRole('alumni');
+        $this->actingAs($owner)->post(route('portal.documents.store'), ['documents' => [1 => ['document_type' => 'diploma', 'copies' => 2], 3 => ['document_type' => 'true_copy', 'copies' => 1]], 'payment_method' => 'walk_in'])->assertSessionHasNoErrors();
+        $this->assertSame(['diploma', 'true_copy'], DocumentRequest::orderBy('id')->pluck('document_type')->all());
+        $this->assertDatabaseCount('appointments', 0);
     }
 
     public function test_document_bundle_role_boundaries_and_admin_processing_access(): void
     {
         $student = $this->makeUserWithRole('student');
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $this->makeSlot()->id,
             'documents' => [['document_type' => 'diploma', 'copies' => 1]],
             'payment_method' => 'walk_in',
@@ -156,71 +148,31 @@ class AppointmentFlowTest extends TestCase
     // ─────────────────────────────────────────────────────────────────────
 
     /** @test */
-    public function student_can_book_a_walk_in_appointment()
+    public function student_can_submit_a_walk_in_document_without_an_appointment(): void
     {
-        $student = $this->makeUserWithRole('student');
-        $slot    = $this->makeSlot();
-
-        $response = $this->actingAs($student)->post(route('portal.appointments.store'), [
-            'appointment_slot_id' => $slot->id,
-            'document_type'       => 'transcript',
-            'purpose'             => 'Employment application',
-            'payment_method'      => 'walk_in',
-        ]);
-
-        $response->assertRedirect(route('portal.appointments.index'));
-        $response->assertSessionHas('success');
-
-        $this->assertDatabaseHas('appointments', [
-            'user_id'             => $student->id,
-            'appointment_slot_id' => $slot->id,
-            'document_type'       => 'transcript',
-            'status'              => 'pending',
-        ]);
-        $documentRequest = DocumentRequest::where('appointment_id', Appointment::where('user_id', $student->id)->value('id'))->firstOrFail();
-        $this->assertSame('tor', $documentRequest->document_type);
-        $this->assertSame('50.00', $documentRequest->fee);
-        $this->assertSame('walk_in', $documentRequest->payment_method);
-        $this->assertSame('unpaid', $documentRequest->payment_status);
-
+        $owner = $this->makeUserWithRole('student');
+        $this->actingAs($owner)->post(route('portal.appointments.store'), ['document_type' => 'transcript', 'payment_method' => 'walk_in'])->assertSessionHasNoErrors();
+        $document = DocumentRequest::where('user_id', $owner->id)->sole();
+        $this->assertSame('tor', $document->document_type);
+        $this->assertSame('50.00', $document->fee);
+        $this->assertSame('unpaid', $document->payment_status);
+        $this->assertNull($document->appointment_id);
+        $this->assertDatabaseCount('appointments', 0);
     }
 
     /** @test */
-    public function student_can_book_multiple_documents_and_copies_under_one_appointment()
+    public function student_can_submit_multiple_standalone_documents_and_copies(): void
     {
-        $student = $this->makeUserWithRole('student');
-        $slot = $this->makeSlot();
-
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
-            'appointment_slot_id' => $slot->id,
-            'documents' => [
-                ['document_type' => 'transcript', 'copies' => 1],
-                ['document_type' => 'diploma', 'copies' => 1],
-                ['document_type' => 'certification', 'copies' => 2],
-            ],
-            'purpose' => 'Employment',
-            'payment_method' => 'walk_in',
-        ])->assertRedirect(route('portal.appointments.index'));
-
-        $appointment = Appointment::where('user_id', $student->id)->firstOrFail();
-        $requests = DocumentRequest::where('appointment_id', $appointment->id)->orderBy('id')->get();
-        $this->assertCount(3, $requests);
+        $owner = $this->makeUserWithRole('student');
+        $this->actingAs($owner)->post(route('portal.appointments.store'), ['documents' => [
+            ['document_type' => 'transcript', 'copies' => 1], ['document_type' => 'diploma', 'copies' => 1], ['document_type' => 'certification', 'copies' => 2]],
+            'payment_method' => 'walk_in'])->assertSessionHasNoErrors();
+        $requests = DocumentRequest::where('user_id', $owner->id)->orderBy('id')->get();
         $this->assertSame(['tor', 'diploma', 'certification'], $requests->pluck('document_type')->all());
         $this->assertSame(['50.00', '100.00', '60.00'], $requests->pluck('fee')->all());
         $this->assertSame([1, 1, 2], $requests->pluck('copies')->all());
-        $this->assertDatabaseHas('appointment_payments', [
-            'appointment_id' => $appointment->id,
-            'is_document_bundle' => true,
-            'payment_method' => 'walk_in',
-            'amount' => '210.00',
-        ]);
-
-        $this->actingAs($student)->get(route('portal.appointments.index'))
-            ->assertOk()
-            ->assertSee('Transcript of Records')
-            ->assertSee('Diploma')
-            ->assertSee('Certification')
-            ->assertSee('Total fees');
+        $this->assertDatabaseCount('appointment_payments', 0);
+        $this->get(route('portal.documents.index'))->assertOk()->assertSee('Transcript of Records')->assertSee('Diploma')->assertSee('Certification');
     }
 
     /** @test */
@@ -268,7 +220,7 @@ class AppointmentFlowTest extends TestCase
         Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
         Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
 
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $slot->id,
             'documents' => [
                 ['document_type' => 'transcript', 'copies' => 2],
@@ -304,7 +256,7 @@ class AppointmentFlowTest extends TestCase
         Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
         Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
 
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $slot->id,
             'documents' => [
                 ['document_type' => 'transcript', 'copies' => 1],
@@ -334,7 +286,10 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('pending', $payment->fresh()->status);
         $this->assertSame('BUNDLE-REF-NEW', $payment->fresh()->reference_number);
         $this->assertNotSame($oldProof, $payment->fresh()->proof_of_payment);
-        Storage::disk('local')->assertMissing($oldProof);
+        Storage::disk('local')->assertExists($oldProof);
+        $this->assertSame(2, DocumentPaymentProof::where('appointment_payment_id', $payment->id)->count());
+        $this->assertSame('rejected', DocumentPaymentProof::where('appointment_payment_id', $payment->id)->oldest('id')->first()->status);
+        $this->assertSame('pending', DocumentPaymentProof::where('appointment_payment_id', $payment->id)->latest('id')->first()->status);
         $this->assertSame(2, $appointment->documentRequests()->where('payment_status', 'pending_verification')->count());
     }
 
@@ -347,7 +302,7 @@ class AppointmentFlowTest extends TestCase
         Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
         Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
 
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $slot->id,
             'documents' => [['document_type' => 'diploma', 'copies' => 1]],
             'payment_method' => 'gcash',
@@ -378,7 +333,7 @@ class AppointmentFlowTest extends TestCase
         Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
         Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
 
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $slot->id,
             'documents' => [
                 ['document_type' => 'transcript', 'copies' => 1],
@@ -433,7 +388,7 @@ class AppointmentFlowTest extends TestCase
         $registrar = $this->makeUserWithRole('registrar');
         $slot = $this->makeSlot();
 
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $slot->id,
             'document_type' => 'certification',
             'purpose' => 'Scholarship application',
@@ -497,7 +452,7 @@ class AppointmentFlowTest extends TestCase
             ->where('title', 'Document Request Update')
             ->latest('id')
             ->firstOrFail();
-        $this->assertSame(route('portal.appointments.index'), $notification->link);
+        $this->assertSame(route('portal.documents.index'), $notification->link);
 
         $this->actingAs($student)
             ->get($notification->link)
@@ -507,61 +462,19 @@ class AppointmentFlowTest extends TestCase
     }
 
     /** @test */
-    public function student_can_book_with_gcash_and_submit_proof()
+    public function student_can_submit_a_standalone_gcash_proof(): void
     {
-        $student = $this->makeUserWithRole('student');
-        $slot    = $this->makeSlot();
-        Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
-        Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
-
-        $response = $this->actingAs($student)->post(route('portal.appointments.store'), [
-            'appointment_slot_id' => $slot->id,
-            'document_type'       => 'diploma',
-            'purpose'             => 'For employment application',
-            'payment_method'      => 'gcash',
-            'reference_number'    => '1234567890',
-            'proof_of_payment'    => $this->fakeProof(),
-        ]);
-
-        $response->assertRedirect(route('portal.appointments.index'));
-
-        $appointment = Appointment::where('user_id', $student->id)->first();
-        $this->assertNotNull($appointment);
-
-        $payment = $appointment->payments()->where('is_document_bundle', true)->firstOrFail();
-        $this->assertSame('100.00', $payment->amount);
-        $this->assertSame('pending', $payment->status);
-        $documentRequest = DocumentRequest::where('appointment_id', $appointment->id)->firstOrFail();
-        $this->assertSame('gcash_qr', $documentRequest->payment_method);
-        $this->assertSame('pending_verification', $documentRequest->payment_status);
-        $this->assertSame('100.00', $documentRequest->fee);
-        $this->assertSame('1234567890', $payment->reference_number);
-        Storage::disk('local')->assertExists($payment->proof_of_payment);
-
-        $this->actingAs($student)
-            ->get(route('portal.payments.appointment', $appointment))
-            ->assertOk()
-            ->assertSee('Document payment')
-            ->assertDontSee('Combined document payment');
-
-        $cashier = $this->makeUserWithRole('cashier');
-        $this->actingAs($cashier)
-            ->get(route('cashier.document-payments.index', ['status' => 'pending_verification']))
-            ->assertOk()
-            ->assertSee('Appointment payments')
-            ->assertSee('1 document')
-            ->assertDontSee('Combined appointment payments');
-        $this->get(route('cashier.document-payments.show', $documentRequest))
-            ->assertOk()
-            ->assertSee('Document payment')
-            ->assertSee('Verify GCash payment')
-            ->assertDontSee('combined');
-        $this->actingAs($cashier)->post(route('cashier.document-payments.bundles.verify', $payment), [
-            'amount_received' => '100.00',
-            'receipt_no' => 'DTC-OR-GC-001',
-        ])->assertRedirect(route('cashier.document-payments.show', $documentRequest));
-        $this->assertSame('verified', $documentRequest->fresh()->payment_status);
-        $this->assertTrue($documentRequest->fresh()->is_paid);
+        $owner = $this->makeUserWithRole('student');
+        Setting::set('gcash_qr_path', 'qr.png'); Storage::disk('local')->put('qr.png', 'qr');
+        $this->actingAs($owner)->post(route('portal.appointments.store'), ['document_type' => 'diploma', 'payment_method' => 'gcash', 'reference_number' => 'ONE', 'proof_of_payment' => $this->fakeProof()])->assertSessionHasNoErrors();
+        $document = DocumentRequest::sole();
+        $this->assertSame('pending_verification', $document->payment_status);
+        $this->assertSame('100.00', $document->fee);
+        Storage::disk('local')->assertExists($document->proof_of_payment);
+        $this->get(route('portal.payments.document', $document))->assertOk();
+        $this->actingAs($this->makeUserWithRole('cashier'))->post(route('cashier.document-payments.verify-gcash', $document), ['amount_received' => 100, 'receipt_no' => 'ONE'])->assertSessionHasNoErrors();
+        $this->assertTrue($document->fresh()->paymentSatisfied());
+        $this->assertDatabaseCount('appointment_payments', 0);
     }
 
     /** @test */
@@ -573,7 +486,7 @@ class AppointmentFlowTest extends TestCase
         Storage::disk('local')->put('settings/gcash-qr.png', 'qr');
         Setting::set('gcash_qr_path', 'settings/gcash-qr.png');
 
-        $this->actingAs($student)->post(route('portal.appointments.store'), [
+        $this->actingAs($student)->historicalSubmission( [
             'appointment_slot_id' => $slot->id,
             'document_type' => 'diploma',
             'purpose' => 'For employment application',
@@ -605,7 +518,7 @@ class AppointmentFlowTest extends TestCase
     }
 
     /** @test */
-    public function gcash_booking_requires_reference_number_and_proof()
+    public function gcash_submission_requires_reference_number_and_proof()
     {
         $student = $this->makeUserWithRole('student');
         $slot    = $this->makeSlot();
@@ -649,7 +562,7 @@ class AppointmentFlowTest extends TestCase
     }
 
     /** @test */
-    public function student_cannot_book_a_full_slot()
+    public function student_submission_does_not_use_full_slots()
     {
         $student = $this->makeUserWithRole('student');
         $slot    = $this->makeSlot(['max_bookings' => 1]);
@@ -666,12 +579,12 @@ class AppointmentFlowTest extends TestCase
             'payment_method'      => 'walk_in',
         ]);
 
-        $response->assertSessionHasErrors('appointment_slot_id');
+        $response->assertSessionHasNoErrors();
         $this->assertDatabaseMissing('appointments', ['user_id' => $student->id]);
     }
 
     /** @test */
-    public function student_cannot_double_book_the_same_slot()
+    public function student_submission_does_not_rebook_an_existing_slot()
     {
         $student = $this->makeUserWithRole('student');
         $slot    = $this->makeSlot(['max_bookings' => 5]);
@@ -688,7 +601,7 @@ class AppointmentFlowTest extends TestCase
             'payment_method'      => 'walk_in',
         ]);
 
-        $response->assertSessionHasErrors('appointment_slot_id');
+        $response->assertSessionHasNoErrors();
         $this->assertSame(1, Appointment::where('user_id', $student->id)->count());
     }
 
@@ -1132,7 +1045,7 @@ class AppointmentFlowTest extends TestCase
     }
 
     /** @test */
-    public function pickup_booked_from_a_ready_document_request_remains_linked_after_confirmation()
+    public function ready_document_is_collected_without_creating_a_new_pickup_appointment()
     {
         $registrar = $this->makeUserWithRole('registrar');
         $alumnus = $this->makeUserWithRole('alumni');
@@ -1148,35 +1061,16 @@ class AppointmentFlowTest extends TestCase
             'payment_status' => 'verified',
         ]);
 
-        $this->actingAs($alumnus)
-            ->get(route('portal.documents.index'))
-            ->assertOk()
-            ->assertSee('Choose a pickup time');
-
-        $this->actingAs($alumnus)
-            ->post(route('portal.documents.pickup-appointment', $request), [
-                'appointment_slot_id' => $slot->id,
-            ])
-            ->assertRedirect(route('portal.documents.index'));
-
-        $request->refresh();
-        $this->assertNotNull($request->appointment_id);
-        $appointment = Appointment::findOrFail($request->appointment_id);
-        $this->assertSame($request->id, DocumentRequest::where('appointment_id', $appointment->id)->value('id'));
-
-        $this->actingAs($registrar)
-            ->post(route('registrar.appointments.confirm', $appointment))
-            ->assertRedirect(route('registrar.documents.index'));
-
-        $this->actingAs($registrar)
-            ->get(route('registrar.documents.index'))
-            ->assertOk()
-            ->assertSee('Pickup')
-            ->assertSee('Confirmed')
-            ->assertSee(\Carbon\Carbon::parse($slot->date)->format('M d, Y'));
-
-        $this->assertSame('ready', $request->fresh()->status);
-        $this->assertSame('confirmed', $appointment->fresh()->status);
+        $this->actingAs($alumnus)->get(route('portal.documents.index'))->assertOk()->assertSee('No appointment is required.');
+        $this->post(route('portal.documents.pickup-appointment', $request), ['appointment_slot_id' => $slot->id])->assertSessionHasErrors('appointment_slot_id');
+        $this->assertNull($request->fresh()->appointment_id);
+        $this->actingAs($registrar)->post(route('registrar.documents.walk-in-release'), [
+            'claimant_id' => $alumnus->id, 'document_ids' => [$request->id], 'handover_confirmed' => '1',
+            'operation_key' => (string) \Illuminate\Support\Str::uuid(),
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('released', $request->fresh()->status);
+        $this->assertSame($registrar->id, $request->fresh()->released_by);
+        $this->assertDatabaseCount('appointments', 0);
     }
 
     /** @test */

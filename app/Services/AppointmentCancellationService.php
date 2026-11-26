@@ -21,8 +21,9 @@ class AppointmentCancellationService
     {
         $isStaff = $actor->hasAnyRole(['registrar', 'admin']);
         abort_if(! $isStaff && $appointment->user_id !== $actor->id, 403);
+        abort_if($appointment->visit_type === 'claiming', 422, 'Claiming cancellation requires a reservation-aware recovery workflow.');
 
-        $result = DB::transaction(function () use ($appointment, $actor, $request, $remarks, $isStaff) {
+        $result = app(AppointmentLifecycle::class)->run($request, 'appointment.cancelled', $appointment, [], [], function () use ($appointment, $actor, $request, $remarks, $isStaff) {
             $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
 
             if ($lockedAppointment->status === 'cancelled') {
@@ -35,14 +36,14 @@ class AppointmentCancellationService
             }
 
             $legacyPayments = AppointmentPayment::where('appointment_id', $lockedAppointment->id)
-                ->lockForUpdate()
+                ->orderBy('id')->lockForUpdate()
                 ->get();
             if ($legacyPayments->contains('status', 'verified')) {
                 return ['result' => 'verified_legacy_payment'];
             }
 
             $documentRequests = DocumentRequest::where('appointment_id', $lockedAppointment->id)
-                ->lockForUpdate()
+                ->orderBy('id')->lockForUpdate()
                 ->get();
 
             if (! $isStaff && $documentRequests->contains(fn ($documentRequest) => in_array($documentRequest->status, ['processing', 'ready', 'released'], true))) {
@@ -105,7 +106,7 @@ class AppointmentCancellationService
                 'document_request' => $documentRequests->first()?->fresh(),
                 'request_disposition' => $requestDisposition,
             ];
-        });
+        }, ['appointment_id' => $appointment->id, 'remarks' => $remarks]);
 
         if ($result['result'] !== 'cancelled') {
             return $result;
@@ -116,6 +117,7 @@ class AppointmentCancellationService
         $documentRequest = $result['document_request'];
         $requestDisposition = $result['request_disposition'];
         $result['user_message'] = $this->applicantMessage($documentRequests, $requestDisposition, $remarks);
+        if ($request->attributes->get('lifecycle_replayed')) return $result;
         $destination = $cancelledAppointment->user->hasRole('alumni')
             ? route('portal.documents.index')
             : route('portal.appointments.index');

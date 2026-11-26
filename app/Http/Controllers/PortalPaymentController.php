@@ -16,10 +16,10 @@ class PortalPaymentController extends Controller
     public function document(Request $request, DocumentRequest $documentRequest)
     {
         abort_unless($documentRequest->user_id === $request->user()->id, 403);
-        $bundle = $documentRequest->appointment?->payments()
+        $bundle = $documentRequest->paymentAppointment?->payments()
             ->where('is_document_bundle', true)->latest()->first();
         if ($bundle) {
-            return redirect()->route('portal.payments.appointment', $documentRequest->appointment);
+            return redirect()->route('portal.payments.appointment', $documentRequest->paymentAppointment);
         }
         $alumni = $request->user()->hasRole('alumni');
         $paid = $documentRequest->is_paid || $documentRequest->payment_status === 'verified';
@@ -35,10 +35,10 @@ class PortalPaymentController extends Controller
             'canSwitchToGcash' => false,
             'remarks' => $documentRequest->payment_rejection_reason, 'receipt' => $documentRequest->receipt_no,
             'reference' => $documentRequest->reference_number,
-            'backUrl' => route($alumni ? 'portal.documents.index' : 'portal.appointments.index'),
-            'submitUrl' => route($alumni ? 'portal.documents.payment.submit' : 'portal.appointments.document-payment.gcash', $documentRequest),
-            'proofUrl' => $documentRequest->proof_of_payment ? route($alumni ? 'portal.documents.payment.proof' : 'portal.appointments.document-payment.proof', $documentRequest) : null,
-            'qrUrl' => route($alumni ? 'portal.documents.gcash.qr' : 'portal.appointments.gcash.qr'), 'referenceMax' => 100,
+            'backUrl' => route('portal.documents.index'),
+            'submitUrl' => route($alumni ? 'portal.documents.payment.submit' : 'portal.documents.payment.gcash', $documentRequest),
+            'proofUrl' => $documentRequest->proof_of_payment ? route('portal.documents.payment.proof', $documentRequest) : null,
+            'qrUrl' => route('portal.documents.gcash.qr'), 'referenceMax' => 100,
         ]);
     }
 
@@ -72,7 +72,7 @@ class PortalPaymentController extends Controller
                 return 'unavailable';
             }
 
-            $documents = $lockedAppointment->documentRequests()->where('fee', '>', 0)->lockForUpdate()->get();
+            $documents = $lockedAppointment->paymentDocuments()->where('fee', '>', 0)->lockForUpdate()->get();
             if ($documents->isEmpty() || $documents->contains(fn ($document) =>
                 $document->is_paid
                 || $document->payment_status !== 'unpaid'
@@ -82,7 +82,7 @@ class PortalPaymentController extends Controller
             }
 
             $payment->update(['payment_method' => 'gcash']);
-            $lockedAppointment->documentRequests()->where('fee', '>', 0)->update(['payment_method' => 'gcash_qr']);
+            $lockedAppointment->paymentDocuments()->where('fee', '>', 0)->update(['payment_method' => 'gcash_qr']);
 
             AuditLog::create([
                 'user_id' => $request->user()->id,
@@ -135,7 +135,7 @@ class PortalPaymentController extends Controller
                 return;
             }
 
-            $documents = $lockedAppointment->documentRequests()->where('fee', '>', 0)->lockForUpdate()->get();
+            $documents = $lockedAppointment->paymentDocuments()->where('fee', '>', 0)->lockForUpdate()->get();
             if ($documents->isEmpty() || $documents->contains(fn ($document) =>
                 $document->is_paid
                 || $document->payment_status !== 'unpaid'
@@ -146,7 +146,7 @@ class PortalPaymentController extends Controller
             }
 
             $payment->update(['payment_method' => 'walk_in']);
-            $lockedAppointment->documentRequests()->where('fee', '>', 0)->update(['payment_method' => 'walk_in']);
+            $lockedAppointment->paymentDocuments()->where('fee', '>', 0)->update(['payment_method' => 'walk_in']);
 
             AuditLog::create([
                 'user_id' => $request->user()->id,
@@ -169,9 +169,12 @@ class PortalPaymentController extends Controller
     public function appointment(Request $request, Appointment $appointment)
     {
         abort_unless($appointment->user_id === $request->user()->id, 403);
+        if ($appointment->visit_type === 'claiming') {
+            return redirect()->route('portal.claiming-appointments.index');
+        }
         $payment = $appointment->latestPayment;
         if ($payment && $payment->is_document_bundle) {
-            $documents = $appointment->documentRequests;
+            $documents = $appointment->paymentDocuments()->get();
             $status = $appointment->paymentNotRequired() && (float) $payment->amount === 0.0 && $payment->status !== 'verified' ? 'not_required' : match ($payment->status) {
                 'verified' => 'verified',
                 'rejected' => 'rejected',

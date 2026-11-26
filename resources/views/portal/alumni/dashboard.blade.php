@@ -130,8 +130,8 @@
                 <a href="{{ route('portal.documents.index') }}" class="quick-action-btn">
                     <i data-lucide="list"></i> My Requests
                 </a>
-                <a href="{{ route('portal.appointments.create') }}" class="quick-action-btn">
-                    <i data-lucide="calendar-check"></i> Book Appointment
+                <a href="{{ route('portal.documents.create') }}" class="quick-action-btn">
+                    <i data-lucide="calendar-check"></i> Request Documents
                 </a>
                 <a href="{{ route('notifications.index') }}" class="quick-action-btn">
                     <i data-lucide="bell"></i> Notifications

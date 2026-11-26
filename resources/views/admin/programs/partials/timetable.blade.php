@@ -37,6 +37,10 @@
                     <label for="tt-close">Latest class end<select id="tt-close" name="closing_hour" class="form-control">@foreach([17=>'5 PM',18=>'6 PM',19=>'7 PM'] as $hour=>$label)<option value="{{ $hour }}" @selected((int)old('closing_hour',17) === $hour)>{{ $label }}</option>@endforeach</select></label>
                 </div>
                 <p class="tt-help">Extended hours also require instructor availability. NSTP, ROTC and laboratory contact hours must be entered explicitly; units do not determine meeting duration.</p>
+                @if($timetableDraft)
+                    <label class="tt-confirm"><input type="checkbox" name="source_id" value="{{ $timetableDraft->id }}" @checked(old('source_id'))> Copy assignments from {{ $timetableDraft->group_code }}</label>
+                    <p class="tt-help">Use the same program, year level and mode as the source. The new draft uses the configured current term and the group details above. Only subjects in the current curriculum are copied; conflicts need review.</p>
+                @endif
                 <div class="tt-actions"><button type="submit" class="dtc-btn dtc-btn-primary">Create draft</button></div>
             </form>
         </details>
@@ -63,6 +67,27 @@
             @endphp
             <div class="tt-draft-heading"><div><h5>{{ $draft->group_code }} <span class="tt-help">{{ $draft->is_demo ? 'Demonstration only' : ucfirst($draft->status) }}</span></h5><p class="tt-help mb-0">{{ $draft->program->name }} · Year {{ $draft->year_level }} · {{ $draft->school_year }} · Semester {{ $draft->semester }} · {{ $draft->capacity }} students</p></div></div>
             @if($draft->is_demo)<p class="tt-notice">Demonstration data. The room, instructor, availability and meeting requirements below are fictional presets and cannot become live offerings.</p>@endif
+            <details class="tt-section">
+                <summary>CSV and draft tools</summary>
+                <p class="tt-help">Export the saved assignments as a CSV template for Excel. Keep the column headings and subject IDs unchanged. Use the instructor and room IDs shown in the editor. Days use MWF, TTH or a single-day code; times use HH:MM (24-hour format).</p>
+                <div class="tt-actions"><a class="dtc-btn dtc-btn-secondary" href="{{ route('admin.timetables.export', $draft) }}">Export CSV</a></div>
+                @if($draft->status === 'draft')
+                    <form method="POST" action="{{ route('admin.timetables.update', $draft) }}" enctype="multipart/form-data" class="mt-3">
+                        @csrf @method('PUT')
+                        <input type="hidden" name="action" value="import">
+                        <label for="tt-csv">Import CSV preview<input id="tt-csv" class="form-control" type="file" name="csv" accept=".csv,text/csv" required></label>
+                        <p class="tt-help">Preview replaces unsaved editor values. Nothing is saved until you choose Save review. Maximum file size: 256 KB; include every subject exactly once.</p>
+                        <div class="tt-actions"><button class="dtc-btn dtc-btn-secondary" type="submit">Preview CSV</button></div>
+                    </form>
+                    <form method="POST" action="{{ route('admin.timetables.update', $draft) }}" class="mt-4">
+                        @csrf @method('PUT')
+                        <input type="hidden" name="action" value="clear">
+                        <p class="tt-help">Clear days, times, rooms and instructors. Keep the subjects, meeting durations, facility requirements and group details.</p>
+                        <label class="tt-confirm"><input type="checkbox" name="confirmed" value="1" required> Clear all schedule assignments for this draft</label>
+                        <div class="tt-actions"><button class="dtc-btn dtc-btn-secondary" type="submit">Clear draft schedule</button></div>
+                    </form>
+                @endif
+            </details>
             @if($draft->status === 'published')
                 <p class="tt-notice">Published {{ $draft->published_at->timezone('Asia/Manila')->format('M j, Y g:i A') }}. Eligible new enrollments can be assigned to this group automatically when the complete selected load fits. Existing enrollments waiting for sections still need Registrar assignment. Published timetables are read only.</p>
             @else
@@ -89,14 +114,14 @@
                     @foreach($timetableSubjects as $index => $subject)
                         @php $row = old('rows.'.$index, $proposalRows->get($subject->id, $draft->configuration['requirements'][$subject->id] ?? [])); @endphp
                         <div class="tt-subject">
-                            <div class="tt-subject-title"><strong>{{ $subject->subject_code }}</strong><span>{{ $subject->subject_name }} · {{ $subject->units }} units</span></div>
+                            <div class="tt-subject-title"><strong>{{ $subject->subject_code }}</strong><span>{{ $subject->subject_name }} · {{ $subject->units }} units · CSV subject ID: {{ $subject->id }}</span></div>
                             <input type="hidden" name="rows[{{ $index }}][subject_id]" value="{{ $subject->id }}">
                             <div class="tt-grid">
-                                <label for="tt-instructor-{{ $index }}">Instructor<select id="tt-instructor-{{ $index }}" name="rows[{{ $index }}][instructor_id]" class="form-control"><option value="">Choose instructor</option>@foreach($resourceChoices->where('kind','instructor') as $choice)<option value="{{ $choice['id'] }}" @selected((string)($row['instructor_id'] ?? '') === (string)$choice['id'])>{{ $choice['name'] }}</option>@endforeach</select></label>
+                                <label for="tt-instructor-{{ $index }}">Instructor<select id="tt-instructor-{{ $index }}" name="rows[{{ $index }}][instructor_id]" class="form-control"><option value="">Choose instructor</option>@foreach($resourceChoices->where('kind','instructor') as $choice)<option value="{{ $choice['id'] }}" @selected((string)($row['instructor_id'] ?? '') === (string)$choice['id'])>{{ $choice['name'] }} (ID {{ $choice['id'] }})</option>@endforeach</select></label>
                                 <label for="tt-pattern-{{ $index }}">Meeting days<select id="tt-pattern-{{ $index }}" name="rows[{{ $index }}][pattern]" class="form-control"><option value="">Choose pattern</option>@foreach(\App\Services\TimetableService::PATTERNS as $pattern)<option value="{{ $pattern }}" @selected(($row['pattern'] ?? '') === $pattern)>{{ $pattern }}</option>@endforeach</select></label>
                                 <label for="tt-minutes-{{ $index }}">Minutes per meeting<input id="tt-minutes-{{ $index }}" type="number" min="30" max="480" step="30" class="form-control" name="rows[{{ $index }}][minutes]" value="{{ $row['minutes'] ?? '' }}"></label>
                                 <label for="tt-required-facility-{{ $index }}">Required facility<select id="tt-required-facility-{{ $index }}" name="rows[{{ $index }}][facility]" class="form-control"><option value="">Choose facility</option>@foreach(\App\Services\TimetableService::FACILITIES as $facility)<option value="{{ $facility }}" @selected(($row['facility'] ?? '') === $facility)>{{ ucwords(str_replace('_',' ',$facility)) }}</option>@endforeach</select></label>
-                                <label for="tt-room-{{ $index }}">Room<select id="tt-room-{{ $index }}" name="rows[{{ $index }}][room_id]" class="form-control"><option value="">Unassigned</option>@foreach($resourceChoices->where('kind','room') as $choice)<option value="{{ $choice['id'] }}" @selected((string)($row['room_id'] ?? '') === (string)$choice['id'])>{{ $choice['name'] }} · {{ $choice['configuration']['capacity'] }} seats</option>@endforeach</select></label>
+                                <label for="tt-room-{{ $index }}">Room<select id="tt-room-{{ $index }}" name="rows[{{ $index }}][room_id]" class="form-control"><option value="">Unassigned</option>@foreach($resourceChoices->where('kind','room') as $choice)<option value="{{ $choice['id'] }}" @selected((string)($row['room_id'] ?? '') === (string)$choice['id'])>{{ $choice['name'] }} (ID {{ $choice['id'] }}) · {{ $choice['configuration']['capacity'] }} seats</option>@endforeach</select></label>
                                 <label for="tt-time-start-{{ $index }}">Start<input id="tt-time-start-{{ $index }}" type="time" class="form-control" name="rows[{{ $index }}][start]" value="{{ $row['start'] ?? '' }}"></label>
                                 <label for="tt-time-end-{{ $index }}">End<input id="tt-time-end-{{ $index }}" type="time" class="form-control" name="rows[{{ $index }}][end]" value="{{ $row['end'] ?? '' }}"></label>
                             </div>

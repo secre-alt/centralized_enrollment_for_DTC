@@ -38,7 +38,7 @@ class NotificationController extends Controller
     /** Return only this Cashier's notification deltas for navbar polling. */
     public function cashierPoll(Request $request)
     {
-        abort_unless($request->user()->hasRole('cashier'), 403);
+        abort_unless($request->user()->hasAnyRole(['cashier', 'admin']), 403);
         return $this->poll($request);
     }
 

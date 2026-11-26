@@ -79,6 +79,46 @@ class AppointmentEditingSafetyTest extends TestCase
         $this->assertSame('verified', $document->fresh()->payment_status);
     }
 
+    public function test_progressing_or_completed_documents_keep_their_content_when_a_pending_booking_is_edited(): void
+    {
+        foreach (['processing', 'ready', 'released'] as $status) {
+            [$appointment, $document] = $this->booking('verified');
+            $document->update(['status' => $status, 'purpose' => 'Original purpose']);
+
+            $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment, 'diploma'))
+                ->assertSessionHasErrors('document_type');
+
+            $document->refresh();
+            $this->assertSame('tor', $document->document_type);
+            $this->assertSame('Original purpose', $document->purpose);
+            $this->assertSame('80.00', $document->fee);
+            $this->assertSame('transcript', $appointment->fresh()->document_type);
+        }
+    }
+
+    public function test_mixed_status_bundle_only_updates_submitted_document_purpose(): void
+    {
+        [$appointment, $submitted] = $this->booking();
+        $submitted->update(['purpose' => 'Original submitted purpose']);
+        $ready = DocumentRequest::create([
+            'user_id' => $appointment->user_id,
+            'appointment_id' => $appointment->id,
+            'document_type' => 'diploma',
+            'copies' => 1,
+            'fee' => 100,
+            'status' => 'ready',
+            'purpose' => 'Ready document purpose',
+            'payment_method' => 'walk_in',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('Updated purpose', $submitted->fresh()->purpose);
+        $this->assertSame('Ready document purpose', $ready->fresh()->purpose);
+    }
+
     public function test_edit_dialog_shows_document_choices_only_when_editable(): void
     {
         [$appointment] = $this->booking('unpaid');

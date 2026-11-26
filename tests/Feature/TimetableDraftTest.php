@@ -10,6 +10,7 @@ use App\Models\TimetableDraft;
 use App\Models\TimetableResource;
 use App\Services\TimetableService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\SeedsRoles;
 use Tests\TestCase;
 
@@ -243,6 +244,9 @@ class TimetableDraftTest extends TestCase
             $this->post(route('admin.timetables.store'), [])->assertForbidden();
             $this->post(route('admin.timetables.resources'), [])->assertForbidden();
             $this->put(route('admin.timetables.update', $draft), ['action' => 'publish', 'reviewed' => 1])->assertForbidden();
+            $this->put(route('admin.timetables.update', $draft), ['action' => 'clear', 'confirmed' => 1])->assertForbidden();
+            $this->put(route('admin.timetables.update', $draft), ['action' => 'import'])->assertForbidden();
+            $this->get(route('admin.timetables.export', $draft))->assertForbidden();
         }
         $this->assertSame('draft', $draft->fresh()->status);
     }
@@ -274,6 +278,112 @@ class TimetableDraftTest extends TestCase
         $room->update(['configuration' => $configuration]);
         $this->publish($draft)->assertSessionHasErrors('timetable');
         $this->assertSame(0, ClassSchedule::count());
+    }
+
+    public function test_clear_requires_confirmation_and_preserves_group_and_published_offerings(): void
+    {
+        [$room, $instructor] = $this->resources();
+        [$draft, $subject] = $this->setupDraft();
+        $this->save($draft, [$this->row($subject, $room, $instructor)])->assertSessionHasNoErrors();
+        $this->put(route('admin.timetables.update', $draft), ['action' => 'clear'])->assertSessionHasErrors('confirmed');
+        $this->assertNotEmpty($draft->fresh()->proposals);
+        $this->put(route('admin.timetables.update', $draft), ['action' => 'clear', 'confirmed' => 1])->assertSessionHasNoErrors();
+        $draft->refresh();
+        $this->assertNull($draft->proposals);
+        $this->assertSame(['minutes' => 60, 'facility' => 'classroom'], $draft->configuration['requirements'][$subject->id]);
+        $this->assertSame('BSTM 1A', $draft->group_code);
+        $this->assertSame(30, $draft->capacity);
+        $this->publish($draft)->assertSessionHasErrors('timetable');
+        $this->save($draft, [$this->row($subject, $room, $instructor)])->assertSessionHasNoErrors();
+        $this->publish($draft)->assertSessionHasNoErrors();
+        $this->put(route('admin.timetables.update', $draft), ['action' => 'clear', 'confirmed' => 1])->assertSessionHasErrors('timetable');
+        $this->assertSame(1, ClassSchedule::count());
+    }
+
+    public function test_copy_uses_current_term_rechecks_conflicts_and_keeps_source_intact(): void
+    {
+        [$room, $instructor] = $this->resources();
+        [$source, $subject] = $this->setupDraft();
+        $this->save($source, [$this->row($subject, $room, $instructor)])->assertSessionHasNoErrors();
+        $this->publish($source)->assertSessionHasNoErrors();
+        $original = $source->fresh()->proposals;
+        $data = ['source_id' => $source->id, 'program_id' => $source->program_id, 'year_level' => 1,
+            'group_code' => 'BSTM 1B', 'capacity' => 30, 'is_demo' => 0, 'closing_hour' => 17];
+        $this->post(route('admin.timetables.store'), $data)->assertSessionHasNoErrors();
+        $copy = TimetableDraft::latest('id')->first();
+        $this->assertSame('draft', $copy->status);
+        $this->assertNotEmpty($copy->proposals[0]['issue']);
+        $this->assertSame($original, $source->fresh()->proposals);
+        Setting::set('current_school_year', '2027-2028');
+        $added = CourseSubject::factory()->create(['program_id' => $source->program_id, 'year_level' => 1, 'semester' => 1]);
+        $this->post(route('admin.timetables.store'), $data)->assertSessionHasNoErrors();
+        $copy = TimetableDraft::latest('id')->first();
+        $this->assertSame('2027-2028', $copy->school_year);
+        $this->assertNull($copy->proposals[0]['issue']);
+        $this->assertSame($added->id, $copy->proposals[1]['subject_id']);
+        $this->assertNotEmpty($copy->proposals[1]['issue']);
+        $this->post(route('admin.timetables.store'), array_merge($data, ['is_demo' => 1]))->assertSessionHasErrors('source_id');
+        $this->assertSame(3, TimetableDraft::count());
+        $this->assertSame(1, ClassSchedule::count());
+    }
+
+    public function test_csv_round_trip_previews_without_saving_then_uses_normal_review(): void
+    {
+        [$room, $instructor] = $this->resources();
+        [$draft, $subject] = $this->setupDraft();
+        $this->save($draft, [$this->row($subject, $room, $instructor)])->assertSessionHasNoErrors();
+        $export = $this->get(route('admin.timetables.export', $draft))->assertOk();
+        $this->assertStringContainsString('no-store', $export->headers->get('Cache-Control'));
+        $csv = $export->streamedContent();
+        $this->assertStringContainsString('subject_id,instructor_id,room_id,pattern,minutes,facility,start,end', $csv);
+        $original = $draft->fresh()->proposals;
+        $csv = str_replace('08:00,09:00', '09:00,10:00', $csv);
+        $response = $this->put(route('admin.timetables.update', $draft), ['action' => 'import',
+            'csv' => UploadedFile::fake()->createWithContent('schedule.csv', $csv)])->assertSessionHasNoErrors();
+        $rows = session()->getOldInput('rows');
+        $this->assertSame('09:00', $rows[0]['start']);
+        $this->assertNull($rows[0]['issue']);
+        $this->assertSame($original, $draft->fresh()->proposals);
+        $this->get($response->headers->get('Location'))->assertOk()->assertSee('data-restored-edits', false);
+        $this->put(route('admin.timetables.update', $draft), ['action' => 'import',
+            'csv' => UploadedFile::fake()->createWithContent('schedule.csv', str_replace('09:00,10:00', '11:30,12:30', $csv))])->assertSessionHasNoErrors();
+        $this->assertNotEmpty(session()->getOldInput('rows')[0]['issue']);
+        $this->assertSame($original, $draft->fresh()->proposals);
+        $this->save($draft, $rows)->assertSessionHasNoErrors();
+        $this->assertSame('09:00', $draft->fresh()->proposals[0]['start']);
+        $this->publish($draft)->assertSessionHasNoErrors();
+        $this->put(route('admin.timetables.update', $draft), ['action' => 'import',
+            'csv' => UploadedFile::fake()->createWithContent('schedule.csv', $csv)])->assertSessionHasErrors('timetable');
+    }
+
+    public function test_csv_rejects_invalid_headers_values_and_incomplete_or_duplicate_subjects(): void
+    {
+        [$draft, $subject] = $this->setupDraft();
+        $header = "subject_id,instructor_id,room_id,pattern,minutes,facility,start,end\n";
+        foreach (["wrong,header\n", $header, $header."{$subject->id},,,MWF,60,classroom,25:00,09:00\n",
+            $header."999999,,,MWF,60,classroom,08:00,09:00\n",
+            $header.str_repeat("{$subject->id},,,MWF,60,classroom,08:00,09:00\n", 2),
+            $header."{$subject->id},too,few\n"] as $csv) {
+            $this->put(route('admin.timetables.update', $draft), ['action' => 'import',
+                'csv' => UploadedFile::fake()->createWithContent('schedule.csv', $csv)])->assertSessionHasErrors();
+            $this->assertNull($draft->fresh()->proposals);
+        }
+    }
+
+    public function test_csv_preview_keeps_assignments_with_their_subject_when_rows_are_reordered(): void
+    {
+        [$room, $instructor] = $this->resources();
+        [$draft, $subject] = $this->setupDraft();
+        $second = CourseSubject::factory()->create(['program_id' => $draft->program_id, 'year_level' => 1, 'semester' => 1]);
+        $csv = "subject_id,instructor_id,room_id,pattern,minutes,facility,start,end\n"
+            ."{$second->id},{$instructor->id},{$room->id},MWF,60,classroom,09:00,10:00\n"
+            ."{$subject->id},{$instructor->id},{$room->id},MWF,60,classroom,08:00,09:00\n";
+        $this->put(route('admin.timetables.update', $draft), ['action' => 'import',
+            'csv' => UploadedFile::fake()->createWithContent('schedule.csv', $csv)])->assertSessionHasNoErrors();
+        $rows = session()->getOldInput('rows');
+        $this->assertSame([$subject->id, $second->id], array_map('intval', array_column($rows, 'subject_id')));
+        $this->assertSame(['08:00', '09:00'], array_column($rows, 'start'));
+        $this->assertNull($draft->fresh()->proposals);
     }
 
     public function test_other_terms_and_inactive_offerings_do_not_block_the_current_term(): void

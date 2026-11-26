@@ -198,6 +198,20 @@ class EnrollmentRefundReconciliationTest extends TestCase
         $this->followingRedirects()->get(route('admin.reports.payment'))->assertOk()->assertSee('Payment Reports');
     }
 
+    public function test_admin_can_record_a_full_refund_with_the_actual_actor_preserved(): void
+    {
+        $student = $this->makeUserWithRole('student');
+        $admin = $this->makeUserWithRole('admin');
+        [, $enrollment, $payment] = $this->rejectedPaidEnrollment($student);
+        $this->actingAs($admin)->post(route('cashier.payments.confirm-refund', $payment), [
+            'refund_amount' => '500.00', 'refund_reference' => 'ADMIN-REFUND-TEST',
+        ])->assertRedirect(route('cashier.payments.show', $enrollment))->assertSessionHasNoErrors();
+        $payment->refresh();
+        $this->assertSame('verified', $payment->status);
+        $this->assertSame('refunded', $payment->refund_status);
+        $this->assertSame($admin->id, $payment->refunded_by);
+    }
+
     public function test_competing_gcash_submissions_for_the_same_term_cannot_both_create_payment_attempts(): void
     {
         $student = $this->makeUserWithRole('student');

@@ -255,8 +255,8 @@
                 <a href="{{ route('portal.enrollment.index') }}" class="quick-action-btn">
                     <i data-lucide="file-text"></i> My Application
                 </a>
-                <a href="{{ route('portal.appointments.create') }}" class="quick-action-btn">
-                    <i data-lucide="calendar-check"></i> Book Appointment
+                <a href="{{ route('portal.documents.create') }}" class="quick-action-btn">
+                    <i data-lucide="calendar-check"></i> Request Documents
                 </a>
                 @if($latestEnrollment && $latestEnrollment->status === 'approved' && $latestEnrollment->is_paid)
                 <a href="{{ route('portal.cor.show') }}" class="quick-action-btn">

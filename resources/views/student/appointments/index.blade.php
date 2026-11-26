@@ -4,11 +4,10 @@
 @section('title', 'My Appointments')
 
 @section('content_header')
-    <x-dtc.page-header title="My appointments" subtitle="Track document preparation, pickup schedules, and payments">
+    <x-dtc.page-header title="My appointments" subtitle="View your scheduled visits and past appointments.">
         <x-slot name="actions">
-        <a href="{{ route('portal.appointments.create') }}" class="dtc-btn dtc-btn-primary">
-            <i data-lucide="plus" aria-hidden="true"></i> Request a document
-        </a>
+        <a href="{{ route('portal.claiming-appointments.index') }}" class="dtc-btn dtc-btn-secondary">Claiming history</a>
+        <a href="{{ route('portal.documents.index') }}" class="dtc-btn dtc-btn-secondary">Document requests</a>
         </x-slot>
     </x-dtc.page-header>
 @endsection
@@ -91,10 +90,10 @@
     @endif
 
     @if ($items->isEmpty())
-        <div class="dr-empty dr-appointments-empty">
+        <div class="dr-empty dr-appointments-empty dr-visit-empty">
             <span class="dr-appointments-empty-icon" aria-hidden="true"><i data-lucide="calendar-days"></i></span>
             <h2>No appointments yet</h2>
-            <p>Request a document to schedule your pickup.</p>
+            <p>Document requests and collection do not require an appointment.</p>
         </div>
     @else
         @if ($pickupNow > 0)
@@ -180,6 +179,7 @@
                             <div class="dr-request-details">
                                 <strong>{{ $document->document_label }} × {{ $document->copies }}</strong>
                                 <span class="u-text-secondary-sm">₱{{ number_format($document->fee, 2) }} · {{ ucfirst($document->status) }}</span>
+                                @if ($document->released_at)<p>Physically released {{ $document->released_at->timezone('Asia/Manila')->format('M d, Y g:i A') }} by {{ $document->releaser?->name ?? 'Recorded staff' }}.</p>@endif
                                 <ol class="dr-track" aria-label="Progress: step {{ $documentStage + 1 }} of 4">
                                     @foreach ($stageName as $i => $name)
                                         <li class="{{ $i < $documentStage || ($i === $documentStage && $document->status === 'released') ? 'is-done' : '' }} {{ $i === $documentStage ? 'is-current' : '' }}"
@@ -248,6 +248,7 @@
                             @if ($canStudentCancel)
                             <form id="cancel-appt-{{ $appointment->id }}" method="POST" action="{{ route('portal.appointments.cancel', $appointment) }}">
                                 @csrf
+                                @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
                                 <button type="button" class="dr-btn dr-btn--danger dr-btn--sm"
                                         data-dtc-confirm
                                         data-dtc-confirm-title="Cancel appointment?"
@@ -304,6 +305,7 @@
                           action="{{ route('portal.appointments.update', $appointment) }}">
                         @csrf
                         @method('PUT')
+                        @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
 
                         <div class="modal-header">
                             <h5 class="modal-title" id="edit-title-{{ $appointment->id }}" style="font-size:14px; font-weight:600;">
@@ -493,7 +495,7 @@
     <link rel="stylesheet" href="{{ asset('css/appointments-index.css') }}">
     <link rel="stylesheet" href="{{ asset('css/document-requests.css') }}">
     <link rel="stylesheet" href="{{ asset('css/document-request-flow.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/alumni-request-history.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/alumni-request-history.css') }}?v={{ filemtime(public_path('css/alumni-request-history.css')) }}">
 @endsection
 
 @section('js')

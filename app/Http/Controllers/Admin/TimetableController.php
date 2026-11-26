@@ -13,6 +13,32 @@ use Illuminate\Validation\ValidationException;
 
 class TimetableController extends Controller
 {
+    private const CSV_COLUMNS = ['subject_id', 'instructor_id', 'room_id', 'pattern', 'minutes', 'facility', 'start', 'end'];
+
+    public function export(TimetableDraft $draft, TimetableService $service)
+    {
+        $rows = $service->locked(function () use ($draft, $service) {
+            $draft = TimetableDraft::whereKey($draft->id)->lockForUpdate()->firstOrFail();
+            $saved = collect($draft->proposals ?? [])->keyBy('subject_id');
+
+            return $service->subjects($draft)->map(fn ($subject) => ['subject_id' => $subject->id]
+                + ($saved->get($subject->id) ?? $draft->configuration['requirements'][$subject->id] ?? []))->all();
+        });
+
+        return response()->streamDownload(function () use ($rows) {
+            $output = fopen('php://output', 'w');
+            fputcsv($output, self::CSV_COLUMNS);
+            foreach ($rows as $row) {
+                fputcsv($output, array_map(function ($column) use ($row) {
+                    $value = (string) ($row[$column] ?? '');
+
+                    return preg_match('/^[=+@\-\t\r\n]/', $value) ? "'".$value : $value;
+                }, self::CSV_COLUMNS));
+            }
+            fclose($output);
+        }, 'timetable-'.$draft->id.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'private, no-store']);
+    }
+
     public function resource(Request $request, TimetableService $service)
     {
         $data = $request->validate([
@@ -66,6 +92,7 @@ class TimetableController extends Controller
             'group_code' => ['required', 'string', 'max:30', 'regex:/^[A-Za-z0-9][A-Za-z0-9 ._-]*$/'],
             'capacity' => ['required', 'integer', 'between:1,1000'], 'is_demo' => ['required', 'boolean'],
             'closing_hour' => ['required', 'integer', 'in:17,18,19'],
+            'source_id' => ['nullable', 'integer', 'exists:timetable_drafts,id'],
         ]);
         $draft = $service->locked(function () use ($data, $request, $service) {
             $schoolYear = trim((string) Setting::get('current_school_year', ''));
@@ -82,7 +109,20 @@ class TimetableController extends Controller
             if ($subjects->isEmpty()) {
                 throw ValidationException::withMessages(['timetable' => 'This program and year have no curriculum subjects for the configured semester. Add the curriculum first.']);
             }
-            if ($draft->is_demo) {
+            if (! empty($data['source_id'])) {
+                $source = TimetableDraft::whereKey($data['source_id'])->lockForUpdate()->firstOrFail();
+                if ($source->program_id != $draft->program_id || $source->year_level != $draft->year_level
+                    || $source->semester != $draft->semester || $source->is_demo !== $draft->is_demo) {
+                    throw ValidationException::withMessages(['source_id' => 'Copy from the same program, year level, semester and demonstration mode.']);
+                }
+                $saved = collect($source->proposals ?? [])->keyBy('subject_id');
+                $rows = $subjects->map(fn ($subject) => ['subject_id' => $subject->id]
+                    + ($saved->get($subject->id) ?? $source->configuration['requirements'][$subject->id] ?? [])
+                    + array_fill_keys(self::CSV_COLUMNS, null))->all();
+                $config = $draft->configuration;
+                $config['requirements'] = collect($rows)->mapWithKeys(fn ($row) => [$row['subject_id'] => collect($row)->only(['instructor_id', 'pattern', 'minutes', 'facility'])->all()])->all();
+                $draft->update(['configuration' => $config, 'proposals' => $service->review($draft, $rows)]);
+            } elseif ($draft->is_demo) {
                 $requirements = [];
                 foreach ($subjects as $subject) {
                     // Demonstration preset only; never infer live contact hours from units.
@@ -102,10 +142,38 @@ class TimetableController extends Controller
 
     public function update(Request $request, TimetableDraft $draft, TimetableService $service)
     {
+        $preview = $request->input('action') === 'import';
+        if ($preview) {
+            $request->validate(['csv' => ['required', 'file', 'max:256']]);
+            $file = fopen($request->file('csv')->getRealPath(), 'r');
+            try {
+                $header = fgetcsv($file);
+                if ($header) {
+                    $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
+                }
+                if ($header !== self::CSV_COLUMNS) {
+                    throw ValidationException::withMessages(['csv' => 'Use the exported CSV template without changing its column headings.']);
+                }
+                $rows = [];
+                while (($values = fgetcsv($file)) !== false) {
+                    if ($values === [null]) {
+                        continue;
+                    }
+                    if (count($values) !== count($header) || count($rows) >= 100) {
+                        throw ValidationException::withMessages(['csv' => 'CSV rows must contain all eight columns, with at most 100 subjects.']);
+                    }
+                    $rows[] = array_combine($header, array_map(fn ($value) => trim((string) $value) === '' ? null : trim((string) $value), $values));
+                }
+            } finally {
+                fclose($file);
+            }
+            $request->merge(['action' => 'review', 'rows' => $rows]);
+        }
         $data = $request->validate([
-            'action' => ['required', 'in:generate,review,publish'],
+            'action' => ['required', 'in:generate,review,publish,clear'],
             'reviewed' => ['exclude_unless:action,publish', 'required', 'accepted'],
-            'rows' => ['required_unless:action,publish', 'array', 'max:100'],
+            'confirmed' => ['exclude_unless:action,clear', 'required', 'accepted'],
+            'rows' => ['exclude_if:action,clear,publish', 'required', 'array', 'max:100'],
             'rows.*.subject_id' => ['required', 'integer'],
             'rows.*.instructor_id' => ['nullable', 'string', 'max:30'],
             'rows.*.room_id' => ['nullable', 'string', 'max:30'],
@@ -114,7 +182,7 @@ class TimetableController extends Controller
             'rows.*.facility' => ['nullable', Rule::in(TimetableService::FACILITIES)],
             'rows.*.start' => ['nullable', 'date_format:H:i'], 'rows.*.end' => ['nullable', 'date_format:H:i'],
         ]);
-        $service->locked(function () use ($draft, $service, $data, $request) {
+        $previewRows = $service->locked(function () use ($draft, $service, $data, $request, $preview) {
             $draft = TimetableDraft::whereKey($draft->id)->lockForUpdate()->firstOrFail();
             if ($draft->status !== 'draft') {
                 throw ValidationException::withMessages(['timetable' => 'Published timetables cannot be regenerated or edited.']);
@@ -124,11 +192,21 @@ class TimetableController extends Controller
 
                 return;
             }
+            if ($data['action'] === 'clear') {
+                $config = $draft->configuration;
+                $config['requirements'] = collect($config['requirements'] ?? [])->map(fn ($row) => collect($row)->only(['minutes', 'facility'])->all())->all();
+                $draft->update(['configuration' => $config, 'proposals' => null]);
+
+                return;
+            }
             $rows = $data['rows'];
             $ids = $service->subjects($draft)->pluck('id')->sort()->values()->all();
             $submittedIds = collect($rows)->pluck('subject_id')->map(fn ($id) => (int) $id)->sort()->values()->all();
             if ($ids !== $submittedIds) {
                 throw ValidationException::withMessages(['timetable' => 'Include every curriculum subject exactly once.']);
+            }
+            if ($preview) {
+                return collect($service->review($draft, $rows))->sortBy('subject_id')->values()->all();
             }
             $requirements = [];
             foreach ($rows as $row) {
@@ -139,6 +217,14 @@ class TimetableController extends Controller
             $draft->update(['configuration' => $config]);
             $draft->update(['proposals' => $data['action'] === 'generate' ? $service->generate($draft) : $service->review($draft, $rows)]);
         });
+
+        if ($preview) {
+            return $this->back($draft, 'CSV preview loaded below. Review the assignments and issues, then Save review to apply them.')
+                ->withInput(['rows' => $previewRows]);
+        }
+        if ($data['action'] === 'clear') {
+            return $this->back($draft, 'Draft assignments cleared. Subjects and group details were kept.');
+        }
 
         return $this->back($draft, $data['action'] === 'publish' ? 'Timetable published. Eligible new enrollments can use this group for automatic section assignment. Existing holds still need Registrar assignment.' : 'Draft saved. Review the assignments and unresolved items.');
     }
