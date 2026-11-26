@@ -5,7 +5,7 @@
      both point at the same modal instance. --}}
 <div class="modal fade" id="enrollmentReviewModal" tabindex="-1" role="dialog" aria-labelledby="enrollmentReviewModalLabel" aria-hidden="true"@if(isset($reviewEnrollment) && $reviewEnrollment) data-auto-review-url="{{ route('registrar.enrollments.show', $reviewEnrollment) }}"@endif>
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content dtc-review-modal-content" id="enrollmentReviewModalContent">
+        <div class="modal-content dtc-review-modal-content rg-enrollment-review" id="enrollmentReviewModalContent">
             <div class="dtc-review-loading">
                 <div class="dtc-spinner u-spinner-sm" ></div>
                 <p>Loading enrollment details…</p>

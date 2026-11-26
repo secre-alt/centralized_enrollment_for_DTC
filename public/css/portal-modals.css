@@ -301,6 +301,28 @@ body .rg-enrollment-decisions .dtc-review-footer-right .dtc-btn-outline-danger:h
 .dtc-review-section-choice label { display: block; font-size: 13px; margin-bottom: 8px; }
 .dtc-review-section-choice small { display: block; margin-top: 8px; line-height: 1.6; }
 .dtc-review-section-assignment { margin: 4px 0 16px; color: var(--dtc-text-secondary); font-size: 13px; }
+body .rg-enrollment-review .rg-enrollment-summary { padding-bottom: 16px; border-bottom: 1px solid var(--dtc-border-soft); }
+.rg-enrollment-program { margin: 0 0 8px; color: var(--dtc-text); font-size: 15px; font-weight: 600; }
+.rg-enrollment-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 8px; color: var(--dtc-text-secondary); font-size: 13px; }
+.rg-enrollment-submitted { margin: 0; color: var(--dtc-text-muted); font-size: 12px; }
+body .rg-enrollment-review .dtc-payment-info-notice { display: block; margin: 0 0 20px; padding: 12px 16px; border: 1px solid var(--dtc-border-soft); border-radius: 8px; background: var(--dtc-surface-soft); color: var(--dtc-text-secondary); font-size: 13px; line-height: 1.6; }
+body .rg-enrollment-review .dtc-payment-info-notice strong { display: block; margin-bottom: 4px; color: var(--dtc-text); font-weight: 600; }
+body .rg-enrollment-review .dtc-review-subject-list { gap: 0; }
+.rg-enrollment-subject-row { min-width: 0; padding: 16px 0; border-bottom: 1px solid var(--dtc-border-soft); }
+.rg-enrollment-subject-row:first-child { padding-top: 0; }
+.rg-enrollment-subject-row:last-child { border-bottom: 0; padding-bottom: 0; }
+body .rg-enrollment-review .dtc-review-subject-item { padding: 0; border: 0; border-radius: 0; background: transparent; flex-wrap: wrap; gap: 8px 12px; }
+body .rg-enrollment-review .dtc-review-subject-code { padding: 4px 8px; border-radius: 4px; background: var(--dtc-surface-soft); color: var(--dtc-text-secondary); }
+body .rg-enrollment-review .dtc-review-subject-name { flex: 1 1 200px; font-size: 14px; line-height: 1.5; }
+body .rg-enrollment-review .dtc-review-section-choice { margin: 12px 0 0; }
+body .rg-enrollment-review .dtc-review-section-choice label { margin-bottom: 4px; font-weight: 500; color: var(--dtc-text-secondary); }
+body .rg-enrollment-review .dtc-review-section-choice select { width: 100%; min-height: 44px; font-size: 13px; }
+body .rg-enrollment-review .dtc-review-section-assignment { margin: 8px 0 0; }
+.rg-enrollment-section-help { margin: -8px 0 24px; color: var(--dtc-text-muted); font-size: 12px; line-height: 1.6; }
+body .rg-enrollment-review .rg-enrollment-decisions .dtc-review-footer-right { width: auto; }
+@media (max-width: 575.98px) {
+    body .rg-enrollment-review .rg-enrollment-decisions .dtc-review-footer-right { width: 100%; }
+}
 form[id^="return-subject-replacement-"] { scroll-margin-top: 24px; }
 .rg-rejection-panel > p { margin: 0 0 16px; font-size: 14px; line-height: 1.6; }
 body .modal .dtc-review-identity { flex: 1 1 auto; gap: 12px; }
