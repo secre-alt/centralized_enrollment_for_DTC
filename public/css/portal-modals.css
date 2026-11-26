@@ -168,24 +168,6 @@ body .modal.dtc-avatar-confirm-modal .dtc-avatar-confirm-title { font-size: 18px
 body .modal.dtc-avatar-confirm-modal .dtc-avatar-confirm-copy { color: var(--dtc-text-secondary); }
 body .modal.dtc-avatar-confirm-modal .dtc-avatar-confirm-actions { margin-top: 24px; gap: 8px; }
 
-/* The student welcome dialog is custom rather than Bootstrap. */
-body .student-welcome .student-welcome-dialog {
-    padding: 24px;
-    border: 1px solid var(--dtc-border);
-    border-radius: 12px;
-    background: var(--dtc-surface);
-    color: var(--dtc-text);
-    text-align: left;
-    box-shadow: var(--portal-dialog-shadow);
-}
-body .student-welcome .student-welcome-emblem { width: 32px; height: 32px; margin: 0 0 16px; border-radius: 8px; background: var(--dtc-surface-soft); }
-body .student-welcome .student-welcome-emblem > span { width: 32px; height: 32px; border-radius: 8px; background: transparent; color: var(--dtc-text-secondary); box-shadow: none; }
-body .student-welcome .student-welcome-emblem svg { width: 18px; height: 18px; }
-body .student-welcome .student-welcome-dialog h2 { color: var(--dtc-text); font-size: 20px; line-height: 1.4; }
-body .student-welcome .student-welcome-dialog p { margin-top: 8px; color: var(--dtc-text-secondary); font-size: 14px; }
-body .student-welcome .student-welcome-primary { min-height: 44px; margin-top: 24px; border-radius: 8px; }
-body .student-welcome-confetti { display: none; }
-
 @media (max-width: 575.98px) {
     body .modal:not(.dtc-confirm-modal) .modal-dialog { margin: 12px; width: auto; max-width: calc(100% - 24px); }
     body .modal :is(.modal-header, .dtc-modal-header, .dtc-review-header, .modal-body, .dtc-review-body) { padding: 16px !important; }

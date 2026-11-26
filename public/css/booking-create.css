@@ -70,7 +70,8 @@
 .dtc-booking-page .dr-slip-foot .dr-btn { min-height: 44px; border-radius: 8px; background: var(--dr-gold); color: #1b2540; font-size: 14px; font-weight: 500; }
 .dtc-booking-page .dr-slip-foot .dr-btn:hover { background: #ffd257; }
 .dtc-booking-page .dr-slip-note { margin-top: 12px; color: rgba(255,255,255,.72); font-size: 12px; }
-.dtc-booking-page .dr-slip-back { color: rgba(255,255,255,.86); }
+.dtc-booking-page .dr-slip-back { min-height: 44px; margin: 0; padding: 10px 16px; border: 1px solid rgba(255,255,255,.45); border-radius: 8px; background: rgba(255,255,255,.14); color: #fff; text-decoration: none; font-weight: 500; }
+.dtc-booking-page .dr-slip-back:hover { background: rgba(255,255,255,.24); }
 .dtc-booking-page .dr-next { border-radius: 12px; }
 .dtc-booking-page .dr-next summary { padding: 0 20px; font-weight: 500; }
 .dtc-booking-page .dr-next-list { padding: 0 20px 20px; gap: 16px; }
@@ -119,7 +120,7 @@
 .dtc-booking-page .dr-copy-picker button:focus-visible { outline: 2px solid var(--dr-brand); outline-offset: -3px; }
 .dtc-booking-page .dr-copy-picker .dr-input { width: 56px; min-height: 44px; padding: 4px; border: 0; border-radius: 0; text-align: center; appearance: textfield; }
 .dtc-booking-page .dr-copy-picker input::-webkit-inner-spin-button { appearance: none; }
-.dtc-booking-page [data-document-submission] .dr-slip { background: #17253e; }
+.dtc-booking-page [data-document-submission] .dr-slip { background: var(--dr-slip); }
 .dtc-booking-page [data-document-submission] .dr-slip-foot { padding-top: 16px; }
 @media (max-width: 575.98px) {
     .dtc-booking-page [data-document-submission] .dr-steps { gap: 4px; }
@@ -158,7 +159,7 @@ body:has([data-document-submission]) .wrapper > .content-wrapper { padding-botto
 .dtc-booking-page .dr-mobile-total { display: none; }
 @media (max-width: 991.98px) {
     body:has([data-document-submission]) .wrapper { padding-bottom: calc(144px + env(safe-area-inset-bottom, 0px)); }
-    .dtc-booking-page [data-document-submission] .dr-slip-foot { position: fixed; z-index: 1035; inset: auto 0 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: #17253e; border-top: 1px solid rgba(255,255,255,.2); box-shadow: 0 -4px 16px rgba(0,0,0,.12); }
+    .dtc-booking-page [data-document-submission] .dr-slip-foot { position: fixed; z-index: 1035; inset: auto 0 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--dr-slip); border-top: 1px solid rgba(255,255,255,.2); box-shadow: 0 -4px 16px rgba(0,0,0,.12); }
     .dtc-booking-page [data-document-submission] .dr-mobile-total { display: block; flex: 0 0 100%; margin: 0; color: #fff; font-size: 13px; line-height: 20px; }
     .dtc-booking-page [data-document-submission] .dr-slip-foot .dr-btn { flex: 1; max-width: none; margin: 0; min-width: 0; }
     .dtc-booking-page [data-document-submission] .dr-slip-back { flex: 0 0 auto; min-height: 44px; padding: 0 12px; }
