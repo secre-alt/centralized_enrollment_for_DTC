@@ -476,7 +476,7 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
             ->assertSee('Ready for pickup')
             ->assertSee('Released')
             ->assertSee('Total fees')
-            ->assertSee('Your requests')
+            ->assertSee('<h1>My document requests</h1>', false)
             ->assertSee('Transcript of Records');
     }
 }

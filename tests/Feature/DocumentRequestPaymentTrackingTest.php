@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\AuditLog;
 use App\Models\DocumentRequest;
+use App\Models\DocumentPaymentProof;
 use App\Models\DocumentPaymentNotificationOutbox;
 use App\Models\Appointment;
 use App\Models\AppointmentSlot;
@@ -115,6 +116,7 @@ class DocumentRequestPaymentTrackingTest extends TestCase
             'copies' => 2,
             'payment_method' => 'gcash_qr',
             'reference_number' => 'GCASH-REF-103',
+            'appointment_slot_id' => AppointmentSlot::factory()->create()->id,
             'proof_of_payment' => UploadedFile::fake()->image('proof.png'),
         ]);
 
@@ -123,15 +125,17 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         $this->assertSame('pending_verification', $documentRequest->payment_status);
         $this->assertFalse($documentRequest->is_paid);
         $this->assertSame('100.00', $documentRequest->fee);
-        $this->assertSame('GCASH-REF-103', $documentRequest->reference_number);
-        Storage::disk('local')->assertExists($documentRequest->proof_of_payment);
-        $this->assertStringStartsWith('document-request-proofs/', $documentRequest->proof_of_payment);
-        $this->assertDatabaseHas('user_notifications', ['user_id' => $cashier->id, 'title' => 'Document Payment Needs Verification']);
+        $payment = $documentRequest;
+        $this->assertNull($documentRequest->payment_appointment_id);
+        $this->assertSame('GCASH-REF-103', $payment->reference_number);
+        Storage::disk('local')->assertExists($payment->proof_of_payment);
+        $this->assertStringStartsWith('document-request-proofs/', $payment->proof_of_payment);
+        $this->assertDatabaseCount('appointment_payments', 0);
         $this->assertSame(0, $registrar->userNotifications()->where('title', 'Document Payment Verified')->count());
         $this->assertDatabaseCount('document_payment_notification_outbox', 0);
     }
 
-    public function test_alumni_can_submit_multiple_documents_and_quantities_for_one_pickup_appointment(): void
+    public function test_alumni_can_submit_multiple_standalone_documents_and_quantities(): void
     {
         $alumni = $this->makeUserWithRole('alumni');
         $slot = AppointmentSlot::factory()->create();
@@ -147,21 +151,19 @@ class DocumentRequestPaymentTrackingTest extends TestCase
             'purpose' => 'Employment',
         ])->assertRedirect(route('portal.documents.index'))->assertSessionHasNoErrors();
 
-        $appointment = Appointment::where('user_id', $alumni->id)->firstOrFail();
-        $requests = DocumentRequest::where('appointment_id', $appointment->id)->orderBy('id')->get();
+        $requests = DocumentRequest::where('user_id', $alumni->id)->orderBy('id')->get();
         $this->assertCount(3, $requests);
         $this->assertSame(['tor', 'diploma', 'certification'], $requests->pluck('document_type')->all());
         $this->assertSame(['50.00', '100.00', '60.00'], $requests->pluck('fee')->all());
         $this->assertSame([1, 1, 2], $requests->pluck('copies')->all());
-        $this->assertSame('210.00', $appointment->payments()->where('is_document_bundle', true)->value('amount'));
+        $this->assertDatabaseCount('appointment_payments', 0);
 
         $this->actingAs($alumni)->get(route('portal.documents.index'))
             ->assertOk()
-            ->assertSee('Appointment #' . $appointment->id)
             ->assertSee('Transcript of Records')
             ->assertSee('Diploma')
             ->assertSee('Certification')
-            ->assertSee('Appointment combined total');
+            ->assertDontSee('Appointment combined total');
     }
 
     public function test_student_and_alumni_document_selection_use_the_shared_redesigned_cards(): void
@@ -171,22 +173,22 @@ class DocumentRequestPaymentTrackingTest extends TestCase
 
         $this->actingAs($student)->get(route('portal.appointments.create'))
             ->assertOk()
-            ->assertSee('css/document-request-flow.css')
-            ->assertSee('dr-document-options', false)
+            ->assertSee('data-document-submission', false)
+            ->assertSee('data-document-option', false)
             ->assertSee('per copy')
-            ->assertSee('data-copy-step="-1"', false)
-            ->assertSee('data-document-subtotal', false);
+            ->assertSee('data-document-field', false)
+            ->assertDontSee('name="appointment_slot_id"', false);
 
         $this->actingAs($alumni)->get(route('portal.documents.create'))
             ->assertOk()
-            ->assertSee('css/document-request-flow.css')
-            ->assertSee('dr-document-options', false)
+            ->assertSee('data-document-submission', false)
+            ->assertSee('data-document-option', false)
             ->assertSee('per copy')
-            ->assertSee('data-copy-step="-1"', false)
-            ->assertSee('data-document-subtotal', false);
+            ->assertSee('data-document-field', false)
+            ->assertDontSee('name="appointment_slot_id"', false);
     }
 
-    public function test_alumni_cannot_mix_legacy_and_combined_document_fields_or_book_a_bundle_without_a_slot(): void
+    public function test_alumni_rejects_mixed_formats_but_needs_no_slot(): void
     {
         $alumni = $this->makeUserWithRole('alumni');
 
@@ -203,10 +205,10 @@ class DocumentRequestPaymentTrackingTest extends TestCase
                 ['document_type' => 'diploma', 'copies' => 1],
             ],
             'payment_method' => 'walk_in',
-        ])->assertSessionHasErrors('appointment_slot_id');
+        ])->assertSessionHasNoErrors();
 
         $this->assertDatabaseCount('appointments', 0);
-        $this->assertDatabaseCount('document_requests', 0);
+        $this->assertDatabaseCount('document_requests', 2);
     }
 
     public function test_alumni_cannot_submit_gcash_claim_without_a_configured_official_qr(): void
@@ -215,7 +217,8 @@ class DocumentRequestPaymentTrackingTest extends TestCase
 
         $this->actingAs($alumni)->from(route('portal.documents.create'))
             ->post(route('portal.documents.store'), [
-                'document_type' => 'tor',
+                'appointment_slot_id' => AppointmentSlot::factory()->create()->id,
+            'document_type' => 'tor',
                 'copies' => 1,
                 'payment_method' => 'gcash_qr',
                 'reference_number' => 'GCASH-REF-104',
@@ -305,9 +308,9 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         Storage::disk('local')->put($documentRequest->proof_of_payment, 'private-proof');
 
         $this->actingAs($alumni)->get(route('portal.documents.create'))
-            ->assertOk()->assertSee('Pay with GCash QR')->assertSee('Official DTC GCash QR code');
+            ->assertOk()->assertSee('GCash')->assertSee('Official DTC GCash QR code');
         $this->actingAs($alumni)->get(route('portal.documents.index'))
-            ->assertOk()->assertSee('Payment under review');
+            ->assertOk()->assertSee('Under verification');
         $this->actingAs($cashier)->get(route('cashier.document-payments.index'))
             ->assertOk()->assertSee('Document Fee Payments');
         $this->actingAs($cashier)->get(route('cashier.document-payments.show', $documentRequest))
@@ -444,7 +447,7 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         $this->assertSame(1, $event->fresh()->attempts);
         $this->assertSame(0, $registrar->userNotifications()->where('event_key', $event->event_key)->count());
 
-        $event->update(['available_at' => now()->subSecond()]);
+        $event->refresh()->update(['available_at' => now()->subSecond()]);
         $this->artisan('document-payment-notifications:process')->assertExitCode(0);
         $this->artisan('document-payment-notifications:process')->assertExitCode(0);
 
@@ -524,6 +527,13 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         $this->assertFalse($documentRequest->is_paid);
         $this->assertSame(1, AuditLog::where('action', 'document_payment.rejected')->count());
         $this->assertSame(1, AuditLog::where('action', 'document_payment.resubmitted')->count());
+        $proofs = DocumentPaymentProof::where('document_request_id', $documentRequest->id)->oldest('id')->get();
+        $this->assertCount(2, $proofs);
+        $this->assertSame('rejected', $proofs[0]->status);
+        $this->assertSame('The reference does not match the receiving account records.', $proofs[0]->rejection_reason);
+        $this->assertSame('pending', $proofs[1]->status);
+        Storage::disk('local')->assertExists('document-request-proofs/old.png');
+        Storage::disk('local')->assertExists($documentRequest->proof_of_payment);
     }
 
     public function test_only_owner_and_cashier_can_open_private_payment_proof(): void
@@ -549,6 +559,18 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         $this->actingAs($cashier)->get(route('cashier.document-payments.proof', $documentRequest))->assertOk()
             ->assertSee('Back to details')
             ->assertSee(route('cashier.document-payments.show', $documentRequest), false);
+
+        $historical = DocumentPaymentProof::create([
+            'document_request_id' => $documentRequest->id,
+            'path' => $documentRequest->proof_of_payment,
+            'submitted_by' => $alumni->id,
+            'submitted_at' => now(),
+            'status' => 'rejected',
+            'reviewed_by' => $cashier->id,
+            'reviewed_at' => now(),
+        ]);
+        $this->actingAs($otherAlumni)->get(route('cashier.document-payments.proofs.show', $historical))->assertForbidden();
+        $this->actingAs($cashier)->get(route('cashier.document-payments.proofs.show', $historical))->assertOk();
     }
 
     public function test_release_is_blocked_until_payment_is_verified_and_allowed_afterward(): void
@@ -565,8 +587,9 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         $this->assertSame('ready', $documentRequest->fresh()->status);
 
         $documentRequest->update(['is_paid' => true, 'payment_status' => 'verified']);
-        $this->actingAs($registrar)->post($releaseUrl, ['status' => 'released'])
-            ->assertRedirect(route('registrar.documents.index'));
+        $this->actingAs($registrar)->post(route('registrar.documents.walk-in-release'), ['claimant_id' => $alumni->id,
+            'document_ids' => [$documentRequest->id], 'handover_confirmed' => '1', 'operation_key' => (string) \Illuminate\Support\Str::uuid()])
+            ->assertRedirect();
 
         $this->assertSame('released', $documentRequest->fresh()->status);
     }
@@ -583,16 +606,16 @@ class DocumentRequestPaymentTrackingTest extends TestCase
             ])->assertForbidden();
     }
 
-    public function test_document_request_routes_are_not_exposed_to_student_or_new_applicant_roles(): void
+    public function test_document_request_routes_are_available_to_students_but_not_applicants(): void
     {
         $student = $this->makeUserWithRole('student');
         $applicant = $this->makeUserWithRole('new_applicant');
 
-        $this->actingAs($student)->get(route('portal.documents.index'))->assertForbidden();
+        $this->actingAs($student)->get(route('portal.documents.index'))->assertOk();
         $this->actingAs($applicant)->get(route('portal.documents.create'))->assertForbidden();
     }
 
-    public function test_request_submission_sends_only_one_admin_alert_and_queues_applicant_email(): void
+    public function test_standalone_submission_does_not_send_obsolete_appointment_alerts(): void
     {
         Mail::fake();
         $admin = $this->makeUserWithRole('admin');
@@ -600,15 +623,16 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         $alumni = $this->makeUserWithRole('alumni');
 
         $this->actingAs($alumni)->post(route('portal.documents.store'), [
+            'appointment_slot_id' => AppointmentSlot::factory()->create()->id,
             'document_type' => 'tor',
             'copies' => 1,
             'payment_method' => 'walk_in',
         ])->assertRedirect(route('portal.documents.index'));
 
+        $this->assertSame(0, $admin->userNotifications()->where('title', 'New Appointment Request')->count());
+        $this->assertSame(0, $registrar->userNotifications()->where('title', 'New Appointment Request')->count());
         $this->assertSame(1, $admin->userNotifications()->where('title', 'New Document Request')->count());
         $this->assertSame(1, $registrar->userNotifications()->where('title', 'New Document Request')->count());
-        $this->assertSame(1, $admin->userNotifications()->count());
-        Mail::assertQueued(DocumentRequestUpdate::class, fn ($mail) => $mail->hasTo($alumni->email));
     }
 
     public function test_status_flow_is_forward_only_and_audits_only_successful_changes(): void
@@ -658,7 +682,7 @@ class DocumentRequestPaymentTrackingTest extends TestCase
 
         $studentNotice = UserNotification::where('user_id', $student->id)
             ->where('title', 'Document Request Update')->firstOrFail();
-        $this->assertSame(route('portal.appointments.index'), $studentNotice->link);
+        $this->assertSame(route('portal.documents.index'), $studentNotice->link);
         $this->assertStringContainsString('Cashier is still verifying your GCash payment', $studentNotice->message);
 
         $cashierNotice = UserNotification::where('user_id', $cashier->id)
@@ -666,7 +690,7 @@ class DocumentRequestPaymentTrackingTest extends TestCase
         $this->assertSame(route('cashier.document-payments.show', $request), $cashierNotice->link);
         $this->assertStringContainsString('GCash payment awaiting verification', $cashierNotice->message);
 
-        Mail::assertQueued(DocumentRequestUpdate::class, 1);
+        Mail::assertQueued(\App\Mail\WorkflowUpdate::class, 1);
     }
 
     public function test_linked_pickup_appointment_waits_for_ready_and_verified_request_and_appears_in_history(): void
@@ -807,8 +831,8 @@ class DocumentRequestPaymentTrackingTest extends TestCase
             ->assertSee('Diploma')
             ->assertSee('Certification')
             ->assertSee('This document request was cancelled and is kept here for your records.')
-            ->assertSee('Pickup appointment cancelled.')
-            ->assertSee('Choose a new pickup time')
+            ->assertDontSee('Pickup appointment cancelled.')
+            ->assertSee('No appointment is required.')
             ->assertDontSee('>Payment details</a>', false)
             ->assertDontSee('>Review payment</a>', false);
 

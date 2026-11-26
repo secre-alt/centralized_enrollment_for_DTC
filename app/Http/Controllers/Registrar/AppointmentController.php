@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
 {
@@ -69,19 +70,15 @@ class AppointmentController extends Controller
     public function updateSlot(Request $request, AppointmentSlot $slot)
     {
         $request->merge(['edit_slot_id' => $slot->id]);
-        $booked = $slot->appointments()->whereIn('status', ['pending', 'confirmed'])->count();
         $validated = $request->validate([
             'date'         => ['required', 'date', 'after_or_equal:today'],
             'start_time'   => ['required', 'date_format:H:i'],
             'end_time'     => ['required', 'date_format:H:i', 'after:start_time'],
-            'max_bookings' => ['required', 'integer', 'min:' . $booked, 'max:50'],
+            'max_bookings' => ['required', 'integer', 'min:1', 'max:50'],
         ]);
 
         if ($validated['date'] === today()->toDateString() && $validated['start_time'] <= now()->format('H:i')) {
             return back()->withErrors(['start_time' => 'The slot must start in the future.'])->withInput();
-        }
-        if ($booked > 0 && ($validated['date'] !== $slot->date || $validated['start_time'] !== substr($slot->start_time, 0, 5) || $validated['end_time'] !== substr($slot->end_time, 0, 5))) {
-            return back()->withErrors(['date' => 'This slot has existing bookings. Use the appointment request workflow to contact and reschedule affected students before changing its time.'])->withInput();
         }
         if (app(\App\Services\AppointmentScheduleService::class)->isClosed($validated['date'], $validated['start_time'], $validated['end_time'])) {
             return back()->withErrors(['date' => 'The Registrar’s Office is closed during this time.'])->withInput();
@@ -91,7 +88,18 @@ class AppointmentController extends Controller
             return back()->withErrors(['start_time' => 'This time overlaps an existing slot.'])->withInput();
         }
 
-        $slot->update(array_merge($validated, ['source' => 'manual']));
+        DB::transaction(function () use ($slot, $validated) {
+            $lockedSlot = AppointmentSlot::whereKey($slot->id)->lockForUpdate()->firstOrFail();
+            $booked = Appointment::where('appointment_slot_id', $lockedSlot->id)
+                ->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get()->count();
+            if ($booked > $validated['max_bookings']) {
+                throw ValidationException::withMessages(['max_bookings' => 'Capacity cannot be lower than existing active bookings.']);
+            }
+            if ($booked > 0 && ($validated['date'] !== $lockedSlot->date || $validated['start_time'] !== substr($lockedSlot->start_time, 0, 5) || $validated['end_time'] !== substr($lockedSlot->end_time, 0, 5))) {
+                throw ValidationException::withMessages(['date' => 'This slot has existing bookings. Use the appointment request workflow to contact and reschedule affected students before changing its time.']);
+            }
+            $lockedSlot->update(array_merge($validated, ['source' => 'manual']));
+        });
 
         return redirect()->route('registrar.appointments.slots')
             ->with('success', 'Appointment slot updated.');
@@ -99,10 +107,17 @@ class AppointmentController extends Controller
 
     public function deleteSlot(AppointmentSlot $slot)
     {
-        if ($slot->appointments()->exists()) {
+        $deleted = DB::transaction(function () use ($slot) {
+            $lockedSlot = AppointmentSlot::whereKey($slot->id)->lockForUpdate()->firstOrFail();
+            if (Appointment::where('appointment_slot_id', $lockedSlot->id)->lockForUpdate()->exists()) {
+                return false;
+            }
+            $lockedSlot->delete();
+            return true;
+        });
+        if (! $deleted) {
             return back()->withErrors(['slot' => 'This slot has appointment history and cannot be deleted. Close it instead to preserve records.']);
         }
-        $slot->delete();
 
         return redirect()->route('registrar.appointments.slots')
             ->with('success', 'Slot removed.');
@@ -111,8 +126,11 @@ class AppointmentController extends Controller
     public function setSlotStatus(Request $request, AppointmentSlot $slot)
     {
         $data = $request->validate(['status' => ['required', 'in:open,closed']]);
-        $slot->update(['status' => $data['status']]);
-        \App\Models\AuditLog::create(['user_id' => Auth::id(), 'action' => 'appointment.slot.status_changed', 'description' => "Changed appointment slot #{$slot->id} status to {$data['status']}.", 'ip_address' => $request->ip(), 'user_agent' => $request->userAgent()]);
+        DB::transaction(function () use ($slot, $data, $request) {
+            $lockedSlot = AppointmentSlot::whereKey($slot->id)->lockForUpdate()->firstOrFail();
+            $lockedSlot->update(['status' => $data['status']]);
+            \App\Models\AuditLog::create(['user_id' => Auth::id(), 'action' => 'appointment.slot.status_changed', 'description' => "Changed appointment slot #{$lockedSlot->id} status to {$data['status']}.", 'ip_address' => $request->ip(), 'user_agent' => $request->userAgent()]);
+        });
         return back()->with('success', 'Slot status updated. Existing appointment and payment history was preserved.');
     }
 
@@ -172,10 +190,12 @@ class AppointmentController extends Controller
 
     public function confirm(Appointment $appointment)
     {
-        $result = DB::transaction(function () use ($appointment) {
-            $slotId = Appointment::whereKey($appointment->id)->value('appointment_slot_id');
+        $result = app(\App\Services\AppointmentLifecycle::class)->run(request(), 'appointment.confirmed', $appointment, [], [], function () use ($appointment) {
+            $slotId = $appointment->appointment_slot_id;
             $slot = AppointmentSlot::whereKey($slotId)->lockForUpdate()->firstOrFail();
             $locked = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+
+            abort_if($locked->visit_type === 'claiming', 422, 'Claiming confirmation is not available through the legacy submission workflow.');
 
             if ((int) $locked->appointment_slot_id !== (int) $slot->id) {
                 return 'slot_unavailable';
@@ -188,7 +208,7 @@ class AppointmentController extends Controller
                 return 'invalid_status';
             }
 
-            $linkedRequests = DocumentRequest::where('appointment_id', $locked->id)->lockForUpdate()->get();
+            $linkedRequests = DocumentRequest::where('appointment_id', $locked->id)->orderBy('id')->lockForUpdate()->get();
             $linkedRequest = $linkedRequests->first();
             if ($linkedRequests->isEmpty()) {
                 // Safely connect a legacy standalone booking only when there is
@@ -203,6 +223,8 @@ class AppointmentController extends Controller
                     ->where('status', 'ready')
                     ->where(fn ($q) => $q->where(fn ($paid) => $paid->where('is_paid', true)->where('payment_status', 'verified'))->orWhere(fn ($free) => $free->where('fee', 0)->where('is_paid', false)->where('payment_status', '!=', 'verified')))
                     ->whereNull('appointment_id')
+                    ->whereNull('pending_claim_appointment_id')
+                    ->orderBy('id')
                     ->lockForUpdate()
                     ->get();
 
@@ -213,7 +235,7 @@ class AppointmentController extends Controller
                 }
             }
             $studentBooking = $linkedRequests->isNotEmpty()
-                && User::whereKey($locked->user_id)->first()?->hasRole(['student', 'new_applicant']);
+                && ($locked->visit_type === 'submission' || User::whereKey($locked->user_id)->first()?->hasRole(['student', 'new_applicant']));
             $requestsCanBeConfirmed = $linkedRequests->every(function ($item) use ($studentBooking) {
                 $requestInProgress = $studentBooking && in_array($item->status, ['submitted', 'processing'], true);
                 $requestReadyAndPaid = $item->status === 'ready'
@@ -227,7 +249,7 @@ class AppointmentController extends Controller
             $schedule = app(AppointmentScheduleService::class);
             $isPast = $slot->date < today()->toDateString()
                 || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'));
-            $activeBookings = $slot->appointments()->whereIn('status', ['pending', 'confirmed'])->count();
+            $activeBookings = $slot->appointments()->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get()->count();
             if (($slot->status ?? 'open') !== 'open' || $isPast || $schedule->isClosed($slot->date, $slot->start_time, $slot->end_time)
                 || $activeBookings > $slot->max_bookings) {
                 return 'slot_unavailable';
@@ -257,7 +279,9 @@ class AppointmentController extends Controller
 
             $locked->update(['status' => 'confirmed']);
             return 'confirmed';
-        });
+        }, ['appointment_id' => $appointment->id]);
+
+        if (request()->attributes->get('lifecycle_replayed')) return redirect()->route('registrar.documents.index')->with('success', 'Appointment confirmed.');
 
         if ($result !== 'confirmed') {
             $message = [

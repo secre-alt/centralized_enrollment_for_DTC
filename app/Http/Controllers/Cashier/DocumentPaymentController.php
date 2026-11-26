@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Appointment;
 use App\Models\AppointmentPayment;
 use App\Models\DocumentRequest;
+use App\Models\DocumentPaymentProof;
 use App\Services\NotificationService;
 use App\Support\PrivateFilePreview;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class DocumentPaymentController extends Controller
         $query = DocumentRequest::with('user')
             ->where(fn ($q) => $q->where('fee', '>', 0)->orWhere('is_paid', true))
             ->where('status', '!=', 'cancelled')
-            ->whereDoesntHave('appointment.payments', fn ($payments) => $payments->where('is_document_bundle', true))
+            ->whereNotExists(fn ($payments) => $payments->selectRaw('1')->from('appointment_payments as bundle')->where('bundle.is_document_bundle', true)->whereRaw('bundle.appointment_id = COALESCE(document_requests.payment_appointment_id, document_requests.appointment_id)'))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('id', ctype_digit($search) ? (int) $search : -1)
@@ -58,7 +59,9 @@ class DocumentPaymentController extends Controller
             ->whereHas('appointment');
         if (isset($filters['method'])) $bundlesQuery->where('payment_method', $filters['method']);
         if (isset($filters['document_type'])) {
-            $bundlesQuery->whereHas('appointment.documentRequests', fn ($documents) => $documents->where('document_type', $filters['document_type']));
+            $bundlesQuery->whereExists(fn ($documents) => $documents->selectRaw('1')->from('document_requests as member')
+                ->whereRaw('COALESCE(member.payment_appointment_id, member.appointment_id) = appointment_payments.appointment_id')
+                ->where('member.document_type', $filters['document_type']));
         }
         \App\Support\ListDateRange::apply($bundlesQuery, $filters, 'appointment_payments.created_at');
         // Preserve counts across status choices while respecting the other filters.
@@ -107,18 +110,18 @@ class DocumentPaymentController extends Controller
 
     public function show(DocumentRequest $documentRequest)
     {
-        $documentRequest->load(['user', 'verifier', 'rejecter', 'appointment.payments']);
-        $bundlePayment = $documentRequest->appointment?->payments
+        $documentRequest->load(['user', 'verifier', 'rejecter', 'paymentAppointment.payments']);
+        $bundlePayment = $documentRequest->paymentAppointment?->payments
             ->first(fn ($payment) => $payment->is_document_bundle);
         $documentRequests = $bundlePayment
-            ? $documentRequest->appointment->documentRequests()->get()
+            ? $documentRequest->paymentAppointment->paymentDocuments()->get()
             : collect([$documentRequest]);
         return view('cashier.document-payments.show', compact('documentRequest', 'bundlePayment', 'documentRequests'));
     }
 
     public function viewProof(Request $request, DocumentRequest $documentRequest)
     {
-        $bundle = $documentRequest->appointment?->payments()
+        $bundle = $documentRequest->paymentAppointment?->payments()
             ->where('is_document_bundle', true)->latest()->first();
         if ($bundle) {
             return $this->viewBundleProof($request, $bundle);
@@ -140,13 +143,29 @@ class DocumentPaymentController extends Controller
         abort_unless($payment->is_document_bundle, 404);
         abort_unless($payment->proof_of_payment && Storage::disk('local')->exists($payment->proof_of_payment), 404);
 
-        $documentRequest = $payment->appointment->documentRequests()->firstOrFail();
+        $documentRequest = $payment->appointment->paymentDocuments()->firstOrFail();
         return PrivateFilePreview::respond(
             $request,
             Storage::disk('local')->path($payment->proof_of_payment),
             'Payment proof',
             route('cashier.document-payments.show', $documentRequest),
             basename($payment->proof_of_payment)
+        );
+    }
+
+    public function viewHistoricalProof(Request $request, DocumentPaymentProof $proof)
+    {
+        abort_unless(Storage::disk('local')->exists($proof->path), 404);
+        $documentRequest = $proof->documentRequest
+            ?: $proof->appointmentPayment?->appointment?->paymentDocuments()->firstOrFail();
+        abort_unless($documentRequest, 404);
+
+        return PrivateFilePreview::respond(
+            $request,
+            Storage::disk('local')->path($proof->path),
+            'Payment proof',
+            route('cashier.document-payments.show', $documentRequest),
+            basename($proof->path)
         );
     }
 
@@ -168,7 +187,7 @@ class DocumentPaymentController extends Controller
             if ($expectedMethod === 'gcash' && (! $lockedPayment->proof_of_payment || ! Storage::disk('local')->exists($lockedPayment->proof_of_payment))) {
                 throw ValidationException::withMessages(['payment' => 'The submitted payment proof is unavailable.']);
             }
-            $requests = DocumentRequest::where('appointment_id', $appointment->id)->lockForUpdate()->get();
+            $requests = DocumentRequest::forPaymentAppointment($appointment->id)->lockForUpdate()->get();
             $expectedDocumentPaymentStatus = $expectedMethod === 'gcash' ? 'pending_verification' : 'unpaid';
             $appointmentCancelled = $appointment->status === 'cancelled';
             if ($requests->isEmpty() || $requests->contains(fn ($item) =>
@@ -194,6 +213,19 @@ class DocumentPaymentController extends Controller
                 'verified_at' => now(),
                 'rejection_reason' => null,
             ]);
+            if ($expectedMethod === 'gcash') {
+                $proof = DocumentPaymentProof::where('appointment_payment_id', $lockedPayment->id)
+                    ->where('status', 'pending')->latest('id')->lockForUpdate()->first();
+                if (! $proof) {
+                    $proof = DocumentPaymentProof::create([
+                        'appointment_payment_id' => $lockedPayment->id,
+                        'path' => $lockedPayment->proof_of_payment,
+                        'reference_number' => $lockedPayment->reference_number,
+                        'submitted_at' => $lockedPayment->updated_at ?? now(),
+                    ]);
+                }
+                $proof->update(['status' => 'verified', 'reviewed_by' => Auth::id(), 'reviewed_at' => now()]);
+            }
             foreach ($requests as $documentRequest) {
                 if ($documentRequest->paymentNotRequired()) continue;
                 $documentRequest->update([
@@ -242,11 +274,27 @@ class DocumentPaymentController extends Controller
                 || $lockedPayment->status !== 'pending') {
                 throw ValidationException::withMessages(['payment' => 'Only a pending bundled GCash payment can be rejected.']);
             }
-            $requests = DocumentRequest::where('appointment_id', $appointment->id)->lockForUpdate()->get();
+            $requests = DocumentRequest::forPaymentAppointment($appointment->id)->lockForUpdate()->get();
             if ($requests->isEmpty()) {
                 throw ValidationException::withMessages(['payment' => 'This bundled payment has no linked document requests.']);
             }
             $lockedPayment->update(['status' => 'rejected', 'rejection_reason' => $validated['rejection_reason'], 'verified_by' => Auth::id(), 'verified_at' => now()]);
+            $proof = DocumentPaymentProof::where('appointment_payment_id', $lockedPayment->id)
+                ->where('status', 'pending')->latest('id')->lockForUpdate()->first();
+            if (! $proof) {
+                $proof = DocumentPaymentProof::create([
+                    'appointment_payment_id' => $lockedPayment->id,
+                    'path' => $lockedPayment->proof_of_payment,
+                    'reference_number' => $lockedPayment->reference_number,
+                    'submitted_at' => $lockedPayment->updated_at ?? now(),
+                ]);
+            }
+            $proof->update([
+                'status' => 'rejected',
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+                'rejection_reason' => $validated['rejection_reason'],
+            ]);
             foreach ($requests as $documentRequest) {
                 if ($documentRequest->paymentNotRequired()) continue;
                 if ($documentRequest->payment_status !== 'pending_verification' || $documentRequest->is_paid) {
@@ -368,6 +416,19 @@ class DocumentPaymentController extends Controller
                 'rejected_by' => null,
                 'rejected_at' => null,
             ]);
+            if ($method === 'gcash_qr') {
+                $proof = DocumentPaymentProof::where('document_request_id', $locked->id)
+                    ->where('status', 'pending')->latest('id')->lockForUpdate()->first();
+                if (! $proof) {
+                    $proof = DocumentPaymentProof::create([
+                        'document_request_id' => $locked->id,
+                        'path' => $locked->proof_of_payment,
+                        'reference_number' => $locked->reference_number,
+                        'submitted_at' => $locked->payment_submitted_at ?? $locked->updated_at ?? now(),
+                    ]);
+                }
+                $proof->update(['status' => 'verified', 'reviewed_by' => Auth::id(), 'reviewed_at' => now()]);
+            }
 
             $this->audit($request, $locked, 'document_payment.verified', "Verified {$method} payment of PHP {$received} for document request #{$locked->id}.");
             NotificationService::enqueueDocumentPaymentVerified($locked);
@@ -395,6 +456,22 @@ class DocumentPaymentController extends Controller
                 'payment_rejection_reason' => $validated['rejection_reason'],
                 'rejected_by' => Auth::id(),
                 'rejected_at' => now(),
+            ]);
+            $proof = DocumentPaymentProof::where('document_request_id', $locked->id)
+                ->where('status', 'pending')->latest('id')->lockForUpdate()->first();
+            if (! $proof) {
+                $proof = DocumentPaymentProof::create([
+                    'document_request_id' => $locked->id,
+                    'path' => $locked->proof_of_payment,
+                    'reference_number' => $locked->reference_number,
+                    'submitted_at' => $locked->payment_submitted_at ?? $locked->updated_at ?? now(),
+                ]);
+            }
+            $proof->update([
+                'status' => 'rejected',
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+                'rejection_reason' => $validated['rejection_reason'],
             ]);
 
             $this->audit(

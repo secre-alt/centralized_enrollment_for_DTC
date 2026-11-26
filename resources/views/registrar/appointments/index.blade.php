@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0 font-weight-bold u-text">Appointment Requests</h4>
-            <p class="mb-0 u-text-secondary-sm">Review bookings and confirm appointments.</p>
+            <p class="mb-0 u-text-secondary-sm">Review scheduled visits separately from document preparation and payment.</p>
         </div>
         <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary dtc-header-btn rg-manage-slots">
             <i data-lucide="clock" class="mr-1"></i>
@@ -22,6 +22,14 @@
 @endpush
 @section('content')
 <div class="registrar-workspace rg-appointments">
+<div class="card card-body mb-3">
+    <strong>Scheduled visits</strong>
+    <p class="mb-2">Confirm or manage existing visits here. A visit does not approve a document request or verify payment. New document requests and walk-in collection need no appointment.</p>
+    <a href="{{ route('registrar.documents.index') }}">Open document requests</a>
+</div>
+@hasanyrole('registrar|admin')
+<p><a class="btn btn-outline-secondary" href="{{ route('registrar.claiming-appointments.index') }}">Historical claiming visits</a></p>
+@endhasanyrole
 
 <form method="GET" action="{{ route('registrar.appointments.index') }}" class="dtc-fl rg-appointment-search" aria-label="Search and filter appointments">
     <input type="hidden" name="status" value="{{ $status }}">
@@ -322,13 +330,18 @@
                         </td>
                         <td data-reg-label="Actions">
                             <div class="u-actions-gap">
-                                @if($appointment->status === 'pending')
+                                @if($appointment->visit_type === 'claiming')
+                                    @hasanyrole('registrar|admin')
+                                    <a href="{{ route('registrar.claiming-appointments.index') }}" class="btn btn-sm btn-outline-primary">View handover</a>
+                                    @endhasanyrole
+                                @elseif($appointment->status === 'pending')
                                     @if($appointment->canBeConfirmed())
                                         {{-- Confirm --}}
                                         <form id="confirm-appt-{{ $appointment->id }}"
                                               method="POST"
                                               action="{{ route('registrar.appointments.confirm', $appointment) }}">
                                             @csrf
+                                            @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
                                             <button type="button"
                                                     class="dtc-icon-btn success rg-booking-confirm"
                                                     title="Confirm appointment"
@@ -366,6 +379,7 @@
                                         <form method="POST" id="cancel-appointment-{{ $appointment->id }}"
                                               action="{{ route('registrar.appointments.cancel', $appointment) }}">
                                             @csrf
+                                            @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Cancel Appointment</h5>
                                                 <button type="button" class="close" data-dismiss="modal">&times;</button>

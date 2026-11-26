@@ -27,18 +27,10 @@
     if ($enrollment) {
         if ($enrollment->status === 'rejected') {
             $enrollmentLabel = 'Rejected';
-        } elseif ($enrollment->is_paid && $enrollment->status === 'pending') {
-            $enrollmentLabel = 'Awaiting Registrar Review';
-        } elseif ($enrollment->status === 'rejected' && $enrollment->is_paid) {
-            $paymentStatusLabel = 'Refund follow-up needed';
-        } elseif (!$enrollment->is_paid && $enrollment->payment && $enrollment->payment->status === 'verified') {
-            $paymentStatusLabel = 'Contact Cashier';
-        } elseif ($enrollment->is_paid) {
-            $enrollmentLabel = 'Paid';
         } elseif ($enrollment->status === 'approved') {
             $enrollmentLabel = 'Approved';
         } elseif ($enrollment->status === 'pending') {
-            $enrollmentLabel = 'Pending';
+            $enrollmentLabel = $nextStep['label'];
         } else {
             $enrollmentLabel = ucfirst($enrollment->status);
         }
@@ -48,17 +40,17 @@
         ? ($applicationBadges[$application->status]['label'] ?? ucwords(str_replace('_',' ',$application->status)))
         : 'Not Found';
 
-    if (!$enrollment) {
-        $paymentStatusLabel = 'Not Required';
-    } elseif ($enrollment->is_paid) {
-        $paymentStatusLabel = 'Confirmed';
-    } elseif ($enrollment->payment && $enrollment->payment->status === 'pending') {
-        $paymentStatusLabel = 'Awaiting Verification';
-    } elseif ($enrollment->payment && $enrollment->payment->status === 'rejected') {
-        $paymentStatusLabel = 'Proof Rejected';
-    } else {
-        $paymentStatusLabel = 'Awaiting Payment';
-    }
+    $paymentStatusLabel = match (true) {
+        !$enrollment => 'Not Required',
+        $enrollment->status === 'rejected' => $nextStep['label'],
+        $enrollment->requires_section_assignment => 'Wait for Sections',
+        (bool) $enrollment->is_paid => 'Confirmed',
+        $enrollment->payment?->status === 'pending' => 'Awaiting Verification',
+        $enrollment->payment?->status === 'rejected' => 'Proof Rejected',
+        $enrollment->payment?->status === 'verified' => 'Contact Cashier',
+        default => 'Awaiting Payment',
+    };
+
 @endphp
 
 <div class="dtc-portal-dashboard">
@@ -83,10 +75,8 @@
     </div>
     <div class="dtc-overview-item">
         <span class="dtc-overview-label">{{ $enrollment ? 'Payment / next step' : 'Next step' }}</span>
-        <strong>{{ $enrollment ? ($enrollment->status === 'pending' && $enrollment->is_paid ? 'Awaiting Registrar Review' : $paymentStatusLabel) : $nextStep['label'] }}</strong>
-        @if($enrollment && in_array($enrollment->status, ['pending', 'approved'], true) && !$enrollment->is_paid)
-            <a href="{{ route('portal.enrollment.payment-info', $enrollment) }}">Payment details</a>
-        @elseif(!empty($nextStep['url']))
+        <strong>{{ $nextStep['label'] }}</strong>
+        @if(!empty($nextStep['url']))
             <a href="{{ $nextStep['url'] }}">Continue</a>
         @else
             <span class="dtc-overview-note">See the Registrar for guidance</span>

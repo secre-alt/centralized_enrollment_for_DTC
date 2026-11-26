@@ -15,6 +15,10 @@
 @push('js')<script src="{{ asset('js/dtc-filters.js') }}"></script>@endpush
 @section('content')
 <div class="cashier-payment-page">
+<div class="card card-body mb-3">
+    <strong>Document payment review</strong>
+    <p class="mb-0">Record received cash or verify GCash against received funds. Registrar assessment, preparation and physical release are separate steps. Historical appointment bundles retain one payment and receipt.</p>
+</div>
 @php
     $listFilterCount = collect(['method', 'document_type', 'date_from', 'date_to'])->filter(fn ($key) => request()->filled($key))->count() + ($filter !== 'all' ? 1 : 0);
 @endphp
@@ -66,8 +70,9 @@
                         ? ($bundle->payment_method === 'gcash' ? 'pending_verification' : 'unpaid')
                         : $bundle->status;
                     $bundleTone = ['unpaid' => 'warning', 'pending_verification' => 'info', 'verified' => 'success', 'rejected' => 'danger'][$bundleStatus] ?? 'neutral';
-                    $firstRequest = $bundle->appointment->documentRequests->first();
-                    $documentCount = $bundle->appointment->documentRequests->count();
+                    $bundleDocuments = $bundle->appointment->paymentDocuments()->get();
+                    $firstRequest = $bundleDocuments->first();
+                    $documentCount = $bundleDocuments->count();
                 @endphp
                 <tr>
                     <td>
@@ -119,10 +124,10 @@
                             </div>
                         </div>
                     </td>
-                    <td>{{ $item->document_label }} <span class="u-text-xs-secondary">× {{ $item->copies }}</span></td>
-                    <td>{{ $item->payment_method === 'gcash_qr' ? 'GCash QR' : 'Walk-in' }}</td>
+                    <td>{{ $item->document_label }} <span class="u-text-xs-secondary">× {{ $item->copies }}</span><div class="u-text-xs-secondary">D-{{ $item->id }}</div></td>
+                    <td>{{ $item->payment_method === 'gcash_qr' ? 'GCash' : 'Cash at Cashier' }}</td>
                     <td class="dtc-pay-fee">₱{{ number_format($item->fee, 2) }}</td>
-                    <td><span class="dtc-status-badge is-{{ $tone }}"><span class="dtc-status-dot"></span>{{ $item->payment_status === 'pending_verification' ? 'Pending' : ucfirst($item->payment_status) }}</span></td>
+                    <td><span class="dtc-status-badge is-{{ $tone }}"><span class="dtc-status-dot"></span>{{ ['unpaid' => 'Payment due', 'pending_verification' => 'Under verification', 'verified' => 'Verified', 'rejected' => 'Payment not verified'][$item->payment_status] ?? ucfirst($item->payment_status) }}</span></td>
                     <td>{{ ucfirst($item->status) }}</td>
                     <td><a class="btn btn-sm btn-primary dtc-docpay-action" href="{{ route('cashier.document-payments.show', $item) }}">{{ $item->payment_status === 'verified' ? 'Details' : ($item->payment_status === 'unpaid' ? 'Record' : 'Review') }}</a></td>
                 </tr>

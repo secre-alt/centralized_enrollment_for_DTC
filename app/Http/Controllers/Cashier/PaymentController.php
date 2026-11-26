@@ -121,8 +121,14 @@ class PaymentController extends Controller
 
     // ── show() ────────────────────────────────────────────────────
 
-    public function show(Enrollment $enrollment)
+    public function show(Request $request, Enrollment $enrollment)
     {
+        if (! $request->ajax()) {
+            $request->session()->reflash();
+
+            return redirect()->route('cashier.payments.index', ['review' => $enrollment->id]);
+        }
+
         $enrollment->load(['user', 'program', 'payment.verifier', 'replacementRequests']);
 
         $latestPayment = Payment::where('enrollment_id', $enrollment->id)
@@ -140,7 +146,7 @@ class PaymentController extends Controller
         $refundFullyConfirmed = $verifiedPayments->isNotEmpty()
             && $verifiedPayments->every(fn ($verifiedPayment) => $verifiedPayment->refundIsComplete());
 
-        return view('cashier.payments.show', compact('enrollment', 'latestPayment', 'verifiedPayments', 'outstandingTermPayments', 'refundFullyConfirmed'));
+        return view('cashier.payments._payment-content', compact('enrollment', 'latestPayment', 'verifiedPayments', 'outstandingTermPayments', 'refundFullyConfirmed'));
     }
 
     // ── store() — walk-in ─────────────────────────────────────────

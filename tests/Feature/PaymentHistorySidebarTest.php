@@ -25,7 +25,7 @@ class PaymentHistorySidebarTest extends TestCase
             ['role' => 'admin', 'url' => route('admin.transactions.index'), 'before' => route('cashier.document-payments.index'), 'after' => route('admin.settings.index')],
             ['role' => 'cashier', 'url' => route('cashier.transactions.index'), 'before' => route('cashier.payments.index'), 'after' => route('cashier.document-payments.index')],
             ['role' => 'registrar', 'url' => route('registrar.transactions.index'), 'before' => route('registrar.documents.index'), 'after' => null],
-            ['role' => 'student', 'url' => route('portal.transactions.index'), 'before' => route('portal.enrollment.index'), 'after' => route('portal.appointments.create')],
+            ['role' => 'student', 'url' => route('portal.transactions.index'), 'before' => route('portal.enrollment.index'), 'after' => route('portal.documents.create')],
             ['role' => 'new_applicant', 'url' => route('portal.transactions.index'), 'before' => route('portal.enrollment.index'), 'after' => null],
             ['role' => 'alumni', 'url' => route('portal.transactions.index'), 'before' => route('portal.documents.index'), 'after' => null],
         ];

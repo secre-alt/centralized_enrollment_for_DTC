@@ -13,7 +13,7 @@ final class DocumentPaymentIdentity
         return $query
             // Bundle children mirror the authoritative appointment payment, even if the booking was cancelled.
             ->whereNotExists(function (Builder $query) {
-                $query->selectRaw('1')->from('appointment_payments as ap')->whereColumn('ap.appointment_id', 'd.appointment_id')
+                $query->selectRaw('1')->from('appointment_payments as ap')->whereRaw('ap.appointment_id = COALESCE(d.payment_appointment_id, d.appointment_id)')
                     ->where(function (Builder $duplicate) {
                         $duplicate->where('ap.is_document_bundle', true)
                             // Legacy processing fees may be separate payments. Suppress only an exact linked payment identity.

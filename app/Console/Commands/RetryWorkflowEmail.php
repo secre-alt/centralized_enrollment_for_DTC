@@ -14,9 +14,9 @@ class RetryWorkflowEmail extends Command
     public function handle(): int
     {
         $notification = UserNotification::with('user')->find($this->argument('notification'));
-        if (!$notification || !$notification->user?->email || !$notification->event_key
-            || !in_array($notification->email_status, ['pending', 'enqueue_failed'], true)) {
-            $this->error('Only pending or enqueue-failed workflow emails with an existing recipient can be retried here. Use queue:retry for failed jobs.');
+        if (!$notification || !filter_var($notification->user?->email, FILTER_VALIDATE_EMAIL) || !$notification->event_key
+            || !in_array($notification->email_status, ['pending', 'enqueue_failed', 'invalid_recipient'], true)) {
+            $this->error('Only pending, enqueue-failed, or corrected-recipient workflow emails with a valid recipient can be retried here. Use queue:retry for failed jobs.');
             return self::FAILURE;
         }
         $queued = NotificationService::sendUserUpdateSafely(

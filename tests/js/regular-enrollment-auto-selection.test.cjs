@@ -92,3 +92,37 @@ test('irregular enrollment leaves subjects individually selectable without a sel
     assert.ok(checkboxes.every(checkbox => !/\bchecked\b/.test(checkbox)));
     assert.doesNotMatch(html, /Select All/);
 });
+
+for (const irregular of [false, true]) {
+    for (const selected of [[], ['22']]) {
+        test(`${irregular ? 'irregular' : 'regular'} enrollment restores ${JSON.stringify(selected)} after validation`, async () => {
+            const view = fs.readFileSync(path.join(__dirname, '../../resources/views/student/enrollment/create.blade.php'), 'utf8');
+            const script = view.match(/@section\('js'\)\s*<script>\s*([\s\S]*?)\s*<\/script>/)[1];
+            const elements = {
+                'type-irregular': { checked: irregular, addEventListener() {} },
+                'type-regular': { addEventListener() {} },
+                program_id: { value: '12', addEventListener() {} },
+                year_level: { value: '2', addEventListener() {} },
+                semester: { value: '2', addEventListener() {} },
+                'subjects-container': { innerHTML: '', dataset: { selectedSubjects: JSON.stringify(selected) } },
+                'subjects-hint': { textContent: '' },
+            };
+            const subjects = [21, 22].map(id => ({ id, subject_code: `IS${id}`, subject_name: 'Subject', units: 3 }));
+            const context = { document: { getElementById: id => elements[id], addEventListener() {} },
+                window: { dtcFetch: async () => ({ json: async () => irregular ? [{ year_level: 2, semester: 2, subjects }] : subjects }) } };
+            vm.runInNewContext(script, context);
+            context.loadSubjects();
+            await new Promise(resolve => setImmediate(resolve));
+            const inputs = elements['subjects-container'].innerHTML.match(/<input type="checkbox" name="subject_ids\[\]"[^>]*>/g);
+            assert.equal(inputs.length, 2);
+            for (const input of inputs) {
+                const id = input.match(/value="(\d+)"/)[1];
+                assert.equal(/\bchecked\b/.test(input), selected.includes(id));
+            }
+            context.loadSubjects({ type: 'change' });
+            await new Promise(resolve => setImmediate(resolve));
+            const changedInputs = elements['subjects-container'].innerHTML.match(/<input type="checkbox" name="subject_ids\[\]"[^>]*>/g);
+            assert.ok(changedInputs.every(input => /\bchecked\b/.test(input) === !irregular));
+        });
+    }
+}

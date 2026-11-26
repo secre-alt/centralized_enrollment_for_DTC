@@ -7,6 +7,7 @@ use App\Models\AppointmentPayment;
 use App\Models\AppointmentSlot;
 use App\Models\AuditLog;
 use App\Models\DocumentRequest;
+use App\Models\DocumentPaymentProof;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -34,25 +35,25 @@ class DocumentAppointmentBookingService
         ?string $proofPath,
         Request $request
     ): Appointment {
-        abort_unless($user->hasAnyRole(['student', 'alumni']), 403);
-        return DB::transaction(function () use (
+        abort_unless($user->hasAnyRole(['student', 'alumni']) && $request->user()?->id === $user->id, 403);
+        return app(AppointmentLifecycle::class)->run($request, 'submission.booked', null, [$slotId], [], function () use (
             $user, $slotId, $documents, $appointmentDocumentType, $purpose,
             $paymentMethod, $referenceNumber, $proofPath, $request
         ) {
             $slot = AppointmentSlot::whereKey($slotId)->lockForUpdate()->firstOrFail();
+            $activeAppointments = Appointment::where('appointment_slot_id', $slot->id)
+                ->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get();
             $schedule = app(AppointmentScheduleService::class);
-            if (! $slot->isAvailable() || $schedule->isClosed($slot->date, $slot->start_time, $slot->end_time)
+            if (($slot->status ?? 'open') !== 'open' || $activeAppointments->count() >= $slot->max_bookings
+                || $schedule->isClosed($slot->date, $slot->start_time, $slot->end_time)
                 || $slot->date < today()->toDateString()
                 || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
                 throw ValidationException::withMessages([
-                    'appointment_slot_id' => 'This pickup time is no longer available. Please select another.',
+                    'appointment_slot_id' => 'This submission time is no longer available. Please select another.',
                 ]);
             }
 
-            if (Appointment::where('user_id', $user->id)
-                ->where('appointment_slot_id', $slot->id)
-                ->whereIn('status', ['pending', 'confirmed'])
-                ->exists()) {
+            if ($activeAppointments->contains('user_id', $user->id)) {
                 throw ValidationException::withMessages([
                     'appointment_slot_id' => 'You already have a booking for this slot.',
                 ]);
@@ -73,6 +74,7 @@ class DocumentAppointmentBookingService
                 'document_type' => $appointmentDocumentType ?: $normalized[0]['document_type'],
                 'purpose' => $purpose,
                 'status' => 'pending',
+                'visit_type' => 'submission',
             ]);
 
             $requestPaymentMethod = $paymentMethod === 'gcash' ? 'gcash_qr' : 'walk_in';
@@ -90,6 +92,7 @@ class DocumentAppointmentBookingService
                     'payment_status' => $document['fee'] == 0 ? 'unpaid' : $requestPaymentStatus,
                 ]);
 
+                $appointment->documentItems()->create(['document_request_id' => $documentRequest->id]);
                 app(DocumentRequestPricing::class)->auditNoPayment($documentRequest, $request);
                 AuditLog::create([
                     'user_id' => $user->id,
@@ -108,18 +111,32 @@ class DocumentAppointmentBookingService
                 ]);
             }
 
-            if ($total > 0) AppointmentPayment::create([
-                'appointment_id' => $appointment->id,
-                'is_document_bundle' => true,
-                'payment_method' => $paymentMethod,
-                'reference_number' => $referenceNumber,
-                'proof_of_payment' => $proofPath,
-                'status' => $paymentMethod === 'gcash' ? 'pending' : 'pending',
-                'amount' => $total,
-            ]);
+            if ($total > 0) {
+                $payment = AppointmentPayment::create([
+                    'appointment_id' => $appointment->id,
+                    'is_document_bundle' => true,
+                    'payment_method' => $paymentMethod,
+                    'reference_number' => $referenceNumber,
+                    'proof_of_payment' => $proofPath,
+                    'status' => 'pending',
+                    'amount' => $total,
+                ]);
+                if ($paymentMethod === 'gcash' && $proofPath) {
+                    DocumentPaymentProof::create([
+                        'appointment_payment_id' => $payment->id,
+                        'path' => $proofPath,
+                        'reference_number' => $referenceNumber,
+                        'submitted_by' => $user->id,
+                        'submitted_at' => now(),
+                    ]);
+                }
+            }
 
             return $appointment->load(['slot', 'documentRequests']);
-        });
+        }, ['slot_id' => $slotId, 'documents' => $documents, 'document_type' => $appointmentDocumentType,
+            'purpose' => $purpose, 'payment_method' => $paymentMethod, 'reference_number' => $referenceNumber,
+            'proof_hash' => $proofPath && \Illuminate\Support\Facades\Storage::disk('local')->exists($proofPath)
+                ? hash_file('sha256', \Illuminate\Support\Facades\Storage::disk('local')->path($proofPath)) : $proofPath]);
     }
 
     private function normalizeDocuments(array $documents): array

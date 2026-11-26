@@ -198,6 +198,20 @@ class EnrollmentRefundReconciliationTest extends TestCase
         $this->followingRedirects()->get(route('admin.reports.payment'))->assertOk()->assertSee('Payment Reports');
     }
 
+    public function test_admin_can_record_a_full_refund_with_the_actual_actor_preserved(): void
+    {
+        $student = $this->makeUserWithRole('student');
+        $admin = $this->makeUserWithRole('admin');
+        [, $enrollment, $payment] = $this->rejectedPaidEnrollment($student);
+        $this->actingAs($admin)->post(route('cashier.payments.confirm-refund', $payment), [
+            'refund_amount' => '500.00', 'refund_reference' => 'ADMIN-REFUND-TEST',
+        ])->assertRedirect(route('cashier.payments.show', $enrollment))->assertSessionHasNoErrors();
+        $payment->refresh();
+        $this->assertSame('verified', $payment->status);
+        $this->assertSame('refunded', $payment->refund_status);
+        $this->assertSame($admin->id, $payment->refunded_by);
+    }
+
     public function test_competing_gcash_submissions_for_the_same_term_cannot_both_create_payment_attempts(): void
     {
         $student = $this->makeUserWithRole('student');
@@ -241,7 +255,7 @@ class EnrollmentRefundReconciliationTest extends TestCase
             ->assertViewHas('enrollments', fn ($rows) => $rows->total() === 1)
             ->assertSee('Refund follow-up')
             ->assertSee(route('cashier.payments.show', $enrollment), false);
-        $this->get(route('cashier.payments.show', $enrollment))
+        $this->get(route('cashier.payments.show', $enrollment), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('Refund pending confirmation')
             ->assertSee('name="refund_reference"', false);
@@ -256,6 +270,32 @@ class EnrollmentRefundReconciliationTest extends TestCase
             ->assertSee('Refunded');
         $this->get(route('cashier.payments.receipt', $enrollment))
             ->assertRedirect(route('cashier.payments.index', ['receipt' => $enrollment->id]));
+    }
+
+    public function test_direct_payment_links_open_the_existing_modal_for_staff(): void
+    {
+        $student = $this->makeUserWithRole('student');
+        [, $enrollment, $payment] = $this->rejectedPaidEnrollment($student);
+
+        foreach (['cashier', 'admin'] as $role) {
+            $this->actingAs($this->makeUserWithRole($role));
+            $url = route('cashier.payments.index', ['review' => $enrollment->id]);
+            $this->withSession([
+                'success' => 'Refund recorded.',
+                '_flash' => ['new' => ['success'], 'old' => []],
+            ])
+                ->get(route('cashier.payments.show', $enrollment))->assertRedirect($url);
+            $this->get($url)->assertOk()
+                ->assertSee('Refund recorded.')
+                ->assertSee('data-auto-review-url="'.route('cashier.payments.show', $enrollment).'"', false);
+            $this->get(route('cashier.payments.show', $enrollment), ['X-Requested-With' => 'XMLHttpRequest'])
+                ->assertOk()->assertViewIs('cashier.payments._payment-content')
+                ->assertSee('Refund pending confirmation')
+                ->assertDontSee('<html', false);
+        }
+
+        $this->assertSame('verified', $payment->fresh()->status);
+        $this->assertSame('pending', $payment->fresh()->refund_status);
     }
 
     public function test_students_cannot_access_cashier_payment_or_refund_confirmation_routes(): void

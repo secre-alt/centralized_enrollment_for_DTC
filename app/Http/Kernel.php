@@ -55,6 +55,8 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $routeMiddleware = [
+        'appointment.lifecycle' => \App\Http\Middleware\AppointmentLifecycleCommand::class,
+        'document.submission' => \App\Http\Middleware\DocumentSubmissionCommand::class,
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,

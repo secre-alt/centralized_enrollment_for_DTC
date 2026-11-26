@@ -10,8 +10,41 @@ class Appointment extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id', 'appointment_slot_id', 'document_type', 'purpose', 'status', 'remarks'
+        'user_id', 'appointment_slot_id', 'document_type', 'purpose', 'status', 'remarks',
+        'visit_type', 'completed_at', 'completed_by',
     ];
+
+    protected $casts = ['completed_at' => 'datetime', 'lifecycle_version' => 'integer'];
+
+    public function lifecycleEvents()
+    {
+        return $this->hasMany(AppointmentLifecycleEvent::class);
+    }
+
+    public function previousAppointment()
+    {
+        return $this->belongsTo(self::class, 'previous_appointment_id');
+    }
+
+    public function successorAppointment()
+    {
+        return $this->hasOne(self::class, 'previous_appointment_id');
+    }
+
+    public function documentItems()
+    {
+        return $this->hasMany(AppointmentDocumentItem::class);
+    }
+
+    public function disruptions()
+    {
+        return $this->hasMany(AppointmentDisruption::class);
+    }
+
+    public function completer()
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
 
     public function user()
     {
@@ -41,6 +74,11 @@ class Appointment extends Model
     public function documentRequests()
     {
         return $this->hasMany(DocumentRequest::class);
+    }
+
+    public function paymentDocuments()
+    {
+        return DocumentRequest::forPaymentAppointment($this->id);
     }
 
     public function getDocumentLabelsAttribute(): Collection
@@ -88,6 +126,9 @@ class Appointment extends Model
 
     public function canBeConfirmed(): bool
     {
+        if ($this->visit_type === 'claiming') {
+            return false;
+        }
         if ($this->status !== 'pending') {
             return false;
         }
@@ -119,7 +160,7 @@ class Appointment extends Model
         }
 
         $user = $this->relationLoaded('user') ? $this->getRelation('user') : $this->user()->first();
-        $studentBooking = $user?->hasRole(['student', 'new_applicant']) ?? false;
+        $studentBooking = $this->visit_type === 'submission' || ($user?->hasRole(['student', 'new_applicant']) ?? false);
 
         return $documentRequests->every(function ($documentRequest) use ($studentBooking) {
             if ($studentBooking && in_array($documentRequest->status, ['submitted', 'processing'], true)) {

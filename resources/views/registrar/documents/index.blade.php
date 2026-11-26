@@ -7,7 +7,7 @@
     <div>
         <h4 class="mb-0 font-weight-bold u-text">Document Requests</h4>
         <p class="mb-0 u-text-secondary-sm dq-subtitle">
-            Manage alumni requests. Admin-managed rates are saved with each request; payment verification is handled by the Cashier.
+            Assess requirements and saved fees, prepare documents, then record collection. Cashier verifies payments separately.
         </p>
     </div>
 @endsection
@@ -26,6 +26,9 @@
 @endpush
 @section('content')
 <div class="registrar-workspace rg-documents">
+@if ($errors->any())
+    <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+@endif
 
 <style>
     .dq-tools { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-bottom: 14px; }
@@ -87,7 +90,7 @@
         .dq-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
         .dq-table tbody tr.dq-row {
             display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 10px; padding: 16px;
-            grid-template-areas: "who status" "doc doc" "pick act";
+            grid-template-areas: "who status" "doc doc" "act act";
             border-bottom: 1px solid var(--dtc-border-soft, var(--dtc-border));
         }
         .dq-table tbody tr.dq-row:last-child { border-bottom: 0; }
@@ -95,12 +98,11 @@
         .dq-table tbody td { display: block; padding: 0 !important; border: 0 !important; background: transparent !important; min-width: 0; }
 
         .dq-row td:nth-child(1) { grid-area: who; }
-        .dq-row td:nth-child(4) { grid-area: status; align-self: start; }
+        .dq-row td:nth-child(4) { grid-area: status; align-self: start; justify-self: end; text-align: right; }
         .dq-row td:nth-child(2) { grid-area: doc; padding: 10px 12px !important; border-radius: 10px; background: var(--dtc-surface-2, rgba(148,163,184,.08)) !important; }
-        .dq-row td:nth-child(5) { grid-area: pick; min-width: 0 !important; align-self: center; }
-        .dq-row td:nth-child(7) { grid-area: act; }
+        .dq-row td:nth-child(7) { grid-area: act; overflow-wrap: anywhere; }
         .dq-row td:nth-child(3),
-        .dq-row td:nth-child(6) { display: none !important; }   /* fee/payment + date move into the doc box / modal */
+        .dq-row td:nth-child(6) { display: none !important; }   /* fee/payment + date move into the document card */
 
         .dq-avatar { width: 30px; height: 30px; flex-basis: 30px; font-size: 12px; }
         .dq-purpose { max-width: none; }
@@ -181,12 +183,12 @@
 <table id="registrar-table-1" class="table dq-table">
                 <thead>
                     <tr>
-                        <th>Alumni</th>
+                        <th>Requester</th>
                         <th>Document</th>
                         <th>Fee &amp; payment</th>
                         <th>Status</th>
-                        <th>Pickup</th>
-                        <th>Date</th>
+                        <th class="d-none">Historical appointment</th>
+                        <th>Requested</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -205,6 +207,19 @@
                         <td>
                             <div class="dq-doc">{{ $req->document_label }} <span class="dq-sub">× {{ $req->copies }}</span></div>
                             <div class="dq-sub dq-purpose">{{ $req->purpose ?: 'No purpose given' }}</div>
+                            @if ($req->assessment_required)
+                                <div class="dq-sub">Assessment: {{ ucfirst($req->assessment_status ?? 'pending') }}</div>
+                                @if ($req->requirements_notes)<div class="dq-sub">Requirements: {{ $req->requirements_notes }}</div>@endif
+                                @if ($req->assessed_at)<div class="dq-sub">{{ $req->assessor?->name ?? 'Recorded staff' }} · {{ $req->assessed_at->timezone('Asia/Manila')->format('M d, Y g:i A') }}</div>@endif
+                            @endif
+                            @if ($req->appointment && $req->appointment->slot)
+                                <div class="dq-sub dq-history-appointment">
+                                    Historical appointment:
+                                    {{ \Carbon\Carbon::parse($req->appointment->slot->date)->format('M d, Y') }}
+                                    at {{ \Carbon\Carbon::parse($req->appointment->slot->start_time)->format('g:i A') }}
+                                    &middot; {{ ucfirst($req->appointment->status) }}
+                                </div>
+                            @endif
                             <div class="dq-mobile-pay" style="align-items:center; justify-content:space-between; margin-top:8px;">
                                 <span class="dq-fee" style="margin:0; font-size:15px;">₱{{ number_format($req->fee, 2) }}</span>
                                 <span class="dq-pay is-{{ $paymentTone[$req->payment_status] ?? 'neutral' }}">{{ $req->paymentNotRequired() ? 'No Payment Required' : ($paymentText[$req->payment_status] ?? ucfirst($req->payment_status)) }}</span>
@@ -219,7 +234,7 @@
                                 <span class="dtc-status-dot"></span>{{ ucfirst($req->status) }}
                             </span>
                         </td>
-                        <td style="min-width:130px;">
+                        <td class="d-none">
                             @if ($req->appointment && $req->appointment->slot)
                                 <div class="dq-name" style="font-weight:600;">
                                     {{ \Carbon\Carbon::parse($req->appointment->slot->date)->format('M d, Y') }}
@@ -229,18 +244,32 @@
                                     · {{ ucfirst($req->appointment->status) }}
                                 </div>
                             @else
-                                <span class="dq-sub">Pickup not booked</span>
+                                <span class="dq-sub">No appointment required</span>
                             @endif
                         </td>
                         <td class="dq-sub" style="white-space:nowrap;">{{ $req->created_at->format('M d, Y') }}</td>
                         <td class="text-right">
-                            @if (in_array($req->status, ['submitted', 'processing', 'ready'], true))
+                            @if ($req->assessment_required && $req->status === 'submitted')
+                                <button type="button" class="btn btn-sm btn-secondary mb-2" data-toggle="modal" data-target="#assessmentModal{{ $req->id }}">Assess request</button>
+                            @endif
+                            @if ($req->status === 'ready')
+                                @if ($req->paymentSatisfied() && $req->assessmentSatisfied())
+                                @hasanyrole('registrar|admin')
+                                <button type="button" class="btn btn-sm btn-primary dq-update" data-toggle="modal" data-target="#releaseModal{{ $req->user_id }}" data-release-document="{{ $req->id }}">Release documents</button>
+                                @else
+                                <span class="dq-sub">Registrar records release</span>
+                                @endhasanyrole
+                                @else
+                                <span class="dq-sub">{{ !$req->assessmentSatisfied() ? 'Assessment required' : 'Awaiting payment verification' }}</span>
+                                @endif
+                            @elseif (in_array($req->status, ['submitted', 'processing'], true))
                                 <button type="button" class="btn btn-sm btn-primary dq-update"
-                                        data-toggle="modal" data-target="#statusModal{{ $req->id }}">
-                                    Update status
+                                        data-toggle="modal" data-target="#statusModal{{ $req->id }}" @disabled(!$req->assessmentSatisfied())>
+                                    {{ $req->status === 'submitted' ? 'Start preparation' : 'Mark ready' }}
                                 </button>
                             @else
                                 <span class="dq-sub">{{ $req->status === 'released' ? 'Completed' : 'Closed' }}</span>
+                                @if ($req->released_at)<div class="dq-sub">Released {{ $req->released_at->timezone('Asia/Manila')->format('M d, Y g:i A') }} by {{ $req->releaser?->name ?? 'Recorded staff' }}</div>@endif
                             @endif
                         </td>
                     </tr>
@@ -276,17 +305,26 @@
 </div>
 
 {{-- Status modals (kept outside the table so they never inherit row styling) --}}
+@foreach ($releaseGroups as $collectionDocuments)
+    @include('registrar.documents._walk-in-collection', ['claimant' => $collectionDocuments->first()->user])
+@endforeach
 @foreach ($requests as $req)
-    @if (in_array($req->status, ['submitted', 'processing', 'ready'], true))
+    @if ($req->assessment_required && $req->status === 'submitted')
+        @include('registrar.documents._assessment', ['document' => $req])
+    @endif
+@endforeach
+@foreach ($requests as $req)
+    @if (in_array($req->status, ['submitted', 'processing'], true))
     @php
-        $nextStatus = ['submitted' => 'processing', 'processing' => 'ready', 'ready' => 'released'][$req->status];
-        $releaseLocked = $nextStatus === 'released' && !$req->paymentSatisfied();
+        $nextStatus = ['submitted' => 'processing', 'processing' => 'ready'][$req->status];
     @endphp
     <div class="modal fade" id="statusModal{{ $req->id }}" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <form method="POST" action="{{ route('registrar.documents.status', $req) }}">
                     @csrf
+                    <input type="hidden" name="operation_key" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
+                    <input type="hidden" name="status" value="{{ $nextStatus }}">
                     <div class="modal-header">
                         <h5 class="modal-title">Update Request Status</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
@@ -298,14 +336,13 @@
                             ({{ $req->copies }} cop{{ $req->copies > 1 ? 'ies' : 'y' }})
                         </p>
                         <div class="form-group">
-                            <label for="status-{{ $req->id }}">Status</label>
-                            <select id="status-{{ $req->id }}" name="status" class="form-control" required>
-                                <option value="{{ $nextStatus }}" {{ $releaseLocked ? 'disabled' : '' }}>{{ ucfirst($nextStatus) }}</option>
-                            </select>
+                            <p class="dq-status-label">Status change</p>
+                            <div class="dq-status-change" aria-label="Status will change from {{ ucfirst($req->status) }} to {{ ucfirst($nextStatus) }}">
+                                <span>{{ ucfirst($req->status) }}</span>
+                                <span class="dq-status-arrow" aria-hidden="true">&rarr;</span>
+                                <strong>{{ ucfirst($nextStatus) }}</strong>
+                            </div>
                         </div>
-                        @if ($releaseLocked)
-                            <div class="dq-lock">“Released” is locked until the Cashier verifies the payment.</div>
-                        @endif
                         <div class="form-group">
                             <label for="remarks-{{ $req->id }}">Remarks <span style="color:var(--dtc-text-muted); font-weight:400;">(optional)</span></label>
                             <textarea id="remarks-{{ $req->id }}" name="remarks" class="form-control" rows="3"
@@ -314,7 +351,7 @@
                     </div>
                     <div class="modal-footer dtc-balanced-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" @if($releaseLocked) disabled @endif>Mark as {{ ucfirst($nextStatus) }}</button>
+                        <button type="submit" class="btn btn-primary">Mark as {{ ucfirst($nextStatus) }}</button>
                     </div>
                 </form>
             </div>
@@ -326,4 +363,8 @@
 
 
 </div>
+@endsection
+
+@section('js')
+    <script src="{{ asset('js/document-release.js') }}" defer></script>
 @endsection

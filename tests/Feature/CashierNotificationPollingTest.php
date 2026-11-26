@@ -82,7 +82,8 @@ class CashierNotificationPollingTest extends TestCase
             ->assertJsonMissing(['message' => 'Other message']);
 
         $this->actingAs($student)->getJson(route('cashier.notifications.poll'))->assertForbidden();
-        $this->actingAs($admin)->getJson(route('cashier.notifications.poll'))->assertForbidden();
+        $this->actingAs($admin)->getJson(route('cashier.notifications.poll'))->assertOk()
+            ->assertJsonCount(0, 'notifications');
     }
 
     public function test_retried_event_creation_is_idempotent_for_each_cashier(): void

@@ -8,6 +8,7 @@ use App\Models\AppointmentPayment;
 use App\Models\AppointmentSlot;
 use App\Models\AuditLog;
 use App\Models\DocumentRequest;
+use App\Models\DocumentPaymentProof;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -23,8 +24,9 @@ class AppointmentController extends Controller
 {
     public function index()
     {
-        $appointments = Appointment::with(['slot', 'latestPayment', 'documentRequest', 'documentRequests'])
+        $appointments = Appointment::with(['slot', 'latestPayment', 'documentRequest', 'documentRequests.releaser'])
             ->where('user_id', Auth::id())
+            ->where('visit_type', '!=', 'claiming')
             ->latest()
             ->get();
 
@@ -44,167 +46,18 @@ class AppointmentController extends Controller
 
     public function create()
     {
-        $slots = AppointmentSlot::where('date', '>=', today())
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get()
-            ->filter(fn($slot) => $slot->isAvailable() && !app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s')))
-            ->values();
-
-        $gcashNumber  = Setting::get('gcash_number');
-        $gcashName    = Setting::get('gcash_name');
-        $gcashQrReady = Setting::get('gcash_qr_path') && Storage::disk('local')->exists(Setting::get('gcash_qr_path'));
-        $documentFees = [
-            'transcript' => (float) Setting::get('document_fee_tor', 50),
-            'diploma' => (float) Setting::get('document_fee_diploma', 100),
-            'certification' => (float) Setting::get('document_fee_certification', 30),
-            'tor' => (float) Setting::get('document_fee_true_copy', 50),
-        ];
-
-        return view('student.appointments.create', compact(
-            'slots', 'gcashNumber', 'gcashName', 'gcashQrReady', 'documentFees'
-        ));
+        return app(\App\Http\Controllers\Alumni\DocumentRequestController::class)->create();
     }
 
     public function store(Request $request)
     {
-        if ($request->exists('documents') && $request->exists('document_type')) {
-            throw ValidationException::withMessages([
-                'documents' => 'Submit either a single document or a combined document list, not both.',
-            ]);
-        }
-
-        $validated = $request->validate([
-            'appointment_slot_id' => ['required', 'exists:appointment_slots,id'],
-            'document_type'       => ['nullable', 'required_without:documents', 'in:transcript,diploma,certification,tor'],
-            'documents'           => ['required_without:document_type', 'array', 'min:1', 'max:4'],
-            'documents.*.document_type' => ['required', 'in:transcript,diploma,certification,tor'],
-            'documents.*.copies'  => ['required', 'integer', 'min:1', 'max:10'],
-            'purpose'             => ['nullable', 'string', 'max:500'],
-            'payment_method'      => ['nullable', 'in:walk_in,gcash'],
-            'reference_number'    => ['nullable', 'string', 'max:100'],
-            'proof_of_payment'    => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'mimetypes:image/jpeg,image/png,application/pdf', 'max:5120'],
-        ], [], [
-            'documents.*.copies' => 'number of copies',
-            'documents.*.document_type' => 'document type',
-        ]);
-
-
-        $documents = $validated['documents'] ?? [[
-            'document_type' => $validated['document_type'],
-            'copies' => 1,
-        ]];
-        $documents = array_values($documents);
-        $appointmentType = $documents[0]['document_type'];
-        $documents = array_map(function ($document) {
-            $document['document_type'] = match ($document['document_type']) {
-                'transcript' => 'tor',
-                'tor' => 'true_copy',
-                default => $document['document_type'],
-            };
-            return $document;
-        }, $documents);
-        $quote = app(\App\Services\DocumentRequestPricing::class)->quote($documents);
-        if ($quote['total'] == 0) {
-            $validated['payment_method'] = 'walk_in';
-        } else {
-            $request->validate(['payment_method' => ['required', 'in:walk_in,gcash']]);
-            $validated['payment_method'] = $request->input('payment_method');
-            if ($validated['payment_method'] === 'gcash') {
-                $request->validate([
-                    'reference_number' => ['required', 'string', 'max:100'],
-                    'proof_of_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'mimetypes:image/jpeg,image/png,application/pdf', 'max:5120'],
-                ]);
-            }
-        }
-        if ($validated['payment_method'] === 'gcash') {
-            $qrPath = Setting::get('gcash_qr_path');
-            if (! $qrPath || ! Storage::disk('local')->exists($qrPath)) {
-                throw ValidationException::withMessages(['payment_method' => 'GCash payment is unavailable. Please pay at the Cashier.']);
-            }
-        }
-
-        $proofPath = $validated['payment_method'] === 'gcash'
-            ? $request->file('proof_of_payment')->store('document-request-proofs', 'local')
-            : null;
-        if ($validated['payment_method'] === 'gcash'
-            && (! $proofPath || ! Storage::disk('local')->exists($proofPath))) {
-            if ($proofPath) {
-                Storage::disk('local')->delete($proofPath);
-            }
-            throw ValidationException::withMessages([
-                'proof_of_payment' => 'The proof could not be saved. Please try uploading it again.',
-            ]);
-        }
-
-        try {
-            $appointment = app(\App\Services\DocumentAppointmentBookingService::class)->book(
-                Auth::user(),
-                (int) $validated['appointment_slot_id'],
-                $documents,
-                $appointmentType,
-                $validated['purpose'] ?? null,
-                $validated['payment_method'] === 'gcash' ? 'gcash' : 'walk_in',
-                $validated['payment_method'] === 'gcash' ? $validated['reference_number'] : null,
-                $proofPath,
-                $request
-            );
-        } catch (\Throwable $exception) {
-            if ($proofPath) {
-                Storage::disk('local')->delete($proofPath);
-            }
-            throw $exception;
-        }
-        if ($appointment->paymentNotRequired() && $proofPath) { Storage::disk('local')->delete($proofPath); $proofPath = null; }
-        $slot = $appointment->slot;
-        $documentLabels = $appointment->documentRequests->map(fn ($item) => $item->document_label . ' × ' . $item->copies)->implode(', ');
-        $totalFee = $appointment->documentRequests->sum('fee');
-
-        if ($proofPath) {
-            foreach (User::role(['cashier', 'admin'])->get() as $cashier) {
-                NotificationService::sendSafely(
-                    $cashier,
-                    'Document Payment Needs Verification',
-                    Auth::user()->name . ' submitted GCash proof for appointment #' . $appointment->id . ' covering ' . $documentLabels . ' (PHP ' . number_format($totalFee, 2) . ').',
-                    'warning',
-                    route('cashier.document-payments.index', ['status' => 'pending_verification'])
-                );
-            }
-        }
-
-        // Notify registrars
-        $notifyUsers = User::role(['registrar', 'admin'])->get();
-        foreach ($notifyUsers as $staff) {
-            NotificationService::send(
-                $staff,
-                'New Appointment Request',
-                Auth::user()->name . ' has booked an appointment for ' . $documentLabels . ' on ' .
-                \Carbon\Carbon::parse($slot->date)->format('M d, Y') .
-                ' at ' . \Carbon\Carbon::parse($slot->start_time)->format('h:i A') . '.',
-                'info',
-                route('registrar.appointments.index')
-            );
-        }
-
-        NotificationService::sendUserUpdateSafely(
-            Auth::user(),
-            'appointment-booked:'.$appointment->id,
-            'Appointment Request Received',
-            'We received your appointment request for '.$documentLabels.' on '
-                .\Carbon\Carbon::parse($slot->date)->format('M d, Y').' at '
-                .\Carbon\Carbon::parse($slot->start_time)->format('h:i A').'. It is awaiting Registrar confirmation.',
-            'info',
-            route('portal.appointments.index'),
-            'View appointment'
-        );
-
-        return redirect()->route('portal.appointments.index')
-            ->with('success', 'Appointment requested. Await Registrar confirmation.');
+        return app(\App\Http\Controllers\Alumni\DocumentRequestController::class)->storeLegacy($request);
     }
 
     public function edit(Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
+        abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointment changes are not available through submission editing.');
 
         if ($appointment->status !== 'pending') {
             return redirect()->route('portal.appointments.index')
@@ -224,11 +77,7 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
-
-        if ($appointment->status !== 'pending') {
-            return redirect()->route('portal.appointments.index')
-                ->with('error', 'Only pending appointments can be edited.');
-        }
+        abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointment changes are not available through submission editing.');
 
         $validated = $request->validate([
             'appointment_slot_id' => ['required', 'exists:appointment_slots,id'],
@@ -245,13 +94,15 @@ class AppointmentController extends Controller
         }
         if ($original['purpose'] !== $validated['purpose']) $changes[] = 'purpose updated';
 
-        DB::transaction(function () use ($validated, $appointment) {
+        app(\App\Services\AppointmentLifecycle::class)->run($request, 'appointment.updated', $appointment,
+            [(int) $validated['appointment_slot_id']], [], function () use ($validated, $appointment) {
             $appointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
             if ($appointment->status !== 'pending') {
                 throw ValidationException::withMessages(['appointment' => 'This booking has changed. Only pending appointments can be edited.']);
             }
-            $linkedRequests = DocumentRequest::where('appointment_id', $appointment->id)->lockForUpdate()->get();
+            $linkedRequests = DocumentRequest::where('appointment_id', $appointment->id)->orderBy('id')->lockForUpdate()->get();
             $linkedRequest = $linkedRequests->first();
+            $immutableRequests = $linkedRequests->whereIn('status', ['processing', 'ready', 'released']);
             $requestType = match ($validated['document_type']) {
                 'transcript' => 'tor',
                 'tor' => 'true_copy',
@@ -261,21 +112,28 @@ class AppointmentController extends Controller
             if ($linkedRequests->count() > 1 && $appointment->document_type !== $validated['document_type']) {
                 throw ValidationException::withMessages(['document_type' => 'Change document types through a new request when an appointment contains multiple documents.']);
             }
+            if ($typeChanged && $immutableRequests->isNotEmpty()) {
+                throw ValidationException::withMessages(['document_type' => 'A document type cannot be changed after processing has started. Submit a new request instead.']);
+            }
             if ($typeChanged && ($linkedRequest->is_paid || in_array($linkedRequest->payment_status, ['pending_verification', 'verified'], true))) {
                 throw ValidationException::withMessages(['document_type' => 'The document type cannot be changed after payment has been submitted. Contact the Registrar for help.']);
             }
             if ($validated['appointment_slot_id'] != $appointment->appointment_slot_id) {
                 $slot = AppointmentSlot::whereKey($validated['appointment_slot_id'])->lockForUpdate()->firstOrFail();
-                if (! $slot->isAvailable() || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) || $slot->date < today()->toDateString() || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
+                $active = Appointment::where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get();
+                if (($slot->status ?? 'open') !== 'open' || $active->count() >= $slot->max_bookings || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) || $slot->date < today()->toDateString() || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
                     throw ValidationException::withMessages(['appointment_slot_id' => 'This slot is no longer available. Please select another.']);
                 }
-                if (Appointment::where('user_id', Auth::id())->where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->where('id', '<>', $appointment->id)->exists()) {
+                if ($active->contains('user_id', Auth::id())) {
                     throw ValidationException::withMessages(['appointment_slot_id' => 'You already have a booking for this slot.']);
                 }
             }
 
             $appointment->update($validated);
             foreach ($linkedRequests as $item) {
+                if (in_array($item->status, ['processing', 'ready', 'released'], true)) {
+                    continue;
+                }
                 $updates = ['purpose' => $validated['purpose']];
                 if ($item->id === $linkedRequest?->id && $typeChanged) {
                     $updates['document_type'] = $requestType;
@@ -293,7 +151,9 @@ class AppointmentController extends Controller
                     $bundlePayment->update(['amount' => $linkedRequests->sum(fn ($item) => (float) $item->fresh()->fee)]);
                 }
             }
-        });
+        }, $validated);
+
+        if ($request->attributes->get('lifecycle_replayed')) return redirect()->route('portal.appointments.index')->with('success', 'Appointment updated.');
 
         // Notify registrars of the update
         $slot = AppointmentSlot::find($appointment->appointment_slot_id);
@@ -334,6 +194,7 @@ class AppointmentController extends Controller
     public function submitGcash(Request $request, Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
+        abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointments do not create another payment.');
         if ($appointment->documentRequests()->exists()) {
             return redirect()->route('portal.payments.appointment', $appointment)->with('error', 'Use the document payment page for this booking.');
         }
@@ -426,7 +287,7 @@ class AppointmentController extends Controller
         }
 
         try {
-            $previousProof = DB::transaction(function () use ($appointment, $validated, $proofPath, $request) {
+            DB::transaction(function () use ($appointment, $validated, $proofPath, $request) {
                 $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
                 if ($lockedAppointment->status === 'cancelled') {
                     throw ValidationException::withMessages(['payment' => 'Cannot submit payment for a cancelled appointment.']);
@@ -441,15 +302,27 @@ class AppointmentController extends Controller
                     && ! $payment->proof_of_payment
                     && ! $payment->reference_number;
                 if ((! $firstSubmission && ($payment->status !== 'rejected' || $payment->payment_method !== 'gcash'))
-                    || $lockedAppointment->documentRequests()->where(function ($query) {
+                    || $lockedAppointment->paymentDocuments()->where(function ($query) {
                         $query->where('is_paid', true)->orWhere('payment_status', 'verified');
                     })->exists()) {
                     throw ValidationException::withMessages(['payment' => 'This bundled payment is not available for GCash submission.']);
                 }
-                if ($lockedAppointment->documentRequests()->where('fee', '>', 0)->whereIn('status', ['cancelled', 'released'])->exists()) {
+                if ($lockedAppointment->paymentDocuments()->where('fee', '>', 0)->whereIn('status', ['cancelled', 'released'])->exists()) {
                     throw ValidationException::withMessages(['payment' => 'This bundled payment is no longer available.']);
                 }
-                $previousProof = $payment->proof_of_payment;
+                if ($payment->status === 'rejected' && $payment->proof_of_payment
+                    && ! DocumentPaymentProof::where('appointment_payment_id', $payment->id)->where('path', $payment->proof_of_payment)->exists()) {
+                    DocumentPaymentProof::create([
+                        'appointment_payment_id' => $payment->id,
+                        'path' => $payment->proof_of_payment,
+                        'reference_number' => $payment->reference_number,
+                        'submitted_at' => $payment->updated_at ?? now(),
+                        'status' => 'rejected',
+                        'reviewed_by' => $payment->verified_by,
+                        'reviewed_at' => $payment->verified_at,
+                        'rejection_reason' => $payment->rejection_reason,
+                    ]);
+                }
                 $payment->update([
                     'status' => 'pending',
                     'reference_number' => $validated['reference_number'],
@@ -458,7 +331,14 @@ class AppointmentController extends Controller
                     'verified_by' => null,
                     'verified_at' => null,
                 ]);
-                $lockedAppointment->documentRequests()->where('fee', '>', 0)->update([
+                DocumentPaymentProof::create([
+                    'appointment_payment_id' => $payment->id,
+                    'path' => $proofPath,
+                    'reference_number' => $validated['reference_number'],
+                    'submitted_by' => Auth::id(),
+                    'submitted_at' => now(),
+                ]);
+                $lockedAppointment->paymentDocuments()->where('fee', '>', 0)->update([
                     'payment_method' => 'gcash_qr',
                     'payment_status' => 'pending_verification',
                     'reference_number' => null,
@@ -481,17 +361,12 @@ class AppointmentController extends Controller
                         'amount_due' => $payment->amount,
                     ],
                 ]);
-
-                return $previousProof;
             });
         } catch (\Throwable $exception) {
             Storage::disk('local')->delete($proofPath);
             throw $exception;
         }
 
-        if ($previousProof && $previousProof !== $proofPath) {
-            Storage::disk('local')->delete($previousProof);
-        }
         $payment = AppointmentPayment::where('appointment_id', $appointment->id)->where('is_document_bundle', true)->latest()->firstOrFail();
         foreach (User::role(['cashier', 'admin'])->get() as $cashier) {
             NotificationService::sendSafely(
@@ -526,124 +401,16 @@ class AppointmentController extends Controller
 
     public function submitDocumentGcash(Request $request, DocumentRequest $documentRequest)
     {
-        abort_if($documentRequest->user_id !== Auth::id(), 403);
-        if ($documentRequest->usesBundledPayment()) {
-            throw ValidationException::withMessages(['payment' => 'This payment is managed through its appointment. Review or submit payment for the whole booking.']);
-        }
-        if ($documentRequest->paymentNotRequired()) {
-            return redirect()->route('portal.payments.document', $documentRequest);
-        }
-
-
-        $validated = $request->validate([
-            'reference_number' => ['required', 'string', 'max:100'],
-            'proof_of_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'mimetypes:image/jpeg,image/png,application/pdf', 'max:5120'],
-        ]);
-        $qrPath = Setting::get('gcash_qr_path');
-        if (! $qrPath || ! Storage::disk('local')->exists($qrPath)) {
-            throw ValidationException::withMessages(['payment' => 'GCash payment is unavailable. Please pay at the Cashier.']);
-        }
-
-        $proofPath = $request->file('proof_of_payment')->store('document-request-proofs', 'local');
-        try {
-            $result = DB::transaction(function () use ($documentRequest, $validated, $proofPath, $request) {
-                $locked = DocumentRequest::whereKey($documentRequest->id)->lockForUpdate()->firstOrFail();
-                if ($locked->paymentNotRequired() || $locked->is_paid || $locked->payment_status === 'verified') {
-                    return 'verified';
-                }
-                if ($locked->payment_status === 'pending_verification') {
-                    return 'pending';
-                }
-                if (! in_array($locked->payment_status, ['unpaid', 'rejected'], true) || in_array($locked->status, ['released', 'cancelled'], true)) {
-                    return 'unavailable';
-                }
-
-                $locked->update([
-                    'payment_method' => 'gcash_qr',
-                    'payment_status' => 'pending_verification',
-                    'reference_number' => $validated['reference_number'],
-                    'proof_of_payment' => $proofPath,
-                    'payment_submitted_at' => now(),
-                    'payment_rejection_reason' => null,
-                    'rejected_by' => null,
-                    'rejected_at' => null,
-                ]);
-
-                AuditLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'document_payment.submitted',
-                    'description' => "Submitted GCash proof for document request #{$locked->id}.",
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'metadata' => [
-                        'document_request_id' => $locked->id,
-                        'payment_method' => $locked->payment_method,
-                        'payment_status' => $locked->payment_status,
-                        'reference_number' => $locked->reference_number,
-                        'amount_due' => $locked->fee,
-                    ],
-                ]);
-
-                return 'submitted';
-            });
-        } catch (\Throwable $exception) {
-            Storage::disk('local')->delete($proofPath);
-            throw $exception;
-        }
-
-        if ($result !== 'submitted') {
-            Storage::disk('local')->delete($proofPath);
-            $message = [
-                'verified' => 'This document payment has already been verified.',
-                'pending' => 'Your GCash payment is already waiting for Cashier verification.',
-                'unavailable' => 'This document request is no longer accepting payment submissions.',
-            ][$result];
-            return back()->with('error', $message);
-        }
-
-        $documentRequest->refresh();
-        foreach (User::role(['cashier', 'admin'])->get() as $cashier) {
-            NotificationService::sendSafely(
-                $cashier,
-                'Document Payment Needs Verification',
-                Auth::user()->name . ' submitted GCash proof for document request #' . $documentRequest->id . '.',
-                'warning',
-                route('cashier.document-payments.show', $documentRequest)
-            );
-        }
-        NotificationService::emailDocumentRequestSafely(
-            $documentRequest->user,
-            $documentRequest,
-            'Your GCash payment proof was submitted. The Cashier will verify it against the received funds.'
-        );
-
-        return redirect()->route('portal.payments.document', $documentRequest)->with('success', 'GCash proof submitted.');
+        return app(\App\Http\Controllers\Alumni\DocumentRequestController::class)->submitStudentPayment($request, $documentRequest);
     }
 
     public function viewDocumentProof(Request $request, DocumentRequest $documentRequest)
     {
-        abort_if($documentRequest->user_id !== Auth::id(), 403);
-        abort_unless($documentRequest->proof_of_payment && Storage::disk('local')->exists($documentRequest->proof_of_payment), 404);
-
-        return PrivateFilePreview::respond(
-            $request,
-            Storage::disk('local')->path($documentRequest->proof_of_payment),
-            'Payment proof',
-            route('portal.payments.document', $documentRequest),
-            basename($documentRequest->proof_of_payment)
-        );
+        return app(\App\Http\Controllers\Alumni\DocumentRequestController::class)->viewProof($request, $documentRequest);
     }
 
     public function showGcashQr()
     {
-        $path = Setting::get('gcash_qr_path');
-        if (! $path || ! Storage::disk('local')->exists($path)) {
-            abort(404);
-        }
-        if (request()->boolean('download')) {
-            $extension = pathinfo($path, PATHINFO_EXTENSION);
-            return response()->download(Storage::disk('local')->path($path), 'DTC-GCash-QR.'.$extension, ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
-        }
-        return response()->file(Storage::disk('local')->path($path));
+        return app(\App\Http\Controllers\Alumni\DocumentRequestController::class)->showGcashQr();
     }
 }

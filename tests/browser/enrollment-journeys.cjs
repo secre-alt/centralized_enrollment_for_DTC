@@ -97,8 +97,15 @@ async function noOverflow(page, name) {
     }
     if (journey === 'hold') {
         await goto(student, '/portal/enrollment/create');
+        await expect(student.locator('#semester')).toHaveValue('1');
+        await expect(student.locator('select[name="semester"]')).toHaveCount(0);
         await student.locator('#program_id').selectOption(process.env.BROWSER_PROGRAM_ID);
         await expect(student.locator('input[name="subject_ids[]"]')).toHaveCount(1);
+        await student.locator('input[name="subject_ids[]"]').uncheck();
+        await submit(student, 'form:has(#year_level) button[type="submit"]');
+        await expect(student.locator('.dtc-enrollment-create-body > .alert-danger')).toBeVisible();
+        await expect(student.locator('input[name="subject_ids[]"]')).toHaveCount(1);
+        await expect(student.locator('input[name="subject_ids[]"]')).not.toBeChecked();
         await student.locator('input[name="subject_ids[]"]').check();
         await submit(student, 'form:has(#year_level) button[type="submit"]');
         assert.equal(state().hold, true);

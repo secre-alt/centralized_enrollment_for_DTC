@@ -1,5 +1,17 @@
 # Paid enrollment workflow: implementation and acceptance
 
+## Cashier payment review links — November 26, 2026
+
+Direct enrollment payment review URLs now redirect to the existing Cashier payment list with `review` selecting the payment dialog. This includes refund follow-ups, reconciliation links and payment-action redirects. AJAX requests return only the shared payment content. Flash messages and validation errors survive the redirect; payment and refund rules are unchanged. No migration or asset build is required. Authenticated browser acceptance remains outstanding.
+
+Verification: the final focused payment/refund/notification/GCash run passed 42 tests (477 assertions). The full MySQL run executed 766 tests (9,315 assertions) with three failures: two affected test expectations were corrected and passed in the focused rerun. The separate alumni dashboard assertion was subsequently updated to check the current “My document requests” heading; all 26 dashboard tests passed (176 assertions). The full suite was not repeated after those test-only corrections. PHP syntax and whitespace checks passed.
+
+## Registrar review presentation — November 26, 2026
+
+Enrollment review now uses a compact program/year/semester/classification summary, with submission time displayed in Asia/Manila. Each subject and its section selector share one row group; labels retain the subject code for screen readers. Shared section guidance appears once, and the prepayment hold explains that sections come before Cashier verification and enrollment approval. Its header reads “Sections required.” The same template serves the modal and standalone page; presentation rules are scoped to enrollment review. Existing form associations, actions, permissions and server validation are preserved. No migration or asset build is required.
+
+Verification: 33 focused automatic-assignment, Cashier-first and subject-replacement tests passed (373 assertions). The updated browser fixture passed 42 cases across seven dialog families, three widths and two themes, including section/form association, neutral notice styling, one-column instructions, footer visibility and scrolling the final selector clear of the footer. The sandboxed Edge launch timed out; the fixture passed outside the sandbox and its screenshot was inspected. Targeted Pint, PHP/JavaScript syntax and whitespace checks passed. This is presentation verification, not full regression acceptance; the full PHP suite was not rerun for this UI-only follow-up. Authenticated manual role acceptance remains outstanding.
+
 ## New submission follow-up: sections before payment
 
 The user approved automatic complete-group assignment from published timetables and chose a prepayment Registrar section-assignment hold when no complete group fits. See [draft timetable generation](draft-timetable-generation.md#automatic-assignment-and-prepayment-section-hold) for the implementation and limits. This supersedes unconditional cashier-first instructions for new unassigned submissions; final academic approval still requires verified payment. Existing records are not backfilled or newly held.

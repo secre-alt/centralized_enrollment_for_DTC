@@ -1,4 +1,26 @@
 /* Document booking: one page grid, quiet summary, and consistent option rows. */
+.dtc-booking-page [data-document-payment-section] { margin-bottom: 20px; }
+.dtc-booking-page [hidden] { display: none !important; }
+.dtc-booking-page [data-document-controls] { border-top: 1px solid var(--dr-line); }
+.dtc-booking-page .dr-opt-input:focus-visible ~ .dr-document-choice { outline: 3px solid var(--dr-brand); outline-offset: -3px; }
+.dtc-booking-page .dr-input { min-height: 44px; min-width: 0; max-width: 100%; }
+.dtc-booking-page .dr-field-error { color: var(--dtc-danger, #b42318); font-size: 13px; }
+.dtc-booking-page .dr-field-error:empty { display: none; }
+.dtc-booking-page .dr-estimate-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.24); overflow-wrap: anywhere; }
+.dtc-booking-page .dr-estimate-total { padding: 16px 0; font-weight: 600; }
+.dtc-booking-page .dr-collection ol { list-style: decimal; padding-left: 20px; margin: 12px 0; }
+.dtc-booking-page .dr-collection li { margin-bottom: 8px; }
+.dtc-booking-page .dr-collection p { margin-top: 12px; }
+.dtc-booking-page:has([data-document-submission]) { padding-bottom: 0; }
+.dtc-booking-page [data-document-submission] .dr-aside { padding-top: 0; }
+@media (min-width: 992px) {
+    /* Match the 28px step tracker and its 24px bottom margin. */
+    .dtc-booking-page [data-document-submission] .dr-aside { padding-top: 52px; }
+}
+.dtc-booking-page [data-document-submission] .dr-slip-body { display: block; }
+.dtc-booking-page [data-document-option] > .dr-sec { display: grid; gap: 8px; }
+.dtc-booking-page [data-document-gcash] { margin-top: 12px; }
+.dtc-booking-page [data-document-gcash] .dr-input { margin-bottom: 12px; }
 .dtc-booking-header, .dtc-booking-page { max-width: none; width: 100%; margin: 0; }
 .dtc-booking-header .dr-back { min-height: 32px; margin: 0 0 8px; padding: 0; gap: 8px; }
 .dtc-booking-header h1 { font-weight: 500; }
@@ -52,7 +74,8 @@
 .dtc-booking-page .dr-slip-foot .dr-btn { min-height: 44px; border-radius: 8px; background: var(--dr-gold); color: #1b2540; font-size: 14px; font-weight: 500; }
 .dtc-booking-page .dr-slip-foot .dr-btn:hover { background: #ffd257; }
 .dtc-booking-page .dr-slip-note { margin-top: 12px; color: rgba(255,255,255,.72); font-size: 12px; }
-.dtc-booking-page .dr-slip-back { color: rgba(255,255,255,.86); }
+.dtc-booking-page .dr-slip-back { min-height: 44px; margin: 0; padding: 10px 16px; border: 1px solid rgba(255,255,255,.45); border-radius: 8px; background: rgba(255,255,255,.14); color: #fff; text-decoration: none; font-weight: 500; }
+.dtc-booking-page .dr-slip-back:hover { background: rgba(255,255,255,.24); }
 .dtc-booking-page .dr-next { border-radius: 12px; }
 .dtc-booking-page .dr-next summary { padding: 0 20px; font-weight: 500; }
 .dtc-booking-page .dr-next-list { padding: 0 20px 20px; gap: 16px; }
@@ -81,4 +104,72 @@
     .dtc-booking-page .dr-opt-desc { font-size: 12px; }
     .dtc-booking-page .dr-document-quantity { margin: 0 12px 12px; }
     .dtc-booking-page .dr-steps-name { font-size: 12px; }
+}
+
+/* Compact document selection; keep legacy appointment forms unchanged. */
+.dtc-booking-page [data-document-submission] .dr-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0; list-style: none; }
+.dtc-booking-page [data-request-step-indicator] { display: flex; align-items: center; gap: 8px; color: var(--dr-ink-3); }
+.dtc-booking-page [data-request-step-indicator]::before { content: none; }
+.dtc-booking-page [data-request-step-indicator].is-current { color: var(--dr-ink); font-weight: 600; }
+.dtc-booking-page [data-document-submission] .dr-steps-name { text-align: left; }
+.dtc-booking-page [data-document-submission] .dr-opt:has(.dr-opt-input:checked) { background: var(--dr-surface); border-color: var(--dr-brand); box-shadow: none; }
+.dtc-booking-page [data-document-submission] .dr-document-choice { min-height: 72px; }
+.dtc-booking-page [data-document-submission] [data-document-controls] { padding: 12px 16px; }
+.dtc-booking-page .dr-copy-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.dtc-booking-page .dr-copy-row label { margin: 0; font-size: 13px; font-weight: 500; }
+.dtc-booking-page .dr-copy-row small { display: block; color: var(--dr-ink-3); font-weight: 400; }
+.dtc-booking-page .dr-copy-picker { display: flex; align-items: center; border: 1px solid var(--dr-line); border-radius: 8px; overflow: hidden; }
+.dtc-booking-page .dr-copy-picker button { width: 44px; min-height: 44px; border: 0; background: var(--dr-soft); color: var(--dr-ink); font-size: 20px; cursor: pointer; }
+.dtc-booking-page .dr-copy-picker button:disabled { opacity: .4; cursor: default; }
+.dtc-booking-page .dr-copy-picker button:focus-visible { outline: 2px solid var(--dr-brand); outline-offset: -3px; }
+.dtc-booking-page .dr-copy-picker .dr-input { width: 56px; min-height: 44px; padding: 4px; border: 0; border-radius: 0; text-align: center; appearance: textfield; }
+.dtc-booking-page .dr-copy-picker input::-webkit-inner-spin-button { appearance: none; }
+.dtc-booking-page [data-document-submission] .dr-slip { background: var(--dr-slip); }
+.dtc-booking-page [data-document-submission] .dr-slip-foot { padding-top: 16px; }
+@media (max-width: 575.98px) {
+    .dtc-booking-page [data-document-submission] .dr-steps { gap: 4px; }
+    .dtc-booking-page [data-request-step-indicator] { gap: 6px; }
+    .dtc-booking-page [data-document-submission] .dr-steps-dot { width: 24px; height: 24px; flex-shrink: 0; }
+}
+
+/* Request pages hide the footer; mobile request actions stay visible. */
+.dtc-booking-page .dr-gcash-step { margin: 24px 0; }
+.dtc-booking-page .dr-gcash-step h4 { margin: 0 0 16px; font-size: 14px; font-weight: 500; }
+.dtc-booking-page .dr-gcash-scan { display: grid; justify-items: center; gap: 16px; margin-bottom: 16px; }
+.dtc-booking-page .dr-gcash-save { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 16px; border: 1px solid var(--dr-line); border-radius: 8px; background: var(--dr-soft); color: var(--dr-ink); font-size: 14px; text-decoration: none; }
+.dtc-booking-page .dr-gcash-step > label { display: block; margin: 16px 0 8px; font-size: 14px; }
+.dtc-booking-page .dr-payment-upload { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--dr-line); border-radius: 8px; background: var(--dr-soft); }
+.dtc-booking-page .dr-upload-choice { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; margin: 0; padding: 8px 12px; border: 1px solid var(--dr-line); border-radius: 8px; background: var(--dr-surface); color: var(--dr-ink); cursor: pointer; font-size: 14px; }
+.dtc-booking-page .dr-payment-upload:focus-within { outline: 2px solid var(--dr-brand); outline-offset: 3px; }
+.dtc-booking-page .dr-upload-filename { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--dr-ink-2); font-size: 13px; }
+.dtc-booking-page [data-document-gcash] :is(input, button, a, label) { scroll-margin-block: 96px 160px; }
+.dtc-booking-page .dr-document-payment { padding: 20px 0; border-top: 1px solid var(--dr-line); }
+.dtc-booking-page .dr-document-payment[hidden] { display: none; }
+.dtc-booking-page .dr-document-payment .dr-sec-title { margin-bottom: 4px; font-size: 16px; font-weight: 500; }
+.dtc-booking-page .dr-payment-amount { margin: 0 0 20px; color: var(--dr-ink-2); font-variant-numeric: tabular-nums; }
+.dtc-booking-page .dr-payment-methods { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 0; margin: 0 0 12px; border: 0; }
+.dtc-booking-page .dr-payment-methods legend { float: none; width: 100%; margin-bottom: 8px; font-size: 14px; font-weight: 500; }
+.dtc-booking-page .dr-payment-methods label { display: flex; flex: 1 1 auto; align-items: center; gap: 8px; min-height: 44px; margin: 0; padding: 8px 12px; border: 1px solid var(--dr-line); border-radius: 8px; font-size: 14px; cursor: pointer; }
+.dtc-booking-page .dr-payment-methods label:has(:checked) { border-color: var(--dr-brand); background: var(--dr-soft); }
+.dtc-booking-page .dr-payment-methods input { width: 16px; height: 16px; margin: 0; accent-color: var(--dr-brand); }
+.dtc-booking-page .dr-payment-methods input:focus-visible { outline: 2px solid var(--dr-brand); outline-offset: 3px; }
+.dtc-booking-page .dr-payment-recipient { display: grid; gap: 4px; margin: 16px 0; overflow-wrap: anywhere; }
+.dtc-booking-page .dr-payment-qr { display: block; max-width: 100%; height: auto; padding: 8px; background: #fff; border-radius: 8px; }
+.dtc-booking-page [data-document-gcash] > label { display: block; margin: 16px 0 8px; font-size: 14px; }
+body:has([data-document-submission]) .main-footer { display: none !important; }
+body:has([data-document-submission]) .wrapper > .content-wrapper { padding-bottom: 0 !important; }
+.dtc-booking-page [data-request-details] > summary { cursor: pointer; }
+.dtc-booking-page .dr-collection > summary { display: list-item; }
+.dtc-booking-page .dr-mobile-total { display: none; }
+@media (max-width: 991.98px) {
+    body:has([data-document-submission]) .wrapper { padding-bottom: calc(144px + env(safe-area-inset-bottom, 0px)); }
+    .dtc-booking-page [data-document-submission] .dr-slip-foot { position: fixed; z-index: 1035; inset: auto 0 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--dr-slip); border-top: 1px solid rgba(255,255,255,.2); box-shadow: 0 -4px 16px rgba(0,0,0,.12); }
+    .dtc-booking-page [data-document-submission] .dr-mobile-total { display: block; flex: 0 0 100%; margin: 0; color: #fff; font-size: 13px; line-height: 20px; }
+    .dtc-booking-page [data-document-submission] .dr-slip-foot .dr-btn { flex: 1; max-width: none; margin: 0; min-width: 0; }
+    .dtc-booking-page [data-document-submission] .dr-slip-back { flex: 0 0 auto; min-height: 44px; padding: 0 12px; }
+    .dtc-booking-page [data-document-submission] .dr-slip-body { padding: 16px; }
+    .dtc-booking-page [data-document-submission] .dr-slip-title { margin: 0; font-size: 14px; }
+    .dtc-booking-page [data-document-submission] .dr-slip-body[open] > summary { margin-bottom: 16px; }
+    .dtc-booking-page [data-document-submission] .dr-slip-tear { display: none; }
+    .dtc-booking-page [data-document-submission] .dr-collection > summary { margin: 0; font-size: 14px; }
 }

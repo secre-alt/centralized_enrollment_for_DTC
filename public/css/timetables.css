@@ -6,8 +6,22 @@
 .tt-section > summary .tt-help, .tt-resource > summary .tt-help { margin-left:12px; }
 .tt-section > p { margin:12px 0 16px; }
 .tt-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
-.tt-workspace label { display:block; font-size:13px; font-weight:500; margin:0; min-width:0; }
-.tt-workspace .form-control { margin-top:8px; width:100%; min-width:0; }
+.tt-start-options { display:grid; gap:12px; margin:20px 0; }
+.tt-start-option { min-width:0; border:1px solid var(--dtc-border); border-radius:8px; padding:16px; }
+.tt-start-option > summary { cursor:pointer; font-size:15px; font-weight:600; }
+.tt-start-option > summary .tt-help { display:block; margin:4px 0 0 16px; font-weight:400; }
+.tt-start-option > p { margin:16px 0; }
+.tt-start-option summary:focus-visible { outline:2px solid var(--dtc-primary); outline-offset:4px; }
+.tt-subject.tt-needs-attention { border-left:2px solid var(--dtc-danger); padding-left:16px; }
+.tt-subject-title .tt-attention-label { color:var(--dtc-danger); font-size:12px; }
+.tt-workspace label { display:block; font-size:14px; font-weight:500; margin:0; min-width:0; }
+.tt-workspace .form-control { margin-top:8px; width:100%; min-width:0; min-height:44px; font-size:14px; }
+.tt-workspace input[type="file"].form-control { height:auto; padding:6px; overflow:hidden; }
+.tt-workspace input[type="file"]::file-selector-button { border:1px solid var(--dtc-border); border-radius:6px; background:var(--dtc-surface); color:var(--dtc-text); padding:6px 10px; margin-right:10px; cursor:pointer; font:inherit; }
+#tt-import-mode-help { margin:8px 0 0; }
+#tt-import-form > label[for="tt-import-mode"] { margin-top:16px; }
+#tt-import-stale { margin:12px 0; }
+.tt-workspace [hidden] { display:none !important; }
 .tt-resource { border-top:1px solid var(--dtc-border); padding:8px 0; }
 .tt-resource-form { padding:16px 0; }
 .tt-availability { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; }
@@ -40,13 +54,28 @@
 .tt-table thead { background:var(--dtc-surface-soft); }
 .tt-table tbody tr:last-child > * { border-bottom:0; }
 .tt-table td { min-width:110px; overflow-wrap:anywhere; }
+.tt-schedule-table th[scope="row"] { overflow-wrap:anywhere; }
 .tt-publish [hidden] { display:none; }
 .tt-actions button:disabled { opacity:.55; cursor:not-allowed; }
 .tt-workspace summary:focus-visible, .tt-list-row:focus-visible { outline:2px solid var(--dtc-primary); outline-offset:4px; }
 @media(max-width:575.98px) {
-    .tt-workspace .card-header, .tt-workspace .card-body { padding:16px; }
+    .tt-workspace .card-header { padding:16px; }
+    .tt-workspace .card-body { padding:12px; }
+    .tt-start-option { padding:12px; }
+    .tt-help { font-size:14px; line-height:1.55; }
+    .tt-section > summary .tt-help, .tt-resource > summary .tt-help { display:block; margin:4px 0 0 16px; }
     .tt-grid, .tt-availability { grid-template-columns:1fr; }
     .tt-actions { flex-direction:column; }
     .tt-actions .dtc-btn { width:100%; }
     .tt-list-row { flex-direction:column; gap:4px; }
+}
+@media(max-width:767.98px) {
+    .tt-table-wrap:has(.tt-schedule-table) { border:0; border-radius:0; overflow:visible; }
+    .tt-schedule-table, .tt-schedule-table tbody { display:block; }
+    .tt-schedule-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+    .tt-schedule-table tr { display:block; border:1px solid var(--dtc-border); border-radius:8px; margin-bottom:12px; overflow:hidden; }
+    .tt-schedule-table tr:last-child { margin-bottom:0; }
+    .tt-schedule-table th[scope="row"] { display:block; padding:12px; background:var(--dtc-surface-soft); }
+    .tt-schedule-table td { display:grid; grid-template-columns:minmax(80px, 35%) minmax(0, 1fr); gap:12px; padding:10px 12px; min-width:0; border:0; }
+    .tt-schedule-table td::before { content:attr(data-label); color:var(--dtc-text-secondary); font-weight:500; }
 }

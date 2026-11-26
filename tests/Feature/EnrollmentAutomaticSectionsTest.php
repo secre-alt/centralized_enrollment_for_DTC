@@ -113,7 +113,11 @@ class EnrollmentAutomaticSectionsTest extends TestCase
         $registrar = $this->makeUserWithRole('registrar');
         $this->actingAs($registrar)->get(route('registrar.enrollments.index'))->assertOk()->assertSee('Sections needed')
             ->assertViewHas('enrollments', fn ($rows) => $rows->contains('id', $enrollment->id));
-        $this->get(route('registrar.enrollments.show', $enrollment))->assertOk()->assertSee('Assign sections')->assertSee('name="section_choices['.$subjects->first()->id.']"', false);
+        $this->get(route('registrar.enrollments.show', $enrollment))->assertOk()->assertSee('Assign sections')->assertSee('name="section_choices['.$subjects->first()->id.']"', false)
+            ->assertSee('rg-enrollment-summary')->assertSee('rg-enrollment-subject-row')
+            ->assertSee('Assign sections before payment.')
+            ->assertDontSee('Registrar review is available after the Cashier verifies the enrollment fee.')
+            ->assertSee('form="approve-enrollment-'.$enrollment->id.'"', false);
     }
 
     public function test_hold_blocks_payment_upload_cash_collection_and_crafted_gcash_verification(): void

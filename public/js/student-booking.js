@@ -16,7 +16,7 @@
     var rail = form.querySelector('[data-date-rail]');
     var picked = form.querySelector('[data-picked]');
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var labels = { 1: 'Next: Pickup time', 2: 'Next: Payment', 3: 'Review booking', 4: 'Confirm booking' };
+    var labels = { 1: 'Next: Submission time', 2: 'Next: Payment', 3: 'Review booking', 4: 'Confirm booking' };
 
     var $ = function (sel, root) { return (root || form).querySelector(sel); };
     var checked = function (name) { return $('input[name="' + name + '"]:checked'); };

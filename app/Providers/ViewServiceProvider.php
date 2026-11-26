@@ -135,10 +135,11 @@ class ViewServiceProvider extends ServiceProvider
                     ]],
                     ['text' => 'Payment History', 'url' => route('portal.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^portal/transactions(?:/|$)#']],
 
-                    ['text' => 'Appointments', 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#'], 'submenu' => [
-                        ['text' => 'Book Appointment', 'url' => route('portal.appointments.create'), 'icon' => 'plus', 'active' => ['portal/appointments/create']],
-                        ['text' => 'My Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'list', 'active' => ['portal/appointments']],
+                    ['text' => 'Document Requests', 'icon' => 'folder-open', 'active' => ['regex:#^portal/documents(?:/|$)#'], 'submenu' => [
+                        ['text' => 'Request Documents', 'url' => route('portal.documents.create'), 'icon' => 'plus', 'active' => ['portal/documents/create']],
+                        ['text' => 'My Requests', 'url' => route('portal.documents.index'), 'icon' => 'list', 'active' => ['portal/documents']],
                     ]],
+                    ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
                     ['text' => 'Certificate of Registration', 'url' => route('portal.cor.show'), 'icon' => 'file-badge'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
@@ -167,10 +168,11 @@ class ViewServiceProvider extends ServiceProvider
                     ['header' => 'MY PORTAL'],
                     ['text' => 'Dashboard', 'url' => route('portal.dashboard'), 'icon' => 'gauge'],
                     ['text' => 'Document Requests', 'icon' => 'folder-open', 'submenu' => [
-                        ['text' => 'Request Document', 'url' => route('portal.documents.create'), 'icon' => 'plus'],
+                        ['text' => 'Request Documents', 'url' => route('portal.documents.create'), 'icon' => 'plus'],
                         ['text' => 'My Requests',      'url' => route('portal.documents.index'),  'icon' => 'list'],
                     ]],
                     ['text' => 'Payment History', 'url' => route('portal.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^portal/transactions(?:/|$)#']],
+                    ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];

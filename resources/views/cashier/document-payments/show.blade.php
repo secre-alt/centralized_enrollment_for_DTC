@@ -16,7 +16,7 @@
         ? ($bundlePayment->status === 'pending' ? ($bundlePayment->payment_method === 'gcash' ? 'pending_verification' : 'unpaid') : $bundlePayment->status)
         : $dr->payment_status;
     $tone      = ['unpaid' => 'warning', 'pending_verification' => 'info', 'verified' => 'success', 'rejected' => 'danger'][$bundleStatus] ?? 'neutral';
-    $statusTxt = ucwords(str_replace('_', ' ', $bundleStatus));
+    $statusTxt = ['unpaid' => 'Payment due', 'pending_verification' => 'Under verification', 'verified' => 'Verified', 'rejected' => 'Payment not verified'][$bundleStatus] ?? ucwords(str_replace('_', ' ', $bundleStatus));
     $isGcash   = $isBundle ? $bundlePayment->payment_method === 'gcash' : $dr->payment_method === 'gcash_qr';
     $methodTxt = $isGcash ? 'GCash QR' : 'Walk-in';
     $canWalkIn = $isBundle

@@ -549,7 +549,7 @@ class PortalDashboardController extends Controller
 
         if ($enrollment->is_paid) {
             return [
-                ['icon' => 'calendar-plus', 'label' => 'Book appointment', 'desc' => 'Request documents and choose a pickup time.', 'url' => route('portal.appointments.create'), 'active' => true, 'actionLabel' => 'Book appointment'],
+                ['icon' => 'files', 'label' => 'Request documents', 'desc' => 'Submit a document request for Registrar assessment.', 'url' => route('portal.documents.create'), 'active' => true, 'actionLabel' => 'Request documents'],
                 ['icon' => 'file-text', 'label' => 'Enrollment record', 'desc' => 'View your enrollment details.', 'url' => route('portal.enrollment.index'), 'active' => false, 'actionLabel' => 'View enrollment'],
             ];
         }

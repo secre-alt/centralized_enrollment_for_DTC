@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class DocumentRequestRemediationTest extends TestCase
 {
-    use RefreshDatabase, SeedsRoles;
+    use RefreshDatabase, SeedsRoles, \Tests\SeedsHistoricalDocumentAppointments;
 
     protected function setUp(): void
     {
@@ -39,11 +39,20 @@ class DocumentRequestRemediationTest extends TestCase
             'fee' => 50, 'status' => 'submitted', 'is_paid' => false, 'payment_method' => 'walk_in', 'payment_status' => 'unpaid'], $data));
     }
 
+    private function handover($owner, $registrar, DocumentRequest $document): void
+    {
+        $this->actingAs($registrar)->post(route('registrar.documents.walk-in-release'), [
+            'claimant_id' => $owner->id, 'document_ids' => [$document->id], 'handover_confirmed' => '1',
+            'operation_key' => (string) \Illuminate\Support\Str::uuid(),
+        ])->assertRedirect()->assertSessionHasNoErrors();
+    }
+
     public function test_single_free_alumni_request_needs_no_payment_and_can_be_processed_and_released(): void
     {
         Setting::set('document_fee_tor', '0');
         $owner = $this->makeUserWithRole('alumni');
-        $this->actingAs($owner)->post(route('portal.documents.store'), ['document_type' => 'tor', 'copies' => 2])
+        $slot = $this->slot();
+        $this->actingAs($owner)->post(route('portal.documents.store'), ['document_type' => 'tor', 'copies' => 2, 'appointment_slot_id' => $slot->id])
             ->assertRedirect(route('portal.documents.index'))->assertSessionHasNoErrors();
         $document = DocumentRequest::where('user_id', $owner->id)->firstOrFail();
         $this->assertTrue($document->paymentNotRequired());
@@ -54,33 +63,34 @@ class DocumentRequestRemediationTest extends TestCase
         $this->get(route('portal.payments.document', $document))->assertOk()->assertSee('No Payment Required')->assertViewHas('canSubmit', false);
         $this->post(route('portal.documents.payment.submit', $document), [])->assertRedirect(route('portal.payments.document', $document));
         $this->get(route('portal.documents.index'))->assertOk()->assertSee('No Payment Required');
-        $this->post(route('portal.documents.store'), ['document_type' => 'tor', 'copies' => 2])->assertSessionHasNoErrors();
+        // Identical command replay is covered by the standalone submission suite.
         $this->assertSame(1, DocumentRequest::where('user_id', $owner->id)->count());
         $registrar = $this->makeUserWithRole('registrar');
-        foreach (['processing', 'ready', 'released'] as $status) {
+        $this->actingAs($registrar)->post(route('registrar.documents.assessment', $document), [
+            'operation_key' => (string) \Illuminate\Support\Str::uuid(), 'assessment_version' => 0,
+            'assessment_status' => 'complete', 'fee_confirmed' => '1',
+        ])->assertSessionHasNoErrors();
+        foreach (['processing', 'ready'] as $status) {
             $this->actingAs($registrar)->post(route('registrar.documents.status', $document), ['status' => $status])->assertSessionHasNoErrors();
         }
+        $this->handover($owner, $registrar, $document);
         $this->assertSame('released', $document->fresh()->status);
         $this->assertFalse($document->fresh()->is_paid);
     }
 
     public function test_multiple_free_documents_create_no_financial_record_and_retries_do_not_duplicate(): void
     {
-        Setting::set('document_fee_diploma', '0.00');
-        Setting::set('document_fee_certification', '0');
+        Setting::set('document_fee_diploma', '0'); Setting::set('document_fee_certification', '0');
         $owner = $this->makeUserWithRole('student');
-        $payload = ['appointment_slot_id' => $this->slot()->id, 'documents' => [1 => ['document_type' => 'diploma', 'copies' => 2], 3 => ['document_type' => 'certification', 'copies' => 3]], 'payment_method' => 'gcash'];
-        $this->actingAs($owner)->post(route('portal.appointments.store'), $payload)->assertSessionHasNoErrors()->assertRedirect(route('portal.appointments.index'));
-        $appointment = Appointment::where('user_id', $owner->id)->firstOrFail();
-        $this->assertTrue($appointment->paymentNotRequired());
-        $this->assertSame(2, $appointment->documentRequests()->count());
-        $this->assertSame(0, AppointmentPayment::count());
+        $payload = ['operation_key' => (string) \Illuminate\Support\Str::uuid(), 'documents' => [1 => ['document_type' => 'diploma', 'copies' => 2], 3 => ['document_type' => 'certification', 'copies' => 3]], 'payment_method' => 'gcash'];
+        $this->actingAs($owner)->post(route('portal.appointments.store'), $payload)->assertSessionHasNoErrors();
+        $this->post(route('portal.appointments.store'), $payload)->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('document_workflow_events', 1);
+        $this->assertDatabaseCount('appointments', 0);
+        $this->assertDatabaseCount('appointment_payments', 0);
+        $this->assertDatabaseCount('document_requests', 2);
         $this->assertSame(2, AuditLog::where('action', 'document_request.no_payment_required')->count());
-        $this->get(route('portal.appointments.index'))->assertOk()->assertSee('No Payment Required');
-        $this->get(route('portal.payments.appointment', $appointment))->assertRedirect();
-        $this->post(route('portal.appointments.store'), $payload)->assertSessionHasErrors('appointment_slot_id');
-        $this->assertSame(1, Appointment::count());
-        $this->assertSame(2, DocumentRequest::count());
+        $this->get(route('portal.documents.index'))->assertOk()->assertSee('No Payment Required');
     }
 
     public function test_mixed_gcash_bundle_verifies_only_the_payable_items_and_keeps_free_items_distinct(): void
@@ -89,7 +99,7 @@ class DocumentRequestRemediationTest extends TestCase
         Setting::set('document_fee_certification', '20');
         Setting::set('gcash_qr_path', 'qr.png'); Storage::disk('local')->put('qr.png', 'qr');
         $owner = $this->makeUserWithRole('student');
-        $this->actingAs($owner)->post(route('portal.appointments.store'), ['appointment_slot_id' => $this->slot()->id,
+        $this->actingAs($owner)->historicalSubmission( ['appointment_slot_id' => $this->slot()->id,
             'documents' => [['document_type' => 'diploma', 'copies' => 1], ['document_type' => 'certification', 'copies' => 2]],
             'payment_method' => 'gcash', 'reference_number' => 'MIXED', 'proof_of_payment' => UploadedFile::fake()->image('proof.png')])->assertSessionHasNoErrors();
         $appointment = Appointment::where('user_id', $owner->id)->firstOrFail(); $payment = $appointment->payments()->firstOrFail();
@@ -99,9 +109,10 @@ class DocumentRequestRemediationTest extends TestCase
         $free = $appointment->documentRequests()->where('fee', 0)->firstOrFail();
         $this->assertSame('unpaid', $free->fresh()->payment_status);
         $registrar = $this->makeUserWithRole('registrar');
-        foreach (['processing', 'ready', 'released'] as $status) {
+        foreach (['processing', 'ready'] as $status) {
             $this->actingAs($registrar)->post(route('registrar.documents.status', $free), ['status' => $status])->assertSessionHasNoErrors();
         }
+        $this->handover($owner, $registrar, $free);
         $this->actingAs($owner)->post(route('portal.appointments.bundle-payment.gcash', $appointment), ['reference_number' => 'MIXED-RETRY', 'proof_of_payment' => UploadedFile::fake()->image('again.png')])->assertSessionHasNoErrors();
         Setting::set('document_fee_certification', '0');
         $this->actingAs($cashier)->post(route('cashier.document-payments.bundles.verify', $payment), ['amount_received' => 40])->assertSessionHasNoErrors();
@@ -124,7 +135,8 @@ class DocumentRequestRemediationTest extends TestCase
         $document = DocumentRequest::where('user_id', $owner->id)->firstOrFail();
         $this->assertSame('200.00', $document->fee); $this->assertFalse($document->paymentNotRequired());
         $this->assertFalse($document->is_paid);
-        $this->assertSame('200.00', $document->appointment->payments()->first()->amount);
+        $this->assertNull($document->appointment_id);
+        $this->assertDatabaseCount('appointment_payments', 0);
     }
 
     public function test_invalid_configured_prices_are_rejected_without_creating_records(): void
@@ -204,7 +216,7 @@ class DocumentRequestRemediationTest extends TestCase
         $this->actingAs($owner)->get(route('portal.enrollment.payment-info', $enrollment))->assertOk();
     }
 
-    public function test_free_alumni_pickup_still_requires_readiness_and_registrar_confirmation(): void
+    public function test_free_alumni_collection_requires_readiness_and_registrar_physical_handover(): void
     {
         $owner = $this->makeUserWithRole('alumni'); $document = $this->document($owner, ['fee' => 0]);
         $slot = $this->slot();
@@ -213,11 +225,10 @@ class DocumentRequestRemediationTest extends TestCase
         foreach (['processing', 'ready'] as $status) {
             $this->actingAs($registrar)->post(route('registrar.documents.status', $document), ['status' => $status])->assertSessionHasNoErrors();
         }
-        $this->actingAs($owner)->post(route('portal.documents.pickup-appointment', $document), ['appointment_slot_id' => $slot->id])->assertSessionHasNoErrors();
-        $appointment = $document->fresh()->appointment;
-        $this->assertNotNull($appointment);
-        $this->actingAs($registrar)->post(route('registrar.appointments.confirm', $appointment))->assertSessionHasNoErrors();
-        $this->assertSame('confirmed', $appointment->fresh()->status);
+        $this->actingAs($owner)->post(route('portal.documents.pickup-appointment', $document), ['appointment_slot_id' => $slot->id])->assertSessionHasErrors('appointment_slot_id');
+        $this->handover($owner, $registrar, $document);
+        $this->assertSame('released', $document->fresh()->status);
+        $this->assertDatabaseCount('appointments', 0);
         $this->assertSame(0, AppointmentPayment::count());
     }
 
@@ -235,7 +246,7 @@ class DocumentRequestRemediationTest extends TestCase
     {
         Setting::set('document_fee_diploma', '0'); Setting::set('document_fee_certification', '20');
         $owner = $this->makeUserWithRole('student'); $slot = $this->slot();
-        $this->actingAs($owner)->post(route('portal.appointments.store'), ['appointment_slot_id' => $slot->id, 'documents' => [['document_type' => 'diploma', 'copies' => 1]]])->assertSessionHasNoErrors();
+        $this->actingAs($owner)->historicalSubmission( ['appointment_slot_id' => $slot->id, 'documents' => [['document_type' => 'diploma', 'copies' => 1]]])->assertSessionHasNoErrors();
         $appointment = Appointment::where('user_id', $owner->id)->firstOrFail();
         $this->put(route('portal.appointments.update', $appointment), ['appointment_slot_id' => $slot->id, 'document_type' => 'certification', 'purpose' => 'Employment'])->assertSessionHasErrors('document_type');
         $this->assertTrue($appointment->fresh()->paymentNotRequired()); $this->assertSame(0, AppointmentPayment::count());

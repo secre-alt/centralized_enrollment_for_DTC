@@ -1,5 +1,6 @@
 @php
     $subjectCount = count($subjects);
+    $classification = $enrollment->resolveClassification();
     $hasOpenReplacement = $enrollment->replacementRequests->contains('status', 'open');
     $canReview = $enrollment->status === 'pending'
         && $enrollment->is_paid
@@ -14,7 +15,7 @@
         && ! $enrollment->payments()->where(fn ($payments) => $payments->where('refund_status', 'refunded')->orWhereNotNull('refunded_at')->orWhereNotNull('refunded_by')->orWhereNotNull('refund_reference')->orWhereNotNull('refund_amount'))->exists();
 @endphp
 
-<div id="review-content">
+<div id="review-content" class="rg-enrollment-review">
 
     {{-- ── Header ─────────────────────────────────────────────────────── --}}
     <div class="dtc-review-header">
@@ -27,7 +28,7 @@
         </div>
         <div class="dtc-review-header-right">
             @if($canAssignBeforePayment)
-                <span class="dtc-status-badge is-warning">Sections needed before payment</span>
+                <span class="dtc-status-badge is-warning">Sections required</span>
             @elseif($canReview)
                 <span class="dtc-status-badge is-success"><span class="dtc-status-dot"></span> Paid — Ready for Review</span>
             @elseif($hasOpenReplacement)
@@ -58,50 +59,16 @@
             <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
         @endif
 
-        <div class="dtc-review-section">
-            <div class="dtc-review-section-title">
-                <span><i data-lucide="graduation-cap"></i> Enrollment Details</span>
-            </div>
-            <div class="dtc-review-info-grid">
-                <div class="dtc-review-info">
-                    <span class="dtc-review-info-label">Program</span>
-                    <span class="dtc-review-info-value">{{ $enrollment->program->name }}</span>
-                </div>
-                <div class="dtc-review-info">
-                    <span class="dtc-review-info-label">Year Level</span>
-                    <span class="dtc-review-info-value">Year {{ $enrollment->year_level }}</span>
-                </div>
-                <div class="dtc-review-info">
-                    <span class="dtc-review-info-label">Semester</span>
-                    <span class="dtc-review-info-value">Semester {{ $enrollment->semester }}</span>
-                </div>
-                <div class="dtc-review-info">
-                    <span class="dtc-review-info-label">Submitted</span>
-                    <span class="dtc-review-info-value">{{ $enrollment->created_at->format('M d, Y · h:i A') }}</span>
-                </div>
-                <div class="dtc-review-info">
-                    <span class="dtc-review-info-label">Classification</span>
-                    <span class="dtc-review-info-value">
-                        @php $classification = $enrollment->resolveClassification(); @endphp
-                        @if($classification === 'new_student')
-                            <span class="dtc-status-badge is-neutral">New student</span>
-                        @else
-                            <span class="dtc-status-badge is-info">{{ ucfirst(str_replace('_', ' ', $classification)) }}</span>
-                        @endif
-                    </span>
-                </div>
-                <div class="dtc-review-info">
-                    <span class="dtc-review-info-label">Subject Load</span>
-                    <span class="dtc-review-info-value">
-                        @if($enrollment->is_irregular)
-                            <span class="dtc-status-badge is-warning">Irregular subjects</span>
-                        @else
-                            <span class="dtc-status-badge is-neutral">Regular subjects</span>
-                        @endif
-                    </span>
-                </div>
-            </div>
-        </div>
+        <section class="dtc-review-section rg-enrollment-summary" aria-label="Enrollment details">
+            <p class="rg-enrollment-program">{{ $enrollment->program->name }}</p>
+            <p class="rg-enrollment-meta">
+                <span>Year {{ $enrollment->year_level }}</span>
+                <span>Semester {{ $enrollment->semester }}</span>
+                <span>{{ $classification === 'new_student' ? 'New student' : ucfirst(str_replace('_', ' ', $classification)) }}</span>
+                <span>{{ $enrollment->is_irregular ? 'Irregular subjects' : 'Regular subjects' }}</span>
+            </p>
+            <p class="rg-enrollment-submitted">Submitted <time datetime="{{ $enrollment->created_at->toIso8601String() }}">{{ $enrollment->created_at->timezone('Asia/Manila')->format('M d, Y · h:i A') }}</time></p>
+        </section>
 
         <div class="dtc-review-section">
             @if($classification === 'transferee')
@@ -119,6 +86,11 @@
                 <div class="dtc-payment-info-notice">
                     The enrollment is waiting for the student's replacement or refund decision. The verified payment remains unchanged.
                 </div>
+            @elseif($canAssignBeforePayment)
+                <div class="dtc-payment-info-notice" role="status">
+                    <strong>Assign sections before payment.</strong>
+                    <p class="mb-0">Assign the full selected load. Cashier verification and enrollment review follow; assigning sections does not approve enrollment.</p>
+                </div>
             @elseif($enrollment->status === 'pending')
                 <div class="dtc-payment-info-notice">
                     Registrar review is available after the Cashier verifies the enrollment fee.
@@ -131,32 +103,33 @@
 
             <div class="dtc-review-subject-list">
                 @forelse ($subjects as $subject)
-                    <div class="dtc-review-subject-item">
-                        <span class="dtc-review-subject-code">{{ $subject->subject_code }}</span>
-                        <span class="dtc-review-subject-name">{{ $subject->subject_name }}</span>
-                        @if($subject->classification !== 'unclassified')
-                            <span class="dtc-status-badge is-neutral">{{ ucfirst(str_replace('_', ' ', $subject->classification)) }}</span>
-                        @endif
-                        @if($enrollment->is_irregular)
-                            <span class="dtc-status-badge is-neutral" style="margin-left:auto; font-size:12px;">Y{{ $subject->year_level }} · Sem {{ $subject->semester }}</span>
+                    <div class="rg-enrollment-subject-row">
+                        <div class="dtc-review-subject-item">
+                            <span class="dtc-review-subject-code">{{ $subject->subject_code }}</span>
+                            <span class="dtc-review-subject-name">{{ $subject->subject_name }}</span>
+                            @if($subject->classification !== 'unclassified')
+                                <span class="dtc-status-badge is-neutral">{{ ucfirst(str_replace('_', ' ', $subject->classification)) }}</span>
+                            @endif
+                            @if($enrollment->is_irregular)
+                                <span class="dtc-status-badge is-neutral" style="margin-left:auto; font-size:12px;">Y{{ $subject->year_level }} · Sem {{ $subject->semester }}</span>
+                            @endif
+                        </div>
+                        @if($canReview || $canAssignBeforePayment)
+                            @if($sectionAssignments->has($subject->id))
+                                <p class="dtc-review-section-assignment">Section: {{ $sectionAssignments[$subject->id]->classSchedule?->section_code ?: 'Needs reconciliation' }}</p>
+                            @else
+                                <div class="form-group dtc-review-section-choice">
+                                    <label for="approval-section-{{ $enrollment->id }}-{{ $subject->id }}">Section <span class="sr-only">for {{ $subject->subject_code }}</span></label>
+                                    <select id="approval-section-{{ $enrollment->id }}-{{ $subject->id }}" name="section_choices[{{ $subject->id }}]" form="approve-enrollment-{{ $enrollment->id }}" class="form-control" required>
+                                        <option value="">Select a recorded section</option>
+                                        @foreach($subject->schedules->where('school_year', $enrollment->school_year)->where('semester', $enrollment->semester)->where('is_active', true)->whereNotNull('section_code')->where('capacity', '>', 0) as $offering)
+                                            <option value="{{ $offering->id }}" @selected((string) old('section_choices.'.$subject->id) === (string) $offering->id)>{{ $offering->section_code }} · {{ $offering->day_pattern }} {{ $offering->time_start }}–{{ $offering->time_end }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                         @endif
                     </div>
-                    @if($canReview || $canAssignBeforePayment)
-                        @if($sectionAssignments->has($subject->id))
-                            <p class="dtc-review-section-assignment">Section: {{ $sectionAssignments[$subject->id]->classSchedule?->section_code ?: 'Needs reconciliation' }}</p>
-                        @else
-                            <div class="form-group dtc-review-section-choice">
-                                <label for="approval-section-{{ $enrollment->id }}-{{ $subject->id }}">Section for {{ $subject->subject_code }}</label>
-                                <select id="approval-section-{{ $enrollment->id }}-{{ $subject->id }}" name="section_choices[{{ $subject->id }}]" form="approve-enrollment-{{ $enrollment->id }}" class="form-control" required>
-                                    <option value="">Select a recorded section</option>
-                                    @foreach($subject->schedules->where('school_year', $enrollment->school_year)->where('semester', $enrollment->semester)->where('is_active', true)->whereNotNull('section_code')->where('capacity', '>', 0) as $offering)
-                                        <option value="{{ $offering->id }}" @selected((string) old('section_choices.'.$subject->id) === (string) $offering->id)>{{ $offering->section_code }} · {{ $offering->day_pattern }} {{ $offering->time_start }}–{{ $offering->time_end }}</option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">If no section is listed, reconcile the offering before approval. Seats and schedules are checked when you approve.</small>
-                            </div>
-                        @endif
-                    @endif
                 @empty
                     <p class="text-muted mb-0" style="font-size:12.5px;">No subjects selected.</p>
                 @endforelse
@@ -164,17 +137,14 @@
         </div>
 
         @if(($canReview || $canAssignBeforePayment) && $subjects->contains(fn ($subject) => ! $sectionAssignments->has($subject->id)))
-            <div class="dtc-review-section dtc-equivalency-setup-note">
-                <strong>{{ $canAssignBeforePayment ? 'Assign selected subjects' : 'Missing section records' }}</strong>
-                @if($canAssignBeforePayment)
-                    <p>Assign the full selected load before payment. Seats, term, subject identity and timetable conflicts are checked together. This does not approve the enrollment.</p>
-                @else
+            <p class="rg-enrollment-section-help">No section listed? Reconcile the offering first. Seats, term, subject identity and schedule conflicts are checked when you submit.</p>
+            @if($canReview)
+                <div class="dtc-review-section dtc-equivalency-setup-note">
+                    <strong>Missing section records</strong>
                     <p>Select the sections above, then record them for reconciliation. This keeps enrollment pending; it does not confirm available seats while other assignments are unknown. Repeat for the other affected records before approving.</p>
-                @endif
-                @unless($canAssignBeforePayment)
                     <button type="submit" form="approve-enrollment-{{ $enrollment->id }}" name="record_sections" value="1" class="dtc-btn dtc-btn-secondary">Record sections</button>
-                @endunless
-            </div>
+                </div>
+            @endif
         @endif
         @if($replacementRequest)
             <div class="alert alert-warning" role="status">

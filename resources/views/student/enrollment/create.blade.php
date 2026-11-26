@@ -8,6 +8,7 @@
 @endpush
 
 @section('content')
+@php($term = $term ?? null)
 <div class="row justify-content-center dtc-enrollment-create">
     <div class="col-lg-8 dtc-enrollment-create-main">
         <div class="card dtc-enrollment-create-card">
@@ -22,7 +23,16 @@
             <div class="card-body dtc-enrollment-create-body">
 
                 @if ($errors->any())
-                    <div class="alert alert-danger">{{ $errors->first() }}</div>
+                    <div class="alert alert-danger" role="alert">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                @if (!$term)
+                    <div class="alert alert-warning" role="alert">The current academic year and semester are not configured. Please contact the Registrar.</div>
                 @endif
 
                 <form method="POST" action="{{ route('portal.enrollment.store') }}" class="dtc-enrollment-create-form">
@@ -50,6 +60,7 @@
                         </div>
                     @endif
 
+                    @error('program_id')<div class="text-danger" role="alert">{{ $message }}</div>@enderror
                     {{-- Enrollment Type --}}
                     <fieldset class="form-group dtc-enrollment-type-group" aria-describedby="subject-selection-help">
                         <legend>Which subjects will you take?</legend>
@@ -67,6 +78,7 @@
                             Transferee or unsure? Ask the Registrar which subjects to take.
                         </small>
                     </fieldset>
+                    @error('is_irregular')<div class="text-danger" role="alert">{{ $message }}</div>@enderror
 
                     {{-- Year + Semester --}}
                     <div class="row dtc-enrollment-term-row">
@@ -79,16 +91,15 @@
                                     <option value="3" {{ old('year_level') == 3 ? 'selected' : '' }}>3rd Year</option>
                                     <option value="4" {{ old('year_level') == 4 ? 'selected' : '' }}>4th Year</option>
                                 </select>
+                                @error('year_level')<div class="text-danger" role="alert">{{ $message }}</div>@enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="semester">Semester</label>
-                                <select name="semester" id="semester" class="form-control" required>
-                                    <option value="1" {{ old('semester') == 1 ? 'selected' : '' }}>1st Semester</option>
-                                    <option value="2" {{ old('semester') == 2 ? 'selected' : '' }}>2nd Semester</option>
-                                    <option value="3" {{ old('semester') == 3 ? 'selected' : '' }}>Summer</option>
-                                </select>
+                                <div class="font-weight-bold mb-2">Current academic term</div>
+                                <p>{{ $term ? $term['school_year'] . ' · ' . [1 => '1st Semester', 2 => '2nd Semester', 3 => 'Summer'][$term['semester']] : 'Not configured' }}</p>
+                                <input type="hidden" name="semester" id="semester" value="{{ $term['semester'] ?? '' }}">
+                                @error('semester')<div class="text-danger" role="alert">{{ $message }}</div>@enderror
                             </div>
                         </div>
                     </div>
@@ -101,7 +112,9 @@
                         <div class="dtc-subjects-hint" id="subjects-hint">
                             All subjects for the selected year and semester will be selected automatically.
                         </div>
-                        <div id="subjects-container">
+                        @error('subject_ids')<div class="text-danger" role="alert">{{ $message }}</div>@enderror
+                        @error('subject_ids.*')<div class="text-danger" role="alert">{{ $message }}</div>@enderror
+                        <div id="subjects-container" data-selected-subjects="{{ json_encode(session()->hasOldInput() ? array_values((array) old('subject_ids', [])) : null) }}">
                             <div style="background:var(--dtc-surface-soft); border:2px dashed var(--dtc-border);
                                         border-radius:12px; padding:24px; text-align:center;">
                                 <i data-lucide="book" class="mb-2 u-border-color" style="width:2em;height:2em"></i>
@@ -135,7 +148,7 @@
                     </div>
 
                     <div class="d-flex u-gap-10 dtc-enrollment-create-actions" >
-                        <button type="submit" class="btn btn-primary flex-fill">
+                        <button type="submit" class="btn btn-primary flex-fill" @disabled(!$term)>
                             <i data-lucide="send" class="mr-1"></i> Submit Enrollment
                         </button>
                     </div>
@@ -174,11 +187,14 @@
 
 @section('js')
 <script>
+let restoredSubjectIds = JSON.parse(document.getElementById('subjects-container').dataset?.selectedSubjects || 'null');
+
 function isIrregularMode() {
     return document.getElementById('type-irregular').checked;
 }
 
-function loadSubjects() {
+function loadSubjects(event) {
+    if (event) restoredSubjectIds = null;
     if (isIrregularMode()) {
         return loadAllSubjects();
     }
@@ -188,7 +204,7 @@ function loadSubjects() {
     const semester  = document.getElementById('semester').value;
     const container = document.getElementById('subjects-container');
 
-    if (!programId) return;
+    if (!programId || !semester) return;
 
     container.innerHTML = `
         <div style="text-align:center; padding:20px; color:var(--dtc-text-muted);">
@@ -224,7 +240,7 @@ function loadSubjects() {
                                onmouseover="this.style.background='var(--dtc-surface-soft)'"
                                onmouseout="this.style.background='transparent'">
                             <input type="checkbox" name="subject_ids[]" value="${s.id}"
-                                   checked
+                                   ${restoredSubjectIds === null || restoredSubjectIds.map(String).includes(String(s.id)) ? 'checked' : ''}
                                    style="width:18px; height:18px; accent-color:var(--dtc-primary);
                                           cursor:pointer; flex-shrink:0;">
                             <div  class="u-flex-1">
@@ -256,7 +272,7 @@ function loadAllSubjects() {
     const programId = document.getElementById('program_id').value;
     const container = document.getElementById('subjects-container');
 
-    if (!programId) return;
+    if (!programId || !document.getElementById('semester').value) return;
 
     container.innerHTML = `
         <div style="text-align:center; padding:20px; color:var(--dtc-text-muted);">
@@ -288,6 +304,7 @@ function loadAllSubjects() {
                                onmouseover="this.style.background='var(--dtc-surface-soft)'"
                                onmouseout="this.style.background='transparent'">
                             <input type="checkbox" name="subject_ids[]" value="${s.id}"
+                                   ${restoredSubjectIds !== null && restoredSubjectIds.map(String).includes(String(s.id)) ? 'checked' : ''}
                                    style="width:18px; height:18px; accent-color:var(--dtc-primary);
                                           cursor:pointer; flex-shrink:0;">
                             <div  class="u-flex-1">
@@ -309,16 +326,20 @@ document.getElementById('program_id').addEventListener('change', loadSubjects);
 document.getElementById('year_level').addEventListener('change', loadSubjects);
 document.getElementById('semester').addEventListener('change', loadSubjects);
 document.getElementById('type-regular').addEventListener('change', function () {
+    restoredSubjectIds = null;
     document.getElementById('subjects-hint').textContent = 'All subjects for the selected year and semester are selected. Uncheck any you will not take.';
     loadSubjects();
 });
 document.getElementById('type-irregular').addEventListener('change', function () {
+    restoredSubjectIds = null;
     document.getElementById('subjects-hint').textContent = 'Showing all subjects grouped by year and semester.';
     loadSubjects();
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('subjects-hint').textContent = isIrregularMode()
+    document.getElementById('subjects-hint').textContent = restoredSubjectIds !== null
+        ? 'Your previous subject choices have been restored. Review them before submitting.'
+        : isIrregularMode()
         ? 'Showing all subjects grouped by year and semester.'
         : 'All subjects for the selected year and semester are selected. Uncheck any you will not take.';
     if (document.getElementById('program_id').value) loadSubjects();

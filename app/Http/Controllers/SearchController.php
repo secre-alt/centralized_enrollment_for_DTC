@@ -135,14 +135,14 @@ class SearchController extends Controller
                 ['title'=>'Dashboard',           'desc'=>'My portal overview',         'icon'=>'layout-dashboard',  'url'=>route('portal.dashboard')],
                 ['title'=>'Enroll Now',          'desc'=>'Submit enrollment form',     'icon'=>'file-text',         'url'=>route('portal.enrollment.create')],
                 ['title'=>'My Enrollment Status','desc'=>'Track enrollment progress',  'icon'=>'list',              'url'=>route('portal.enrollment.index')],
-                ['title'=>'Book Appointment',    'desc'=>'Schedule document pickup',   'icon'=>'calendar-plus',     'url'=>route('portal.appointments.create')],
-                ['title'=>'My Appointments',     'desc'=>'View my bookings',           'icon'=>'calendar',          'url'=>route('portal.appointments.index')],
+                ['title'=>'Request Documents',   'desc'=>'Submit documents without an appointment',   'icon'=>'calendar-plus',     'url'=>route('portal.documents.create')],
+                ['title'=>'My Requests',         'desc'=>'Track document processing and collection',           'icon'=>'calendar',          'url'=>route('portal.documents.index')],
                 ['title'=>'Notifications',       'desc'=>'View all notifications',     'icon'=>'bell',              'url'=>route('notifications.index')],
             ];
         }
 
         if (!$user->hasAnyRole(['student', 'alumni', 'admin', 'registrar', 'cashier'])) {
-            $pages = array_values(array_filter($pages, fn ($page) => !in_array($page['url'], [route('portal.appointments.create'), route('portal.appointments.index')], true)));
+            $pages = array_values(array_filter($pages, fn ($page) => !in_array($page['url'], [route('portal.documents.create'), route('portal.documents.index')], true)));
         }
         return $pages;
     }

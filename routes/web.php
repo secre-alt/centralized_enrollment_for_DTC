@@ -173,6 +173,7 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
     Route::post('/timetables/resources', [\App\Http\Controllers\Admin\TimetableController::class, 'resource'])->name('timetables.resources');
     Route::post('/timetables', [\App\Http\Controllers\Admin\TimetableController::class, 'store'])->name('timetables.store');
+    Route::get('/timetables/{draft}/csv', [\App\Http\Controllers\Admin\TimetableController::class, 'export'])->name('timetables.export');
     Route::put('/timetables/{draft}', [\App\Http\Controllers\Admin\TimetableController::class, 'update'])->name('timetables.update');
     Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
     Route::delete('/programs/{program}', [ProgramController::class, 'destroy'])->name('programs.destroy');
@@ -238,14 +239,20 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::get('/appointments/closures/impact', [AppointmentScheduleController::class, 'previewClosureImpact'])->name('appointments.closures.impact');
     Route::post('/appointments/closures', [AppointmentScheduleController::class, 'storeClosure'])->name('appointments.closures.store');
     Route::post('/appointments/closures/{closure}/deactivate', [AppointmentScheduleController::class, 'deactivate'])->name('appointments.closures.deactivate');
+    Route::middleware('role:registrar|admin')->group(function () {
+        Route::post('/documents/walk-in-release', [RegistrarDocumentController::class, 'releaseWalkIn'])->name('documents.walk-in-release');
+        Route::get('/claiming-appointments', [\App\Http\Controllers\Registrar\ClaimingAppointmentController::class, 'index'])->name('claiming-appointments.index');
+        Route::post('/claiming-appointments/{appointment}/release', [\App\Http\Controllers\Registrar\ClaimingAppointmentController::class, 'release'])->middleware('appointment.lifecycle:claim.released')->name('claiming-appointments.release');
+    });
     Route::get('/appointments', [RegistrarAppointmentController::class, 'index'])->name('appointments.index');
-    Route::post('/appointments/{appointment}/confirm', [RegistrarAppointmentController::class, 'confirm'])->name('appointments.confirm');
-    Route::post('/appointments/{appointment}/cancel', [RegistrarAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{appointment}/confirm', [RegistrarAppointmentController::class, 'confirm'])->middleware('appointment.lifecycle:appointment.confirmed')->name('appointments.confirm');
+    Route::post('/appointments/{appointment}/cancel', [RegistrarAppointmentController::class, 'cancel'])->middleware('appointment.lifecycle:appointment.cancelled')->name('appointments.cancel');
     Route::post('/appointments/payments/{payment}/verify', [RegistrarAppointmentController::class, 'verifyPayment'])->name('appointments.payments.verify');
     Route::post('/appointments/payments/{payment}/reject', [RegistrarAppointmentController::class, 'rejectPayment'])->name('appointments.payments.reject');
     Route::get('/appointments/payments/{payment}/proof', [RegistrarAppointmentController::class, 'viewProof'])->name('appointments.payments.proof');
 
     Route::get('/documents', [RegistrarDocumentController::class, 'index'])->name('documents.index');
+    Route::post('/documents/{documentRequest}/assessment', [RegistrarDocumentController::class, 'assess'])->name('documents.assessment');
     Route::post('/documents/{documentRequest}/status', [RegistrarDocumentController::class, 'updateStatus'])->name('documents.status');
 
     Route::get('/applications', [RegistrarApplicationController::class, 'index'])->name('applications.index');
@@ -274,11 +281,12 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
     Route::post('/payments/{payment}/verify', [CashierPaymentController::class, 'verify'])->name('payments.verify');
     Route::post('/payments/{payment}/reject', [CashierPaymentController::class, 'reject'])->name('payments.reject');
-    Route::post('/payments/{payment}/confirm-refund', [CashierPaymentController::class, 'confirmRefund'])->middleware('role:cashier')->name('payments.confirm-refund');
+    Route::post('/payments/{payment}/confirm-refund', [CashierPaymentController::class, 'confirmRefund'])->middleware('role:cashier|admin')->name('payments.confirm-refund');
 
     Route::get('/document-payments', [CashierDocumentPaymentController::class, 'index'])->name('document-payments.index');
     Route::get('/document-payments/{documentRequest}', [CashierDocumentPaymentController::class, 'show'])->name('document-payments.show');
     Route::get('/document-payments/{documentRequest}/proof', [CashierDocumentPaymentController::class, 'viewProof'])->name('document-payments.proof');
+    Route::get('/document-payments/proofs/{proof}', [CashierDocumentPaymentController::class, 'viewHistoricalProof'])->name('document-payments.proofs.show');
     Route::post('/document-payments/{documentRequest}/verify-walk-in', [CashierDocumentPaymentController::class, 'verifyWalkIn'])->name('document-payments.verify-walk-in');
     Route::post('/document-payments/{documentRequest}/verify-gcash', [CashierDocumentPaymentController::class, 'verifyGcash'])->name('document-payments.verify-gcash');
     Route::post('/document-payments/{documentRequest}/reject', [CashierDocumentPaymentController::class, 'reject'])->name('document-payments.reject');
@@ -305,6 +313,8 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::post('/enrollment/{enrollment}/revise', [EnrollmentController::class, 'submitReplacement'])->name('enrollment.revise.submit');
     Route::post('/enrollment/replacement-requests/{replacementRequest}/refund', [EnrollmentController::class, 'requestEnrollmentRefund'])->name('enrollment.replacement.refund');
     Route::middleware('role:student|alumni')->group(function () {
+    Route::get('/claiming-appointments', [\App\Http\Controllers\ClaimingAppointmentController::class, 'index'])->name('claiming-appointments.index');
+    Route::post('/claiming-appointments', [\App\Http\Controllers\ClaimingAppointmentController::class, 'store'])->middleware('appointment.lifecycle:claim.booked')->name('claiming-appointments.store');
     Route::get('/payments/documents/{documentRequest}', [\App\Http\Controllers\PortalPaymentController::class, 'document'])->name('payments.document');
     Route::get('/payments/appointments/{appointment}', [\App\Http\Controllers\PortalPaymentController::class, 'appointment'])->name('payments.appointment');
     Route::post('/payments/appointments/{appointment}/switch-to-gcash', [\App\Http\Controllers\PortalPaymentController::class, 'switchBundleToGcash'])->name('payments.appointments.switch-to-gcash');
@@ -318,11 +328,11 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
     Route::middleware('role:student|alumni')->group(function () {
     Route::get('/appointments/create', [StudentAppointmentController::class, 'create'])->name('appointments.create');
-    Route::post('/appointments', [StudentAppointmentController::class, 'store'])->name('appointments.store');
+    Route::post('/appointments', [StudentAppointmentController::class, 'store'])->middleware('document.submission')->name('appointments.store');
     Route::get('/appointments', [StudentAppointmentController::class, 'index'])->name('appointments.index');
-    Route::post('/appointments/{appointment}/cancel', [StudentAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{appointment}/cancel', [StudentAppointmentController::class, 'cancel'])->middleware('appointment.lifecycle:appointment.cancelled')->name('appointments.cancel');
     Route::get('/appointments/{appointment}/edit', [StudentAppointmentController::class, 'edit'])->name('appointments.edit');
-    Route::put('/appointments/{appointment}', [StudentAppointmentController::class, 'update'])->name('appointments.update');
+    Route::put('/appointments/{appointment}', [StudentAppointmentController::class, 'update'])->middleware('appointment.lifecycle:appointment.updated')->name('appointments.update');
     Route::post('/appointments/{appointment}/payment/gcash', [StudentAppointmentController::class, 'submitGcash'])->name('appointments.payment.gcash');
     Route::post('/appointments/{appointment}/bundle-payment/gcash', [StudentAppointmentController::class, 'submitBundleGcash'])->name('appointments.bundle-payment.gcash');
     Route::get('/appointments/payment/proof/{payment}', [StudentAppointmentController::class, 'viewProof'])->name('appointments.payment.proof');
@@ -332,12 +342,13 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
     });
 
-    Route::middleware('role:alumni')->group(function () {
+    Route::middleware('role:student|alumni')->group(function () {
         Route::get('/documents', [AlumniDocumentController::class, 'index'])->name('documents.index');
         Route::get('/documents/create', [AlumniDocumentController::class, 'create'])->name('documents.create');
-        Route::post('/documents', [AlumniDocumentController::class, 'store'])->name('documents.store');
-        Route::post('/documents/{documentRequest}/pickup-appointment', [AlumniDocumentController::class, 'bookPickup'])->name('documents.pickup-appointment');
+        Route::post('/documents', [AlumniDocumentController::class, 'store'])->middleware('document.submission')->name('documents.store');
+        Route::post('/documents/{documentRequest}/pickup-appointment', [AlumniDocumentController::class, 'bookPickup'])->middleware('appointment.lifecycle:legacy.pickup_booked')->name('documents.pickup-appointment');
         Route::post('/documents/{documentRequest}/payment', [AlumniDocumentController::class, 'submitPayment'])->name('documents.payment.submit');
+        Route::post('/documents/{documentRequest}/payment/gcash', [AlumniDocumentController::class, 'submitStudentPayment'])->middleware('role:student')->name('documents.payment.gcash');
         Route::get('/documents/{documentRequest}/proof', [AlumniDocumentController::class, 'viewProof'])->name('documents.payment.proof');
         Route::get('/documents/gcash-qr', [AlumniDocumentController::class, 'showGcashQr'])->name('documents.gcash.qr');
     });
