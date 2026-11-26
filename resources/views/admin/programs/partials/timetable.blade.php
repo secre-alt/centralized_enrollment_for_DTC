@@ -97,10 +97,10 @@
                 <h6 id="tt-saved-title">Saved schedule</h6>
                 <p class="tt-help">{{ $timetableSubjects->count() - $unresolved }} of {{ $timetableSubjects->count() }} subjects placed · {{ $unresolved }} need attention. This summary shows saved assignments.</p>
                 <div class="tt-table-wrap" role="region" aria-label="Saved subject assignments" tabindex="0">
-                    <table class="tt-table"><thead><tr><th>Subject</th><th>Days / time</th><th>Room</th><th>Instructor</th><th>Review</th></tr></thead><tbody>
+                    <table class="tt-table tt-schedule-table"><thead><tr><th>Subject</th><th>Days / time</th><th>Room</th><th>Instructor</th><th>Review</th></tr></thead><tbody>
                     @foreach($timetableSubjects as $subject)
                         @php $savedRow = $proposalRows->get($subject->id, []); @endphp
-                        <tr><th scope="row">{{ $subject->subject_code }}</th><td>{{ $savedRow['pattern'] ?? 'Not set' }}<br>{{ $savedRow['start'] ?? '—' }}–{{ $savedRow['end'] ?? '—' }}</td><td>{{ $resourceChoices->firstWhere('id', $savedRow['room_id'] ?? null)['name'] ?? 'Unassigned' }}</td><td>{{ $resourceChoices->firstWhere('id', $savedRow['instructor_id'] ?? null)['name'] ?? 'Unassigned' }}</td><td>{{ empty($savedRow) ? 'Needs assignment' : ($savedRow['issue'] ?? 'Placed') }}</td></tr>
+                        <tr><th scope="row">{{ $subject->subject_code }}</th><td data-label="Days / time"><span>{{ $savedRow['pattern'] ?? 'Not set' }}<br>{{ $savedRow['start'] ?? '—' }}–{{ $savedRow['end'] ?? '—' }}</span></td><td data-label="Room"><span>{{ $resourceChoices->firstWhere('id', $savedRow['room_id'] ?? null)['name'] ?? 'Unassigned' }}</span></td><td data-label="Instructor"><span>{{ $resourceChoices->firstWhere('id', $savedRow['instructor_id'] ?? null)['name'] ?? 'Unassigned' }}</span></td><td data-label="Review"><span>{{ empty($savedRow) ? 'Needs assignment' : ($savedRow['issue'] ?? 'Placed') }}</span></td></tr>
                     @endforeach
                     </tbody></table>
                 </div>

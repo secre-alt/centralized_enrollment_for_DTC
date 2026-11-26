@@ -41,8 +41,8 @@
     </details>
     <details class="tt-start-option" @if($entryIntent === 'import') open @endif>
         <summary>Import CSV <span class="tt-help">Preview before saving</span></summary>
-        <p class="tt-help">Start from an exported CSV. Need a sample? Try demo, then export it. Include every curriculum subject once, with the original column headings and recorded IDs. Maximum 256 KB and 100 subjects.</p>
-        <form method="POST" action="{{ route('admin.timetables.store') }}" enctype="multipart/form-data">
+        <p class="tt-help">Use an exported CSV with every curriculum subject once. Keep the original headings and IDs. Maximum 256 KB / 100 subjects.</p>
+        <form method="POST" action="{{ route('admin.timetables.store') }}" enctype="multipart/form-data" id="tt-import-form">
             @csrf
             <input type="hidden" name="intent" value="import">
             <input type="hidden" name="action" value="preview">
@@ -54,11 +54,12 @@
                 <label for="tt-import-group">Student group<input id="tt-import-group" name="group_code" class="form-control" maxlength="30" placeholder="e.g. BSTM 1A" value="{{ $entryIntent === 'import' ? old('group_code') : '' }}" required></label>
                 <label for="tt-import-seats">Group size<input id="tt-import-seats" name="capacity" type="number" class="form-control" min="1" max="1000" value="{{ $entryIntent === 'import' ? old('capacity') : '' }}" required></label>
             </div>
+            <label for="tt-import-mode">Mode<select id="tt-import-mode" aria-describedby="tt-import-mode-help" name="is_demo" class="form-control"><option value="0" @selected((string)old('is_demo', '0') === '0')>Normal draft</option><option value="1" @selected((string)old('is_demo') === '1')>Demonstration - cannot publish</option></select></label>
+            <p id="tt-import-mode-help" class="tt-help">For sample CSVs with demo-room and demo-instructor IDs, choose Demonstration. Normal drafts need real resource IDs.</p>
             <label class="mt-3" for="tt-start-csv">CSV file<input id="tt-start-csv" class="form-control" type="file" name="csv" accept=".csv,text/csv" required></label>
             <details class="tt-resource mt-3">
-                <summary>Import settings <span class="tt-help">Mode and teaching hours</span></summary>
+                <summary>Teaching hours</summary>
                 <div class="tt-grid">
-                    <label for="tt-import-mode">Mode<select id="tt-import-mode" name="is_demo" class="form-control"><option value="0" @selected((string)old('is_demo', '0') === '0')>Normal draft</option><option value="1" @selected((string)old('is_demo') === '1')>Demonstration - cannot publish</option></select></label>
                     <label for="tt-import-close">Latest class end<select id="tt-import-close" name="closing_hour" class="form-control">@foreach([17=>'5 PM',18=>'6 PM',19=>'7 PM'] as $hour=>$label)<option value="{{ $hour }}" @selected((int)old('closing_hour',17) === $hour)>{{ $label }}</option>@endforeach</select></label>
                 </div>
             </details>
@@ -67,13 +68,16 @@
         @if($entryIntent === 'import' && old('creation_preview') && is_array(old('rows')))
             @php
                 $previewRows = collect(old('rows'))->filter(fn ($row) => is_array($row));
+                $previewIssues = $previewRows->filter(fn ($row) => !empty($row['issue']))->count();
                 $previewSubjects = \App\Models\CourseSubject::whereIn('id', $previewRows->pluck('subject_id')->filter(fn ($id) => is_scalar($id)))->get()->keyBy('id');
                 $previewResources = old('is_demo') ? collect(app(\App\Services\TimetableService::class)->resources(new \App\Models\TimetableDraft(['is_demo' => true]))) : $timetableResources;
             @endphp
             <section id="tt-import-preview" class="tt-saved-summary" aria-labelledby="tt-import-preview-title">
                 <h6 id="tt-import-preview-title">CSV preview - not saved</h6>
-                <p class="tt-help">{{ old('group_code') }} / {{ old('preview_school_year') }} / Semester {{ old('preview_semester') }}. Review the rows, then save a draft to adjust any flagged assignments. This does not publish or reserve resources.</p>
-                <form method="POST" action="{{ route('admin.timetables.store') }}">
+                <p class="tt-help">{{ old('group_code') }} / {{ old('preview_school_year') }} / Semester {{ old('preview_semester') }}. Saving creates a draft only. Adjust flagged assignments in the draft.</p>
+                <p class="tt-help">{{ $previewRows->count() - $previewIssues }} of {{ $previewRows->count() }} subjects placed / {{ $previewIssues }} need attention</p>
+                <p id="tt-import-stale" class="tt-issue" role="status" hidden>Import details changed. Preview the CSV again before saving.</p>
+                <form id="tt-import-save" method="POST" action="{{ route('admin.timetables.store') }}">
                     @csrf
                     <input type="hidden" name="intent" value="import">
                     <input type="hidden" name="action" value="create">
@@ -82,9 +86,9 @@
                         <input type="hidden" name="{{ $field }}" value="{{ old($field) }}">
                     @endforeach
                     <div class="tt-table-wrap" role="region" aria-label="Imported schedule preview" tabindex="0">
-                        <table class="tt-table"><thead><tr><th>Subject</th><th>Days / time</th><th>Room</th><th>Instructor</th><th>Review</th></tr></thead><tbody>
+                        <table class="tt-table tt-schedule-table"><thead><tr><th>Subject</th><th>Days / time</th><th>Room</th><th>Instructor</th><th>Review</th></tr></thead><tbody>
                             @foreach($previewRows as $index => $row)
-                                <tr><th scope="row">{{ $previewSubjects->get($row['subject_id'])?->subject_code ?? $row['subject_id'] }}</th><td>{{ $row['pattern'] ?? 'Not set' }}<br>{{ $row['start'] ?? '-' }} - {{ $row['end'] ?? '-' }}</td><td>{{ $previewResources->firstWhere('id', $row['room_id'] ?? null)['name'] ?? 'Unassigned' }}</td><td>{{ $previewResources->firstWhere('id', $row['instructor_id'] ?? null)['name'] ?? 'Unassigned' }}</td><td>{{ $row['issue'] ?? 'Placed' }}</td></tr>
+                                <tr><th scope="row">{{ $previewSubjects->get($row['subject_id'])?->subject_code ?? $row['subject_id'] }}</th><td data-label="Days / time"><span>{{ $row['pattern'] ?? 'Not set' }}<br>{{ $row['start'] ?? '-' }} - {{ $row['end'] ?? '-' }}</span></td><td data-label="Room"><span>{{ $previewResources->firstWhere('id', $row['room_id'] ?? null)['name'] ?? 'Unassigned' }}</span></td><td data-label="Instructor"><span>{{ $previewResources->firstWhere('id', $row['instructor_id'] ?? null)['name'] ?? 'Unassigned' }}</span></td><td data-label="Review"><span>{{ $row['issue'] ?? 'Placed' }}</span></td></tr>
                             @endforeach
                         </tbody></table>
                     </div>

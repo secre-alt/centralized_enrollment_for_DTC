@@ -7,7 +7,28 @@ document.addEventListener('DOMContentLoaded', function () {
         programFields.forEach(field => {
             if (!field.dataset.timetableEdited) field.value = event.detail || field.options[0]?.value || '';
         });
+        checkImportPreview();
     });
+    const importForm = document.getElementById('tt-import-form');
+    const importSave = document.getElementById('tt-import-save');
+    const importSnapshot = importForm && importSave ? new URLSearchParams(new FormData(importForm)).toString() : null;
+    let fileChanged = false;
+    function checkImportPreview(event) {
+        if (importSnapshot === null) return true;
+        if (event?.target?.type === 'file') fileChanged = true;
+        const stale = fileChanged || new URLSearchParams(new FormData(importForm)).toString() !== importSnapshot;
+        document.getElementById('tt-import-stale').hidden = !stale;
+        importSave.querySelector('button[type="submit"]').disabled = stale;
+        return !stale;
+    }
+    if (importForm && importSave) {
+        importForm.addEventListener('input', checkImportPreview);
+        importForm.addEventListener('change', checkImportPreview);
+        importSave.addEventListener('submit', function (event) {
+            if (!checkImportPreview()) event.preventDefault();
+        });
+        checkImportPreview();
+    }
     const editor = document.getElementById('tt-edit-form');
     const publication = document.querySelector('.tt-publish[data-ready]');
     if (!editor || !publication) return;
