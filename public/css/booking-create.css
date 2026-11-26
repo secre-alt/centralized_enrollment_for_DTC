@@ -13,6 +13,10 @@
 .dtc-booking-page .dr-collection p { margin-top: 12px; }
 .dtc-booking-page:has([data-document-submission]) { padding-bottom: 0; }
 .dtc-booking-page [data-document-submission] .dr-aside { padding-top: 0; }
+@media (min-width: 992px) {
+    /* Match the 28px step tracker and its 24px bottom margin. */
+    .dtc-booking-page [data-document-submission] .dr-aside { padding-top: 52px; }
+}
 .dtc-booking-page [data-document-submission] .dr-slip-body { display: block; }
 .dtc-booking-page [data-document-option] > .dr-sec { display: grid; gap: 8px; }
 .dtc-booking-page [data-document-gcash] { margin-top: 12px; }
