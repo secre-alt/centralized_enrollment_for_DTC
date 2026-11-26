@@ -77,6 +77,96 @@ class TimetableDraftTest extends TestCase
             ->assertSee('Eligible new enrollments can be assigned')->assertDontSee('Automatic student assignment is a later stage');
     }
 
+    public function test_quick_demo_needs_only_program_and_year_and_stays_fictional(): void
+    {
+        $program = Program::factory()->create();
+        CourseSubject::factory()->create(['program_id' => $program->id, 'year_level' => 2, 'semester' => 1]);
+        $this->get(route('admin.programs.index', ['program' => $program->id]))->assertOk()
+            ->assertSeeInOrder(['Try demo', 'Copy timetable', 'Import CSV', 'Create manually', 'Manage resources']);
+        $this->post(route('admin.timetables.store'), ['intent' => 'demo', 'program_id' => $program->id, 'year_level' => 2,
+            'is_demo' => 0, 'capacity' => 999, 'group_code' => 'LIVE GROUP'])->assertSessionHasNoErrors();
+        $draft = TimetableDraft::firstOrFail();
+        $this->assertTrue($draft->is_demo);
+        $this->assertSame('DEMO YEAR 2', $draft->group_code);
+        $this->assertSame(30, $draft->capacity);
+        $this->assertSame('demo-instructor', $draft->proposals[0]['instructor_id']);
+        $this->assertSame(0, TimetableResource::count());
+        $this->publish($draft)->assertSessionHasErrors('timetable');
+        $this->assertSame(0, ClassSchedule::count());
+    }
+
+    public function test_quick_copy_inherits_source_details_without_retyping(): void
+    {
+        [$room, $instructor] = $this->resources();
+        [$source, $subject] = $this->setupDraft('BSTM', ['closing_hour' => 19, 'capacity' => 25]);
+        $this->save($source, [$this->row($subject, $room, $instructor)])->assertSessionHasNoErrors();
+        $this->post(route('admin.timetables.store'), ['intent' => 'copy', 'source_id' => $source->id,
+            'group_code' => 'BSTM 1B'])->assertSessionHasNoErrors();
+        $copy = TimetableDraft::latest('id')->first();
+        $this->assertSame($source->program_id, $copy->program_id);
+        $this->assertSame($source->year_level, $copy->year_level);
+        $this->assertSame($source->capacity, $copy->capacity);
+        $this->assertFalse($copy->is_demo);
+        $this->assertSame(19, $copy->configuration['closing_hour']);
+        $this->assertSame($source->fresh()->proposals, $copy->proposals);
+        $this->assertSame('BSTM 1A', $source->fresh()->group_code);
+        $this->get(route('admin.programs.index', ['timetable' => $source->id]))->assertOk()
+            ->assertViewHas('timetableDrafts', fn ($drafts) => $drafts->count() === 2);
+    }
+
+    public function test_csv_can_preview_before_any_draft_exists_then_save_with_fresh_checks(): void
+    {
+        [$room, $instructor] = $this->resources();
+        $program = Program::factory()->create();
+        $subject = CourseSubject::factory()->create(['program_id' => $program->id, 'year_level' => 1, 'semester' => 1]);
+        $csv = "subject_id,instructor_id,room_id,pattern,minutes,facility,start,end\n"
+            ."{$subject->id},{$instructor->id},{$room->id},MWF,60,classroom,08:00,09:00\n";
+        $data = ['intent' => 'import', 'action' => 'preview', 'program_id' => $program->id, 'year_level' => 1,
+            'group_code' => 'IMPORT 1A', 'capacity' => 30];
+        $response = $this->post(route('admin.timetables.store'), $data + ['csv' => UploadedFile::fake()->createWithContent('schedule.csv', $csv)])
+            ->assertSessionHasNoErrors();
+        $this->assertSame(0, TimetableDraft::count());
+        $this->assertSame(0, ClassSchedule::count());
+        $preview = session()->getOldInput();
+        $this->assertSame('2026-2027', $preview['preview_school_year']);
+        $this->assertNull($preview['rows'][0]['issue']);
+        $this->get($response->headers->get('Location'))->assertOk()->assertSee('CSV preview - not saved')
+            ->assertSee($subject->subject_code)->assertSee('Save draft')->assertDontSee('Publish saved timetable');
+        $room->update(['configuration' => ['active' => false, 'capacity' => 40, 'facility' => 'classroom']]);
+        $this->post(route('admin.timetables.store'), array_merge($preview, ['action' => 'create']))->assertSessionHasNoErrors();
+        $draft = TimetableDraft::firstOrFail();
+        $this->assertNotEmpty($draft->proposals[0]['issue']);
+        $this->assertSame('draft', $draft->status);
+        $this->assertSame('60', $draft->configuration['requirements'][$subject->id]['minutes']);
+        $this->publish($draft)->assertSessionHasErrors('timetable');
+        $this->assertSame(0, ClassSchedule::count());
+    }
+
+    public function test_new_import_rejects_stale_terms_and_invalid_subjects_without_leaving_empty_drafts(): void
+    {
+        $program = Program::factory()->create();
+        $subject = CourseSubject::factory()->create(['program_id' => $program->id, 'year_level' => 1, 'semester' => 1]);
+        $row = ['subject_id' => $subject->id, 'instructor_id' => 'demo-instructor', 'room_id' => 'demo-room',
+            'pattern' => 'MWF', 'minutes' => 60, 'facility' => 'classroom', 'start' => '08:00', 'end' => '09:00'];
+        $data = ['intent' => 'import', 'action' => 'create', 'program_id' => $program->id, 'year_level' => 1,
+            'group_code' => 'IMPORT DEMO', 'capacity' => 30, 'is_demo' => 1, 'rows' => [$row],
+            'preview_school_year' => '2025-2026', 'preview_semester' => 1];
+        $this->post(route('admin.timetables.store'), $data)->assertSessionHasErrors('timetable');
+        $data['preview_school_year'] = '2026-2027';
+        $data['rows'][0]['subject_id'] = CourseSubject::factory()->create()->id;
+        $this->post(route('admin.timetables.store'), $data)->assertSessionHasErrors('timetable');
+        $this->assertSame(0, TimetableDraft::count());
+        $data['rows'] = [$row];
+        $this->post(route('admin.timetables.store'), $data)->assertSessionHasNoErrors();
+        $this->assertTrue(TimetableDraft::firstOrFail()->is_demo);
+        $this->assertSame(0, TimetableResource::count());
+        $this->assertSame(0, ClassSchedule::count());
+        $data['action'] = 'preview';
+        $this->post(route('admin.timetables.store'), $data + ['csv' => UploadedFile::fake()->createWithContent('bad.csv', "wrong,header\n")])
+            ->assertSessionHasErrors('csv');
+        $this->assertSame(1, TimetableDraft::count());
+    }
+
     public function test_demonstration_uses_only_fictional_resources_and_cannot_publish(): void
     {
         [$draft] = $this->setupDraft('BSTM', ['is_demo' => 1]);

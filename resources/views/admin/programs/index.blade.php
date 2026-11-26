@@ -259,6 +259,7 @@ function loadSubjectsCard(url, pushState) {
         .then(function (res) { return res.text(); })
         .then(function (html) {
             subjectsWrapper.innerHTML = html;
+            document.dispatchEvent(new CustomEvent('dtc:program-selected', { detail: new URL(url, window.location.href).searchParams.get('program') }));
             // Re-run the partial's own inline script block (innerHTML-injected
             // <script> tags don't auto-execute) so edit-subject buttons work.
             subjectsWrapper.querySelectorAll('script').forEach(function (old) {

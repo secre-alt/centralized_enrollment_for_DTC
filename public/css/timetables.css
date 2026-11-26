@@ -6,6 +6,14 @@
 .tt-section > summary .tt-help, .tt-resource > summary .tt-help { margin-left:12px; }
 .tt-section > p { margin:12px 0 16px; }
 .tt-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+.tt-start-options { display:grid; gap:12px; margin:20px 0; }
+.tt-start-option { min-width:0; border:1px solid var(--dtc-border); border-radius:8px; padding:16px; }
+.tt-start-option > summary { cursor:pointer; font-size:15px; font-weight:600; }
+.tt-start-option > summary .tt-help { display:block; margin:4px 0 0 16px; font-weight:400; }
+.tt-start-option > p { margin:16px 0; }
+.tt-start-option summary:focus-visible { outline:2px solid var(--dtc-primary); outline-offset:4px; }
+.tt-subject.tt-needs-attention { border-left:2px solid var(--dtc-danger); padding-left:16px; }
+.tt-subject-title .tt-attention-label { color:var(--dtc-danger); font-size:12px; }
 .tt-workspace label { display:block; font-size:13px; font-weight:500; margin:0; min-width:0; }
 .tt-workspace .form-control { margin-top:8px; width:100%; min-width:0; }
 .tt-resource { border-top:1px solid var(--dtc-border); padding:8px 0; }

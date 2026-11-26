@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const programFields = document.querySelectorAll('[data-timetable-program]');
+    programFields.forEach(field => field.addEventListener('change', function () {
+        field.dataset.timetableEdited = '1';
+    }));
+    document.addEventListener('dtc:program-selected', function (event) {
+        programFields.forEach(field => {
+            if (!field.dataset.timetableEdited) field.value = event.detail || field.options[0]?.value || '';
+        });
+    });
     const editor = document.getElementById('tt-edit-form');
     const publication = document.querySelector('.tt-publish[data-ready]');
     if (!editor || !publication) return;
