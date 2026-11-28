@@ -17,9 +17,10 @@ class ResetPasswordController extends Controller
      */
     public function showResetForm(Request $request, string $token)
     {
+        $validated = $request->validate(['email' => ['nullable', 'string', 'max:255']]);
         return view('auth.reset-password', [
             'token' => $token,
-            'email' => $request->query('email', ''),
+            'email' => $validated['email'] ?? '',
         ]);
     }
 
@@ -30,7 +31,7 @@ class ResetPasswordController extends Controller
     public function reset(Request $request)
     {
         $request->validate([
-            'token'                 => ['required'],
+            'token'                 => ['required', 'string'],
             'email'                 => ['required', 'email'],
             'password'              => \App\Support\SecuritySettings::passwordRules(),
             'password_confirmation' => ['required'],

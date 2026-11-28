@@ -22,7 +22,7 @@ class StudentGcashPaymentTest extends TestCase
         Storage::fake('local');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_can_submit_a_gcash_proof_for_their_own_pending_enrollment()
     {
         $student    = $this->makeUserWithRole('new_applicant');
@@ -76,7 +76,7 @@ class StudentGcashPaymentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_submit_gcash_payment_for_someone_elses_enrollment()
     {
         $student       = $this->makeUserWithRole('new_applicant');
@@ -98,7 +98,7 @@ class StudentGcashPaymentTest extends TestCase
         $this->assertDatabaseMissing('payments', ['enrollment_id' => $enrollment->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_view_someone_elses_payment_proof()
     {
         $student      = $this->makeUserWithRole('new_applicant');
@@ -111,7 +111,7 @@ class StudentGcashPaymentTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function submitting_gcash_payment_twice_while_one_is_pending_is_blocked()
     {
         $student    = $this->makeUserWithRole('new_applicant');
@@ -134,7 +134,7 @@ class StudentGcashPaymentTest extends TestCase
         $this->assertSame(1, Payment::where('enrollment_id', $enrollment->id)->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_rejected_gcash_attempt_can_be_resubmitted()
     {
         $student = $this->makeUserWithRole('new_applicant');
@@ -154,7 +154,7 @@ class StudentGcashPaymentTest extends TestCase
         $this->assertSame('pending', Payment::where('enrollment_id', $enrollment->id)->latest('id')->first()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function gcash_submission_requires_a_reference_number_and_a_valid_proof_file()
     {
         $student    = $this->makeUserWithRole('new_applicant');
@@ -171,7 +171,7 @@ class StudentGcashPaymentTest extends TestCase
         $this->assertDatabaseMissing('payments', ['enrollment_id' => $enrollment->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_can_submit_gcash_payment_before_registrar_approval()
     {
         $student    = $this->makeUserWithRole('new_applicant');

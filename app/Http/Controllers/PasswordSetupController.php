@@ -22,7 +22,8 @@ class PasswordSetupController extends Controller
      */
     public function showForm(Request $request, string $token)
     {
-        $email = $request->query('email', '');
+        $validated = $request->validate(['email' => ['nullable', 'string', 'max:255']]);
+        $email = $validated['email'] ?? '';
 
         $linkExpired = ! $this->tokenIsValid($email, $token);
 

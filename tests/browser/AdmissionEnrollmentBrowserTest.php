@@ -21,10 +21,10 @@ class AdmissionEnrollmentBrowserTest extends TestCase
     public static function journeys(): array
     {
         return ['admission' => ['admission'], 'hold' => ['hold'], 'gcash' => ['gcash'],
-            'replacement' => ['replacement'], 'refund' => ['refund']];
+            'replacement' => ['replacement'], 'refund' => ['refund'], 'roles' => ['roles'], 'layout' => ['layout']];
     }
 
-    /** @dataProvider journeys */
+    #[\PHPUnit\Framework\Attributes\DataProvider('journeys')]
     public function test_real_browser_admission_and_enrollment_journeys(string $journey): void
     {
         $this->assertTrue(app()->environment('testing'));
@@ -51,6 +51,17 @@ class AdmissionEnrollmentBrowserTest extends TestCase
             'semester' => 1, 'capacity' => 1, 'is_active' => true, 'requires_irregular' => false,
             'day_pattern' => 'MWF', 'time_start' => '08:00', 'time_end' => '09:00', 'room' => '1T']);
         $paymentBefore = null;
+        if ($journey === 'roles') {
+            foreach (['admin', 'alumni', 'new_applicant'] as $role) {
+                $account = $this->makeUserWithRole($role, ['email' => 'browser-'.$role.'@example.test',
+                    'password' => Hash::make($password), 'status' => 'active']);
+                if ($role === 'new_applicant') {
+                    \App\Models\Application::create(['reference_no' => 'APP-BROWSER-ROLES', 'user_id' => $account->id,
+                        'program_id' => $subject->program_id, 'first_name' => 'Browser', 'last_name' => 'Applicant',
+                        'email' => $account->email, 'academic_status' => 'new_student', 'status' => 'approved', 'reviewed_at' => now()]);
+                }
+            }
+        }
         if ($journey !== 'admission') {
             $student = $this->makeUserWithRole('student', ['email' => 'browser-student@example.test', 'password' => Hash::make($password), 'status' => 'active']);
             $alternative = $section->replicate();
@@ -82,6 +93,7 @@ class AdmissionEnrollmentBrowserTest extends TestCase
             'SESSION_DRIVER' => 'file', 'SESSION_SECURE_COOKIE' => 'false', 'MAIL_MAILER' => 'array',
             'CACHE_DRIVER' => 'array', 'APP_URL' => $baseUrl, 'BROWSER_SESSION_PATH' => $directory.'/sessions',
             'BROWSER_BASE_URL' => $baseUrl, 'BROWSER_PASSWORD' => $password, 'BROWSER_PROGRAM_ID' => (string) $subject->program_id,
+            'ADMISSION_URL' => $baseUrl.'/apply',
             'BROWSER_REGISTRAR_EMAIL' => $registrar->email, 'BROWSER_CASHIER_EMAIL' => $cashier->email,
             'BROWSER_OUTPUT' => $directory, 'BROWSER_PHP' => PHP_BINARY, 'BROWSER_JOURNEY' => $journey,
             'BROWSER_SUBJECT_ID' => (string) $subject->id, 'BROWSER_ORIGINAL_SECTION' => (string) $section->id,
@@ -92,7 +104,12 @@ class AdmissionEnrollmentBrowserTest extends TestCase
         $this->assertIsResource($process);
         fclose($pipes[0]);
         try {
-            $script = $journey === 'admission' ? 'admission-enrollment.cjs' : 'enrollment-journeys.cjs';
+            $script = match ($journey) {
+                'admission' => 'admission-enrollment.cjs',
+                'roles' => 'role-pages.cjs',
+                'layout' => 'admission-layout.cjs',
+                default => 'enrollment-journeys.cjs',
+            };
             $browser = proc_open(['node', base_path('tests/browser/'.$script)],
                 [0 => ['pipe', 'r'], 1 => ['file', $directory.'/browser.out', 'w'], 2 => ['file', $directory.'/browser.err', 'w']], $browserPipes, base_path(), $environment);
             $this->assertIsResource($browser);
@@ -111,6 +128,9 @@ class AdmissionEnrollmentBrowserTest extends TestCase
             proc_close($browser);
             $this->assertFalse($status['running'], 'Browser flow timed out: '.$directory);
             $this->assertSame(0, $status['exitcode'], file_get_contents($directory.'/browser.out')."\n".file_get_contents($directory.'/browser.err')."\nArtifacts: ".$directory);
+            if (in_array($journey, ['roles', 'layout'], true)) {
+                return;
+            }
             $email = $journey === 'admission' ? 'browser-applicant@example.test' : 'browser-student@example.test';
             $enrollment = Enrollment::whereHas('user', fn ($query) => $query->where('email', $email))->firstOrFail();
             $this->assertSame($journey === 'refund' ? 'rejected' : ($journey === 'hold' ? 'pending' : 'approved'), $enrollment->status);

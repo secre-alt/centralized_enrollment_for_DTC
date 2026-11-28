@@ -101,6 +101,8 @@ class EnrollmentAutomaticSectionsTest extends TestCase
 
     public function test_no_complete_group_leaves_hold_visible_to_student_and_registrar(): void
     {
+        // Wall-clock corrections must not expire this multi-page workflow fixture.
+        $this->freezeTime();
         $subjects = $this->subjects();
         $this->group($subjects->take(1));
         $student = $this->makeUserWithRole('student');

@@ -169,6 +169,16 @@ class EnrollmentController extends Controller
         $enrollment = DB::transaction(function () use ($user, $validated, $isIrregular, $term) {
             \App\Models\User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
+            // Serialize JSON curriculum references with subject deletion and recheck after locking.
+            $subjects = \App\Models\CourseSubject::whereIn('id', $validated['subject_ids'])
+                ->orderBy('id')->lockForUpdate()->get();
+            if ($subjects->count() !== count($validated['subject_ids'])
+                || $subjects->contains(fn ($subject) => (int) $subject->program_id !== (int) $validated['program_id'])) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'subject_ids' => 'The selected subjects have changed. Refresh the enrollment form and select subjects again.',
+                ]);
+            }
+
             $officialProfile = $user->studentProfile()->lockForUpdate()->first();
             if (! $user->hasRole('new_applicant') && $officialProfile?->program_id
                 && (int) $officialProfile->program_id !== (int) $validated['program_id']) {

@@ -116,13 +116,14 @@ class DocumentReadyNotificationTest extends TestCase
     public function test_enqueue_failure_preserves_ready_and_existing_retry_command_is_idempotent(): void
     {
         $document = $this->document('alumni');
+        $mailFake = Mail::getFacadeRoot();
         Mail::shouldReceive('to')->once()->andThrow(new \RuntimeException('Queue unavailable'));
         $body = ['status' => 'ready', 'operation_key' => (string) Str::uuid()];
         $this->actingAs($this->makeUserWithRole('registrar'))->post(route('registrar.documents.status', $document), $body)->assertSessionHasNoErrors();
         $notice = UserNotification::where('user_id', $document->user_id)->sole();
         $this->assertSame('ready', $document->fresh()->status);
         $this->assertSame('enqueue_failed', $notice->email_status);
-        Mail::fake();
+        Mail::swap($mailFake);
         $this->artisan('workflow-emails:retry', ['notification' => $notice->id])->assertExitCode(0);
         $this->artisan('workflow-emails:retry', ['notification' => $notice->id])->assertExitCode(1);
         $this->post(route('registrar.documents.status', $document), $body)->assertSessionHasNoErrors();

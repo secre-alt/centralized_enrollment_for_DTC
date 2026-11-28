@@ -24,7 +24,7 @@ class StudentDashboardEnrollmentStatusTest extends TestCase
         $this->seedRoles();
     }
 
-    /** @dataProvider calendarDates */
+    #[\PHPUnit\Framework\Attributes\DataProvider('calendarDates')]
     public function test_calendar_progress_uses_configured_dates(string $start, string $end, string $today, string $status, ?int $progress, ?int $daysLeft): void
     {
         $student = $this->makeUserWithRole('student');

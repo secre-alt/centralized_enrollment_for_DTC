@@ -12,7 +12,7 @@ test('existing theme switch applies saved dark/light classes without closing an 
     const context = vm.createContext({
         localStorage: { getItem: () => saved }, window: { matchMedia: () => ({ matches: false }) },
         CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
-        document: { documentElement: { classList: html }, body: { classList: body },
+        document: { addEventListener() {}, documentElement: { classList: html }, body: { classList: body },
             getElementById: id => id === 'studentWelcome' ? welcome : null, dispatchEvent() {} }
     });
     vm.runInContext(source.slice(0, source.indexOf('function toggleDtcTheme')), context);
@@ -28,7 +28,7 @@ test('existing theme switch applies saved dark/light classes without closing an 
 test('shared theme resolution honors saved choices and otherwise follows the system', () => {
     const source = fs.readFileSync('public/js/dtc-app.js', 'utf8');
     for (const [saved, system, expected] of [['dark', false, 'dark'], ['light', true, 'light'], [null, true, 'dark'], [null, false, 'light']]) {
-        const context = vm.createContext({ localStorage: { getItem: () => saved }, window: { matchMedia: () => ({ matches: system }) } });
+        const context = vm.createContext({ document: { addEventListener() {} }, localStorage: { getItem: () => saved }, window: { matchMedia: () => ({ matches: system }) } });
         vm.runInContext(source.slice(0, source.indexOf('function applyDtcTheme')), context);
         assert.equal(vm.runInContext('getDtcTheme()', context), expected);
         for (const file of ['resources/views/layouts/public.blade.php', 'resources/views/auth/welcome.blade.php', 'resources/views/vendor/adminlte/master.blade.php']) {

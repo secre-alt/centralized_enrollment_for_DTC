@@ -71,7 +71,7 @@ class IrregularEnrollmentTest extends TestCase
         $this->assertSame('transferee', $enrollment->resolveClassification());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function regular_enrollment_still_works_with_single_year_semester_subjects()
     {
         $student = $this->makeUserWithRole('student');
@@ -94,7 +94,7 @@ class IrregularEnrollmentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function getSubjects_regular_mode_only_returns_the_requested_year_and_semester()
     {
         $student = $this->makeUserWithRole('student');
@@ -109,7 +109,7 @@ class IrregularEnrollmentTest extends TestCase
         $this->assertEqualsCanonicalizing(['IS101', 'IS102'], $codes->all());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function getSubjects_all_mode_returns_every_subject_grouped_by_year_and_semester()
     {
         $student = $this->makeUserWithRole('student');
@@ -127,7 +127,7 @@ class IrregularEnrollmentTest extends TestCase
         $this->assertSame(4, $totalSubjects);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function irregular_enrollment_can_select_subjects_across_multiple_year_levels_in_one_submission()
     {
         $student = $this->makeUserWithRole('student');
@@ -149,7 +149,7 @@ class IrregularEnrollmentTest extends TestCase
         $this->assertEqualsCanonicalizing([$a->id, $c->id], $enrollment->subject_ids);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function subjects_belonging_to_another_program_are_rejected_even_in_irregular_mode()
     {
         $student   = $this->makeUserWithRole('student');
@@ -169,7 +169,7 @@ class IrregularEnrollmentTest extends TestCase
         $this->assertDatabaseMissing('enrollments', ['user_id' => $student->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function duplicate_subject_ids_in_the_same_submission_are_rejected()
     {
         $student = $this->makeUserWithRole('student');
@@ -187,7 +187,7 @@ class IrregularEnrollmentTest extends TestCase
         $this->assertDatabaseMissing('enrollments', ['user_id' => $student->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function enrollment_type_defaults_to_regular_when_not_submitted()
     {
         $student = $this->makeUserWithRole('student');

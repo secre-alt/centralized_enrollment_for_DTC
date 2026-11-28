@@ -20,6 +20,10 @@ if (Illuminate\Support\Facades\DB::selectOne('SELECT DATABASE() AS name')->name 
     http_response_code(503);
     exit('Unsafe browser database configuration.');
 }
+// Exercise real HTTP security middleware only after confirming database isolation.
+$app->detectEnvironment(fn () => 'production');
+$app['config']->set('app.env', 'production');
+$app['config']->set('app.debug', false);
 $app['config']->set('session.files', getenv('BROWSER_SESSION_PATH'));
 $app['config']->set('filesystems.disks.local.root', getenv('BROWSER_UPLOAD_PATH'));
 $request = Illuminate\Http\Request::capture();

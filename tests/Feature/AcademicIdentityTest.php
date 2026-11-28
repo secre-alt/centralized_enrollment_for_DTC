@@ -39,7 +39,7 @@ class AcademicIdentityTest extends TestCase
     // Walk-in payment path
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function walk_in_payment_sets_enrolled_ay_from_enrollment_school_year()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -58,7 +58,7 @@ class AcademicIdentityTest extends TestCase
         $this->assertSame('2025-2026', $profile->enrolled_ay);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function walk_in_payment_enrolled_ay_is_null_when_enrollment_has_no_school_year()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -80,7 +80,7 @@ class AcademicIdentityTest extends TestCase
     // GCash verification path
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function gcash_verification_sets_enrolled_ay_from_enrollment_school_year()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -102,7 +102,7 @@ class AcademicIdentityTest extends TestCase
         $this->assertSame('2026-2027', $profile->enrolled_ay);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function enrolled_ay_is_not_overwritten_if_student_profile_already_exists()
     {
         // A student who already has a profile (e.g. re-pays after a rejected
@@ -139,7 +139,7 @@ class AcademicIdentityTest extends TestCase
     // (Registrar UI TBD — these confirm the column and cast are correct)
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_can_be_stored_and_retrieved_as_an_integer()
     {
         $profile = StudentProfile::create([
@@ -152,7 +152,7 @@ class AcademicIdentityTest extends TestCase
         $this->assertSame(2026, $profile->fresh()->graduation_year);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_is_nullable_by_default()
     {
         $profile = StudentProfile::create([
@@ -164,7 +164,7 @@ class AcademicIdentityTest extends TestCase
         $this->assertNull($profile->fresh()->graduation_year);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_can_be_set_after_creation()
     {
         $profile = StudentProfile::create([
@@ -182,7 +182,7 @@ class AcademicIdentityTest extends TestCase
     // Dashboard display — student
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_dashboard_shows_enrolled_ay_pill_when_profile_has_ay()
     {
         $student = $this->makeUserWithRole('student');
@@ -201,7 +201,7 @@ class AcademicIdentityTest extends TestCase
         $response->assertSee('Enrolled AY');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_dashboard_shows_no_ay_pill_when_enrolled_ay_is_null()
     {
         $student = $this->makeUserWithRole('student');
@@ -218,7 +218,7 @@ class AcademicIdentityTest extends TestCase
     // Dashboard display — alumni
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function alumni_dashboard_shows_batch_year_when_graduation_year_is_set()
     {
         $alumni = $this->makeUserWithRole('alumni');
@@ -237,7 +237,7 @@ class AcademicIdentityTest extends TestCase
         $response->assertSee('2026');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function alumni_dashboard_shows_no_batch_pill_when_graduation_year_is_null()
     {
         $alumni = $this->makeUserWithRole('alumni');

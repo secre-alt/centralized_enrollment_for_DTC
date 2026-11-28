@@ -57,7 +57,7 @@ class PromoteToAlumniTest extends TestCase
 
     // ── happy path ────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_promote_a_paid_student_to_alumni()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -80,7 +80,7 @@ class PromoteToAlumniTest extends TestCase
         $this->assertSame(2026, $profile->graduation_year);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function admin_can_also_promote_a_student_to_alumni()
     {
         $admin   = $this->makeUserWithRole('admin');
@@ -95,7 +95,7 @@ class PromoteToAlumniTest extends TestCase
         $this->assertTrue($student->hasRole('alumni'));
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_is_stored_on_existing_student_profile()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -110,7 +110,7 @@ class PromoteToAlumniTest extends TestCase
 
     // ── validation ────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_is_required()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -125,7 +125,7 @@ class PromoteToAlumniTest extends TestCase
         $this->assertTrue($student->hasRole('student'));
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_must_be_an_integer()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -136,7 +136,7 @@ class PromoteToAlumniTest extends TestCase
             ->assertSessionHasErrors('graduation_year');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_cannot_be_before_1990()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -147,7 +147,7 @@ class PromoteToAlumniTest extends TestCase
             ->assertSessionHasErrors('graduation_year');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function graduation_year_cannot_be_more_than_one_year_in_the_future()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -160,7 +160,7 @@ class PromoteToAlumniTest extends TestCase
 
     // ── role guard ────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cannot_promote_a_user_who_is_already_alumni()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -177,7 +177,7 @@ class PromoteToAlumniTest extends TestCase
         $this->assertTrue($alumni->hasRole('alumni'));
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cannot_promote_a_cashier_or_registrar_via_this_endpoint()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -196,7 +196,7 @@ class PromoteToAlumniTest extends TestCase
 
     // ── access control ────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_access_the_promote_endpoint()
     {
         $actor   = $this->makeUserWithRole('student');
@@ -210,7 +210,7 @@ class PromoteToAlumniTest extends TestCase
         $this->assertTrue($student->hasRole('student'));
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_cashier_cannot_access_the_promote_endpoint()
     {
         $cashier = $this->makeUserWithRole('cashier');
@@ -221,7 +221,7 @@ class PromoteToAlumniTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function unauthenticated_users_are_redirected_to_login()
     {
         $student = $this->paidStudentWithProfile();

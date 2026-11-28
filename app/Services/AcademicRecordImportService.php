@@ -115,11 +115,11 @@ class AcademicRecordImportService
     {
         $handle = @fopen($path, 'rb');
         if (! $handle) throw ValidationException::withMessages(['file' => 'The CSV file could not be read.']);
-        $header = fgetcsv($handle);
+        $header = fgetcsv($handle, escape: '\\');
         if (isset($header[0])) $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
         if (! is_array($header) || $header !== $this->headers($type)) { fclose($handle); throw ValidationException::withMessages(['file' => 'The CSV header does not match the selected template.']); }
         $rows = [];
-        while (($values = fgetcsv($handle)) !== false) {
+        while (($values = fgetcsv($handle, escape: '\\')) !== false) {
             if (count($values) === 1 && trim((string) $values[0]) === '') continue;
             if (count($values) !== count($header)) { $rows[] = ['_malformed' => true]; }
             else $rows[] = array_combine($header, array_map(static fn ($value) => trim((string) $value), $values));

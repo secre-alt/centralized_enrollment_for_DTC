@@ -48,6 +48,9 @@ return [
 
     'encrypt' => false,
 
+    // Preserve the existing PHP session payload format across the Laravel 13 upgrade.
+    'serialization' => 'php',
+
     /*
     |--------------------------------------------------------------------------
     | Session File Location

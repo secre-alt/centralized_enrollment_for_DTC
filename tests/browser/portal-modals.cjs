@@ -34,7 +34,7 @@ window.addEventListener('load', function () {
     const card = doc.querySelector('.modal-content, .student-welcome-dialog');
     const rect = card.getBoundingClientRect(), style = win.getComputedStyle(card);
     function check(ok, message) { if (!ok) failures.push(frame.title + ': ' + message); }
-    check(style.borderTopLeftRadius === '12px', 'corner radius ' + style.borderTopLeftRadius);
+    check(style.borderTopLeftRadius === (card.matches('.student-welcome-dialog') ? '16px' : '12px'), 'corner radius ' + style.borderTopLeftRadius);
     check(rect.left >= -1 && rect.right <= win.innerWidth + 1, 'horizontal overflow');
     check(style.backgroundImage === 'none', 'decorative surface');
     const primary = doc.querySelector('.btn-primary, .dtc-btn-success, .dtc-confirm-ok, .student-welcome-primary');

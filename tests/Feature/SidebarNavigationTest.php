@@ -11,7 +11,7 @@ class SidebarNavigationTest extends TestCase
 {
     use RefreshDatabase, SeedsRoles;
 
-    /** @dataProvider unreadCounts */
+    #[\PHPUnit\Framework\Attributes\DataProvider('unreadCounts')]
     public function test_sidebar_icon_structure_and_unread_counts(int $count, string $display): void
     {
         $this->seedRoles();

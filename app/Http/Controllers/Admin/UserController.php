@@ -182,7 +182,27 @@ class UserController extends Controller
             abort(403, 'You cannot delete your own account.');
         }
 
-        $user->delete();
+        DB::transaction(function () use ($user) {
+            $account = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            // Include historical owners and nullable audit actors before any cascading deletion.
+            $references = DB::table('information_schema.KEY_COLUMN_USAGE')
+                ->where('CONSTRAINT_SCHEMA', DB::connection()->getDatabaseName())
+                ->where('REFERENCED_TABLE_SCHEMA', DB::connection()->getDatabaseName())
+                ->where('REFERENCED_TABLE_NAME', 'users')
+                ->where('REFERENCED_COLUMN_NAME', 'id')
+                ->select('TABLE_NAME', 'COLUMN_NAME')->distinct()->get();
+
+            foreach ($references as $reference) {
+                if (DB::table($reference->TABLE_NAME)->where($reference->COLUMN_NAME, $account->id)
+                    ->lockForUpdate()->first([$reference->COLUMN_NAME])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'user' => 'This account has recorded activity and cannot be removed. Lock it instead.',
+                    ]);
+                }
+            }
+
+            $account->delete();
+        }, 3);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User removed.');

@@ -7,7 +7,9 @@ test('set/reset password toggles work after Lucide has replaced the eye with an 
     for (const page of ['set-password', 'reset-password']) {
         const source = fs.readFileSync(`resources/views/auth/${page}.blade.php`, 'utf8');
         const start = source.indexOf('function togglePw(');
-        const code = source.slice(start, source.indexOf('</script>', start));
+        const code = source.slice(start, source.indexOf('</script>', start))
+            .replaceAll("@json(__('ui.auth.hide_password'))", JSON.stringify('Hide password'))
+            .replaceAll("@json(__('ui.auth.show_password'))", JSON.stringify('Show password'));
         const inputs = { password: { type: 'password' }, password_confirmation: { type: 'password' } };
         const button = { icon: { tag: 'svg' }, replaceChildren(icon) { this.icon = icon; }, setAttribute(name, value) { this[name] = value; } };
         const lucide = { createIcons() { button.icon.tag = 'svg'; } };

@@ -22,7 +22,7 @@ class AcademicImportController extends Controller
     {
         abort_unless(in_array($type, ['students', 'alumni'], true), 404);
         return response()->streamDownload(function () use ($service, $type) {
-            $out = fopen('php://output', 'w'); fputcsv($out, $service->headers($type)); fclose($out);
+            $out = fopen('php://output', 'w'); fputcsv($out, $service->headers($type), escape: '\\'); fclose($out);
         }, $type.'-template.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
@@ -125,11 +125,11 @@ class AcademicImportController extends Controller
         abort_unless($batch->report_path && Storage::disk('local')->exists($batch->report_path), 404);
         $issues = json_decode(Storage::disk('local')->get($batch->report_path), true) ?: [];
         return response()->streamDownload(function () use ($issues) {
-            $out = fopen('php://output', 'w'); fputcsv($out, ['Row', 'Issue']);
+            $out = fopen('php://output', 'w'); fputcsv($out, ['Row', 'Issue'], escape: '\\');
             foreach ($issues as $issue) {
                 $message = (string) $issue['message'];
                 if (preg_match('/^[=+\-@]/', $message)) $message = "'".$message;
-                fputcsv($out, [$issue['row'], $message]);
+                fputcsv($out, [$issue['row'], $message], escape: '\\');
             }
             fclose($out);
         }, 'import-'.$batch->reference.'-issues.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);

@@ -12,7 +12,8 @@ class SearchController extends Controller
 {
     public function search(Request $request)
     {
-        $query   = trim($request->get('q', ''));
+        $validated = $request->validate(['q' => ['nullable', 'string', 'max:150']]);
+        $query   = trim($validated['q'] ?? '');
         $results = [];
 
         if (strlen($query) < 2) {

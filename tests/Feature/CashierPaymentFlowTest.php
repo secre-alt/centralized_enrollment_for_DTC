@@ -32,7 +32,7 @@ class CashierPaymentFlowTest extends TestCase
             ->assertSee('value="Cashier Search Match"', false);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_can_confirm_a_walk_in_payment_for_an_approved_unpaid_enrollment()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -54,7 +54,7 @@ class CashierPaymentFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function walk_in_payment_notifies_the_registrar_only_after_payment_is_recorded()
     {
         $cashier = $this->makeUserWithRole('cashier');
@@ -71,7 +71,7 @@ class CashierPaymentFlowTest extends TestCase
         $this->assertSame(1, UserNotification::where('user_id', $admin->id)->where('title', 'Payment Recorded')->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function walk_in_payment_cannot_be_recorded_twice_for_the_same_enrollment()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -87,7 +87,7 @@ class CashierPaymentFlowTest extends TestCase
         $this->assertSame(1, Payment::where('enrollment_id', $enrollment->id)->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_can_record_walk_in_payment_before_registrar_approval()
     {
         $cashier = $this->makeUserWithRole('cashier');
@@ -101,7 +101,7 @@ class CashierPaymentFlowTest extends TestCase
         $this->assertTrue($enrollment->fresh()->is_paid);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_pending_gcash_attempt_blocks_walk_in_but_a_rejected_attempt_does_not()
     {
         $cashier = $this->makeUserWithRole('cashier');
@@ -122,7 +122,7 @@ class CashierPaymentFlowTest extends TestCase
         $this->assertTrue($enrollment->fresh()->is_paid);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_non_cashier_cannot_process_payments()
     {
         $student    = $this->makeUserWithRole('student');
@@ -133,7 +133,7 @@ class CashierPaymentFlowTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_can_verify_a_pending_gcash_payment_and_it_marks_the_enrollment_paid()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -155,7 +155,7 @@ class CashierPaymentFlowTest extends TestCase
         $this->assertTrue($enrollment->is_paid);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_can_reject_a_pending_gcash_payment_with_a_reason()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -176,7 +176,7 @@ class CashierPaymentFlowTest extends TestCase
         $this->assertFalse($enrollment->is_paid);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function rejecting_a_gcash_payment_requires_a_reason()
     {
         $cashier    = $this->makeUserWithRole('cashier');
@@ -190,7 +190,7 @@ class CashierPaymentFlowTest extends TestCase
         $this->assertSame('pending', $payment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function receipt_page_shows_the_verified_payment_even_when_an_older_rejected_one_exists()
     {
         // Regression test for the Enrollment::payment() unordered-relation
@@ -218,7 +218,7 @@ class CashierPaymentFlowTest extends TestCase
         $response->assertDontSee($rejected->receipt_no);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function standalone_receipt_links_redirect_to_the_current_receipt_modal()
     {
         $cashier = $this->makeUserWithRole('cashier');
@@ -232,7 +232,7 @@ class CashierPaymentFlowTest extends TestCase
             ->assertOk()->assertViewIs('cashier.payments._receipt-content');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function receipt_ajax_request_gets_a_real_404_json_error_when_no_verified_payment_exists()
     {
         // Regression test for the redirect-swallowed-by-AJAX bug: an
@@ -248,7 +248,7 @@ class CashierPaymentFlowTest extends TestCase
         $response->assertJson(['message' => 'No verified payment found for this enrollment.']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function receipt_non_ajax_request_redirects_with_an_error_when_no_verified_payment_exists()
     {
         $cashier    = $this->makeUserWithRole('cashier');
