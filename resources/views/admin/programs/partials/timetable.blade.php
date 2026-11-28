@@ -64,6 +64,7 @@
                 $unresolved = $timetableSubjects->filter(fn($subject) => !$proposalRows->has($subject->id) || !empty($proposalRows->get($subject->id)['issue']))->count();
                 $canPublish = $timetableSubjects->isNotEmpty() && $unresolved === 0;
             @endphp
+            <h6 class="tt-step-title">2. Build the weekly schedule</h6>
             <div class="tt-draft-heading"><div><h5>{{ $draft->group_code }} <span class="tt-help">{{ $draft->is_demo ? 'Demonstration only' : ucfirst($draft->status) }}</span></h5><p class="tt-help mb-0">{{ $draft->program->name }} · Year {{ $draft->year_level }} · {{ $draft->school_year }} · Semester {{ $draft->semester }} · {{ $draft->capacity }} students</p></div></div>
             @if($draft->is_demo)<p class="tt-notice">Demonstration data. The room, instructor, availability and meeting requirements below are fictional presets and cannot become live offerings.</p>@endif
             <details class="tt-section">
@@ -90,10 +91,11 @@
             @if($draft->status === 'published')
                 <p class="tt-notice">Published {{ $draft->published_at->timezone('Asia/Manila')->format('M j, Y g:i A') }}. Eligible new enrollments can be assigned to this group automatically when the complete selected load fits. Existing enrollments waiting for sections still need Registrar assignment. Published timetables are read only.</p>
             @else
-                <p class="tt-help">Enter requirements, then generate suggestions. Edit individual room/time assignments and save the draft. Generation uses a first-fit search; an unresolved item may need a manual adjustment rather than another room. MWF means Monday, Wednesday and Friday; TTH means Tuesday and Thursday.</p>
+                <p class="tt-help">Enter requirements, then generate suggestions. MWF means Monday, Wednesday and Friday; TTH means Tuesday and Thursday; single weekdays are also available. Your examples commonly begin at 8:00 AM and leave 12:00–1:00 PM free. Set actual hours and instructor availability for your term. Generation uses a first-fit search; an unresolved item may need a manual adjustment rather than another room.</p>
                 <p class="tt-help">Each offering currently supports one time block repeated on its meeting days. A split morning/afternoon class needs an approved meeting model before publication; do not enter it as an uninterrupted block across lunch.</p>
             @endif
             <section class="tt-saved-summary" aria-labelledby="tt-saved-title">
+                <h6 class="tt-step-title">3. Review and publish</h6>
                 <h6 id="tt-saved-title">Saved schedule</h6>
                 <p class="tt-help">{{ $timetableSubjects->count() - $unresolved }} of {{ $timetableSubjects->count() }} subjects placed · {{ $unresolved }} need attention. This summary shows saved assignments.</p>
                 <div class="tt-table-wrap" role="region" aria-label="Saved subject assignments" tabindex="0">

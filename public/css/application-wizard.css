@@ -347,7 +347,7 @@ body.dtc-dark main:has(.app-wizard-page) {
 }
 .wiz-err-msg i { width: 13px; height: 13px; flex-shrink: 0; }
 
-.wiz-hint { font-size: 12px; color: #94a3b8; }
+.wiz-hint { font-size: 12px; color: #64748b; }
 /* Keep the familiar native calendar and keyboard date entry. */
 #birthdate {
     min-height: 52px;
@@ -792,7 +792,7 @@ body.dtc-dark .wiz-input:-webkit-autofill:focus {
 }
 body.dtc-dark .wiz-group-label         { color:#93c5fd; }
 body.dtc-dark .wiz-divider             { border-color:#1e293b; }
-body.dtc-dark .wiz-hint                { color:#64748b; }
+body.dtc-dark .wiz-hint                { color:#a8b5c9; }
 
 /* Dark mode tabs */
 body.dtc-dark .doc-tabs                { border-color:#1e293b; }

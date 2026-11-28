@@ -3,6 +3,7 @@
     $copyChoices = collect($timetableDrafts->items())->when($timetableDraft, fn ($drafts) => $drafts->prepend($timetableDraft))->unique('id');
 @endphp
 <p class="tt-help">Current term: <strong>{{ \App\Models\Setting::get('current_school_year', 'Not configured') }} / {{ \App\Models\Setting::get('current_semester', 'Not configured') }}</strong>. New drafts use this term automatically.</p>
+<h6 class="tt-step-title">1. Start a draft</h6>
 <div class="tt-start-options">
     <details class="tt-start-option" @if($entryIntent === 'demo') open @endif>
         <summary>Try demo <span class="tt-help">Fictional sample schedule</span></summary>
@@ -41,7 +42,7 @@
     </details>
     <details class="tt-start-option" @if($entryIntent === 'import') open @endif>
         <summary>Import CSV <span class="tt-help">Preview before saving</span></summary>
-        <p class="tt-help">Use an exported CSV with every curriculum subject once. Keep the original headings and IDs. Maximum 256 KB / 100 subjects.</p>
+        <p class="tt-help">Upload a schedule with every curriculum subject once. Keep the exported column headings and subject IDs. Instructor and room columns can use resource IDs or their configured names. Maximum 256 KB / 100 subjects.</p>
         <form method="POST" action="{{ route('admin.timetables.store') }}" enctype="multipart/form-data" id="tt-import-form">
             @csrf
             <input type="hidden" name="intent" value="import">
@@ -55,7 +56,7 @@
                 <label for="tt-import-seats">Group size<input id="tt-import-seats" name="capacity" type="number" class="form-control" min="1" max="1000" value="{{ $entryIntent === 'import' ? old('capacity') : '' }}" required></label>
             </div>
             <label for="tt-import-mode">Mode<select id="tt-import-mode" aria-describedby="tt-import-mode-help" name="is_demo" class="form-control"><option value="0" @selected((string)old('is_demo', '0') === '0')>Normal draft</option><option value="1" @selected((string)old('is_demo') === '1')>Demonstration - cannot publish</option></select></label>
-            <p id="tt-import-mode-help" class="tt-help">For sample CSVs with demo-room and demo-instructor IDs, choose Demonstration. Normal drafts need real resource IDs.</p>
+            <p id="tt-import-mode-help" class="tt-help">For sample CSVs with demo-room and demo-instructor IDs, choose Demonstration. Normal drafts match instructor and room IDs or names to configured resources.</p>
             <label class="mt-3" for="tt-start-csv">CSV file<input id="tt-start-csv" class="form-control" type="file" name="csv" accept=".csv,text/csv" required></label>
             <details class="tt-resource mt-3">
                 <summary>Teaching hours</summary>

@@ -266,11 +266,8 @@
                 const serviceId = card.dataset.serviceId;
                 const data = SERVICES[serviceId];
                 if (!data) return;
-                card.setAttribute('aria-label',
-                    isCenter
-                        ? `${data.title} — press Enter to learn more`
-                        : `${data.title} — click to navigate`
-                );
+                const cardText = card.innerText.replace(/\s+/g, ' ').trim();
+                card.setAttribute('aria-label', `${cardText} — ${isCenter ? 'press Enter to learn more' : 'click to navigate'}`);
                 card.style.cursor = isCenter ? 'pointer' : 'grab';
             });
         });
@@ -282,11 +279,8 @@
             const isCenter = card.classList.contains('is-center');
             const data = SERVICES[card.dataset.serviceId];
             if (!data) return;
-            card.setAttribute('aria-label',
-                isCenter
-                    ? `${data.title} — press Enter to learn more`
-                    : `${data.title} — click to navigate`
-            );
+            const cardText = card.innerText.replace(/\s+/g, ' ').trim();
+            card.setAttribute('aria-label', `${cardText} — ${isCenter ? 'press Enter to learn more' : 'click to navigate'}`);
             card.style.cursor = isCenter ? 'pointer' : 'grab';
         });
     }

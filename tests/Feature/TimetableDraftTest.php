@@ -142,6 +142,55 @@ class TimetableDraftTest extends TestCase
         $this->assertSame(0, ClassSchedule::count());
     }
 
+    public function test_csv_import_matches_shared_resource_names_across_rows(): void
+    {
+        [$room, $instructor] = $this->resources();
+        $program = Program::factory()->create();
+        $subjects = collect([1, 2])->map(fn () => CourseSubject::factory()->create([
+            'program_id' => $program->id, 'year_level' => 1, 'semester' => 1,
+        ]));
+        $csv = "subject_id,instructor_id,room_id,pattern,minutes,facility,start,end\n";
+        foreach ($subjects as $index => $subject) {
+            $start = $index === 0 ? '08:00' : '09:00';
+            $end = $index === 0 ? '09:00' : '10:00';
+            $csv .= "{$subject->id},TEST INSTRUCTOR,1t,MWF,60,classroom,{$start},{$end}\n";
+        }
+
+        $response = $this->post(route('admin.timetables.store'), [
+            'intent' => 'import', 'action' => 'preview', 'program_id' => $program->id, 'year_level' => 1,
+            'group_code' => 'IMPORT 1A', 'capacity' => 30,
+            'csv' => UploadedFile::fake()->createWithContent('schedule.csv', $csv),
+        ])->assertSessionHasNoErrors();
+
+        $rows = session()->getOldInput()['rows'];
+        $this->assertSame([(string) $instructor->id, (string) $instructor->id], array_column($rows, 'instructor_id'));
+        $this->assertSame([(string) $room->id, (string) $room->id], array_column($rows, 'room_id'));
+        $this->assertNull($rows[0]['issue']);
+        $this->assertSame(0, TimetableDraft::count());
+        $this->get($response->headers->get('Location'))->assertOk()->assertSee('Test instructor')->assertSee('1T');
+    }
+
+    public function test_csv_import_flags_unknown_resource_names_instead_of_guessing(): void
+    {
+        [$room] = $this->resources();
+        $program = Program::factory()->create();
+        $subject = CourseSubject::factory()->create(['program_id' => $program->id, 'year_level' => 1, 'semester' => 1]);
+        $csv = "subject_id,instructor_id,room_id,pattern,minutes,facility,start,end\n"
+            ."{$subject->id},Unknown Instructor,{$room->id},MWF,60,classroom,08:00,09:00\n";
+
+        $response = $this->post(route('admin.timetables.store'), [
+            'intent' => 'import', 'action' => 'preview', 'program_id' => $program->id, 'year_level' => 1,
+            'group_code' => 'IMPORT 1A', 'capacity' => 30,
+            'csv' => UploadedFile::fake()->createWithContent('schedule.csv', $csv),
+        ])->assertSessionHasNoErrors();
+
+        $row = session()->getOldInput()['rows'][0];
+        $this->assertNull($row['instructor_id']);
+        $this->assertStringContainsString('No instructor matches', $row['issue']);
+        $this->get($response->headers->get('Location'))->assertOk()->assertSee('No instructor matches')->assertSee('Unknown Instructor');
+        $this->assertSame(0, TimetableDraft::count());
+    }
+
     public function test_new_import_rejects_stale_terms_and_invalid_subjects_without_leaving_empty_drafts(): void
     {
         $program = Program::factory()->create();

@@ -87,6 +87,7 @@ class TimetableController extends Controller
 
     public function store(Request $request, TimetableService $service)
     {
+        $importIssues = [];
         $request->validate(['intent' => ['sometimes', 'in:manual,demo,copy,import'], 'action' => ['sometimes', 'in:preview,create']]);
         $intent = $request->input('intent', 'manual');
         if ($intent === 'demo') {
@@ -103,7 +104,9 @@ class TimetableController extends Controller
             $request->merge(['is_demo' => $request->input('is_demo', 0), 'closing_hour' => $request->input('closing_hour', 17), 'source_id' => null]);
             $request->validate(['action' => ['required', 'in:preview,create']]);
             if ($request->input('action') === 'preview') {
-                $request->merge(['rows' => $this->csvRows($request)]);
+                $rows = $this->csvRows($request);
+                $importIssues = collect($rows)->mapWithKeys(fn ($row) => [$row['subject_id'] => $row['_import_issue'] ?? null])->all();
+                $request->merge(['rows' => $rows]);
             } else {
                 $request->validate(['preview_school_year' => ['required', 'string'], 'preview_semester' => ['required', 'integer']]);
             }
@@ -118,7 +121,7 @@ class TimetableController extends Controller
         if ($intent === 'import') {
             $data += $request->validate(['rows' => ['required', 'array', 'max:100']] + $this->rowRules());
         }
-        $draft = $service->locked(function () use ($data, $request, $service, $intent) {
+        $draft = $service->locked(function () use ($data, $request, $service, $intent, $importIssues) {
             $schoolYear = trim((string) Setting::get('current_school_year', ''));
             $semester = ['1st' => 1, '2nd' => 2, 'Summer' => 3][Setting::get('current_semester', '')] ?? null;
             if ($schoolYear === '' || ! $semester) {
@@ -139,7 +142,13 @@ class TimetableController extends Controller
                 throw ValidationException::withMessages(['timetable' => 'This program and year have no curriculum subjects for the configured semester. Add the curriculum first.']);
             }
             if ($intent === 'import' && $request->input('action') === 'preview') {
-                $draft->proposals = collect($service->review($draft, $data['rows']))->sortBy('subject_id')->values()->all();
+                $reviewed = $service->review($draft, $data['rows']);
+                foreach ($reviewed as &$row) {
+                    if (! empty($importIssues[$row['subject_id']])) {
+                        $row['issue'] = $importIssues[$row['subject_id']];
+                    }
+                }
+                $draft->proposals = collect($reviewed)->sortBy('subject_id')->values()->all();
 
                 return $draft;
             }
@@ -191,8 +200,11 @@ class TimetableController extends Controller
     public function update(Request $request, TimetableDraft $draft, TimetableService $service)
     {
         $preview = $request->input('action') === 'import';
+        $importIssues = [];
         if ($preview) {
-            $request->merge(['action' => 'review', 'rows' => $this->csvRows($request)]);
+            $rows = $this->csvRows($request);
+            $importIssues = collect($rows)->mapWithKeys(fn ($row) => [$row['subject_id'] => $row['_import_issue'] ?? null])->all();
+            $request->merge(['action' => 'review', 'rows' => $rows]);
         }
         $data = $request->validate([
             'action' => ['required', 'in:generate,review,publish,clear'],
@@ -200,7 +212,7 @@ class TimetableController extends Controller
             'confirmed' => ['exclude_unless:action,clear', 'required', 'accepted'],
             'rows' => ['exclude_if:action,clear,publish', 'required', 'array', 'max:100'],
         ] + $this->rowRules());
-        $previewRows = $service->locked(function () use ($draft, $service, $data, $request, $preview) {
+        $previewRows = $service->locked(function () use ($draft, $service, $data, $request, $preview, $importIssues) {
             $draft = TimetableDraft::whereKey($draft->id)->lockForUpdate()->firstOrFail();
             if ($draft->status !== 'draft') {
                 throw ValidationException::withMessages(['timetable' => 'Published timetables cannot be regenerated or edited.']);
@@ -224,7 +236,14 @@ class TimetableController extends Controller
                 throw ValidationException::withMessages(['timetable' => 'Include every curriculum subject exactly once.']);
             }
             if ($preview) {
-                return collect($service->review($draft, $rows))->sortBy('subject_id')->values()->all();
+                $reviewed = $service->review($draft, $rows);
+                foreach ($reviewed as &$row) {
+                    if (! empty($importIssues[$row['subject_id']])) {
+                        $row['issue'] = $importIssues[$row['subject_id']];
+                    }
+                }
+
+                return collect($reviewed)->sortBy('subject_id')->values()->all();
             }
             $requirements = [];
             foreach ($rows as $row) {
@@ -260,6 +279,7 @@ class TimetableController extends Controller
                 throw ValidationException::withMessages(['csv' => 'Use the exported CSV template without changing its column headings.']);
             }
             $rows = [];
+            $resources = TimetableResource::all();
             while (($values = fgetcsv($file, escape: '\\')) !== false) {
                 if ($values === [null]) {
                     continue;
@@ -267,7 +287,27 @@ class TimetableController extends Controller
                 if (count($values) !== count($header) || count($rows) >= 100) {
                     throw ValidationException::withMessages(['csv' => 'CSV rows must contain all eight columns, with at most 100 subjects.']);
                 }
-                $rows[] = array_combine($header, array_map(fn ($value) => trim((string) $value) === '' ? null : trim((string) $value), $values));
+                $row = array_combine($header, array_map(fn ($value) => trim((string) $value) === '' ? null : trim((string) $value), $values));
+                foreach (['instructor_id' => 'instructor', 'room_id' => 'room'] as $column => $kind) {
+                    $value = $row[$column];
+                    if ($value === null || ($kind === 'room' && $value === 'demo-room') || ($kind === 'instructor' && $value === 'demo-instructor')) {
+                        continue;
+                    }
+                    $resource = $resources->first(fn ($candidate) => $candidate->kind === $kind && (string) $candidate->id === $value);
+                    if (! $resource) {
+                        $matches = $resources->filter(
+                            fn ($candidate) => $candidate->kind === $kind && mb_strtoupper(trim($candidate->name)) === mb_strtoupper($value)
+                        );
+                        $resource = $matches->count() === 1 ? $matches->first() : null;
+                        if ($matches->count() > 1) {
+                            $row['_import_issue'] = trim(($row['_import_issue'] ?? '').' More than one '.$kind.' matches “'.$value.'”. Choose the correct resource in the draft.');
+                        } elseif (! $resource) {
+                            $row['_import_issue'] = trim(($row['_import_issue'] ?? '').' No '.$kind.' matches “'.$value.'”. Choose an active resource in the draft.');
+                        }
+                    }
+                    $row[$column] = $resource ? (string) $resource->id : null;
+                }
+                $rows[] = $row;
             }
         } finally {
             fclose($file);
@@ -280,8 +320,8 @@ class TimetableController extends Controller
     {
         return [
             'rows.*.subject_id' => ['required', 'integer'],
-            'rows.*.instructor_id' => ['nullable', 'string', 'max:30'],
-            'rows.*.room_id' => ['nullable', 'string', 'max:30'],
+            'rows.*.instructor_id' => ['nullable', 'string', 'max:50'],
+            'rows.*.room_id' => ['nullable', 'string', 'max:50'],
             'rows.*.pattern' => ['nullable', Rule::in(TimetableService::PATTERNS)],
             'rows.*.minutes' => ['nullable', 'integer', 'between:30,480', 'multiple_of:30'],
             'rows.*.facility' => ['nullable', Rule::in(TimetableService::FACILITIES)],

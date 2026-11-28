@@ -360,7 +360,7 @@
 .dtc-modal-footer {
     text-align: center;
     font-size: 10.5px;
-    color: #94A3B8;
+    color: #64748B;
     padding: 12px 28px 18px;
     margin: 0;
 }
@@ -496,7 +496,7 @@ body.dtc-dark .dtc-modal-submit:hover {
 }
 
 body.dtc-dark .dtc-modal-footer {
-    color: #64748B;
+    color: #A8B5C9;
 }
 
 /* ── Reduced motion ──────────────────────────────────────── */

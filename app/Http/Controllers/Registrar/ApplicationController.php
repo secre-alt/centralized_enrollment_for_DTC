@@ -39,7 +39,12 @@ class ApplicationController extends Controller
                 'submitted', 'under_review', 'revision_required', 'approved', 'rejected', 'cancelled',
             ])],
             'program_id' => ['nullable', 'integer', 'exists:programs,id'],
+            'duplicate_review' => ['nullable', Rule::in(['pending', 'reviewed'])],
         ] + \App\Support\ListDateRange::rules($request));
+
+        $possibleDuplicateIds = ($filters['duplicate_review'] ?? null) === 'pending'
+            ? $this->possibleDuplicateApplicationIds()
+            : collect();
 
         $applications = Application::with(['program', 'user', 'reviewer', 'documents'])
             ->when(isset($filters['search']), function ($query) use ($filters) {
@@ -59,6 +64,12 @@ class ApplicationController extends Controller
             })
             ->when($filters['program_id'] ?? null, function ($query, $programId) {
                 $query->where('program_id', $programId);
+            })
+            ->when(($filters['duplicate_review'] ?? null) === 'pending', function ($query) use ($possibleDuplicateIds) {
+                $query->whereIn('applications.id', $possibleDuplicateIds)->whereNull('duplicate_review_outcome');
+            })
+            ->when(($filters['duplicate_review'] ?? null) === 'reviewed', function ($query) {
+                $query->whereNotNull('duplicate_review_outcome');
             })
             ->tap(fn ($query) => \App\Support\ListDateRange::apply($query, $filters, 'applications.created_at'))
             ->latest()
@@ -124,30 +135,60 @@ class ApplicationController extends Controller
             })
             ->get()
             ->filter(function (Application $candidate) use ($application) {
-                $sameEmail = filled($application->email) && mb_strtolower(trim($application->email)) === mb_strtolower(trim($candidate->email));
-                $phone = fn ($value) => preg_replace('/\D+/', '', (string) $value);
-                $samePhone = filled($application->phone) && $phone($application->phone) !== '' && $phone($application->phone) === $phone($candidate->phone);
-                $address = fn ($value) => mb_strtolower(preg_replace('/\s+/u', ' ', trim((string) $value)) ?? '');
-                $sameAddress = filled($application->current_address) && $address($application->current_address) === $address($candidate->current_address);
-
-                if (!$sameEmail && !$samePhone && !$sameAddress) {
+                $reasons = $this->duplicateContactMatchReasons($application, $candidate);
+                if (!$reasons) {
                     return false;
                 }
 
-                $reasons = ['Same normalized name', 'Same birthdate'];
-                if ($sameEmail) {
-                    $reasons[] = 'Same email';
-                }
-                if ($samePhone) {
-                    $reasons[] = 'Same phone';
-                }
-                if ($sameAddress) {
-                    $reasons[] = 'Same residential address';
-                }
-                $candidate->setAttribute('duplicate_match_reasons', $reasons);
+                $candidate->setAttribute('duplicate_match_reasons', array_merge(['Same normalized name', 'Same birthdate'], $reasons));
 
                 return true;
             })->values();
+    }
+
+    private function possibleDuplicateApplicationIds()
+    {
+        $groups = Application::query()->whereNotNull('birthdate')
+            ->get(['id', 'first_name', 'middle_name', 'last_name', 'birthdate', 'email', 'phone', 'current_address'])
+            ->groupBy(fn (Application $application) => implode('|', [
+                mb_strtolower(trim((string) $application->first_name)),
+                mb_strtolower(trim((string) $application->middle_name)),
+                mb_strtolower(trim((string) $application->last_name)),
+                $application->birthdate->toDateString(),
+            ]));
+
+        $matches = collect();
+        foreach ($groups as $group) {
+            for ($left = 0; $left < $group->count(); $left++) {
+                for ($right = $left + 1; $right < $group->count(); $right++) {
+                    if ($this->duplicateContactMatchReasons($group[$left], $group[$right])) {
+                        $matches->push($group[$left]->id, $group[$right]->id);
+                    }
+                }
+            }
+        }
+
+        return $matches->unique()->values();
+    }
+
+    private function duplicateContactMatchReasons(Application $application, Application $candidate): array
+    {
+        $reasons = [];
+        if (filled($application->email) && mb_strtolower(trim($application->email)) === mb_strtolower(trim($candidate->email))) {
+            $reasons[] = 'Same email';
+        }
+
+        $phone = fn ($value) => preg_replace('/\D+/', '', (string) $value);
+        if (filled($application->phone) && $phone($application->phone) !== '' && $phone($application->phone) === $phone($candidate->phone)) {
+            $reasons[] = 'Same phone';
+        }
+
+        $address = fn ($value) => mb_strtolower(preg_replace('/\s+/u', ' ', trim((string) $value)) ?? '');
+        if (filled($application->current_address) && $address($application->current_address) === $address($candidate->current_address)) {
+            $reasons[] = 'Same residential address';
+        }
+
+        return $reasons;
     }
 
     public function startReview(Application $application)
