@@ -147,7 +147,7 @@ class AppointmentFlowTest extends TestCase
     // Student — Booking
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_can_submit_a_walk_in_document_without_an_appointment(): void
     {
         $owner = $this->makeUserWithRole('student');
@@ -160,7 +160,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertDatabaseCount('appointments', 0);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_can_submit_multiple_standalone_documents_and_copies(): void
     {
         $owner = $this->makeUserWithRole('student');
@@ -175,7 +175,7 @@ class AppointmentFlowTest extends TestCase
         $this->get(route('portal.documents.index'))->assertOk()->assertSee('Transcript of Records')->assertSee('Diploma')->assertSee('Certification');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_submit_duplicate_document_types_in_a_combined_booking()
     {
         $student = $this->makeUserWithRole('student');
@@ -194,7 +194,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertDatabaseCount('document_requests', 0);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_mix_legacy_and_combined_document_fields()
     {
         $student = $this->makeUserWithRole('student');
@@ -211,7 +211,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertDatabaseCount('document_requests', 0);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_verifies_one_bundle_payment_for_all_linked_student_documents()
     {
         $student = $this->makeUserWithRole('student');
@@ -247,7 +247,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame(2, $appointment->documentRequests()->where('is_paid', true)->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_can_reject_and_student_can_resubmit_a_combined_gcash_payment()
     {
         $student = $this->makeUserWithRole('student');
@@ -293,7 +293,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame(2, $appointment->documentRequests()->where('payment_status', 'pending_verification')->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_cannot_verify_or_reject_a_bundled_gcash_payment()
     {
         $student = $this->makeUserWithRole('student');
@@ -324,7 +324,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('pending_verification', $appointment->documentRequests()->firstOrFail()->payment_status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_can_reconcile_a_gcash_bundle_after_the_appointment_is_cancelled()
     {
         $student = $this->makeUserWithRole('student');
@@ -381,7 +381,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('DTC-CANCEL-BUNDLE-001', $documentRequest->fresh()->receipt_no);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function confirming_a_new_document_appointment_takes_registrar_to_the_request_for_processing()
     {
         $student = $this->makeUserWithRole('student');
@@ -426,7 +426,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('confirmed', $appointment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_document_status_notification_opens_their_appointments_and_shows_the_update()
     {
         $student = $this->makeUserWithRole('student');
@@ -461,7 +461,7 @@ class AppointmentFlowTest extends TestCase
             ->assertSee('Transcript of Records');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_can_submit_a_standalone_gcash_proof(): void
     {
         $owner = $this->makeUserWithRole('student');
@@ -477,7 +477,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertDatabaseCount('appointment_payments', 0);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_cannot_confirm_a_gcash_appointment_payment_when_its_proof_is_missing()
     {
         $student = $this->makeUserWithRole('student');
@@ -517,7 +517,7 @@ class AppointmentFlowTest extends TestCase
             ->assertDontSee('The submitted payment proof is unavailable.');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function gcash_submission_requires_reference_number_and_proof()
     {
         $student = $this->makeUserWithRole('student');
@@ -533,7 +533,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertDatabaseMissing('appointments', ['user_id' => $student->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cashier_can_verify_walk_in_payment_for_a_student_document_request()
     {
         $student = $this->makeUserWithRole('student');
@@ -561,7 +561,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('DTC-OR-WI-001', $documentRequest->fresh()->receipt_no);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_submission_does_not_use_full_slots()
     {
         $student = $this->makeUserWithRole('student');
@@ -583,7 +583,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertDatabaseMissing('appointments', ['user_id' => $student->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_submission_does_not_rebook_an_existing_slot()
     {
         $student = $this->makeUserWithRole('student');
@@ -605,7 +605,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame(1, Appointment::where('user_id', $student->id)->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function document_type_must_be_a_valid_option()
     {
         $student = $this->makeUserWithRole('student');
@@ -622,7 +622,7 @@ class AppointmentFlowTest extends TestCase
     // Student — GCash Post-Booking Submission
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_can_submit_gcash_proof_after_booking()
     {
         $student     = $this->makeUserWithRole('student');
@@ -645,7 +645,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('pending', $payment->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_submit_gcash_while_one_is_pending()
     {
         $student     = $this->makeUserWithRole('student');
@@ -667,7 +667,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame(1, $appointment->payments()->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_submit_gcash_for_another_students_appointment()
     {
         $student     = $this->makeUserWithRole('student');
@@ -685,7 +685,7 @@ class AppointmentFlowTest extends TestCase
     // Student — Cancellation
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_can_cancel_their_own_pending_appointment()
     {
         $student     = $this->makeUserWithRole('student');
@@ -701,7 +701,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('cancelled', $appointment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cancelling_an_appointment_cancels_only_a_submitted_linked_request_and_preserves_payment_history()
     {
         $student = $this->makeUserWithRole('student');
@@ -738,7 +738,7 @@ class AppointmentFlowTest extends TestCase
             ->assertDontSee('Update Request Status');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_history_keeps_active_document_requests_visible_when_pickup_appointment_is_cancelled()
     {
         $student = $this->makeUserWithRole('student');
@@ -781,7 +781,7 @@ class AppointmentFlowTest extends TestCase
             ->assertSee('data-groups="progress cancelled"', false);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_history_places_cancelled_document_requests_in_cancelled_filter()
     {
         $student = $this->makeUserWithRole('student');
@@ -811,7 +811,7 @@ class AppointmentFlowTest extends TestCase
             ->assertSee('Transcript of Records');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_cancellation_preserves_processing_ready_and_released_linked_requests()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -835,7 +835,7 @@ class AppointmentFlowTest extends TestCase
         }
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function repeated_appointment_cancellation_does_not_create_duplicate_staff_or_cashier_notices()
     {
         $student = $this->makeUserWithRole('student');
@@ -857,7 +857,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame(1, UserNotification::where('user_id', $cashier->id)->where('title', 'Appointment Cancelled for Document Request')->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_cancel_a_confirmed_appointment()
     {
         $student     = $this->makeUserWithRole('student');
@@ -870,7 +870,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('confirmed', $appointment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_see_or_submit_cancel_for_released_document_requests()
     {
         $student = $this->makeUserWithRole('student');
@@ -904,7 +904,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('pending', $appointment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_cancel_another_students_appointment()
     {
         $student     = $this->makeUserWithRole('student');
@@ -922,7 +922,7 @@ class AppointmentFlowTest extends TestCase
     // Registrar — Confirm & Cancel
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_confirm_a_pending_appointment()
     {
         $registrar   = $this->makeUserWithRole('registrar');
@@ -940,7 +940,7 @@ class AppointmentFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_index_hides_confirm_action_for_past_slot_bookings()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -964,7 +964,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertFalse($appointment->canBeConfirmed());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_index_hides_confirm_action_when_linked_pickup_payment_is_unpaid()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1000,7 +1000,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('pending', $appointment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function confirming_a_document_pickup_tells_the_alumnus_what_to_do_next()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1044,7 +1044,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame($appointment->id, $request->fresh()->appointment_id);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function ready_document_is_collected_without_creating_a_new_pickup_appointment()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1073,7 +1073,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertDatabaseCount('appointments', 0);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function confirming_a_legacy_booking_links_the_single_matching_ready_request()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1107,7 +1107,7 @@ class AppointmentFlowTest extends TestCase
             ->assertSee('Confirmed');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_cancel_an_appointment_with_a_reason()
     {
         $registrar   = $this->makeUserWithRole('registrar');
@@ -1124,7 +1124,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('Slot is no longer available.', $appointment->remarks);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cancelling_an_appointment_requires_a_reason()
     {
         $registrar   = $this->makeUserWithRole('registrar');
@@ -1137,7 +1137,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('pending', $appointment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_access_registrar_appointment_actions()
     {
         $student     = $this->makeUserWithRole('student');
@@ -1156,7 +1156,7 @@ class AppointmentFlowTest extends TestCase
     // Registrar — GCash Payment Verification
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_verify_a_pending_gcash_payment()
     {
         $registrar   = $this->makeUserWithRole('registrar');
@@ -1173,7 +1173,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertNotNull($payment->verified_at);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_cannot_verify_pending_gcash_for_a_cancelled_appointment()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1193,7 +1193,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame(1, AppointmentPayment::where('appointment_id', $appointment->id)->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_cannot_verify_a_second_payment_for_an_appointment()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1213,7 +1213,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame(1, AppointmentPayment::where('appointment_id', $appointment->id)->where('status', 'verified')->count());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_reject_a_pending_gcash_payment_with_a_reason()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1232,7 +1232,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame($registrar->id, $payment->verified_by);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function rejecting_a_gcash_payment_requires_a_reason()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1246,7 +1246,7 @@ class AppointmentFlowTest extends TestCase
         $this->assertSame('pending', $payment->fresh()->status);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cannot_verify_an_already_verified_payment()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1257,7 +1257,7 @@ class AppointmentFlowTest extends TestCase
             ->assertStatus(422);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function cannot_reject_an_already_rejected_payment()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1269,7 +1269,7 @@ class AppointmentFlowTest extends TestCase
             ])->assertStatus(422);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_verify_or_reject_payments()
     {
         $student = $this->makeUserWithRole('student');
@@ -1291,7 +1291,7 @@ class AppointmentFlowTest extends TestCase
     // Registrar — Index view
     // ─────────────────────────────────────────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_index_shows_pending_appointments_by_default()
     {
         $registrar   = $this->makeUserWithRole('registrar');
@@ -1306,7 +1306,7 @@ class AppointmentFlowTest extends TestCase
         $response->assertDontSee($confirmed->user->name);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_index_shows_pending_gcash_payments_requiring_verification()
     {
         $registrar   = $this->makeUserWithRole('registrar');
@@ -1319,7 +1319,7 @@ class AppointmentFlowTest extends TestCase
         $response->assertSee($payment->reference_number);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_index_marks_bundle_gcash_as_waiting_for_cashier_without_blocking_processing_confirmation()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -1357,7 +1357,7 @@ class AppointmentFlowTest extends TestCase
             ->assertSee('rg-booking-confirm');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_index_can_filter_by_confirmed_status()
     {
         $registrar  = $this->makeUserWithRole('registrar');

@@ -15,6 +15,7 @@ class ApplicationRejected extends Mailable
      * The rejected application record.
      */
     public Application $application;
+    public string $statusUrl;
 
     public function __construct(Application $application)
     {

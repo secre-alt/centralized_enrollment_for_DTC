@@ -34,7 +34,7 @@ class CreditedSubjectTest extends TestCase
         return compact('program', 'subject', 'enrollment');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_add_a_credited_subject()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -61,7 +61,7 @@ class CreditedSubjectTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_add_a_credited_subject()
     {
         $student = $this->makeUserWithRole('student');
@@ -75,7 +75,7 @@ class CreditedSubjectTest extends TestCase
         $this->assertDatabaseMissing('credited_subjects', ['enrollment_id' => $enrollment->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_cashier_cannot_add_a_credited_subject()
     {
         $cashier = $this->makeUserWithRole('cashier');
@@ -87,7 +87,7 @@ class CreditedSubjectTest extends TestCase
         )->assertForbidden();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_credited_subject_from_another_program_is_rejected()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -104,7 +104,7 @@ class CreditedSubjectTest extends TestCase
         $this->assertDatabaseMissing('credited_subjects', ['enrollment_id' => $enrollment->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_edit_a_credited_subject()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -129,7 +129,7 @@ class CreditedSubjectTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_edit_a_credited_subject()
     {
         $student = $this->makeUserWithRole('student');
@@ -148,7 +148,7 @@ class CreditedSubjectTest extends TestCase
         $this->assertDatabaseMissing('credited_subjects', ['equivalent_subject' => 'Hacked Value']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function registrar_can_delete_a_credited_subject()
     {
         $registrar = $this->makeUserWithRole('registrar');
@@ -166,7 +166,7 @@ class CreditedSubjectTest extends TestCase
         $this->assertDatabaseMissing('credited_subjects', ['id' => $credit->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function a_student_cannot_delete_a_credited_subject()
     {
         $student = $this->makeUserWithRole('student');
@@ -184,7 +184,7 @@ class CreditedSubjectTest extends TestCase
         $this->assertDatabaseHas('credited_subjects', ['id' => $credit->id]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function adding_a_credited_subject_does_not_change_the_cor_total_units_or_subject_list()
     {
         $registrar = $this->makeUserWithRole('registrar');

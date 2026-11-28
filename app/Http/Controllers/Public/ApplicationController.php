@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Mail\ApplicationSubmitted;
+use App\Mail\ApplicationEmailChangeVerification;
 use App\Models\Application;
 use App\Models\ApplicationDocument;
+use App\Models\ApplicationEmailChange;
 use App\Models\Program;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -766,7 +769,7 @@ class ApplicationController extends Controller
             }
 
             try {
-                Mail::to($application->email)->send(new ApplicationSubmitted($application));
+                Mail::to($application->email)->send(new ApplicationSubmitted($application, $this->applicationStatusEmailUrl($application)));
             } catch (\Throwable $mailException) {
                 Log::warning('Application reference email could not be sent.', [
                     'application_id' => $application->id,
@@ -818,7 +821,156 @@ class ApplicationController extends Controller
      */
     public function statusForm()
     {
-        return view('public.application.status');
+        return view('public.application.status', [
+            'referenceNo' => old('reference_no'),
+            'email' => old('email'),
+        ]);
+    }
+
+    /** Open status from an expiring, email-bound link without exposing the address. */
+    public function statusFromEmail(Request $request, Application $application)
+    {
+        abort_unless(hash_equals(
+            hash_hmac('sha256', strtolower(trim($application->email)), (string) config('app.key')),
+            (string) $request->query('email_hash')
+        ), 403);
+
+        return $this->showApplicationStatus($application, true)
+            ->header('Cache-Control', 'private, no-store, max-age=0');
+    }
+
+    public function requestEmailCorrection(Request $request, Application $application)
+    {
+        abort_unless(hash_equals(
+            hash_hmac('sha256', strtolower(trim($application->email)), (string) config('app.key')),
+            (string) $request->query('email_hash')
+        ), 403);
+
+        $validated = $request->validate(['new_email' => ['required', 'email', 'max:255']]);
+        $newEmail = trim($validated['new_email']);
+        if (strcasecmp($newEmail, $application->email) === 0) {
+            return back()->withErrors(['new_email' => 'Enter an email address different from the one currently on the application.']);
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $emailChange = DB::transaction(function () use ($application, $newEmail, $token) {
+            $locked = Application::whereKey($application->id)->lockForUpdate()->firstOrFail();
+            if ($locked->status !== 'revision_required' || $locked->user_id !== null) {
+                return null;
+            }
+
+            $locked->emailChanges()->whereNull('verified_at')->where('expires_at', '>', now())->update(['expires_at' => now()]);
+
+            return $locked->emailChanges()->create([
+                'old_email' => $locked->email,
+                'new_email' => $newEmail,
+                'token_hash' => hash('sha256', $token),
+                'expires_at' => now()->addHour(),
+                'previous_remarks' => $locked->remarks,
+                'previous_reviewed_by' => $locked->reviewed_by,
+                'previous_reviewed_at' => $locked->reviewed_at,
+            ]);
+        });
+
+        if (! $emailChange) {
+            return redirect()->route('public.application.status.form')
+                ->with('error', 'This application is no longer eligible for an email correction.');
+        }
+
+        $url = route('public.application.status.email-change.confirm', [$emailChange, $token]);
+        try {
+            Mail::to($newEmail)->send(new ApplicationEmailChangeVerification($emailChange->load('application'), $url));
+        } catch (\Throwable $exception) {
+            Log::warning('Application email change verification delivery failed.', [
+                'application_id' => $application->id,
+                'email_change_id' => $emailChange->id,
+                'exception' => get_class($exception),
+            ]);
+
+            return back()->with('warning', 'We could not send the verification email. Check the address and try again.');
+        }
+
+        return back()->with('success', 'Check the new email inbox and verify the address to resubmit your application.');
+    }
+
+    public function confirmEmailCorrection(ApplicationEmailChange $emailChange, string $token)
+    {
+        abort_unless($this->validEmailChange($emailChange, $token), 404);
+
+        return response()->view('public.application.email-change-confirm', compact('emailChange', 'token'))
+            ->header('Cache-Control', 'private, no-store, max-age=0');
+    }
+
+    public function completeEmailCorrection(ApplicationEmailChange $emailChange, string $token)
+    {
+        $application = DB::transaction(function () use ($emailChange, $token) {
+            $change = ApplicationEmailChange::whereKey($emailChange->id)->lockForUpdate()->firstOrFail();
+            if (! $this->validEmailChange($change, $token)) {
+                return null;
+            }
+
+            $locked = Application::whereKey($change->application_id)->lockForUpdate()->firstOrFail();
+            if ($locked->status !== 'revision_required' || $locked->user_id !== null || $locked->email !== $change->old_email) {
+                return null;
+            }
+
+            $locked->update(['email' => $change->new_email, 'status' => 'submitted']);
+            $change->update(['verified_at' => now()]);
+            ApplicationEmailChange::where('application_id', $locked->id)
+                ->whereKeyNot($change->id)
+                ->whereNull('verified_at')
+                ->update(['expires_at' => now()]);
+
+            return $locked->fresh();
+        });
+
+        if (! $application) {
+            return redirect()->route('public.application.status.form')
+                ->with('error', 'This verification link is invalid, expired, or no longer applies to the application.');
+        }
+
+        try {
+            Mail::to($application->email)->send(new ApplicationSubmitted($application, $this->applicationStatusEmailUrl($application)));
+        } catch (\Throwable $exception) {
+            Log::warning('Application resubmission email delivery failed.', [
+                'application_id' => $application->id,
+                'exception' => get_class($exception),
+            ]);
+        }
+
+        try {
+            foreach (User::role(['registrar', 'admin'])->get() as $staff) {
+                NotificationService::sendForEvent(
+                    $staff,
+                    'application-email-correction:' . $emailChange->id,
+                    'Application Resubmitted',
+                    "Application {$application->reference_no} has verified an updated email address and is ready for review.",
+                    'info',
+                    route('registrar.applications.show', $application)
+                );
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('Application resubmission staff notification failed.', [
+                'application_id' => $application->id,
+                'email_change_id' => $emailChange->id,
+                'exception' => get_class($exception),
+            ]);
+        }
+
+        return redirect()->route('public.application.status.form')
+            ->with('success', 'Your email was verified and the application was resubmitted for Registrar review.');
+    }
+
+    private function validEmailChange(ApplicationEmailChange $emailChange, string $token): bool
+    {
+        $emailChange->loadMissing('application');
+
+        return $emailChange->verified_at === null
+            && $emailChange->expires_at->isFuture()
+            && hash_equals($emailChange->token_hash, hash('sha256', $token))
+            && $emailChange->application?->status === 'revision_required'
+            && $emailChange->application?->user_id === null
+            && $emailChange->application?->email === $emailChange->old_email;
     }
 
     /**
@@ -859,15 +1011,39 @@ class ApplicationController extends Controller
                 ]);
         }
 
-        $enrollment = $application->getEnrollmentForProgress();
+        return $this->showApplicationStatus($application);
+    }
 
-        return view('public.application.status', [
+    private function showApplicationStatus(Application $application, bool $canCorrectEmail = false)
+    {
+        $application->loadMissing(['program', 'documents', 'user.studentProfile', 'user.enrollments.payment']);
+        $enrollment = $application->getEnrollmentForProgress();
+        $canCorrectEmail = $canCorrectEmail && $application->status === 'revision_required' && $application->user_id === null;
+
+        return response()->view('public.application.status', [
             'application' => $application,
             'enrollment' => $enrollment,
             'progressTimeline' => $application->getProgressTimeline($enrollment),
-            'nextStep' => $application->getStatusNextStep($enrollment),
+            'nextStep' => $application->status === 'revision_required' && ! $canCorrectEmail
+                ? 'Review the Registrar remarks and contact the Registrar about the requested correction. Email corrections are available through the current link in your notification email.'
+                : $application->getStatusNextStep($enrollment),
+            'canCorrectEmail' => $canCorrectEmail,
+            'emailCorrectionUrl' => $canCorrectEmail
+                ? URL::temporarySignedRoute('public.application.status.email-correction', now()->addDays(7), [
+                    'application' => $application->id,
+                    'email_hash' => hash_hmac('sha256', strtolower(trim($application->email)), (string) config('app.key')),
+                ])
+                : null,
             'physicalRequirements' =>
                 self::PHYSICAL_REQUIREMENTS[$application->academic_status] ?? [],
+        ]);
+    }
+
+    private function applicationStatusEmailUrl(Application $application): string
+    {
+        return URL::temporarySignedRoute('public.application.status.email', now()->addDays(7), [
+            'application' => $application->id,
+            'email_hash' => hash_hmac('sha256', strtolower(trim($application->email)), (string) config('app.key')),
         ]);
     }
 

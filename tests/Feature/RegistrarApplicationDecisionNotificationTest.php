@@ -111,6 +111,55 @@ class RegistrarApplicationDecisionNotificationTest extends TestCase
         $this->assertSame(1, UserNotification::where('title', 'Application Rejected')->count());
     }
 
+    public function test_registrar_can_resend_revision_email_without_changing_application_or_notifications(): void
+    {
+        Mail::fake();
+        $registrar = $this->makeUserWithRole('registrar');
+        $applicant = $this->makeUserWithRole('student');
+        $application = $this->makeApplication([
+            'user_id' => $applicant->id,
+            'status' => 'revision_required',
+            'remarks' => 'Change your email address.',
+        ]);
+        $noticeCount = UserNotification::count();
+
+        $this->actingAs($registrar)
+            ->post(route('registrar.applications.resend-email', $application))
+            ->assertRedirect(route('registrar.applications.show', $application))
+            ->assertSessionHas('success');
+
+        Mail::assertSent(ApplicationRevisionRequired::class, fn ($mail) => $mail->application->is($application));
+        $this->assertSame('revision_required', $application->fresh()->status);
+        $this->assertSame('Change your email address.', $application->fresh()->remarks);
+        $this->assertSame($noticeCount, UserNotification::count());
+    }
+
+    public function test_admin_can_resend_rejection_email_and_invalid_states_are_rejected(): void
+    {
+        Mail::fake();
+        $admin = $this->makeUserWithRole('admin');
+        $rejected = $this->makeApplication(['status' => 'rejected', 'remarks' => 'Incomplete.']);
+        $this->actingAs($admin)
+            ->post(route('registrar.applications.resend-email', $rejected))
+            ->assertSessionHas('success');
+        Mail::assertSent(\App\Mail\ApplicationRejected::class);
+
+        $submitted = $this->makeApplication(['status' => 'submitted']);
+        $this->post(route('registrar.applications.resend-email', $submitted))
+            ->assertSessionHas('error');
+        Mail::assertSent(\App\Mail\ApplicationRejected::class, 1);
+    }
+
+    public function test_student_cannot_resend_application_email(): void
+    {
+        $student = $this->makeUserWithRole('student');
+        $application = $this->makeApplication(['status' => 'revision_required']);
+
+        $this->actingAs($student)
+            ->post(route('registrar.applications.resend-email', $application))
+            ->assertForbidden();
+    }
+
     private function makeApplication(array $attributes = []): Application
     {
         $program = Program::factory()->create();

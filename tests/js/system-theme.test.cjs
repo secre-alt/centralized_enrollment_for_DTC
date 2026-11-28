@@ -15,6 +15,7 @@ function setup(saved = null, dark = false, blocked = false) {
         },
         window: { matchMedia: () => media, addEventListener(type, handler) { onStorage = handler; } },
         document: {
+            addEventListener() {},
             documentElement: { classList: { toggle(key, enabled) { enabled ? classes.add(key) : classes.delete(key); }, remove() {} } },
             body: { classList: { toggle() {} } }, getElementById: () => null, dispatchEvent() {},
         },

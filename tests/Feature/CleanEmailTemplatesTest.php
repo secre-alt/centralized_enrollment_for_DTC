@@ -40,9 +40,9 @@ class CleanEmailTemplatesTest extends TestCase
                 'eventMessage' => '<script>untrusted</script>', 'actionUrl' => $url, 'actionLabel' => 'View payment'], ['Payment recorded', '&lt;script&gt;untrusted&lt;/script&gt;', $url]],
             ['application-approved', ['application' => $application, 'setupUrl' => $url, 'expiresInMinutes' => 60], ['APP-EMAIL-123', 'test@example.test', '60 minutes', $url]],
             ['reset-password', ['email' => 'test@example.test', 'resetUrl' => $url, 'expiresInMinutes' => 60], ['test@example.test', '60 minutes', 'Your password will stay unchanged.', $url]],
-            ['application-submitted', ['referenceNo' => 'APP-EMAIL-123'], ['APP-EMAIL-123', 'Submission is not approval.']],
-            ['application-revision-required', ['application' => $application], ['APP-EMAIL-123', 'Registrar', '&lt;script&gt;alert(1)&lt;/script&gt;']],
-            ['application-rejected', ['application' => $application], ['APP-EMAIL-123', 'Reason', '&lt;script&gt;alert(1)&lt;/script&gt;']],
+            ['application-submitted', ['referenceNo' => 'APP-EMAIL-123', 'statusUrl' => $url], ['APP-EMAIL-123', 'Submission is not approval.', $url]],
+            ['application-revision-required', ['application' => $application, 'statusUrl' => $url], ['APP-EMAIL-123', 'Registrar', '&lt;script&gt;alert(1)&lt;/script&gt;', $url]],
+            ['application-rejected', ['application' => $application, 'statusUrl' => $url], ['APP-EMAIL-123', 'Reason', '&lt;script&gt;alert(1)&lt;/script&gt;', $url]],
             ['portal-account-invitation', ['profile' => $profile, 'activationUrl' => $url, 'expiresInMinutes' => 61], ['2026-12345', '61 minutes', $url]],
             ['document-request-update', ['documentRequest' => $document, 'eventMessage' => 'Ready for collection.'], ['Ready for collection.', '2 copies', 'Verified']],
         ];

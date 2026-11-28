@@ -16,7 +16,7 @@ class RequiredPasswordController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'current_password' => ['required', 'current_password:web'],
+            'current_password' => ['bail', 'required', 'string', 'current_password:web'],
             'password' => array_merge(\App\Support\SecuritySettings::passwordRules(), ['different:current_password']),
         ]);
         $user = \Illuminate\Support\Facades\DB::transaction(function () use ($request) {

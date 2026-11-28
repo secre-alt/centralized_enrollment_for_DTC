@@ -27,13 +27,13 @@ class TimetableController extends Controller
 
         return response()->streamDownload(function () use ($rows) {
             $output = fopen('php://output', 'w');
-            fputcsv($output, self::CSV_COLUMNS);
+            fputcsv($output, self::CSV_COLUMNS, escape: '\\');
             foreach ($rows as $row) {
                 fputcsv($output, array_map(function ($column) use ($row) {
                     $value = (string) ($row[$column] ?? '');
 
                     return preg_match('/^[=+@\-\t\r\n]/', $value) ? "'".$value : $value;
-                }, self::CSV_COLUMNS));
+                }, self::CSV_COLUMNS), escape: '\\');
             }
             fclose($output);
         }, 'timetable-'.$draft->id.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'private, no-store']);
@@ -252,7 +252,7 @@ class TimetableController extends Controller
         $request->validate(['csv' => ['required', 'file', 'max:256']]);
         $file = fopen($request->file('csv')->getRealPath(), 'r');
         try {
-            $header = fgetcsv($file);
+            $header = fgetcsv($file, escape: '\\');
             if ($header) {
                 $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
             }
@@ -260,7 +260,7 @@ class TimetableController extends Controller
                 throw ValidationException::withMessages(['csv' => 'Use the exported CSV template without changing its column headings.']);
             }
             $rows = [];
-            while (($values = fgetcsv($file)) !== false) {
+            while (($values = fgetcsv($file, escape: '\\')) !== false) {
                 if ($values === [null]) {
                     continue;
                 }

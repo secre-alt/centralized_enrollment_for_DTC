@@ -62,7 +62,7 @@ class DoubleEnrollmentTest extends TestCase
 
     // ── store() — double-enrollment guard ────────────────────────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_with_a_pending_enrollment_cannot_submit_another()
     {
         $student = $this->makeUserWithRole('student');
@@ -93,7 +93,7 @@ class DoubleEnrollmentTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_with_an_approved_enrollment_cannot_submit_another()
     {
         $student = $this->makeUserWithRole('student');
@@ -121,7 +121,7 @@ class DoubleEnrollmentTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_with_a_paid_approved_enrollment_cannot_submit_another()
     {
         $student = $this->makeUserWithRole('student');
@@ -148,7 +148,7 @@ class DoubleEnrollmentTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_with_only_a_rejected_enrollment_is_allowed_to_enroll_again()
     {
         $student = $this->makeUserWithRole('student');
@@ -180,7 +180,7 @@ class DoubleEnrollmentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function student_with_no_prior_enrollment_can_enroll_successfully()
     {
         $student = $this->makeUserWithRole('student');
@@ -201,7 +201,7 @@ class DoubleEnrollmentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function an_approved_enrollment_from_a_previous_term_does_not_block_the_current_term()
     {
         $student = $this->makeUserWithRole('student');
@@ -228,7 +228,7 @@ class DoubleEnrollmentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function client_semester_cannot_bypass_same_term_duplicate_guard_or_change_saved_term()
     {
         $student = $this->makeUserWithRole('student');
@@ -250,7 +250,7 @@ class DoubleEnrollmentTest extends TestCase
 
     // ── create() — double-enrollment guard (student branch) ───────────────
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function create_page_redirects_student_with_active_pending_enrollment()
     {
         $student = $this->makeUserWithRole('student');
@@ -272,7 +272,7 @@ class DoubleEnrollmentTest extends TestCase
         $response->assertOk();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function create_page_redirects_new_applicant_with_active_enrollment()
     {
         $applicant = $this->makeUserWithRole('new_applicant');

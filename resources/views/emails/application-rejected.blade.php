@@ -6,4 +6,5 @@
     <p style="margin:0;">{!! nl2br(e($application->remarks)) !!}</p>
 </div>
 <p style="margin:18px 0 0;">For questions, contact the Registrar's Office with your reference number.</p>
+@include('emails.action', ['url' => $statusUrl, 'label' => 'Check status'])
 @endcomponent

@@ -1,0 +1,2874 @@
+[
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "/",
+    "name": "landing",
+    "action": "App\\Http\\Controllers\\AuthController@showLanding",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "_ignition/execute-solution",
+    "name": "ignition.executeSolution",
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\ExecuteSolutionController",
+    "middleware": [
+      "Spatie\\LaravelIgnition\\Http\\Middleware\\RunnableSolutionsEnabled"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "_ignition/health-check",
+    "name": "ignition.healthCheck",
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\HealthCheckController",
+    "middleware": [
+      "Spatie\\LaravelIgnition\\Http\\Middleware\\RunnableSolutionsEnabled"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "_ignition/update-config",
+    "name": "ignition.updateConfig",
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\UpdateConfigController",
+    "middleware": [
+      "Spatie\\LaravelIgnition\\Http\\Middleware\\RunnableSolutionsEnabled"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "account/password",
+    "name": "account.password.edit",
+    "action": "App\\Http\\Controllers\\Auth\\RequiredPasswordController@edit",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "account/password",
+    "name": "account.password.update",
+    "action": "App\\Http\\Controllers\\Auth\\RequiredPasswordController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/dashboard",
+    "name": "admin.dashboard",
+    "action": "App\\Http\\Controllers\\Admin\\DashboardController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/programs",
+    "name": "admin.programs.index",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/programs",
+    "name": "admin.programs.store",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "admin/programs/{program}",
+    "name": "admin.programs.destroy",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@destroy",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/programs/{program}",
+    "name": "admin.programs.update",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/programs/{program}/subjects",
+    "name": "admin.programs.subjects",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@subjects",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/programs/{program}/subjects",
+    "name": "admin.programs.subjects.store",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@storeSubject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/reports/enrollment",
+    "name": "admin.reports.enrollment",
+    "action": "App\\Http\\Controllers\\Admin\\ReportController@enrollmentReport",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/reports/payment",
+    "name": "admin.reports.payment",
+    "action": "App\\Http\\Controllers\\Admin\\ReportController@paymentReport",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "admin/schedules/{schedule}",
+    "name": "admin.programs.subjects.schedule.destroy",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@destroySchedule",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings",
+    "name": "admin.settings.index",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/settings",
+    "name": "admin.settings.update",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/academic",
+    "name": "admin.settings.academic",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@academic",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/settings/academic",
+    "name": "admin.settings.academic.update",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@updateAcademic",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/audit-logs",
+    "name": "admin.settings.audit",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@auditLogs",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/backup",
+    "name": "admin.settings.backup",
+    "action": "App\\Http\\Controllers\\Admin\\BackupController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/settings/backup/create",
+    "name": "admin.settings.backup.create",
+    "action": "App\\Http\\Controllers\\Admin\\BackupController@backup",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/settings/backup/restore",
+    "name": "admin.settings.backup.restore",
+    "action": "App\\Http\\Controllers\\Admin\\BackupController@restore",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "admin/settings/backup/{backup}",
+    "name": "admin.settings.backup.delete",
+    "action": "App\\Http\\Controllers\\Admin\\BackupController@deleteBackup",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/backup/{backup}/download",
+    "name": "admin.settings.backup.download",
+    "action": "App\\Http\\Controllers\\Admin\\BackupController@download",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "admin/settings/favicon",
+    "name": "admin.settings.favicon.remove",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@removeFavicon",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/general",
+    "name": "admin.settings.general",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@general",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "admin/settings/logo",
+    "name": "admin.settings.logo.remove",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@removeLogo",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/notifications",
+    "name": "admin.settings.notifications",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@notifications",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/settings/notifications",
+    "name": "admin.settings.notifications.update",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@updateNotifications",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/payment",
+    "name": "admin.settings.payment",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@payment",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/settings/payment",
+    "name": "admin.settings.payment.update",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@updatePayment",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/settings/payment/qr",
+    "name": "admin.settings.payment.qr",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@uploadQr",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/payment/qr-preview",
+    "name": "admin.settings.payment.qr.preview",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@showGcashQr",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/settings/security",
+    "name": "admin.settings.security",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@security",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/settings/security",
+    "name": "admin.settings.security.update",
+    "action": "App\\Http\\Controllers\\Admin\\SettingsController@updateSecurity",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "admin/subjects/{subject}",
+    "name": "admin.programs.subjects.destroy",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@destroySubject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/subjects/{subject}",
+    "name": "admin.programs.subjects.update",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@updateSubject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/subjects/{subject}/schedule",
+    "name": "admin.programs.subjects.schedule.store",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@storeSchedule",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/timetables",
+    "name": "admin.timetables.store",
+    "action": "App\\Http\\Controllers\\Admin\\TimetableController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/timetables/resources",
+    "name": "admin.timetables.resources",
+    "action": "App\\Http\\Controllers\\Admin\\TimetableController@resource",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/timetables/{draft}",
+    "name": "admin.timetables.update",
+    "action": "App\\Http\\Controllers\\Admin\\TimetableController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/timetables/{draft}/csv",
+    "name": "admin.timetables.export",
+    "action": "App\\Http\\Controllers\\Admin\\TimetableController@export",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/transactions",
+    "name": "admin.transactions.index",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/transactions/{transaction}",
+    "name": "admin.transactions.show",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/users",
+    "name": "admin.users.index",
+    "action": "App\\Http\\Controllers\\Admin\\UserController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "admin/users",
+    "name": "admin.users.store",
+    "action": "App\\Http\\Controllers\\Admin\\UserController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT|PATCH",
+    "uri": "admin/users/{user}",
+    "name": "admin.users.update",
+    "action": "App\\Http\\Controllers\\Admin\\UserController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "admin/users/{user}",
+    "name": "admin.users.destroy",
+    "action": "App\\Http\\Controllers\\Admin\\UserController@destroy",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "admin/users/{user}/edit",
+    "name": "admin.users.edit",
+    "action": "App\\Http\\Controllers\\Admin\\UserController@edit",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "admin/users/{user}/reset-password",
+    "name": "admin.users.resetPassword",
+    "action": "App\\Http\\Controllers\\Admin\\UserController@resetPassword",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "adminlte/darkmode/toggle",
+    "name": "adminlte.darkmode.toggle",
+    "action": "JeroenNoten\\LaravelAdminLte\\Http\\Controllers\\DarkModeController@toggle",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "api/user",
+    "name": null,
+    "action": "Closure",
+    "middleware": [
+      "api",
+      "App\\Http\\Middleware\\Authenticate:sanctum",
+      "App\\Http\\Middleware\\EnforceAccountSession"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "apply",
+    "name": "public.application.create",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationController@create",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "apply",
+    "name": "public.application.store",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationController@store",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:application-submission"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "apply/cancel",
+    "name": "public.application.cancel",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationCancellationController@request",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:5,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "apply/locations/cities/{city}/barangays",
+    "name": "public.application.locations.barangays",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationLocationController@barangays",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "apply/locations/provinces/{province}/cities",
+    "name": "public.application.locations.cities",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationLocationController@cities",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "apply/locations/regions",
+    "name": "public.application.locations.regions",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationLocationController@regions",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "apply/locations/regions/{region}/areas",
+    "name": "public.application.locations.areas",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationLocationController@areas",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "apply/status",
+    "name": "public.application.status.form",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationController@statusForm",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "apply/status",
+    "name": "public.application.status",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationController@status",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:application-status-lookup"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "apply/success",
+    "name": "public.application.success",
+    "action": "App\\Http\\Controllers\\Public\\ApplicationController@success",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/dashboard",
+    "name": "cashier.dashboard",
+    "action": "App\\Http\\Controllers\\Cashier\\DashboardController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/document-payments",
+    "name": "cashier.document-payments.index",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/document-payments/bundles/{payment}/proof",
+    "name": "cashier.document-payments.bundles.proof",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@viewBundleProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/document-payments/bundles/{payment}/reject",
+    "name": "cashier.document-payments.bundles.reject",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@rejectBundle",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/document-payments/bundles/{payment}/verify",
+    "name": "cashier.document-payments.bundles.verify",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@verifyBundle",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/document-payments/proofs/{proof}",
+    "name": "cashier.document-payments.proofs.show",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@viewHistoricalProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/document-payments/{documentRequest}",
+    "name": "cashier.document-payments.show",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/document-payments/{documentRequest}/proof",
+    "name": "cashier.document-payments.proof",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@viewProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/document-payments/{documentRequest}/reject",
+    "name": "cashier.document-payments.reject",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@reject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/document-payments/{documentRequest}/verify-gcash",
+    "name": "cashier.document-payments.verify-gcash",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@verifyGcash",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/document-payments/{documentRequest}/verify-walk-in",
+    "name": "cashier.document-payments.verify-walk-in",
+    "action": "App\\Http\\Controllers\\Cashier\\DocumentPaymentController@verifyWalkIn",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/notifications/poll",
+    "name": "cashier.notifications.poll",
+    "action": "App\\Http\\Controllers\\NotificationController@cashierPoll",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:120,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/payments",
+    "name": "cashier.payments.index",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/payments/{enrollment}",
+    "name": "cashier.payments.show",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/payments/{enrollment}",
+    "name": "cashier.payments.store",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/payments/{enrollment}/receipt",
+    "name": "cashier.payments.receipt",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@receipt",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/payments/{payment}/confirm-refund",
+    "name": "cashier.payments.confirm-refund",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@confirmRefund",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/payments/{payment}/proof",
+    "name": "cashier.payments.proof",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@viewProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/payments/{payment}/reject",
+    "name": "cashier.payments.reject",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@reject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "cashier/payments/{payment}/verify",
+    "name": "cashier.payments.verify",
+    "action": "App\\Http\\Controllers\\Cashier\\PaymentController@verify",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/transactions",
+    "name": "cashier.transactions.index",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "cashier/transactions/{transaction}",
+    "name": "cashier.transactions.show",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:cashier|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "email/verification-notification",
+    "name": "verification.send",
+    "action": "App\\Http\\Controllers\\Auth\\EmailVerificationController@send",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:6,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "email/verify",
+    "name": "verification.notice",
+    "action": "App\\Http\\Controllers\\Auth\\EmailVerificationController@notice",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "email/verify/{id}/{hash}",
+    "name": "verification.verify",
+    "action": "App\\Http\\Controllers\\Auth\\EmailVerificationController@verify",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\ValidateSignature",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:6,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "forgot-password",
+    "name": "password.request",
+    "action": "App\\Http\\Controllers\\Auth\\ForgotPasswordController@showLinkRequestForm",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\RedirectIfAuthenticated"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "forgot-password",
+    "name": "password.email",
+    "action": "App\\Http\\Controllers\\Auth\\ForgotPasswordController@sendResetLinkEmail",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\RedirectIfAuthenticated",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:password-recovery"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "help",
+    "name": "help.index",
+    "action": "App\\Http\\Controllers\\HelpCenterController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|registrar|cashier|student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "login",
+    "name": "login",
+    "action": "App\\Http\\Controllers\\AuthController@showLogin",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\RedirectIfAuthenticated"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "login",
+    "name": null,
+    "action": "App\\Http\\Controllers\\AuthController@login",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\RedirectIfAuthenticated"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "logout",
+    "name": "logout",
+    "action": "App\\Http\\Controllers\\AuthController@logout",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "logout",
+    "name": "logout.confirm",
+    "action": "App\\Http\\Controllers\\AuthController@confirmLogout",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "notifications",
+    "name": "notifications.index",
+    "action": "App\\Http\\Controllers\\NotificationController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "notifications/mark-all-read",
+    "name": "notifications.markAllRead",
+    "action": "App\\Http\\Controllers\\NotificationController@markAllRead",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "notifications/poll",
+    "name": "notifications.poll",
+    "action": "App\\Http\\Controllers\\NotificationController@poll",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:120,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "notifications/read",
+    "name": "notifications.destroyRead",
+    "action": "App\\Http\\Controllers\\NotificationController@destroyRead",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "notifications/student-welcome",
+    "name": "notifications.student-welcome",
+    "action": "App\\Http\\Controllers\\NotificationController@studentWelcome",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:120,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "notifications/{notification}",
+    "name": "notifications.destroy",
+    "action": "App\\Http\\Controllers\\NotificationController@destroy",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "notifications/{notification}/open",
+    "name": "notifications.open",
+    "action": "App\\Http\\Controllers\\NotificationController@open",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "notifications/{notification}/read",
+    "name": "notifications.read",
+    "action": "App\\Http\\Controllers\\NotificationController@markRead",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "notifications/{notification}/state",
+    "name": "notifications.state",
+    "action": "App\\Http\\Controllers\\NotificationController@updateState",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal-activation",
+    "name": "portal.activation.store",
+    "action": "App\\Http\\Controllers\\PortalActivationController@store",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:10,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal-activation/{token}",
+    "name": "portal.activation.show",
+    "action": "App\\Http\\Controllers\\PortalActivationController@show",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:20,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/application",
+    "name": "portal.application.show",
+    "action": "App\\Http\\Controllers\\Portal\\ApplicationController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/appointments",
+    "name": "portal.appointments.store",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni",
+      "App\\Http\\Middleware\\DocumentSubmissionCommand"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/appointments",
+    "name": "portal.appointments.index",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/appointments/create",
+    "name": "portal.appointments.create",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@create",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/appointments/document-requests/{documentRequest}/payment/gcash",
+    "name": "portal.appointments.document-payment.gcash",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@submitDocumentGcash",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/appointments/document-requests/{documentRequest}/payment/proof",
+    "name": "portal.appointments.document-payment.proof",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@viewDocumentProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/appointments/payment/gcash-qr",
+    "name": "portal.appointments.gcash.qr",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@showGcashQr",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/appointments/payment/proof/{payment}",
+    "name": "portal.appointments.payment.proof",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@viewProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "portal/appointments/{appointment}",
+    "name": "portal.appointments.update",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni",
+      "App\\Http\\Middleware\\AppointmentLifecycleCommand:appointment.updated"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/appointments/{appointment}/bundle-payment/gcash",
+    "name": "portal.appointments.bundle-payment.gcash",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@submitBundleGcash",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/appointments/{appointment}/cancel",
+    "name": "portal.appointments.cancel",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@cancel",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni",
+      "App\\Http\\Middleware\\AppointmentLifecycleCommand:appointment.cancelled"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/appointments/{appointment}/edit",
+    "name": "portal.appointments.edit",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@edit",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/appointments/{appointment}/payment/gcash",
+    "name": "portal.appointments.payment.gcash",
+    "action": "App\\Http\\Controllers\\Student\\AppointmentController@submitGcash",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/claiming-appointments",
+    "name": "portal.claiming-appointments.index",
+    "action": "App\\Http\\Controllers\\ClaimingAppointmentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/claiming-appointments",
+    "name": "portal.claiming-appointments.store",
+    "action": "App\\Http\\Controllers\\ClaimingAppointmentController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni",
+      "App\\Http\\Middleware\\AppointmentLifecycleCommand:claim.booked"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/cor",
+    "name": "portal.cor.show",
+    "action": "App\\Http\\Controllers\\Portal\\CorController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/cor/download",
+    "name": "portal.cor.download",
+    "action": "App\\Http\\Controllers\\Portal\\CorController@download",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/dashboard",
+    "name": "portal.dashboard",
+    "action": "App\\Http\\Controllers\\PortalDashboardController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/documents",
+    "name": "portal.documents.index",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/documents",
+    "name": "portal.documents.store",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni",
+      "App\\Http\\Middleware\\DocumentSubmissionCommand"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/documents/create",
+    "name": "portal.documents.create",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@create",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/documents/gcash-qr",
+    "name": "portal.documents.gcash.qr",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@showGcashQr",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/documents/{documentRequest}/payment",
+    "name": "portal.documents.payment.submit",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@submitPayment",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/documents/{documentRequest}/payment/gcash",
+    "name": "portal.documents.payment.gcash",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@submitStudentPayment",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni",
+      "App\\Http\\Middleware\\RoleMiddleware:student"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/documents/{documentRequest}/pickup-appointment",
+    "name": "portal.documents.pickup-appointment",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@bookPickup",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni",
+      "App\\Http\\Middleware\\AppointmentLifecycleCommand:legacy.pickup_booked"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/documents/{documentRequest}/proof",
+    "name": "portal.documents.payment.proof",
+    "action": "App\\Http\\Controllers\\Alumni\\DocumentRequestController@viewProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/enrollment",
+    "name": "portal.enrollment.store",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/enrollment",
+    "name": "portal.enrollment.index",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/enrollment/create",
+    "name": "portal.enrollment.create",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@create",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/enrollment/replacement-requests/{replacementRequest}/refund",
+    "name": "portal.enrollment.replacement.refund",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@requestEnrollmentRefund",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/enrollment/{enrollment}/payment-info",
+    "name": "portal.enrollment.payment-info",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@paymentInfo",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/enrollment/{enrollment}/payment/gcash",
+    "name": "portal.enrollment.payment.gcash",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@submitGcash",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/enrollment/{enrollment}/revise",
+    "name": "portal.enrollment.revise",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@showReplacement",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/enrollment/{enrollment}/revise",
+    "name": "portal.enrollment.revise.submit",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@submitReplacement",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/payment/gcash-qr",
+    "name": "portal.enrollment.gcash.qr",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@showGcashQr",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/payment/proof/{payment}",
+    "name": "portal.enrollment.payment.proof",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@viewProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/payments/appointments/{appointment}",
+    "name": "portal.payments.appointment",
+    "action": "App\\Http\\Controllers\\PortalPaymentController@appointment",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/payments/appointments/{appointment}/back-to-requests",
+    "name": "portal.payments.appointments.back-to-requests",
+    "action": "App\\Http\\Controllers\\PortalPaymentController@backToRequests",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/payments/appointments/{appointment}/switch-to-gcash",
+    "name": "portal.payments.appointments.switch-to-gcash",
+    "action": "App\\Http\\Controllers\\PortalPaymentController@switchBundleToGcash",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/payments/documents/{documentRequest}",
+    "name": "portal.payments.document",
+    "action": "App\\Http\\Controllers\\PortalPaymentController@document",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/profile",
+    "name": "portal.profile.show",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/profile",
+    "name": "portal.profile.update",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "portal/profile/avatar",
+    "name": "portal.profile.avatar.remove",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@removeAvatar",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/profile/language",
+    "name": "portal.profile.language.update",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@updateLanguage",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "portal/profile/password",
+    "name": "portal.profile.password",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@updatePassword",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/programs/{program}/subjects",
+    "name": "portal.enrollment.subjects",
+    "action": "App\\Http\\Controllers\\Student\\EnrollmentController@getSubjects",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/transactions",
+    "name": "portal.transactions.index",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/transactions/export/csv",
+    "name": "portal.transactions.export.csv",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@exportCsv",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/transactions/export/pdf",
+    "name": "portal.transactions.export.pdf",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@exportPdf",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/transactions/{transaction}",
+    "name": "portal.transactions.show",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "portal/transactions/{transaction}/receipt",
+    "name": "portal.transactions.receipt",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@receipt",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:student|alumni|new_applicant"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "profile",
+    "name": "profile.show",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|registrar|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "profile",
+    "name": "profile.update",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|registrar|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "profile/avatar",
+    "name": "profile.avatar.remove",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@removeAvatar",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|registrar|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "profile/language",
+    "name": "profile.language.update",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@updateLanguage",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|registrar|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "profile/password",
+    "name": "profile.password",
+    "action": "App\\Http\\Controllers\\Portal\\ProfileController@updatePassword",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|registrar|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/applications",
+    "name": "registrar.applications.index",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/applications/cancellation-requests/{cancellationRequest}/approve",
+    "name": "registrar.applications.cancellation.approve",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@approveCancellation",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/applications/cancellation-requests/{cancellationRequest}/reject",
+    "name": "registrar.applications.cancellation.reject",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@rejectCancellation",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/applications/{application}",
+    "name": "registrar.applications.show",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/applications/{application}/approve",
+    "name": "registrar.applications.approve",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@approve",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/applications/{application}/documents/{document}",
+    "name": "registrar.applications.documents.show",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@downloadDocument",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/applications/{application}/documents/{document}/view",
+    "name": "registrar.applications.documents.view",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@viewDocument",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/applications/{application}/reject",
+    "name": "registrar.applications.reject",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@reject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/applications/{application}/revision",
+    "name": "registrar.applications.revision",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@revision",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/applications/{application}/start-review",
+    "name": "registrar.applications.start-review",
+    "action": "App\\Http\\Controllers\\Registrar\\ApplicationController@startReview",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/appointments",
+    "name": "registrar.appointments.index",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/closures",
+    "name": "registrar.appointments.closures.store",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentScheduleController@storeClosure",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/appointments/closures/impact",
+    "name": "registrar.appointments.closures.impact",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentScheduleController@previewClosureImpact",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/closures/{closure}/deactivate",
+    "name": "registrar.appointments.closures.deactivate",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentScheduleController@deactivate",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/appointments/payments/{payment}/proof",
+    "name": "registrar.appointments.payments.proof",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@viewProof",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/payments/{payment}/reject",
+    "name": "registrar.appointments.payments.reject",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@rejectPayment",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/payments/{payment}/verify",
+    "name": "registrar.appointments.payments.verify",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@verifyPayment",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/appointments/schedule",
+    "name": "registrar.appointments.schedule",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentScheduleController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "registrar/appointments/schedule",
+    "name": "registrar.appointments.schedule.update",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentScheduleController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/schedule/generate",
+    "name": "registrar.appointments.schedule.generate",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentScheduleController@generate",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/appointments/slots",
+    "name": "registrar.appointments.slots",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@slots",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/slots",
+    "name": "registrar.appointments.slots.store",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@storeSlot",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "registrar/appointments/slots/{slot}",
+    "name": "registrar.appointments.slots.update",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@updateSlot",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "registrar/appointments/slots/{slot}",
+    "name": "registrar.appointments.slots.delete",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@deleteSlot",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "registrar/appointments/slots/{slot}/status",
+    "name": "registrar.appointments.slots.status",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@setSlotStatus",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/{appointment}/cancel",
+    "name": "registrar.appointments.cancel",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@cancel",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "App\\Http\\Middleware\\AppointmentLifecycleCommand:appointment.cancelled"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/appointments/{appointment}/confirm",
+    "name": "registrar.appointments.confirm",
+    "action": "App\\Http\\Controllers\\Registrar\\AppointmentController@confirm",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "App\\Http\\Middleware\\AppointmentLifecycleCommand:appointment.confirmed"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/claiming-appointments",
+    "name": "registrar.claiming-appointments.index",
+    "action": "App\\Http\\Controllers\\Registrar\\ClaimingAppointmentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/claiming-appointments/{appointment}/release",
+    "name": "registrar.claiming-appointments.release",
+    "action": "App\\Http\\Controllers\\Registrar\\ClaimingAppointmentController@release",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "App\\Http\\Middleware\\AppointmentLifecycleCommand:claim.released"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "registrar/credited-subjects/{creditedSubject}",
+    "name": "registrar.enrollments.credited-subjects.update",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@updateCreditedSubject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "DELETE",
+    "uri": "registrar/credited-subjects/{creditedSubject}",
+    "name": "registrar.enrollments.credited-subjects.destroy",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@destroyCreditedSubject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/dashboard",
+    "name": "registrar.dashboard",
+    "action": "App\\Http\\Controllers\\Registrar\\DashboardController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/documents",
+    "name": "registrar.documents.index",
+    "action": "App\\Http\\Controllers\\Registrar\\DocumentRequestController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/documents/walk-in-release",
+    "name": "registrar.documents.walk-in-release",
+    "action": "App\\Http\\Controllers\\Registrar\\DocumentRequestController@releaseWalkIn",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/documents/{documentRequest}/assessment",
+    "name": "registrar.documents.assessment",
+    "action": "App\\Http\\Controllers\\Registrar\\DocumentRequestController@assess",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/documents/{documentRequest}/status",
+    "name": "registrar.documents.status",
+    "action": "App\\Http\\Controllers\\Registrar\\DocumentRequestController@updateStatus",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/enrollments",
+    "name": "registrar.enrollments.index",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/enrollments/{enrollment}",
+    "name": "registrar.enrollments.show",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/enrollments/{enrollment}/approve",
+    "name": "registrar.enrollments.approve",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@approve",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/enrollments/{enrollment}/cor",
+    "name": "registrar.enrollments.cor.show",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@showCor",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/enrollments/{enrollment}/cor/download",
+    "name": "registrar.enrollments.cor.download",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@downloadCor",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/enrollments/{enrollment}/credited-subjects",
+    "name": "registrar.enrollments.credited-subjects.store",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@storeCreditedSubject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/enrollments/{enrollment}/reject",
+    "name": "registrar.enrollments.reject",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@reject",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/enrollments/{enrollment}/subject-replacement",
+    "name": "registrar.enrollments.subject-replacement",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@returnForSubjectReplacement",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/imports",
+    "name": "registrar.imports.index",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/imports",
+    "name": "registrar.imports.upload",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@upload",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:10,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/imports/template/{type}",
+    "name": "registrar.imports.template",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@template",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/imports/{batch}",
+    "name": "registrar.imports.show",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/imports/{batch}/cancel",
+    "name": "registrar.imports.cancel",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@cancel",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/imports/{batch}/commit",
+    "name": "registrar.imports.commit",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@commit",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:10,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/imports/{batch}/provision-selected",
+    "name": "registrar.imports.provision-selected",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@provisionSelected",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:5,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/imports/{batch}/report",
+    "name": "registrar.imports.report",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicImportController@report",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/students",
+    "name": "registrar.students.index",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicRecordController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/students",
+    "name": "registrar.students.store",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicRecordController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/students/create",
+    "name": "registrar.students.create",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicRecordController@create",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/students/{student}",
+    "name": "registrar.students.show",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicRecordController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "PUT",
+    "uri": "registrar/students/{student}",
+    "name": "registrar.students.update",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicRecordController@update",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/students/{student}/edit",
+    "name": "registrar.students.edit",
+    "action": "App\\Http\\Controllers\\Registrar\\AcademicRecordController@edit",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/students/{student}/invitation/resend",
+    "name": "registrar.students.invitation.resend",
+    "action": "App\\Http\\Controllers\\Registrar\\PortalAccountProvisioningController@resend",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:5,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/students/{student}/invitation/revoke",
+    "name": "registrar.students.invitation.revoke",
+    "action": "App\\Http\\Controllers\\Registrar\\PortalAccountProvisioningController@revoke",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/students/{student}/provision",
+    "name": "registrar.students.provision",
+    "action": "App\\Http\\Controllers\\Registrar\\PortalAccountProvisioningController@confirm",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/students/{student}/provision",
+    "name": "registrar.students.provision.store",
+    "action": "App\\Http\\Controllers\\Registrar\\PortalAccountProvisioningController@store",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:10,1"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/students/{user}/promote-alumni",
+    "name": "registrar.students.promote-alumni",
+    "action": "App\\Http\\Controllers\\Registrar\\EnrollmentController@promoteToAlumni",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "registrar/subjects/{subject}/equivalencies",
+    "name": "registrar.subjects.equivalencies.store",
+    "action": "App\\Http\\Controllers\\Admin\\ProgramController@storeEquivalency",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/transactions",
+    "name": "registrar.transactions.index",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "registrar/transactions/{transaction}",
+    "name": "registrar.transactions.show",
+    "action": "App\\Http\\Controllers\\TransactionHistoryController@show",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:registrar|admin"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "reports/payments",
+    "name": "reports.payments.index",
+    "action": "App\\Http\\Controllers\\PaymentReportController@index",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "reports/payments/csv",
+    "name": "reports.payments.csv",
+    "action": "App\\Http\\Controllers\\PaymentReportController@csv",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "reports/payments/pdf",
+    "name": "reports.payments.pdf",
+    "action": "App\\Http\\Controllers\\PaymentReportController@pdf",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate",
+      "App\\Http\\Middleware\\RoleMiddleware:admin|cashier"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "request-activation",
+    "name": "password.activation.request",
+    "action": "App\\Http\\Controllers\\PasswordSetupController@requestForm",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "resend-activation",
+    "name": "password.activation.resend",
+    "action": "App\\Http\\Controllers\\PasswordSetupController@resend",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:5,1",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:password-recovery"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "reset-password",
+    "name": "password.update",
+    "action": "App\\Http\\Controllers\\Auth\\ResetPasswordController@reset",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\RedirectIfAuthenticated",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:password-recovery"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "reset-password/{token}",
+    "name": "password.reset",
+    "action": "App\\Http\\Controllers\\Auth\\ResetPasswordController@showResetForm",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\RedirectIfAuthenticated"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "sanctum/csrf-cookie",
+    "name": "sanctum.csrf-cookie",
+    "action": "Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController@show",
+    "middleware": [
+      "web"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "search",
+    "name": "search",
+    "action": "App\\Http\\Controllers\\SearchController@search",
+    "middleware": [
+      "web",
+      "App\\Http\\Middleware\\Authenticate"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "POST",
+    "uri": "set-password",
+    "name": "password.setup.store",
+    "action": "App\\Http\\Controllers\\PasswordSetupController@store",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:password-recovery"
+    ]
+  },
+  {
+    "domain": null,
+    "method": "GET|HEAD",
+    "uri": "set-password/{token}",
+    "name": "password.setup.show",
+    "action": "App\\Http\\Controllers\\PasswordSetupController@showForm",
+    "middleware": [
+      "web",
+      "Illuminate\\Routing\\Middleware\\ThrottleRequests:password-setup-page"
+    ]
+  }
+]

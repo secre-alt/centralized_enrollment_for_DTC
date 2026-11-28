@@ -28,6 +28,9 @@ class Application extends Model
         'reviewed_by',
         'reviewed_at',
         'remarks',
+        'duplicate_review_outcome',
+        'duplicate_reviewed_by',
+        'duplicate_reviewed_at',
         'user_id',
         'academic_status',
         'gender',
@@ -167,6 +170,7 @@ class Application extends Model
     protected $casts = [
         'birthdate'   => 'date',
         'reviewed_at' => 'datetime',
+        'duplicate_reviewed_at' => 'datetime',
         'confirmation_token_expires_at' => 'datetime',
         'acknowledged_at' => 'datetime',
     ];
@@ -203,12 +207,22 @@ class Application extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
+    public function duplicateReviewer()
+    {
+        return $this->belongsTo(User::class, 'duplicate_reviewed_by');
+    }
+
     /**
      * Uploaded supporting documents for this application.
      */
     public function documents()
     {
         return $this->hasMany(ApplicationDocument::class);
+    }
+
+    public function emailChanges()
+    {
+        return $this->hasMany(ApplicationEmailChange::class);
     }
 
     public function cancellationRequests()
@@ -268,6 +282,7 @@ class Application extends Model
         switch ($this->status) {
             case 'submitted':
                 $timeline[1]['status'] = 'current';
+                $timeline[0]['timestamp'] = $this->emailChanges()->whereNotNull('verified_at')->latest('verified_at')->value('verified_at') ?? $this->created_at;
                 break;
 
             case 'under_review':
@@ -365,6 +380,7 @@ class Application extends Model
                 default => 'Your enrollment request was not approved. Sign in to review the Registrar remarks and contact the Registrar for guidance.',
             };
             $step['status'] = 'action_required';
+
             return $step;
         }
 
@@ -383,12 +399,14 @@ class Application extends Model
             } else {
                 $step['description'] = 'Pay the enrollment fee or submit GCash proof. Registrar review begins after the Cashier verifies payment.';
             }
+
             return $step;
         }
 
         if ($enrollment->status === 'approved' && $payment?->status === 'verified' && !$enrollment->is_paid) {
             $step['description'] = 'A verified payment record exists, but enrollment is not marked paid. Contact the Cashier to confirm the record before making another payment.';
             $step['status'] = 'action_required';
+
             return $step;
         }
         if ($enrollment->status === 'approved' && !$enrollment->is_paid) {
@@ -400,6 +418,7 @@ class Application extends Model
             } else {
                 $step['description'] = 'Your enrollment is approved. Pay the enrollment fee; completion is recorded after payment verification.';
             }
+
             return $step;
         }
 
@@ -408,10 +427,12 @@ class Application extends Model
             $step['description'] = 'The Cashier verified payment and the Registrar approved your enrollment. Your student record was created.';
             $step['status'] = 'completed';
             $step['timestamp'] = $payment?->verified_at;
+
             return $step;
         }
 
         $step['description'] = 'Enrollment or payment is not yet fully confirmed. Sign in to the portal or contact the Registrar or Cashier for assistance.';
+
         return $step;
     }
 
@@ -432,9 +453,9 @@ class Application extends Model
     public function getStatusDescription(): string
     {
         return match ($this->status) {
-            'submitted' => 'Your application has been submitted and is awaiting initial review.',
+            'submitted' => 'Your application has been submitted and is awaiting Registrar review.',
             'under_review' => 'Your application is currently being reviewed by the Registrar. No action is needed from you at this time.',
-            'revision_required' => 'Your application requires document corrections. Please review the remarks and take the necessary action.',
+            'revision_required' => 'Your application needs corrections. Review the Registrar remarks and update your email below if that was requested.',
             'approved' => 'Your application has been approved. You are eligible to begin enrollment; approval alone does not mean enrollment or payment is complete.',
             'rejected' => 'Your application was not approved. Please review the remarks and contact the Registrar if you have questions.',
             'cancelled' => 'The Registrar approved your cancellation request. The application remains on file.',
@@ -455,7 +476,7 @@ class Application extends Model
         return match ($this->status) {
             'submitted' => 'No action is needed while the Registrar reviews your application. Check this page for updates.',
             'under_review' => 'Your application is being reviewed. Monitor this status and follow any instructions from the Registrar.',
-            'revision_required' => 'Read the Registrar remarks and contact the Registrar using your reference number. This status page cannot receive corrected documents.',
+            'revision_required' => 'Review the Registrar remarks. If the requested correction is your email address, update it below and verify the new address. Contact the Registrar for other corrections.',
             'approved' => $this->approvedApplicationNextStep($enrollment),
             'rejected' => 'Review the Registrar remarks and contact the Registrar using your reference number if you need clarification. This page does not offer an appeal or resubmission process.',
             'cancelled' => 'This application is cancelled and cannot proceed to enrollment. Contact the Registrar if you need guidance about applying again.',
@@ -469,7 +490,7 @@ class Application extends Model
             return 'Your enrollment and payment are complete. Sign in to the student portal to access your enrollment records.';
         }
 
-        if (!$enrollment) {
+        if (! $enrollment) {
             return 'Use the account activation email (or request another activation link), sign in, then submit your enrollment request. Application approval alone does not complete enrollment.';
         }
 
@@ -486,6 +507,7 @@ class Application extends Model
             if ($enrollment->payment?->status === 'verified') {
                 return 'A verified payment record exists, but enrollment is not marked paid. Contact the Cashier before making another payment.';
             }
+
             return 'Pay the enrollment fee first. Registrar review begins after the Cashier verifies payment.';
         }
 
@@ -506,11 +528,11 @@ class Application extends Model
             return 'Sign in to review the payment rejection reason and resubmit proof through the supported enrollment payment flow.';
         }
 
-        if ($enrollment->status === 'approved' && $enrollment->payment?->status === 'verified' && !$enrollment->is_paid) {
+        if ($enrollment->status === 'approved' && $enrollment->payment?->status === 'verified' && ! $enrollment->is_paid) {
             return 'A verified payment record exists, but enrollment is not marked paid. Contact the Cashier to confirm the record before making another payment.';
         }
 
-        if ($enrollment->status === 'approved' && !$enrollment->is_paid) {
+        if ($enrollment->status === 'approved' && ! $enrollment->is_paid) {
             return 'Your enrollment is approved. Pay the enrollment fee through the student portal or Cashier; enrollment completes after payment verification.';
         }
 

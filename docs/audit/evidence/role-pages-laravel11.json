@@ -1,0 +1,559 @@
+{
+  "framework": "11.57.2",
+  "php": "8.4.28",
+  "results": [
+    {
+      "role": "admin",
+      "url": "/admin/dashboard",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/admin/dashboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/admin/users",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/admin/users",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/admin/programs",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/admin/programs",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/admin/settings",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/admin/settings",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/help",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "admin",
+      "url": "/help",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/dashboard",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/dashboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/enrollments",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/enrollments",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/documents",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/documents",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/appointments/slots",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/registrar/appointments/slots",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/help",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "registrar",
+      "url": "/help",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/cashier/dashboard",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/cashier/dashboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/cashier/payments",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/cashier/payments",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/cashier/document-payments",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/cashier/document-payments",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/reports/payments",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/reports/payments",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/help",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "cashier",
+      "url": "/help",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/dashboard",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/dashboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/enrollment",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/enrollment",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/documents",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/documents",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/transactions",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/transactions",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/profile",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "student",
+      "url": "/portal/profile",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/dashboard",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/dashboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/documents",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/documents",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/documents/create",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/documents/create",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/transactions",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/transactions",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/profile",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "alumni",
+      "url": "/portal/profile",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/dashboard",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/dashboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/application",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/application",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/enrollment/create",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/enrollment/create",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/profile",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/portal/profile",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/help",
+      "theme": "light",
+      "width": 1366,
+      "status": 200,
+      "overflow": false
+    },
+    {
+      "role": "new_applicant",
+      "url": "/help",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "overflow": false
+    }
+  ],
+  "boundaries": [
+    {
+      "role": "student",
+      "url": "/admin/users",
+      "status": 403
+    },
+    {
+      "role": "alumni",
+      "url": "/admin/users",
+      "status": 403
+    },
+    {
+      "role": "new_applicant",
+      "url": "/admin/users",
+      "status": 403
+    }
+  ],
+  "errors": [],
+  "consoleErrors": [
+    {
+      "role": "student",
+      "url": "/admin/users",
+      "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    },
+    {
+      "role": "alumni",
+      "url": "/admin/users",
+      "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    },
+    {
+      "role": "new_applicant",
+      "url": "/admin/users",
+      "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    }
+  ],
+  "requests": [
+    {
+      "role": "admin",
+      "url": "/notifications/poll",
+      "error": "net::ERR_ABORTED",
+      "cancelled": true
+    },
+    {
+      "role": "registrar",
+      "url": "/notifications/poll",
+      "error": "net::ERR_ABORTED",
+      "cancelled": true
+    },
+    {
+      "role": "cashier",
+      "url": "/cashier/notifications/poll",
+      "error": "net::ERR_ABORTED",
+      "cancelled": true
+    },
+    {
+      "role": "student",
+      "url": "/notifications/poll",
+      "error": "net::ERR_ABORTED",
+      "cancelled": true
+    },
+    {
+      "role": "alumni",
+      "url": "/notifications/poll",
+      "error": "net::ERR_ABORTED",
+      "cancelled": true
+    },
+    {
+      "role": "new_applicant",
+      "url": "/notifications/poll",
+      "error": "net::ERR_ABORTED",
+      "cancelled": true
+    }
+  ]
+}

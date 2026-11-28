@@ -152,6 +152,9 @@
                             <td>{{ $application->reference_no }}</td>
                             <td>
                                 {{ $application->full_name }}
+                                @if($application->has_possible_duplicate)
+                                    <div><span class="badge badge-warning mt-1">Possible duplicate</span></div>
+                                @endif
                             </td>
                             <td>{{ $applicantTypeLabels[$application->academic_status] ?? ucwords(str_replace('_', ' ', $application->academic_status)) }}</td>
                             <td>{{ $application->program->name ?? '—' }}</td>
@@ -195,6 +198,9 @@
                     </div>
                     <x-dtc.status-badge :status="$application->status" :variant="$statusVariants[$application->status] ?? 'neutral'" />
                 </div>
+                @if($application->has_possible_duplicate)
+                    <div class="px-3 pt-2"><span class="badge badge-warning">Possible duplicate</span></div>
+                @endif
                 <div class="dtc-app-card-body">
                     <div class="dtc-app-card-row">
                         <span class="dtc-app-card-label">Type</span>

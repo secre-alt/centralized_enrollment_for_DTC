@@ -94,6 +94,10 @@ class ProgramController extends Controller
         if (\App\Models\TimetableDraft::where('program_id', $program->id)->exists()) {
             throw ValidationException::withMessages(['program' => 'This program has timetable history and cannot be removed.']);
         }
+        Program::whereKey($program->id)->lockForUpdate()->firstOrFail();
+        foreach ($program->subjects()->orderBy('id')->lockForUpdate()->get() as $subject) {
+            $this->assertSubjectRemovable($subject);
+        }
         $program->delete();
         return redirect()->route('admin.programs.index')
             ->with('success', 'Program removed.');
@@ -162,6 +166,8 @@ class ProgramController extends Controller
 
     private function removeSubject(CourseSubject $subject)
     {
+        $subject = CourseSubject::whereKey($subject->id)->lockForUpdate()->firstOrFail();
+        $this->assertSubjectRemovable($subject);
         if ($subject->schedules()->whereNotNull('timetable_draft_id')->exists()) {
             throw ValidationException::withMessages(['subject' => 'This subject has published timetable history and cannot be removed.']);
         }
@@ -170,6 +176,22 @@ class ProgramController extends Controller
 
         return redirect()->route('admin.programs.index', ['program' => $programId])
             ->with('success', 'Subject removed.');
+    }
+
+    private function assertSubjectRemovable(CourseSubject $subject): void
+    {
+        // Older enrollments store curriculum identity only in JSON, sometimes as strings.
+        $enrollment = \App\Models\Enrollment::where(function ($query) use ($subject) {
+            $query->whereJsonContains('subject_ids', (int) $subject->id)
+                ->orWhereJsonContains('subject_ids', (string) $subject->id);
+        })->lockForUpdate()->first(['id']);
+        $credit = \App\Models\CreditedSubject::where('course_subject_id', $subject->id)
+            ->lockForUpdate()->first(['id']);
+        if ($enrollment || $credit) {
+            throw ValidationException::withMessages([
+                'subject' => 'This subject has enrollment or credited-subject history and cannot be removed.',
+            ]);
+        }
     }
 
     // ── SCHEDULE (per subject) ──────────────────────────────────────────────

@@ -18,6 +18,8 @@ class WorkflowEmailNotificationTest extends TestCase
     public function test_failed_enqueue_can_retry_without_duplicate_notification_or_email(): void
     {
         $user = $this->user('retry@example.test');
+        Mail::fake();
+        $mailFake = Mail::getFacadeRoot();
         $pending = \Mockery::mock(\Illuminate\Mail\PendingMail::class);
         Mail::shouldReceive('to')->once()->with($user->email)->andReturn($pending);
         $pending->shouldReceive('queue')->once()->andThrow(new \RuntimeException('Queue unavailable'));
@@ -25,7 +27,7 @@ class WorkflowEmailNotificationTest extends TestCase
         $notification = UserNotification::where('event_key', 'retry:1')->firstOrFail();
         $this->assertSame('enqueue_failed', $notification->email_status);
 
-        Mail::fake();
+        Mail::swap($mailFake);
         $this->assertTrue(NotificationService::sendUserUpdateSafely($user, 'retry:1', 'Received', 'Your request was received.'));
         $this->assertSame('queued', $notification->fresh()->email_status);
         $this->assertTrue(NotificationService::sendUserUpdateSafely($user, 'retry:1', 'Received', 'Your request was received.'));

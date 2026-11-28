@@ -19,6 +19,10 @@ class RoleSeeder extends Seeder
             Role::firstOrCreate(['name' => $role]);
         }
 
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
+
         // Create default admin account
         $admin = \App\Models\User::firstOrCreate(
             ['email' => 'admin@dtc.edu.ph'],

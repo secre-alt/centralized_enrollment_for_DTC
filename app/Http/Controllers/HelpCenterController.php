@@ -24,7 +24,7 @@ class HelpCenterController extends Controller
 
         // Filter content and destinations on the server, before searching or rendering.
         if ($user->hasAnyRole(['student', 'new_applicant']) && !$staff) {
-            $add('Enrollment', 'Does application approval complete enrollment?', 'Application approval allows you to begin enrollment. Submit your subject selection, wait for the Registrar’s review, then follow the payment instructions shown in your account.', 'portal.enrollment.index', 'My enrollment');
+            $add('Enrollment', 'Does application approval complete enrollment?', 'Application approval allows you to begin enrollment. Submit your subjects and obtain a complete load with assigned sections; contact the Registrar if section assignment is on hold. Follow the payment instructions, wait for Cashier verification, then await final Registrar approval.', 'portal.enrollment.index', 'My enrollment');
             $add('Enrollment', 'Should I choose regular or irregular subjects?', 'Regular subjects follow the selected year and semester. Irregular selection allows subjects across year levels or semesters. This choice does not change your admission classification. Ask the Registrar about transfer credits before selecting subjects.', 'portal.enrollment.create', 'Enrollment');
             $add('Payments', 'Where do I check enrollment payments?', 'Check your enrollment status and payment history. A submitted GCash proof is not a verified payment. If proof is rejected, read the reason before submitting a correction.', 'portal.transactions.index', 'Payment history');
         }

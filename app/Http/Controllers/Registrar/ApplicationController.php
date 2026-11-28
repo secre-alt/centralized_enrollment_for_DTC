@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -64,6 +65,10 @@ class ApplicationController extends Controller
             ->paginate(\App\Support\TablePagination::perPage(10))->withQueryString()
             ->withQueryString();
 
+        $applications->getCollection()->each(function (Application $application) {
+            $application->setAttribute('has_possible_duplicate', $application->duplicate_review_outcome === null && $this->possibleDuplicates($application)->isNotEmpty());
+        });
+
         $programs = Program::orderBy('name')->get(['id', 'name']);
 
         return view('registrar.applications.index', compact('applications', 'programs'));
@@ -72,8 +77,77 @@ class ApplicationController extends Controller
     public function show(Application $application)
     {
         $application->load(['program', 'user', 'reviewer', 'documents', 'cancellationRequests.requester', 'cancellationRequests.reviewer']);
+        $possibleDuplicates = $this->possibleDuplicates($application);
 
-        return view('registrar.applications.show', compact('application'));
+        return view('registrar.applications.show', compact('application', 'possibleDuplicates'));
+    }
+
+    public function reviewDuplicateMatch(Request $request, Application $application)
+    {
+        $validated = $request->validate([
+            'outcome' => ['required', Rule::in(['confirmed_duplicate', 'not_duplicate'])],
+        ]);
+
+        if ($validated['outcome'] === 'confirmed_duplicate' && $this->possibleDuplicates($application)->isEmpty()) {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('error', 'There are no current matching applications to confirm.');
+        }
+
+        DB::transaction(function () use ($application, $validated) {
+            $locked = Application::whereKey($application->id)->lockForUpdate()->firstOrFail();
+            $locked->update([
+                'duplicate_review_outcome' => $validated['outcome'],
+                'duplicate_reviewed_by' => auth()->id(),
+                'duplicate_reviewed_at' => now(),
+            ]);
+        });
+
+        return redirect()->route('registrar.applications.show', $application)
+            ->with('success', $validated['outcome'] === 'confirmed_duplicate'
+                ? 'Possible duplicate recorded for staff reference. Both application records remain separate.'
+                : 'These applications were marked as reviewed and not duplicates.');
+    }
+
+    private function possibleDuplicates(Application $application)
+    {
+        if (!$application->birthdate || !$application->first_name || !$application->last_name) {
+            return collect();
+        }
+
+        return Application::query()
+            ->where('id', '<>', $application->id)
+            ->whereDate('birthdate', $application->birthdate->toDateString())
+            ->whereRaw('LOWER(TRIM(first_name)) = ?', [mb_strtolower(trim($application->first_name))])
+            ->whereRaw('LOWER(TRIM(last_name)) = ?', [mb_strtolower(trim($application->last_name))])
+            ->when($application->middle_name, fn ($query, $middle) => $query->whereRaw('LOWER(TRIM(middle_name)) = ?', [mb_strtolower(trim($middle))]), function ($query) {
+                $query->where(fn ($q) => $q->whereNull('middle_name')->orWhereRaw("TRIM(middle_name) = ''"));
+            })
+            ->get()
+            ->filter(function (Application $candidate) use ($application) {
+                $sameEmail = filled($application->email) && mb_strtolower(trim($application->email)) === mb_strtolower(trim($candidate->email));
+                $phone = fn ($value) => preg_replace('/\D+/', '', (string) $value);
+                $samePhone = filled($application->phone) && $phone($application->phone) !== '' && $phone($application->phone) === $phone($candidate->phone);
+                $address = fn ($value) => mb_strtolower(preg_replace('/\s+/u', ' ', trim((string) $value)) ?? '');
+                $sameAddress = filled($application->current_address) && $address($application->current_address) === $address($candidate->current_address);
+
+                if (!$sameEmail && !$samePhone && !$sameAddress) {
+                    return false;
+                }
+
+                $reasons = ['Same normalized name', 'Same birthdate'];
+                if ($sameEmail) {
+                    $reasons[] = 'Same email';
+                }
+                if ($samePhone) {
+                    $reasons[] = 'Same phone';
+                }
+                if ($sameAddress) {
+                    $reasons[] = 'Same residential address';
+                }
+                $candidate->setAttribute('duplicate_match_reasons', $reasons);
+
+                return true;
+            })->values();
     }
 
     public function startReview(Application $application)
@@ -294,6 +368,64 @@ class ApplicationController extends Controller
             ->with($delivery['ok'] ? 'success' : 'warning', 'Revision requested. ' . $delivery['message']);
     }
 
+    public function resendDecisionEmail(Application $application)
+    {
+        if (! in_array($application->status, ['approved', 'rejected', 'revision_required'], true)) {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('error', 'A decision email is available only for approved, rejected, or revision-required applications.');
+        }
+
+        if (! filter_var($application->email, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('warning', 'The saved applicant email address is missing or invalid. Update it before resending.');
+        }
+
+        if ($application->status === 'approved' && (! $application->user || $application->user->email_verified_at !== null)) {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('warning', 'An activation email can only be resent for an approved account that has not been activated.');
+        }
+
+        try {
+            $mail = match ($application->status) {
+                'approved' => $this->approvedApplicationMail($application),
+                'rejected' => new ApplicationRejected($application),
+                'revision_required' => new ApplicationRevisionRequired($application),
+            };
+            Mail::to($application->email)->send($this->addApplicationStatusLink($mail, $application));
+
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('success', 'Decision email resent to ' . $application->email . '.');
+        } catch (\Throwable $exception) {
+            Log::warning('Application decision email resend failed.', [
+                'application_id' => $application->id,
+                'exception' => get_class($exception),
+            ]);
+
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('warning', 'Email could not be delivered. Check the SMTP/Mailpit connection and try again.');
+        }
+    }
+
+    private function approvedApplicationMail(Application $application): ApplicationApproved
+    {
+        $token = Password::broker('users')->createToken($application->user);
+        $setupUrl = route('password.setup.show', ['token' => $token, 'email' => $application->email]);
+
+        return new ApplicationApproved($application, $setupUrl, config('auth.passwords.users.expire', 60));
+    }
+
+    private function addApplicationStatusLink(Mailable $mail, Application $application): Mailable
+    {
+        if ($mail instanceof ApplicationRejected || $mail instanceof ApplicationRevisionRequired) {
+            $mail->statusUrl = URL::temporarySignedRoute('public.application.status.email', now()->addDays(7), [
+                'application' => $application->id,
+                'email_hash' => hash_hmac('sha256', strtolower(trim($application->email)), (string) config('app.key')),
+            ]);
+        }
+
+        return $mail;
+    }
+
     public function approveCancellation(Request $request, ApplicationCancellationRequest $cancellationRequest, ApplicationCancellationService $service)
     {
         abort_unless($request->user()->hasAnyRole(['registrar', 'admin']), 403);
@@ -373,7 +505,7 @@ class ApplicationController extends Controller
         $emailSent = false;
         if (filter_var($application->email, FILTER_VALIDATE_EMAIL)) {
             try {
-                Mail::to($application->email)->send($mail);
+                Mail::to($application->email)->send($this->addApplicationStatusLink($mail, $application));
                 $emailSent = true;
             } catch (\Throwable $exception) {
                 Log::warning('Application decision email delivery failed.', [

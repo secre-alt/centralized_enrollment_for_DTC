@@ -46,6 +46,10 @@ Final confirmation explicitly acknowledges accuracy, Terms and Privacy Policy. T
 
 Review retains expanded sections and Edit controls. Filled/total badges count supplied details, including optional values; they are not required-completion quotas. Browser validation checks required fields before advancing and again before confirmation; server validation also enforces direct posts.
 
+When a Registrar marks an unlinked applicant's application `revision_required`, the applicant can correct only the application email through the signed link in the notification email. The new address must be verified before the application returns to `submitted` for review. Previous review remarks and reviewer details remain recorded with the email-change history. Other requested changes, including documents, must be arranged with the Registrar; this status flow does not edit other application fields or accept replacement uploads.
+
+Registrar review screens flag possible duplicate applications only when normalized first, middle and last names and birthdate match, plus at least one matching email, phone number or current address. The flag is a review aid, not a block or decision. Staff can record a confirmed related application or mark the match as not a duplicate; both application records remain separate, and admission status is unchanged.
+
 ## Verification
 
 42 PHP tests passed in an isolated admission test database, covering required education for every route, manual and independent-city addresses, international addresses, optional disclosures, files and acknowledgment. 14 JavaScript checks passed. Browser checks cover route-specific required attributes and blocking an empty residential description.

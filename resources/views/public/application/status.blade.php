@@ -3,30 +3,21 @@
 @section('title', 'Check Application Status')
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/application-wizard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/application-wizard.css') }}?v={{ filemtime(public_path('css/application-wizard.css')) }}">
 @stop
 
 @section('content')
-<div class="app-wizard-page status-lookup-page">
-    <div class="app-wizard-topbar">
-        <a href="{{ route('landing') }}" class="app-wizard-back" aria-label="Back to home">
-            <i data-lucide="arrow-left" aria-hidden="true"></i>
-        </a>
-    </div>
-
-    <header class="app-wizard-intro">
-        @if(isset($application))
+<div class="app-wizard-page status-lookup-page {{ isset($application) ? '' : 'admission-wizard' }}">
+    @if(isset($application))
+        <header class="app-wizard-intro">
             <div class="status-page-heading">
                 <h1>Application status</h1>
                 <span class="status-result-badge is-{{ $application->status }}" role="status">
                     {{ ucwords(str_replace('_', ' ', $application->status)) }}
                 </span>
             </div>
-        @else
-            <h1>Check your application status</h1>
-            <p>Use the reference number and email address from your application.</p>
-        @endif
-    </header>
+        </header>
+    @endif
 
     @if(isset($application))
         <section class="wiz-panel status-result-card" aria-labelledby="status-result-title">
@@ -61,6 +52,24 @@
                     <section class="status-remarks" aria-labelledby="status-remarks-title">
                         <h3 id="status-remarks-title">Registrar remarks</h3>
                         <div class="status-remarks-copy">{{ $application->remarks }}</div>
+                    </section>
+                @endif
+
+                @if($application->status === 'revision_required' && $canCorrectEmail)
+                    <section class="status-remarks status-email-correction" aria-labelledby="email-correction-title">
+                        <h3 id="email-correction-title">Update your application email</h3>
+                        <p class="status-remarks-copy">Your current address is {{ $application->email }}. Enter the correct address and verify it to resubmit your application. Other requested corrections must be arranged with the Registrar.</p>
+                        @if(session('success'))<div class="alert alert-success" role="status">{{ session('success') }}</div>@endif
+                        @if(session('warning'))<div class="alert alert-warning" role="alert">{{ session('warning') }}</div>@endif
+                        <form method="POST" action="{{ $emailCorrectionUrl }}" class="status-email-correction-form">
+                            @csrf
+                            <div class="wiz-field">
+                                <label for="new_email">New email address <span class="req">*</span></label>
+                                <input type="email" name="new_email" id="new_email" class="wiz-input @error('new_email') wiz-invalid @enderror" value="{{ old('new_email') }}" placeholder="you@example.com" autocomplete="email" maxlength="255" required>
+                                @error('new_email')<span class="wiz-err-msg">{{ $message }}</span>@enderror
+                            </div>
+                            <button type="submit" class="wiz-btn wiz-btn--primary status-submit-btn">Send verification link <i data-lucide="arrow-right" aria-hidden="true"></i></button>
+                        </form>
                     </section>
                 @endif
 
@@ -100,15 +109,16 @@
             </div>
         </section>
     @else
-        <section class="wiz-panel" aria-labelledby="status-form-title">
-            <div class="wiz-panel-header">
-                <div class="wiz-panel-icon"><i data-lucide="search-check" aria-hidden="true"></i></div>
-                <div>
-                    <h2 class="wiz-panel-title" id="status-form-title">Lookup details</h2>
-                    <p class="wiz-panel-sub">Both details must match the application record.</p>
-                </div>
+        <section class="admission-card status-lookup-card" aria-labelledby="status-form-title">
+            <div class="admission-progress-heading">
+                <span>Applicant services</span>
+                <span>Check status</span>
             </div>
-            <div class="wiz-panel-body">
+            <header class="app-wizard-intro status-lookup-intro">
+                <h1 id="status-form-title">Check your application status</h1>
+                <p>Enter the reference number and email address from your application.</p>
+            </header>
+            <div class="status-lookup-body">
                 @if(session('error'))
                     <div class="alert alert-danger status-error" role="alert">{{ session('error') }}</div>
                 @endif
@@ -126,23 +136,25 @@
 
                 <form method="POST" action="{{ route('public.application.status') }}" class="status-lookup-form">
                     @csrf
-                    <div class="wiz-field">
-                        <label for="reference_no">Application reference number <span class="req">*</span></label>
-                        <input type="text" name="reference_no" id="reference_no"
-                            class="wiz-input @error('reference_no') wiz-invalid @enderror"
-                            value="{{ old('reference_no') }}" placeholder="e.g. APP-2026-ABC123"
-                            autocomplete="off" maxlength="50" required aria-describedby="reference-hint">
-                        <span class="wiz-hint" id="reference-hint">Found on your confirmation page and email. It starts with APP-.</span>
-                        @error('reference_no')<span class="wiz-err-msg">{{ $message }}</span>@enderror
-                    </div>
+                    <div class="wiz-row wiz-row--2 status-lookup-fields">
+                        <div class="wiz-field">
+                            <label for="reference_no">Application reference number <span class="req">*</span></label>
+                            <input type="text" name="reference_no" id="reference_no"
+                                class="wiz-input @error('reference_no') wiz-invalid @enderror"
+                                value="{{ $referenceNo ?? old('reference_no') }}" placeholder="e.g. APP-2026-ABC123"
+                                autocomplete="off" maxlength="50" required aria-describedby="reference-hint" autofocus>
+                            <span class="wiz-hint" id="reference-hint">Found on your confirmation page and email. It starts with APP-.</span>
+                            @error('reference_no')<span class="wiz-err-msg">{{ $message }}</span>@enderror
+                        </div>
 
-                    <div class="wiz-field">
-                        <label for="email">Email address <span class="req">*</span></label>
-                        <input type="email" name="email" id="email"
-                            class="wiz-input @error('email') wiz-invalid @enderror"
-                            value="{{ old('email') }}" placeholder="you@example.com"
-                            autocomplete="email" maxlength="255" required>
-                        @error('email')<span class="wiz-err-msg">{{ $message }}</span>@enderror
+                        <div class="wiz-field">
+                            <label for="email">Email address <span class="req">*</span></label>
+                            <input type="email" name="email" id="email"
+                                class="wiz-input @error('email') wiz-invalid @enderror"
+                                value="{{ $email ?? old('email') }}" placeholder="you@example.com"
+                                autocomplete="email" maxlength="255" required>
+                            @error('email')<span class="wiz-err-msg">{{ $message }}</span>@enderror
+                        </div>
                     </div>
 
                     <button type="submit" class="wiz-btn wiz-btn--primary status-submit-btn">

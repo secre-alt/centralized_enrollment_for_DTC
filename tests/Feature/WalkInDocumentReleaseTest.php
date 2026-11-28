@@ -236,13 +236,14 @@ class WalkInDocumentReleaseTest extends TestCase
             mkdir($directory, 0777, true);
         }
         file_put_contents($directory.'/walk-in-release-form.html', $page->getContent());
+        $mailFake = Mail::getFacadeRoot();
         Mail::shouldReceive('to')->once()->andThrow(new \RuntimeException('Queue unavailable'));
         $this->handover($owner, [$document->id], ['operation_key' => $key])->assertSessionHasNoErrors();
         $notice = UserNotification::where('event_key', 'document-released:'.$document->id)->sole();
         $this->assertSame('enqueue_failed', $notice->email_status);
         $this->assertNotNull($ready->fresh()->read_at);
         $this->assertSame('released', $document->fresh()->status);
-        Mail::fake();
+        Mail::swap($mailFake);
         $this->handover($owner, [$document->id], ['operation_key' => $key])->assertSessionHasNoErrors();
         Mail::assertQueued(\App\Mail\WorkflowUpdate::class, 1);
         $this->assertSame(2, UserNotification::where('user_id', $owner->id)->count());

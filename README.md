@@ -1,6 +1,6 @@
 # DTC EMS
 
-DTC EMS is a Laravel 9 enrollment management system for Danao Technological College. It supports public applications, enrollment review, verified payment processing, student and alumni self-service, appointments, notifications, reporting, and administrator settings.
+DTC EMS is a Laravel 13 enrollment management system for Danao Technological College, verified with PHP 8.4.28. It supports public applications, enrollment review, verified payment processing, student and alumni self-service, appointments, notifications, reporting, and administrator settings.
 
 ## Modules
 
@@ -111,11 +111,11 @@ Enrollment records use `pending`, `approved`, or `rejected`. Students submit an 
 
 These are deployment requirements, not steps verified against a live server:
 
-- Deploy a reviewed release and install Composer dependencies (`composer install --no-dev --optimize-autoloader`). This repository has no npm lockfile, so frontend builds currently use `npm install` followed by `npm run build`; add and review a lockfile before relying on reproducible `npm ci` builds.
+- Deploy a reviewed release and install exact Composer dependencies (`composer install --no-dev --optimize-autoloader`). Frontend dependencies are recorded in `package-lock.json`; use `npm ci` followed by `npm run build` for a reproducible build.
 - Set `APP_ENV=production`, `APP_DEBUG=false`, the correct HTTPS `APP_URL`, and a protected, persistent `APP_KEY`. Do not expose `.env`, source files, logs, SQL dumps, or private uploads through the web root.
 - Set `APP_TRUSTED_HOSTS` to a comma-separated list of exact production hostnames (including any aliases). `TrustHosts` also accepts the host in `APP_URL`; it rejects other Host headers. Keep `APP_URL` set to the canonical HTTPS hostname.
 - Terminate HTTPS correctly and set `SESSION_SECURE_COOKIE=true`. Use a suitable production session/cache backend and restrict cookie domain/path as needed. Keep HTTP-only and SameSite protections enabled.
-- Set `RECAPTCHA_ENABLED=true` and configure both the matching site and secret keys. Login deliberately fails closed if CAPTCHA is disabled, unconfigured, rejected, or Google cannot be reached. Test a valid login and an invalid Host header in staging.
+- Login uses server-side rate limits, account status checks and session revocation. There is currently no reCAPTCHA integration; CAPTCHA environment keys do not enable a challenge. Verify valid login, throttling and rejection of invalid Host headers in staging.
 - Use a dedicated least-privilege database account, strong unique credentials, network restrictions, and regular tested backups.
 - Configure real outbound email and verify application, Student/Alumni portal invitation, and document-request delivery. Portal invitation delivery is synchronous so the Registrar receives an accurate sent/failed result; failed deliveries are recorded for retry. Document-request emails are queued after the related database write commits. With `QUEUE_CONNECTION=database`, migrate the `jobs` table and run a supervised `php artisan queue:work`; monitor `failed_jobs` and use `php artisan queue:retry` for recoverable delivery failures. With `QUEUE_CONNECTION=sync`, mail is sent during the request after commit and transport errors are logged without undoing the saved action.
 - Cashier GCash payment alerts use authenticated database polling (5-second interval) so no broadcast server, extra environment variables, or queue worker is required. Deploy `public/js/cashier-notification-polling.js` with the application and apply the notification event-key migration before enabling the updated app. The navbar remains database-backed and recovers after temporary polling/network failures.

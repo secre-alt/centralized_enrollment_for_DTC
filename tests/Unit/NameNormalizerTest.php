@@ -26,7 +26,7 @@ class NameNormalizerTest extends TestCase
         $this->assertSame('III', $application->suffix);
     }
 
-    /** @dataProvider nameExamples */
+    #[\PHPUnit\Framework\Attributes\DataProvider('nameExamples')]
     public function test_it_normalizes_case_spacing_and_compound_names(string $input, string $expected): void
     {
         $this->assertSame($expected, NameNormalizer::normalize($input));
