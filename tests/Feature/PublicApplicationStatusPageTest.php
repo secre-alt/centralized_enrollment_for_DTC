@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\SeedsRoles;
 use Tests\TestCase;
+use Illuminate\Support\Facades\URL;
 
 class PublicApplicationStatusPageTest extends TestCase
 {
@@ -34,10 +35,11 @@ class PublicApplicationStatusPageTest extends TestCase
 
         $this->get(route('public.application.status.form'))
             ->assertOk()
-            ->assertSee('class="app-wizard-page status-lookup-page"', false)
-            ->assertSee('Lookup details')
-            ->assertSee('Both details must match the application record.')
-            ->assertSee('Check your application status')
+            ->assertSee('class="app-wizard-page status-lookup-page admission-wizard"', false)
+            ->assertSee('class="admission-card status-lookup-card"', false)
+            ->assertSee('Applicant services')
+            ->assertSee('Check status')
+            ->assertSee('Enter the reference number and email address from your application.')
             ->assertDontSee('Application status</span>', false)
             ->assertSee('APP-2026-ABC123')
             ->assertSee('not-found@example.test')
@@ -72,8 +74,50 @@ class PublicApplicationStatusPageTest extends TestCase
             ->assertSee('Jamie Applicant')
             ->assertSee('BS Criminology')
             ->assertSee('Next step')
-            ->assertSee('awaiting initial review')
+            ->assertSee('awaiting Registrar review')
             ->assertDontSee('Internal text is not shown');
+    }
+
+    public function test_signed_email_link_opens_status_without_email_in_url_and_expires(): void
+    {
+        $application = $this->makeApplication('revision_required', 'Please correct your application.');
+        $emailHash = hash_hmac('sha256', strtolower(trim($application->email)), (string) config('app.key'));
+        $link = URL::temporarySignedRoute('public.application.status.email', now()->addHour(), [
+            'application' => $application->id,
+            'email_hash' => $emailHash,
+        ]);
+
+        $this->get($link)
+            ->assertOk()
+            ->assertSee($application->reference_no)
+            ->assertSee('Please correct your application.')
+            ->assertDontSee('app-wizard-back', false)
+            ->assertDontSee('arrow-left', false);
+        $this->assertStringNotContainsString($application->email, $link);
+
+        $this->get(URL::temporarySignedRoute('public.application.status.email', now()->subMinute(), [
+            'application' => $application->id,
+            'email_hash' => $emailHash,
+        ]))->assertForbidden();
+
+        $this->get(URL::temporarySignedRoute('public.application.status.email', now()->addHour(), [
+            'application' => $application->id,
+            'email_hash' => str_repeat('0', 64),
+        ]))->assertForbidden();
+    }
+
+    public function test_manual_status_lookup_fields_remain_available_and_match_admission_wizard(): void
+    {
+        $this->get(route('public.application.status.form'))
+            ->assertOk()
+            ->assertSee('class="app-wizard-page status-lookup-page admission-wizard"', false)
+            ->assertSee('class="admission-card status-lookup-card"', false)
+            ->assertSee('Applicant services')
+            ->assertSee('Check status')
+            ->assertSee('Enter the reference number and email address from your application.')
+            ->assertSee('name="reference_no"', false)
+            ->assertSee('name="email"', false)
+            ->assertSee('class="wiz-btn wiz-btn--primary status-submit-btn"', false);
     }
 
     public function test_public_status_displays_escaped_remarks_and_no_invented_resubmission_path(): void
@@ -89,7 +133,7 @@ class PublicApplicationStatusPageTest extends TestCase
             ->assertSee('Please clarify your school history.')
             ->assertSee('&lt;script&gt;alert(&#039;xss&#039;)&lt;/script&gt;', false)
             ->assertDontSee('<script>alert', false)
-            ->assertSee('This status page cannot receive corrected documents.')
+            ->assertSee('Email corrections are available through the current link in your notification email.')
             ->assertDontSee('Upload corrected documents');
     }
 

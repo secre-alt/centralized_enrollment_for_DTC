@@ -1998,6 +1998,14 @@ body.dtc-dark .rev-edit:hover { background: #1e293b; border-color: #60a5fa; }
 
 /* Public application status lookup shares the admission form's visual system. */
 .status-lookup-page { min-height: 0; }
+.status-lookup-page.admission-wizard { width: min(1280px, calc(100% - 48px)); max-width: none; padding: 16px 0 24px; }
+.status-lookup-card { padding: 40px 48px 44px !important; }
+.status-lookup-intro { margin: 32px 0 28px !important; }
+.status-lookup-intro h1 { color: #111827; font-size: 28px; line-height: 1.2; }
+.status-lookup-intro p { margin: 6px 0 0; color: #64748b; font-size: 14px; }
+.status-lookup-body { padding-top: 4px; }
+.status-lookup-fields { margin-bottom: 28px; }
+.status-submit-btn { width: auto; min-width: 140px; margin-left: auto; }
 .status-lookup-page .wiz-panel { display: block; }
 .status-lookup-secure { display: inline-flex; align-items: center; gap: 6px; color: #64748b; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .status-lookup-secure svg { width: 15px; height: 15px; color: #0f4cdb; }
@@ -2260,6 +2268,13 @@ body.dtc-dark .wiz-address-heading p { color: #94a3b8; }
 .status-lookup-page .status-remarks-copy { overflow-wrap: anywhere; }
 .status-lookup-page .status-progress li { min-width: 0; }
 .status-lookup-page .status-progress li > div { min-width: 0; }
+@media (max-width: 767px) {
+    .status-lookup-page.admission-wizard { width: calc(100% - 24px); padding-top: 16px; }
+    .status-lookup-card { padding: 28px 20px 32px !important; }
+    .status-lookup-intro { margin: 28px 0 24px !important; }
+    .status-lookup-fields { grid-template-columns: minmax(0, 1fr); }
+    .status-submit-btn { width: 100%; }
+}
 body.dtc-dark .app-wizard-page .wiz-step[aria-current="step"] .wiz-step-label { color: #93c5fd; }
 body.dtc-dark .app-wizard-page .wiz-personal-section-title { color: #e2e8f0; }
 body.dtc-dark .app-wizard-page .wiz-name-section-header h3 { color: #e2e8f0; }

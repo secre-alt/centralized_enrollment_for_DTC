@@ -15,6 +15,7 @@ class ApplicationRevisionRequired extends Mailable
      * The application record requiring revision.
      */
     public Application $application;
+    public string $statusUrl;
 
     public function __construct(Application $application)
     {

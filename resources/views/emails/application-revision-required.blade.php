@@ -6,5 +6,5 @@
     <p style="margin:0;">{!! nl2br(e($application->remarks)) !!}</p>
 </div>
 <p style="margin:18px 0 0;">Use your reference number and application email to check the details.</p>
-@include('emails.action', ['url' => route('public.application.status.form'), 'label' => 'Check status'])
+@include('emails.action', ['url' => $statusUrl, 'label' => 'Check status'])
 @endcomponent

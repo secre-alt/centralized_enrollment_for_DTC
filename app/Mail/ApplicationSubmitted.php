@@ -12,10 +12,12 @@ class ApplicationSubmitted extends Mailable
     use Queueable, SerializesModels;
 
     public string $referenceNo;
+    public string $statusUrl;
 
-    public function __construct(Application $application)
+    public function __construct(Application $application, string $statusUrl)
     {
         $this->referenceNo = $application->reference_no;
+        $this->statusUrl = $statusUrl;
     }
 
     public function build()

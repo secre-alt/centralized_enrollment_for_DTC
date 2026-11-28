@@ -73,10 +73,11 @@ class SecurityAuditRemediationTest extends TestCase
             ->assertOk()
             ->assertSee($application->reference_no);
 
-        Mail::to($application->email)->send(new ApplicationSubmitted($application));
+        Mail::to($application->email)->send(new ApplicationSubmitted($application, route('public.application.status.form')));
         Mail::assertSent(ApplicationSubmitted::class, function (ApplicationSubmitted $mail) use ($application) {
             $html = view('emails.application-submitted', [
                 'referenceNo' => $mail->referenceNo,
+                'statusUrl' => $mail->statusUrl,
             ])->render();
             $this->assertStringContainsString($application->reference_no, $html);
 
@@ -121,6 +122,7 @@ class SecurityAuditRemediationTest extends TestCase
         Mail::assertSent(ApplicationSubmitted::class, function (ApplicationSubmitted $mail) use ($application) {
             $html = view('emails.application-submitted', [
                 'referenceNo' => $mail->referenceNo,
+                'statusUrl' => $mail->statusUrl,
             ])->render();
             $this->assertStringContainsString($application->reference_no, $html);
 
