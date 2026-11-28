@@ -294,6 +294,52 @@ class ApplicationController extends Controller
             ->with($delivery['ok'] ? 'success' : 'warning', 'Revision requested. ' . $delivery['message']);
     }
 
+    public function resendDecisionEmail(Application $application)
+    {
+        if (! in_array($application->status, ['approved', 'rejected', 'revision_required'], true)) {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('error', 'A decision email is available only for approved, rejected, or revision-required applications.');
+        }
+
+        if (! filter_var($application->email, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('warning', 'The saved applicant email address is missing or invalid. Update it before resending.');
+        }
+
+        if ($application->status === 'approved' && (! $application->user || $application->user->email_verified_at !== null)) {
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('warning', 'An activation email can only be resent for an approved account that has not been activated.');
+        }
+
+        try {
+            $mail = match ($application->status) {
+                'approved' => $this->approvedApplicationMail($application),
+                'rejected' => new ApplicationRejected($application),
+                'revision_required' => new ApplicationRevisionRequired($application),
+            };
+            Mail::to($application->email)->send($mail);
+
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('success', 'Decision email resent to ' . $application->email . '.');
+        } catch (\Throwable $exception) {
+            Log::warning('Application decision email resend failed.', [
+                'application_id' => $application->id,
+                'exception' => get_class($exception),
+            ]);
+
+            return redirect()->route('registrar.applications.show', $application)
+                ->with('warning', 'Email could not be delivered. Check the SMTP/Mailpit connection and try again.');
+        }
+    }
+
+    private function approvedApplicationMail(Application $application): ApplicationApproved
+    {
+        $token = Password::broker('users')->createToken($application->user);
+        $setupUrl = route('password.setup.show', ['token' => $token, 'email' => $application->email]);
+
+        return new ApplicationApproved($application, $setupUrl, config('auth.passwords.users.expire', 60));
+    }
+
     public function approveCancellation(Request $request, ApplicationCancellationRequest $cancellationRequest, ApplicationCancellationService $service)
     {
         abort_unless($request->user()->hasAnyRole(['registrar', 'admin']), 403);

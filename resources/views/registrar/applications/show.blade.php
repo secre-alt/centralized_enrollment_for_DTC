@@ -524,6 +524,7 @@
                 <div class="text-muted u-text-sm">
                     This application requires revision. Review the Registrar remarks above before further action.
                 </div>
+                @include('registrar.applications._resend-decision-email')
             </div>
         </div>
         @elseif($application->status === 'approved')
@@ -532,6 +533,9 @@
                 <div class="text-muted u-text-sm">
                     This application has been approved. No further action is available.
                 </div>
+                @if($application->user && !$application->user->email_verified_at)
+                    @include('registrar.applications._resend-decision-email')
+                @endif
             </div>
         </div>
         @elseif($application->status === 'rejected')
@@ -540,6 +544,7 @@
                 <div class="text-muted u-text-sm" >
                     This application has been rejected. Review the Registrar remarks above for the reason.
                 </div>
+                @include('registrar.applications._resend-decision-email')
             </div>
         </div>
         @elseif($application->status === 'cancelled')

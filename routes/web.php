@@ -263,6 +263,7 @@ use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
     Route::post('/applications/{application}/approve', [RegistrarApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/applications/{application}/reject', [RegistrarApplicationController::class, 'reject'])->name('applications.reject');
     Route::post('/applications/{application}/revision', [RegistrarApplicationController::class, 'revision'])->name('applications.revision');
+    Route::post('/applications/{application}/resend-email', [RegistrarApplicationController::class, 'resendDecisionEmail'])->middleware('throttle:5,1')->name('applications.resend-email');
     Route::post('/applications/cancellation-requests/{cancellationRequest}/approve', [RegistrarApplicationController::class, 'approveCancellation'])->name('applications.cancellation.approve');
     Route::post('/applications/cancellation-requests/{cancellationRequest}/reject', [RegistrarApplicationController::class, 'rejectCancellation'])->name('applications.cancellation.reject');
     });
