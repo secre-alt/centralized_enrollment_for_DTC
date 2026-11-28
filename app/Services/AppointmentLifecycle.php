@@ -146,7 +146,7 @@ class AppointmentLifecycle
         $documents = DocumentRequest::where('appointment_id', $appointment->id)->orWhereIn('id', array_column($items, 'document_request_id'))
             ->orderBy('id')->lockForUpdate()->get(['id', 'document_type', 'copies', 'purpose', 'fee', 'status', 'appointment_id', 'payment_appointment_id', 'pending_claim_appointment_id'])->toArray();
 
-        return ['appointment' => $appointment->only(['id', 'user_id', 'appointment_slot_id', 'status', 'visit_type', 'document_type', 'purpose', 'remarks', 'lifecycle_version', 'completed_at', 'completed_by']),
+        return ['appointment' => $appointment->only(['id', 'user_id', 'appointment_service_id', 'appointment_slot_id', 'reference_number', 'status', 'visit_type', 'document_type', 'purpose', 'remarks', 'cancellation_reason', 'rejection_reason', 'staff_remarks', 'confirmed_by', 'confirmed_at', 'checked_in_by', 'checked_in_at', 'lifecycle_version', 'completed_at', 'completed_by']),
             'documents' => $documents, 'items' => $items];
     }
 

@@ -19,7 +19,7 @@ class DashboardController extends Controller
             ->where('is_paid', true)
             ->whereHas('payment', fn ($query) => $query->where('status', 'verified'))
             ->count();
-        $appointmentsToday  = Appointment::whereHas('slot', fn($q) =>
+        $appointmentsToday  = Appointment::whereNotNull('appointment_service_id')->whereHas('slot', fn($q) =>
             $q->whereDate('date', today()))->count();
         $totalRevenue       = Payment::where('status', 'verified')->sum('amount')
             - Payment::where('refund_status', 'refunded')->sum('refund_amount');
@@ -38,7 +38,7 @@ class DashboardController extends Controller
         $recentActivities = UserNotification::with('user')
             ->latest()->take(6)->get();
 
-        $upcomingAppointments = Appointment::with('user', 'slot')
+        $upcomingAppointments = Appointment::with('user', 'slot', 'service')->whereNotNull('appointment_service_id')
             ->whereHas('slot', fn($q) => $q->whereDate('date', '>=', today()))
             ->where('status', 'confirmed')
             ->orderBy('created_at')

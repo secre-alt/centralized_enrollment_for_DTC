@@ -1,0 +1,36 @@
+.dtc-advising-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dtc-section-gap, 24px);
+}
+
+.dtc-advising-page > * { margin: 0 !important; }
+.dtc-advising-panel, .dtc-advising-appointment { border: 1px solid var(--dtc-border, #dce3ed); border-radius: 12px; box-shadow: 0 1px 2px rgb(16 24 40 / 4%); }
+.dtc-advising-panel .card-body, .dtc-advising-appointment .card-body { padding: var(--dtc-panel-padding, 24px); }
+.dtc-advising-intro { margin-bottom: 20px; }
+.dtc-advising-intro h2, .dtc-advising-section-heading h2 { margin: 0; color: var(--dtc-text, #172b4d); font-size: 18px; font-weight: 600; line-height: 26px; }
+.dtc-advising-intro p, .dtc-advising-section-heading p { max-width: 76ch; margin: 6px 0 0; color: var(--dtc-text-secondary, #52657e); font-size: 14px; line-height: 22px; }
+.dtc-advising-intro .dtc-advising-note { margin-top: 8px; font-size: 13px; }
+.dtc-advising-page .alert { margin: 0 0 16px; }
+.dtc-advising-page form.row { margin-bottom: -16px; }
+.dtc-advising-page .form-group { margin-bottom: 16px; }
+.dtc-advising-page .form-control { min-height: 44px; border-radius: 8px; }
+.dtc-advising-page textarea.form-control { min-height: 96px; }
+.dtc-advising-empty { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid var(--dtc-border, #dce3ed); border-radius: 8px; background: var(--dtc-surface-soft, #f7f9fc); color: var(--dtc-text-secondary, #52657e); }
+.dtc-advising-empty > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--dtc-primary, #1455d9); }
+.dtc-advising-empty strong { color: var(--dtc-text, #172b4d); font-size: 14px; line-height: 20px; }
+.dtc-advising-empty p { margin: 4px 0 0; font-size: 13px; line-height: 20px; }
+.dtc-advising-section-heading { margin-bottom: 12px; }
+.dtc-advising-section-heading p { margin-top: 2px; }
+.dtc-advising-history { min-width: 0; }
+.dtc-advising-appointment { margin-bottom: 12px !important; }
+.dtc-advising-appointment:last-child { margin-bottom: 0 !important; }
+.dtc-advising-appointment .card-body { gap: 12px; }
+.dtc-advising-appointment .card-body > div:first-child { min-width: 0; }
+.dtc-advising-history-empty { padding: 16px; border: 1px dashed var(--dtc-border, #dce3ed); border-radius: 8px; color: var(--dtc-text-secondary, #52657e); font-size: 14px; }
+
+@media (max-width: 767.98px) {
+    .dtc-advising-panel .card-body, .dtc-advising-appointment .card-body { padding: 16px; }
+    .dtc-advising-page form.row { margin-inline: -8px; }
+    .dtc-advising-page form.row > [class*="col-"] { padding-inline: 8px; }
+}

@@ -46,7 +46,7 @@ class DocumentRequestUiTest extends TestCase
             if (! is_dir($directory)) mkdir($directory, 0755, true);
             file_put_contents($directory.'/document-history-'.$role.'.html', $historyPage->getContent());
             $this->get(route('portal.appointments.index'))->assertOk()
-                ->assertSee('No appointments yet')
+                ->assertSee('No appointment records')
                 ->assertSee('Claiming history')
                 ->assertDontSee('Historical submission appointments appear below.');
             $this->get(route('portal.claiming-appointments.index'))->assertOk()

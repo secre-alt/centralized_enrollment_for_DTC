@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AppointmentService;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -75,8 +76,12 @@ class ViewServiceProvider extends ServiceProvider
                         ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'file-text'],
                         ['text' => 'Students & Alumni',    'url' => route('registrar.students.index'),     'icon' => 'users'],
                         ['text' => 'Academic Import Center','url' => route('registrar.imports.index'),      'icon' => 'upload'],
-                        ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'calendar-check'],
-                        ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'clock'],
+                        ['text' => 'Appointments', 'icon' => 'calendar-check', 'submenu' => [
+                            ['text' => 'Consultation requests', 'url' => route('registrar.appointments.index'), 'icon' => 'calendar-check'],
+                            ['text' => 'Historical document visits', 'url' => route('registrar.appointments.index', ['kind' => 'historical']), 'icon' => 'history'],
+                            ['text' => 'Manage services', 'url' => route('registrar.appointments.services.index'), 'icon' => 'list', 'active' => ['registrar/appointments/services']],
+                            ['text' => 'Manage slots', 'url' => route('registrar.appointments.slots'), 'icon' => 'clock', 'active' => ['registrar/appointments/slots']],
+                        ]],
                         ['text' => 'Document Requests',    'url' => route('registrar.documents.index'),    'icon' => 'folder-open'],
 
                         ['header' => 'CASHIER'],
@@ -101,8 +106,12 @@ class ViewServiceProvider extends ServiceProvider
                     ['text' => 'Review Enrollments',   'url' => route('registrar.enrollments.index'),  'icon' => 'file-text'],
                     ['text' => 'Students & Alumni',    'url' => route('registrar.students.index'),     'icon' => 'users'],
                     ['text' => 'Academic Import Center','url' => route('registrar.imports.index'),      'icon' => 'upload'],
-                    ['text' => 'Appointment Requests', 'url' => route('registrar.appointments.index'), 'icon' => 'calendar-check'],
-                    ['text' => 'Manage Slots',         'url' => route('registrar.appointments.slots'), 'icon' => 'clock'],
+                    ['text' => 'Appointments', 'icon' => 'calendar-check', 'submenu' => [
+                        ['text' => 'Consultation requests', 'url' => route('registrar.appointments.index'), 'icon' => 'calendar-check'],
+                        ['text' => 'Historical document visits', 'url' => route('registrar.appointments.index', ['kind' => 'historical']), 'icon' => 'history'],
+                        ['text' => 'Manage services', 'url' => route('registrar.appointments.services.index'), 'icon' => 'list', 'active' => ['registrar/appointments/services']],
+                        ['text' => 'Manage slots', 'url' => route('registrar.appointments.slots'), 'icon' => 'clock', 'active' => ['registrar/appointments/slots']],
+                    ]],
                     ['text' => 'Document Requests',    'url' => route('registrar.documents.index'),    'icon' => 'folder-open'],
                     ['text' => 'Payment History',      'url' => route('registrar.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^registrar/transactions(?:/|$)#']],
                     ['header' => 'SYSTEM'],
@@ -139,8 +148,11 @@ class ViewServiceProvider extends ServiceProvider
                         ['text' => 'Request Documents', 'url' => route('portal.documents.create'), 'icon' => 'plus', 'active' => ['portal/documents/create']],
                         ['text' => 'My Requests', 'url' => route('portal.documents.index'), 'icon' => 'list', 'active' => ['portal/documents']],
                     ]],
-                    ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
-                    ['text' => 'Enrollment advising', 'url' => route('portal.advising.index'), 'icon' => 'calendar-plus', 'active' => ['portal/advising']],
+                    ['text' => 'Appointments', 'icon' => 'calendar-check', 'submenu' => [
+                        ['text' => 'Book Appointment', 'url' => route('portal.advising.index'), 'icon' => 'plus', 'active' => ['portal/advising']],
+                        ['text' => 'My Appointments', 'url' => route('portal.advising.index').'#appointments-history', 'icon' => 'list'],
+                        ['text' => 'Document Appointment History', 'url' => route('portal.appointments.index'), 'icon' => 'history', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
+                    ]],
                     ['text' => 'Certificate of Registration', 'url' => route('portal.cor.show'), 'icon' => 'file-badge'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
@@ -158,6 +170,12 @@ class ViewServiceProvider extends ServiceProvider
                         ['text' => 'My Enrollment Status', 'url' => route('portal.enrollment.index'),  'icon' => 'list'],
                     ]],
                     ['text' => 'Payment History', 'url' => route('portal.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^portal/transactions(?:/|$)#']],
+                    ...(AppointmentService::where('is_active', true)->whereJsonContains('eligible_roles', 'new_applicant')->exists() ? [[
+                        'text' => 'Appointments', 'icon' => 'calendar-check', 'submenu' => [
+                            ['text' => 'Book Appointment', 'url' => route('portal.advising.index'), 'icon' => 'plus', 'active' => ['portal/advising']],
+                            ['text' => 'My Appointments', 'url' => route('portal.advising.index').'#appointments-history', 'icon' => 'list'],
+                        ],
+                    ]] : []),
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];
@@ -173,8 +191,11 @@ class ViewServiceProvider extends ServiceProvider
                         ['text' => 'My Requests',      'url' => route('portal.documents.index'),  'icon' => 'list'],
                     ]],
                     ['text' => 'Payment History', 'url' => route('portal.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^portal/transactions(?:/|$)#']],
-                    ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
-                    ['text' => 'Enrollment advising', 'url' => route('portal.advising.index'), 'icon' => 'calendar-plus', 'active' => ['portal/advising']],
+                    ['text' => 'Appointments', 'icon' => 'calendar-check', 'submenu' => [
+                        ['text' => 'Book Appointment', 'url' => route('portal.advising.index'), 'icon' => 'plus', 'active' => ['portal/advising']],
+                        ['text' => 'My Appointments', 'url' => route('portal.advising.index').'#appointments-history', 'icon' => 'list'],
+                        ['text' => 'Document Appointment History', 'url' => route('portal.appointments.index'), 'icon' => 'history', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
+                    ]],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];

@@ -45,6 +45,7 @@ class PortalPaymentController extends Controller
     public function switchBundleToGcash(Request $request, Appointment $appointment)
     {
         abort_unless($appointment->user_id === $request->user()->id, 403);
+        abort_if($appointment->appointment_service_id, 422, 'Consultation appointments do not have payments.');
 
         $qrPath = Setting::get('gcash_qr_path');
         if (! $qrPath || ! Storage::disk('local')->exists($qrPath)) {
@@ -115,6 +116,7 @@ class PortalPaymentController extends Controller
     public function backToRequests(Request $request, Appointment $appointment)
     {
         abort_unless($appointment->user_id === $request->user()->id, 403);
+        abort_if($appointment->appointment_service_id, 422, 'Consultation appointments do not have payments.');
 
         DB::transaction(function () use ($request, $appointment) {
             $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
@@ -169,7 +171,7 @@ class PortalPaymentController extends Controller
     public function appointment(Request $request, Appointment $appointment)
     {
         abort_unless($appointment->user_id === $request->user()->id, 403);
-        abort_if($appointment->visit_type === 'advising', 422, 'Advising appointments do not require payment.');
+        abort_if($appointment->appointment_service_id, 422, 'Consultation appointments do not have payments.');
         if ($appointment->visit_type === 'claiming') {
             return redirect()->route('portal.claiming-appointments.index');
         }

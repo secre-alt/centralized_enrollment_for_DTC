@@ -31,7 +31,7 @@ abstract class TestCase extends BaseTestCase
         if (preg_match('~^/registrar/documents/\d+/status$~', $path) && ($data['status'] ?? null) === 'ready') {
             $data += ['operation_key' => (string) \Illuminate\Support\Str::uuid()];
         }
-        if (preg_match('~^/(?:portal|registrar)/(?:claiming-appointments(?:/\d+/release)?|appointments(?:/\d+(?:/(?:confirm|cancel))?)?|documents(?:/\d+/pickup-appointment)?)$~', $path)) {
+        if (preg_match('~^/(?:portal|registrar)/(?:advising|claiming-appointments(?:/\d+/release)?|appointments(?:/\d+(?:/(?:confirm|cancel|reject|check-in|complete|no-show|remarks))?)?|documents(?:/\d+/pickup-appointment)?)$~', $path)) {
             $data += ['operation_key' => (string) \Illuminate\Support\Str::uuid()];
             if (preg_match('~/(?:claiming-appointments|appointments)/(\d+)~', $path, $matches)) {
                 $data += ['lifecycle_version' => \App\Models\Appointment::find($matches[1])?->lifecycle_version ?? 0];

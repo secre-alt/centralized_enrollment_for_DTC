@@ -441,6 +441,7 @@ class PortalDashboardController extends Controller
             ->select('appointments.*')
             ->join('appointment_slots', 'appointment_slots.id', '=', 'appointments.appointment_slot_id')
             ->where('appointments.user_id', $userId)
+            ->whereNotNull('appointments.appointment_service_id')
             ->where('appointments.status', 'confirmed')
             ->whereNotNull('appointment_slots.date')
             ->whereNotNull('appointment_slots.start_time')

@@ -173,7 +173,7 @@
                     <div>
                         <div  class="u-text-sm-bold">{{ $appt->user->name }}</div>
                         <div  class="u-text-xs-secondary">
-                            {{ ucfirst($appt->document_type) }} •
+                            {{ $appt->service?->name ?? 'Registrar consultation' }} •
                             {{ \Carbon\Carbon::parse($appt->slot->start_time)->format('h:i A') }}
                         </div>
                     </div>

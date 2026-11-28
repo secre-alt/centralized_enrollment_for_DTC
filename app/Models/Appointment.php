@@ -5,16 +5,32 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class Appointment extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id', 'appointment_slot_id', 'document_type', 'purpose', 'status', 'remarks',
-        'visit_type', 'completed_at', 'completed_by',
+        'user_id', 'appointment_service_id', 'appointment_slot_id', 'document_type', 'purpose', 'status', 'remarks',
+        'visit_type', 'reference_number', 'confirmed_by', 'confirmed_at', 'checked_in_by', 'checked_in_at',
+        'completed_at', 'completed_by', 'cancellation_reason', 'rejection_reason', 'staff_remarks',
     ];
 
-    protected $casts = ['completed_at' => 'datetime', 'lifecycle_version' => 'integer'];
+    protected $casts = ['confirmed_at' => 'datetime', 'checked_in_at' => 'datetime', 'completed_at' => 'datetime', 'lifecycle_version' => 'integer'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $appointment) {
+            if ($appointment->appointment_service_id && ! $appointment->reference_number) {
+                $appointment->reference_number = 'DTC-APT-'.Str::upper((string) Str::uuid());
+            }
+        });
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(AppointmentService::class, 'appointment_service_id');
+    }
 
     public function lifecycleEvents()
     {

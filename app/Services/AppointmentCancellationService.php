@@ -23,16 +23,28 @@ class AppointmentCancellationService
         abort_if(! $isStaff && $appointment->user_id !== $actor->id, 403);
         abort_if($appointment->visit_type === 'claiming', 422, 'Claiming cancellation requires a reservation-aware recovery workflow.');
 
-        $result = app(AppointmentLifecycle::class)->run($request, 'appointment.cancelled', $appointment, [], [], function () use ($appointment, $actor, $request, $remarks, $isStaff) {
+        $isConsultation = (bool) $appointment->appointment_service_id;
+        $result = app(AppointmentLifecycle::class)->run($request, 'appointment.cancelled', $appointment, [], [], function () use ($appointment, $actor, $request, $remarks, $isStaff, $isConsultation) {
             $lockedAppointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
 
             if ($lockedAppointment->status === 'cancelled') {
                 return ['result' => 'already_cancelled'];
             }
 
-            $allowedStatuses = $isStaff ? ['pending', 'confirmed'] : ['pending'];
+            $allowedStatuses = $isStaff || $isConsultation ? ['pending', 'confirmed'] : ['pending'];
             if (! in_array($lockedAppointment->status, $allowedStatuses, true)) {
                 return ['result' => 'invalid_status'];
+            }
+
+            if ($lockedAppointment->appointment_service_id) {
+                $lockedAppointment->update(['status' => 'cancelled', 'cancellation_reason' => $remarks]);
+                AuditLog::create(['user_id' => $actor->id, 'action' => 'appointment.consultation_cancelled',
+                    'description' => "Cancelled consultation appointment #{$lockedAppointment->id}.",
+                    'ip_address' => $request->ip(), 'user_agent' => $request->userAgent(),
+                    'metadata' => ['appointment_id' => $lockedAppointment->id, 'reason' => $remarks]]);
+
+                return ['result' => 'cancelled', 'appointment' => $lockedAppointment->fresh(['user', 'slot']),
+                    'document_requests' => collect(), 'document_request' => null, 'request_disposition' => 'none'];
             }
 
             $legacyPayments = AppointmentPayment::where('appointment_id', $lockedAppointment->id)
@@ -45,13 +57,6 @@ class AppointmentCancellationService
             $documentRequests = DocumentRequest::where('appointment_id', $lockedAppointment->id)
                 ->orderBy('id')->lockForUpdate()
                 ->get();
-
-            if ($lockedAppointment->visit_type === 'advising') {
-                $lockedAppointment->update(['status' => 'cancelled', 'remarks' => $remarks ?? $lockedAppointment->remarks]);
-                AuditLog::create(['user_id' => $actor->id, 'action' => 'appointment.advising_cancelled',
-                    'description' => "Cancelled advising appointment #{$lockedAppointment->id}.", 'ip_address' => $request->ip(), 'user_agent' => $request->userAgent()]);
-                return ['result' => 'cancelled', 'user_message' => 'Advising appointment cancelled.'];
-            }
 
             if (! $isStaff && $documentRequests->contains(fn ($documentRequest) => in_array($documentRequest->status, ['processing', 'ready', 'released'], true))) {
                 return ['result' => 'resolved_request'];

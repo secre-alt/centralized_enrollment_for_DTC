@@ -4,9 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\DocumentRequest;
-use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Route;
 use Tests\SeedsRoles;
 use Tests\TestCase;
 
@@ -38,55 +36,26 @@ class AppointmentEditingSafetyTest extends TestCase
         return ['appointment_slot_id' => $appointment->appointment_slot_id, 'document_type' => $type, 'purpose' => 'Updated purpose'];
     }
 
-    public function test_purpose_changes_preserve_original_fee_for_every_payment_state(): void
+    public function test_legacy_document_booking_edit_routes_are_read_only_and_preserve_payment(): void
     {
-        Setting::set('document_fee_tor', 999);
         foreach (['unpaid', 'pending_verification', 'verified', 'rejected'] as $status) {
             [$appointment, $document] = $this->booking($status);
-            $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment))->assertSessionHasNoErrors();
+            $this->get(route('portal.appointments.edit', $appointment))->assertStatus(410);
+            $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment))->assertStatus(410);
+            $this->post(route('portal.appointments.cancel', $appointment))->assertStatus(410);
             $this->assertSame('80.00', $document->fresh()->fee);
-            $this->assertSame('Updated purpose', $document->fresh()->purpose);
+            $this->assertSame($status, $document->fresh()->payment_status);
+            $this->assertSame('pending', $appointment->fresh()->status);
         }
     }
 
-    public function test_document_type_change_reprices_only_unpaid_or_rejected_requests_and_keeps_copies(): void
-    {
-        Setting::set('document_fee_diploma', 120);
-        foreach (['unpaid', 'rejected', 'pending_verification', 'verified'] as $status) {
-            [$appointment, $document] = $this->booking($status);
-            $response = $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment, 'diploma'));
-            if (in_array($status, ['unpaid', 'rejected'])) {
-                $response->assertSessionHasNoErrors();
-                $this->assertSame('240.00', $document->fresh()->fee);
-            } else {
-                $response->assertSessionHasErrors('document_type');
-                $this->assertSame('80.00', $document->fresh()->fee);
-                $this->assertSame('transcript', $appointment->fresh()->document_type);
-            }
-        }
-    }
-
-    public function test_rescheduling_a_paid_booking_preserves_its_fee_and_payment(): void
-    {
-        [$appointment, $document] = $this->booking('verified');
-        Setting::set('document_fee_tor', 999);
-        $slot = \App\Models\AppointmentSlot::factory()->create(['date' => now()->addDays(10)->toDateString(), 'status' => 'open']);
-        $payload = $this->payload($appointment);
-        $payload['appointment_slot_id'] = $slot->id;
-        $this->put(route('portal.appointments.update', $appointment), $payload)->assertSessionHasNoErrors();
-        $this->assertSame($slot->id, $appointment->fresh()->appointment_slot_id);
-        $this->assertSame('80.00', $document->fresh()->fee);
-        $this->assertSame('verified', $document->fresh()->payment_status);
-    }
-
-    public function test_progressing_or_completed_documents_keep_their_content_when_a_pending_booking_is_edited(): void
+    public function test_progressing_or_completed_documents_are_unchanged_by_legacy_update_attempts(): void
     {
         foreach (['processing', 'ready', 'released'] as $status) {
             [$appointment, $document] = $this->booking('verified');
             $document->update(['status' => $status, 'purpose' => 'Original purpose']);
 
-            $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment, 'diploma'))
-                ->assertSessionHasErrors('document_type');
+            $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment, 'diploma'))->assertStatus(410);
 
             $document->refresh();
             $this->assertSame('tor', $document->document_type);
@@ -96,7 +65,7 @@ class AppointmentEditingSafetyTest extends TestCase
         }
     }
 
-    public function test_mixed_status_bundle_only_updates_submitted_document_purpose(): void
+    public function test_legacy_update_attempt_does_not_modify_any_document_in_a_mixed_bundle(): void
     {
         [$appointment, $submitted] = $this->booking();
         $submitted->update(['purpose' => 'Original submitted purpose']);
@@ -112,44 +81,43 @@ class AppointmentEditingSafetyTest extends TestCase
             'payment_status' => 'unpaid',
         ]);
 
-        $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment))
-            ->assertSessionHasNoErrors();
+        $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment))->assertStatus(410);
 
-        $this->assertSame('Updated purpose', $submitted->fresh()->purpose);
+        $this->assertSame('Original submitted purpose', $submitted->fresh()->purpose);
         $this->assertSame('Ready document purpose', $ready->fresh()->purpose);
     }
 
-    public function test_edit_dialog_shows_document_choices_only_when_editable(): void
+    public function test_appointment_history_has_no_document_edit_or_reschedule_controls(): void
     {
-        [$appointment] = $this->booking('unpaid');
+        [, $document] = $this->booking('unpaid');
         $this->get(route('portal.appointments.index'))
             ->assertOk()
-            ->assertSee('dr-edit-modal')
-            ->assertSee('name="document_type"', false)
-            ->assertSee('value="diploma"', false)
-            ->assertSee('No other slots available');
+            ->assertSee('Appointment history')
+            ->assertSee('Document progress and release details')
+            ->assertSee('Document Requests')
+            ->assertDontSee('dr-edit-modal')
+            ->assertDontSee('Edit booking')
+            ->assertDontSee('Ready for pickup');
 
-        $appointment->documentRequests()->update(['payment_status' => 'pending_verification']);
+        $document->update(['payment_status' => 'pending_verification']);
         $this->get(route('portal.appointments.index'))
             ->assertOk()
-            ->assertSee('To change these documents, contact the Registrar.')
-            ->assertSee('Transcript of Records')
-            ->assertDontSee('value="diploma"', false);
+            ->assertSee('Payment History')
+            ->assertDontSee('name="appointment_slot_id"', false);
     }
 
-    public function test_edit_rechecks_database_status_even_when_route_model_is_stale(): void
+    public function test_legacy_booking_updates_are_read_only_for_every_existing_status(): void
     {
         foreach (['confirmed', 'cancelled'] as $status) {
             [$appointment, $document] = $this->booking();
             Appointment::whereKey($appointment->id)->update(['status' => $status]);
-            Route::bind('appointment', fn () => $appointment);
-            $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment))->assertSessionHasErrors('appointment');
+            $this->put(route('portal.appointments.update', $appointment), $this->payload($appointment))->assertStatus(410);
             $this->assertSame($status, $appointment->fresh()->status);
             $this->assertNotSame('Updated purpose', $document->fresh()->purpose);
         }
     }
 
-    public function test_passed_schedule_guidance_preserves_booking_documents_and_payment(): void
+    public function test_passed_schedule_is_shown_as_read_only_history_without_pickup_rescheduling(): void
     {
         $this->travelTo(\Carbon\Carbon::parse('2026-10-28 09:00:00'));
         try {
@@ -157,20 +125,20 @@ class AppointmentEditingSafetyTest extends TestCase
             $appointment->slot->update(['date' => '2026-10-28', 'start_time' => '08:00:00', 'end_time' => '08:30:00']);
             $this->assertTrue($appointment->fresh()->scheduleHasPassed());
             $this->get(route('portal.appointments.index'))->assertOk()
-                ->assertSee('Schedule passed — choose a new time')
-                ->assertSee('Edit booking');
+                ->assertSee('Past appointment')
+                ->assertDontSee('choose a new time')
+                ->assertDontSee('Edit booking')
+                ->assertDontSee('Ready for pickup');
             $this->assertSame('pending', $appointment->fresh()->status);
             $this->assertSame('verified', $document->fresh()->payment_status);
             $this->assertSame('80.00', $document->fresh()->fee);
 
             $appointment->update(['status' => 'confirmed']);
             $this->get(route('portal.appointments.index'))->assertOk()
-                ->assertSee('Scheduled time passed — contact the Registrar')
-                ->assertSee('dr-registrar-contact', false)
-                ->assertSee('Need to reschedule or cancel?')
-                ->assertSee('Contact Registrar')
-                ->assertDontSee('Contact the Registrar to change or cancel this confirmed booking.')
-                ->assertDontSee('data-target="#editModal'.$appointment->id.'"', false);
+                ->assertSee('Past appointment')
+                ->assertDontSee('Need to reschedule')
+                ->assertDontSee('another pickup time')
+                ->assertDontSee('data-registrar-contact', false);
 
             $appointment->update(['status' => 'cancelled']);
             $this->assertFalse($appointment->fresh()->scheduleHasPassed());
@@ -193,7 +161,7 @@ class AppointmentEditingSafetyTest extends TestCase
         }
     }
 
-    public function test_payment_action_is_only_shown_when_payment_needs_attention(): void
+    public function test_payment_details_are_not_repeated_in_appointment_history(): void
     {
         $this->travelTo(\Carbon\Carbon::parse('2026-10-28 09:00:00'));
         try {
@@ -201,31 +169,30 @@ class AppointmentEditingSafetyTest extends TestCase
             $overdue->update(['status' => 'confirmed']);
             $overdue->slot->update(['date' => '2026-10-27', 'start_time' => '08:00:00', 'end_time' => '08:30:00']);
             $this->get(route('portal.appointments.index'))->assertOk()
-                ->assertSee('Review payment')
-                ->assertDontSee('>Payment details</a>', false);
+                ->assertSee('Payment history')
+                ->assertDontSee('Review payment')
+                ->assertDontSee('Payment details');
 
             [$cancelled, $cancelledDocument] = $this->booking('unpaid');
             $cancelled->update(['status' => 'cancelled']);
-            $this->get(route('portal.appointments.index'))->assertOk()
-                ->assertSee('Review payment');
+            $this->get(route('portal.appointments.index'))->assertOk()->assertDontSee('Review payment');
 
             $cancelledDocument->update(['fee' => 0]);
             $this->get(route('portal.appointments.index'))->assertOk()
-                ->assertSee('No Payment Required')
-                ->assertDontSee('>Review payment</a>', false)
-                ->assertDontSee('>Payment details</a>', false);
+                ->assertDontSee('No Payment Required')
+                ->assertDontSee('Review payment');
 
             [$paidCancelled] = $this->booking('verified');
             $paidCancelled->update(['status' => 'cancelled']);
             $this->get(route('portal.appointments.index'))->assertOk()
-                ->assertDontSee('>Review payment</a>', false)
-                ->assertDontSee('>Payment details</a>', false);
+                ->assertDontSee('Review payment')
+                ->assertDontSee('Payment details');
         } finally {
             $this->travelBack();
         }
     }
 
-    public function test_registrar_contact_uses_configured_details_and_falls_back_without_email(): void
+    public function test_appointment_history_does_not_show_legacy_pickup_contact_controls(): void
     {
         [$appointment] = $this->booking();
         $this->get(route('portal.appointments.index'))->assertOk()
@@ -233,32 +200,41 @@ class AppointmentEditingSafetyTest extends TestCase
 
         $appointment->update(['status' => 'confirmed']);
         $this->get(route('portal.appointments.index'))->assertOk()
-            ->assertSee('Contact Registrar')
-            ->assertSee('Need to change or cancel?')
-            ->assertSee('dr-registrar-contact', false)
-            ->assertDontSee('Appointment confirmed')
-            ->assertSee('Visit the Registrar’s Office to arrange another pickup time.')
-            ->assertDontSee('data-contact-email', false);
+            ->assertSee('Appointment history')
+            ->assertDontSee('Need to change or cancel?')
+            ->assertDontSee('data-registrar-contact', false)
+            ->assertDontSee('another pickup time');
 
-        Setting::set('registrar_email', 'registrar@example.test');
-        Setting::set('registrar_office', '<script>alert(1)</script>');
         $this->get(route('portal.appointments.index'))->assertOk()
-            ->assertSee('registrar@example.test')
-            ->assertSee('data-booking-reference="'.$appointment->id.'"', false)
-            ->assertSee('data-contact-email', false)
-            ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
+            ->assertDontSee('registrar@example.test')
+            ->assertDontSee('data-booking-reference', false)
+            ->assertDontSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
             ->assertDontSee('<script>alert(1)</script>', false);
     }
 
-    public function test_cancellation_explains_payment_follow_up_and_preserves_payment_records(): void
+    public function test_advising_cancellation_stays_available_and_document_history_cannot_be_cancelled(): void
     {
         foreach (['verified', 'pending_verification'] as $status) {
             [$appointment, $document] = $this->booking($status);
-            $response = $this->post(route('portal.appointments.cancel', $appointment))->assertSessionHasNoErrors();
-            $message = $response->getSession()->get('success');
-            $this->assertStringContainsString('Cashier', $message);
+            $this->post(route('portal.appointments.cancel', $appointment))->assertStatus(410);
             $this->assertSame($status, $document->fresh()->payment_status);
-            $this->assertSame('cancelled', $document->fresh()->status);
+            $this->assertSame('submitted', $document->fresh()->status);
+            $this->assertSame('pending', $appointment->fresh()->status);
         }
+
+        $user = $this->makeUserWithRole('student');
+        $slot = \App\Models\AppointmentSlot::factory()->create(['date' => now()->addDays(2)->toDateString()]);
+        $advising = Appointment::factory()->create([
+            'user_id' => $user->id,
+            'appointment_slot_id' => $slot->id,
+            'visit_type' => 'advising',
+            'status' => 'pending',
+            'document_type' => 'advising',
+        ]);
+        $this->actingAs($user)->post(route('portal.appointments.cancel', $advising), [
+            'operation_key' => (string) \Illuminate\Support\Str::uuid(),
+            'lifecycle_version' => 0,
+        ])->assertSessionHasNoErrors()->assertRedirect(route('portal.advising.index'));
+        $this->assertSame('cancelled', $advising->fresh()->status);
     }
 }

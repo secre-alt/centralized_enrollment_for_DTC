@@ -3,7 +3,7 @@
 @section('title', 'Request Documents')
 @section('content_header')
     <div class="dr dr-head dtc-booking-header"><div>
-        <a href="{{ route('portal.appointments.index') }}" class="dr-back"><i data-lucide="chevron-left" aria-hidden="true"></i> My document requests</a>
+        <a href="{{ route('portal.documents.index') }}" class="dr-back"><i data-lucide="chevron-left" aria-hidden="true"></i> My document requests</a>
         <h1>Request a document</h1>
         <p>Choose your documents and arrange payment. No appointment is required.</p>
     </div></div>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Registrar\DashboardController as RegistrarDashboardController;
 use App\Http\Controllers\Registrar\EnrollmentController as RegistrarEnrollmentController;
 use App\Http\Controllers\Registrar\AppointmentController as RegistrarAppointmentController;
+use App\Http\Controllers\Registrar\AppointmentServiceController;
 use App\Http\Controllers\Registrar\AppointmentScheduleController;
 use App\Http\Controllers\Cashier\DashboardController as CashierDashboardController;
 use App\Http\Controllers\Cashier\PaymentController as CashierPaymentController;
@@ -253,6 +254,9 @@ if (app()->environment('ui-testing')) {
     Route::get('/appointments/closures/impact', [AppointmentScheduleController::class, 'previewClosureImpact'])->name('appointments.closures.impact');
     Route::post('/appointments/closures', [AppointmentScheduleController::class, 'storeClosure'])->name('appointments.closures.store');
     Route::post('/appointments/closures/{closure}/deactivate', [AppointmentScheduleController::class, 'deactivate'])->name('appointments.closures.deactivate');
+    Route::get('/appointments/services', [AppointmentServiceController::class, 'index'])->name('appointments.services.index');
+    Route::post('/appointments/services', [AppointmentServiceController::class, 'store'])->name('appointments.services.store');
+    Route::put('/appointments/services/{service}', [AppointmentServiceController::class, 'update'])->name('appointments.services.update');
     Route::middleware('role:registrar|admin')->group(function () {
         Route::post('/documents/walk-in-release', [RegistrarDocumentController::class, 'releaseWalkIn'])->name('documents.walk-in-release');
         Route::get('/claiming-appointments', [\App\Http\Controllers\Registrar\ClaimingAppointmentController::class, 'index'])->name('claiming-appointments.index');
@@ -260,7 +264,12 @@ if (app()->environment('ui-testing')) {
     });
     Route::get('/appointments', [RegistrarAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments/{appointment}/confirm', [RegistrarAppointmentController::class, 'confirm'])->middleware('appointment.lifecycle:appointment.confirmed')->name('appointments.confirm');
+    Route::post('/appointments/{appointment}/reject', [RegistrarAppointmentController::class, 'reject'])->middleware('appointment.lifecycle:appointment.rejected')->name('appointments.reject');
     Route::post('/appointments/{appointment}/cancel', [RegistrarAppointmentController::class, 'cancel'])->middleware('appointment.lifecycle:appointment.cancelled')->name('appointments.cancel');
+    Route::post('/appointments/{appointment}/check-in', [RegistrarAppointmentController::class, 'checkIn'])->middleware('appointment.lifecycle:appointment.checked_in')->name('appointments.check-in');
+    Route::post('/appointments/{appointment}/complete', [RegistrarAppointmentController::class, 'complete'])->middleware('appointment.lifecycle:appointment.completed')->name('appointments.complete');
+    Route::post('/appointments/{appointment}/no-show', [RegistrarAppointmentController::class, 'markNoShow'])->middleware('appointment.lifecycle:appointment.no_show')->name('appointments.no-show');
+    Route::post('/appointments/{appointment}/remarks', [RegistrarAppointmentController::class, 'saveStaffRemarks'])->middleware('appointment.lifecycle:appointment.remarks_updated')->name('appointments.remarks');
     Route::post('/appointments/payments/{payment}/verify', [RegistrarAppointmentController::class, 'verifyPayment'])->name('appointments.payments.verify');
     Route::post('/appointments/payments/{payment}/reject', [RegistrarAppointmentController::class, 'rejectPayment'])->name('appointments.payments.reject');
     Route::get('/appointments/payments/{payment}/proof', [RegistrarAppointmentController::class, 'viewProof'])->name('appointments.payments.proof');
@@ -328,6 +337,10 @@ if (app()->environment('ui-testing')) {
     Route::get('/enrollment/{enrollment}/revise', [EnrollmentController::class, 'showReplacement'])->name('enrollment.revise');
     Route::post('/enrollment/{enrollment}/revise', [EnrollmentController::class, 'submitReplacement'])->name('enrollment.revise.submit');
     Route::post('/enrollment/replacement-requests/{replacementRequest}/refund', [EnrollmentController::class, 'requestEnrollmentRefund'])->name('enrollment.replacement.refund');
+    Route::middleware('role:student|alumni|new_applicant')->group(function () {
+        Route::get('/advising', [StudentAppointmentController::class, 'advising'])->name('advising.index');
+        Route::post('/advising', [StudentAppointmentController::class, 'bookAdvising'])->middleware('appointment.lifecycle:advising.booked')->name('advising.store');
+    });
     Route::middleware('role:student|alumni')->group(function () {
     Route::get('/claiming-appointments', [\App\Http\Controllers\ClaimingAppointmentController::class, 'index'])->name('claiming-appointments.index');
     Route::post('/claiming-appointments', [\App\Http\Controllers\ClaimingAppointmentController::class, 'store'])->middleware('appointment.lifecycle:claim.booked')->name('claiming-appointments.store');
@@ -344,8 +357,6 @@ if (app()->environment('ui-testing')) {
 
     Route::middleware('role:student|alumni')->group(function () {
     Route::get('/appointments/create', [StudentAppointmentController::class, 'create'])->name('appointments.create');
-    Route::get('/advising', [StudentAppointmentController::class, 'advising'])->name('advising.index');
-    Route::post('/advising', [StudentAppointmentController::class, 'bookAdvising'])->middleware('appointment.lifecycle:advising.booked')->name('advising.store');
     Route::post('/appointments', [StudentAppointmentController::class, 'store'])->middleware('document.submission')->name('appointments.store');
     Route::get('/appointments', [StudentAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments/{appointment}/cancel', [StudentAppointmentController::class, 'cancel'])->middleware('appointment.lifecycle:appointment.cancelled')->name('appointments.cancel');

@@ -1,494 +1,92 @@
 @extends('adminlte::page')
 @include('partials.navbar')
 
-@section('title', 'My Appointments')
+@section('title', 'Document Appointment History')
 
 @section('content_header')
-    <x-dtc.page-header title="My appointments" subtitle="View your scheduled visits and past appointments.">
+    <x-dtc.page-header title="Document appointment history" subtitle="Review scheduled visits connected to your document requests.">
         <x-slot name="actions">
-        <a href="{{ route('portal.advising.index') }}" class="dtc-btn dtc-btn-primary">Enrollment advising</a>
-        <a href="{{ route('portal.claiming-appointments.index') }}" class="dtc-btn dtc-btn-secondary">Claiming history</a>
-        <a href="{{ route('portal.documents.index') }}" class="dtc-btn dtc-btn-secondary">Document requests</a>
+            <a href="{{ route('portal.documents.index') }}" class="dtc-btn dtc-btn-primary">Document requests</a>
+            <a href="{{ route('portal.claiming-appointments.index') }}" class="dtc-btn dtc-btn-secondary">Past claiming bookings</a>
         </x-slot>
     </x-dtc.page-header>
 @endsection
 
+@section('content')
 @php
     $items = method_exists($appointments, 'getCollection') ? $appointments->getCollection() : collect($appointments);
-    $docNames = ['transcript' => 'Transcript of Records', 'diploma' => 'Diploma', 'certification' => 'Certification', 'tor' => 'True Copy of Records', 'true_copy' => 'True Copy of Records'];
-
-    // Four-step track driven by the document request; cancelled bookings get their own group.
-    $stageOf   = ['submitted' => 0, 'processing' => 1, 'ready' => 2, 'released' => 3];
-    $stageName = ['Submitted', 'Preparing', 'Ready', 'Released'];
-    $badgeText = ['submitted' => 'Submitted', 'processing' => 'Being prepared', 'ready' => 'Ready for pickup', 'released' => 'Released'];
-    $badgeTextAppt = ['pending' => 'waiting for confirmation', 'confirmed' => 'confirmed', 'cancelled' => 'cancelled'];
-    $badgeTone = ['submitted' => 'warning', 'processing' => 'info', 'ready' => 'purple', 'released' => 'success'];
-    $groupsOf = function ($a) {
-        $activeStatuses = $a->documentRequests
-            ->pluck('status')
-            ->reject(fn ($status) => $status === 'cancelled')
-            ->values();
-        $groups = [];
-        if ($activeStatuses->isEmpty()) {
-            $groups[] = $a->status === 'cancelled' || $a->documentRequests->contains('status', 'cancelled')
-                ? 'cancelled'
-                : 'progress';
-        } elseif ($activeStatuses->every(fn ($status) => $status === 'released')) {
-            $groups[] = 'released';
-        } else {
-            $groups[] = $activeStatuses->contains('ready') ? 'ready' : 'progress';
-        }
-        if ($a->documentRequests->contains('status', 'cancelled') && ! in_array('cancelled', $groups, true)) {
-            $groups[] = 'cancelled';
-        }
-        return $groups;
+    $groupFor = static function ($appointment) {
+        if ($appointment->status === 'cancelled') return 'cancelled';
+        $slot = $appointment->slot;
+        $end = $slot ? \Carbon\Carbon::parse($slot->date.' '.$slot->end_time, 'Asia/Manila') : null;
+        return $end && $end->gt(now('Asia/Manila')) && in_array($appointment->status, ['pending', 'confirmed'], true)
+            ? 'upcoming'
+            : 'past';
     };
-
-    $counts = ['all' => $items->count(), 'progress' => 0, 'ready' => 0, 'released' => 0, 'cancelled' => 0];
-    foreach ($items as $a) {
-        foreach ($groupsOf($a) as $group) { $counts[$group]++; }
-    }
-    $activeItems = $items->filter(fn ($a) => $a->status !== 'cancelled');
-    $pickupNow   = $activeItems->filter(fn ($a) => $a->documentRequests->contains(fn ($document) => $document->status === 'ready' && $document->paymentSatisfied()))->count();
-    $totalFees   = $activeItems->sum(fn ($a) => (float) $a->documentRequests->sum('fee'));
-    $confirmed   = $items->where('status', 'confirmed')->count();
+    $counts = ['all' => $items->count(), 'upcoming' => 0, 'past' => 0, 'cancelled' => 0];
+    foreach ($items as $appointment) $counts[$groupFor($appointment)]++;
 @endphp
-
-@section('content')
 <div class="dr dr-index dtc-appointments-page dr-alumni-history dr-appointment-history">
-
-    @if ($errors->any())
-        <div class="dr-alert dr-alert--error" role="alert"><i data-lucide="circle-alert" aria-hidden="true"></i><div>{{ $errors->first() }}</div></div>
-    @endif
-
-    @if ($items->isNotEmpty())
-    <details class="dr-history-summary">
-        <summary>Appointment overview <span>{{ $counts['all'] }} total &middot; {{ $confirmed }} confirmed</span></summary>
-    <div class="dtc-dashboard-overview dtc-dashboard-overview--four mb-3" aria-label="Appointment summary">
-        <div class="dtc-overview-item">
-            <span class="dtc-overview-label">Total appointments</span>
-            <strong>{{ $counts['all'] }}</strong>
-            <span class="dtc-overview-note">All bookings</span>
-        </div>
-        <div class="dtc-overview-item">
-            <span class="dtc-overview-label">Ready for pickup</span>
-            <strong>{{ $pickupNow }}</strong>
-            <span class="dtc-overview-note">Payment verified</span>
-        </div>
-        <div class="dtc-overview-item">
-            <span class="dtc-overview-label">Confirmed pickups</span>
-            <strong>{{ $confirmed }}</strong>
-            <span class="dtc-overview-note">Registrar confirmed</span>
-        </div>
-        <div class="dtc-overview-item">
-            <span class="dtc-overview-label">Total fees</span>
-            <strong>&#8369;{{ number_format($totalFees, 2) }}</strong>
-            <span class="dtc-overview-note">Across active requests</span>
-        </div>
+    <div class="dr-history-intro">
+        This page is only for scheduled document visits. Enrollment advising has its own <a href="{{ route('portal.advising.index') }}">Enrollment advising</a> page. Document status, fees, and release details are in <a href="{{ route('portal.documents.index') }}">Document Requests</a>. Ready documents can be collected during posted office hours without booking.
     </div>
 
-    </details>
-    @endif
+    @if (session('success'))<div class="alert alert-success" role="status">{{ session('success') }}</div>@endif
+    @if ($errors->any())<div class="dr-alert dr-alert--error" role="alert"><i data-lucide="circle-alert" aria-hidden="true"></i><div>{{ $errors->first() }}</div></div>@endif
 
     @if ($items->isEmpty())
         <div class="dr-empty dr-appointments-empty dr-visit-empty">
             <span class="dr-appointments-empty-icon" aria-hidden="true"><i data-lucide="calendar-days"></i></span>
-            <h2>No appointments yet</h2>
-            <p>Document requests and collection do not require an appointment.</p>
+            <h2>No document appointments</h2>
+            <p>Ready documents can be collected during posted office hours without an appointment. Check Document Requests for progress or Enrollment Advising to request a consultation.</p>
+            <a href="{{ route('portal.documents.index') }}" class="dr-btn dr-btn--primary">View document requests</a>
         </div>
     @else
-        @if ($pickupNow > 0)
-            <p class="dr-collection-hint">For pickup, bring a valid ID and your receipt if payment was required.</p>
-        @endif
-
-        <div class="dr-filters" role="group" aria-label="Filter appointments" data-dr-filters>
+        <div class="dr-filters" role="group" aria-label="Filter document appointments" data-dr-filters>
             <button type="button" class="dr-filter" data-filter="all" aria-pressed="true">All <span class="dr-filter-count">{{ $counts['all'] }}</span></button>
-            <button type="button" class="dr-filter" data-filter="progress" aria-pressed="false">In progress <span class="dr-filter-count">{{ $counts['progress'] }}</span></button>
-            <button type="button" class="dr-filter" data-filter="ready" aria-pressed="false">Ready <span class="dr-filter-count">{{ $counts['ready'] }}</span></button>
-            <button type="button" class="dr-filter" data-filter="released" aria-pressed="false">Released <span class="dr-filter-count">{{ $counts['released'] }}</span></button>
-            <button type="button" class="dr-filter" data-filter="cancelled" aria-pressed="false">Cancelled <span class="dr-filter-count">{{ $counts['cancelled'] }}</span></button>
+            @foreach (['upcoming' => 'Upcoming', 'past' => 'Past', 'cancelled' => 'Cancelled'] as $key => $label)
+                @if ($counts[$key] > 0)
+                    <button type="button" class="dr-filter" data-filter="{{ $key }}" aria-pressed="false">{{ $label }} <span class="dr-filter-count">{{ $counts[$key] }}</span></button>
+                @endif
+            @endforeach
         </div>
 
         <ul class="dr-list">
             @foreach ($items as $appointment)
                 @php
-                    $pay = $appointment->latestPayment;
+                    $slot = $appointment->slot;
+                    $group = $groupFor($appointment);
                     $documentRequests = $appointment->documentRequests;
-                    $docRequest = $appointment->documentRequest;
-                    $bundlePayment = $pay && $pay->is_document_bundle ? $pay : null;
-                    $when = \Carbon\Carbon::parse($appointment->slot->date);
-                    $time = \Carbon\Carbon::parse($appointment->slot->start_time)->format('g:i A').' to '.\Carbon\Carbon::parse($appointment->slot->end_time)->format('g:i A');
-                    $cancelled = $appointment->status === 'cancelled';
-                    $schedulePassed = $appointment->scheduleHasPassed();
-                    $st = \Carbon\Carbon::parse($appointment->slot->start_time); $en = \Carbon\Carbon::parse($appointment->slot->end_time);
-                    $timeShort = $st->format('g:i').($st->format('A') === $en->format('A') ? '' : ' '.$st->format('A')).'–'.$en->format('g:i A');
-                    $payRejected = $bundlePayment
-                        ? $bundlePayment->status === 'rejected'
-                        : ($documentRequests->contains(fn ($item) => $item->payment_status === 'rejected')
-                            || ($pay && $pay->status === 'rejected'));
-                    $docPayStatus = $bundlePayment
-                        ? ($bundlePayment->status === 'verified' ? 'verified' : ($bundlePayment->status === 'rejected' ? 'rejected' : ($bundlePayment->payment_method === 'gcash' ? 'pending_verification' : 'unpaid')))
-                        : $docRequest?->payment_status;
-                    $payTone = $docPayStatus
-                        ? (['verified' => 'success', 'pending_verification' => 'info', 'rejected' => 'danger', 'unpaid' => 'warning'][$docPayStatus] ?? 'neutral')
-                        : ($pay ? ($pay->status === 'verified' ? 'success' : ($pay->status === 'rejected' ? 'danger' : ($pay->isGcash() ? 'info' : 'warning'))) : 'neutral');
-                    $payLabel = $appointment->paymentNotRequired() ? 'No Payment Required' : ($docPayStatus
-                        ? (['verified' => 'Verified', 'pending_verification' => 'Pending verification', 'rejected' => 'Payment rejected', 'unpaid' => 'Unpaid'][$docPayStatus] ?? ucfirst((string) $docPayStatus))
-                        : ($pay
-                            ? ($pay->status === 'verified' ? 'Paid' : ($pay->status === 'rejected' ? 'Payment not verified' : ($pay->isGcash() ? 'Payment under review' : 'Pay at Cashier')))
-                            : 'No payment yet'));
-                    $hasPaymentAction = $bundlePayment
-                        ? (float) $bundlePayment->amount > 0 && in_array($bundlePayment->status, ['pending', 'rejected'], true)
-                        : ($documentRequests->isNotEmpty()
-                            ? $documentRequests->contains(fn ($item) => (float) $item->fee > 0
-                                && !$item->is_paid
-                                && $item->status !== 'cancelled'
-                                && in_array($item->payment_status, ['unpaid', 'pending_verification', 'rejected'], true))
-                            : ($pay
-                                ? (float) $pay->amount > 0 && in_array($pay->status, ['pending', 'rejected'], true)
-                                : $appointmentProcessingFee > 0));
-                    $paymentActionLabel = $cancelled || $schedulePassed ? 'Review payment' : 'Payment details';
+                    $documents = $documentRequests->map(fn ($document) => $document->document_label.' × '.$document->copies)->unique()->values();
                 @endphp
-                @php
-                    $docStatus = $docRequest?->status;
-                    $stage     = $docStatus ? ($stageOf[$docStatus] ?? 0) : null;
-                    $copiesTx  = $docRequest ? $docRequest->copies.($docRequest->copies > 1 ? ' copies' : ' copy') : null;
-                    $collect   = $documentRequests->contains(fn ($item) => $item->status === 'ready' && $item->paymentSatisfied());
-                    $docLabel  = $docNames[$appointment->document_type] ?? ucwords(str_replace('_', ' ', $appointment->document_type));
-                    $topBadgeText = $cancelled ? 'Cancelled' : ($docStatus ? ($badgeText[$docStatus] ?? ucfirst($docStatus)) : 'Waiting for confirmation');
-                    $topBadgeTone = $cancelled ? 'neutral' : ($docStatus ? ($badgeTone[$docStatus] ?? 'neutral') : 'warning');
-                @endphp
-                <li class="dr-req {{ $payRejected ? 'needs-fix' : ($collect ? 'needs-action' : '') }} {{ $cancelled ? 'is-muted' : '' }}"
-                    data-group="{{ $groupsOf($appointment)[0] }}"
-                    data-groups="{{ implode(' ', $groupsOf($appointment)) }}">
+                <li class="dr-req {{ $appointment->status === 'cancelled' ? 'is-muted' : '' }}" data-group="{{ $group }}">
                     <div class="dr-req-top">
                         <div>
-                            <h2 class="dr-req-name">{{ $documentRequests->isNotEmpty() ? 'Appointment documents' : $docLabel }}</h2>
-                            <p class="dr-req-meta">
-                                @if ($bundlePayment)Combined total &#8369;{{ number_format($bundlePayment->amount, 2) }} · @endif
-                                requested {{ $appointment->created_at->format('M j, Y') }}
-                            </p>
+                            <h2 class="dr-req-name">Document appointment #{{ $appointment->id }}</h2>
+                            <p class="dr-req-meta">{{ ucfirst($group) }} · Recorded {{ $appointment->created_at->timezone('Asia/Manila')->format('M j, Y g:i A') }}</p>
                         </div>
-                        @if ($cancelled)
-                            <span class="dtc-status-badge is-{{ $topBadgeTone }}">{{ $topBadgeText }}</span>
-                        @endif
+                        <span class="dtc-status-badge is-{{ $appointment->status === 'confirmed' || $appointment->status === 'completed' ? 'success' : ($appointment->status === 'pending' ? 'warning' : 'neutral') }}">{{ ucfirst($appointment->status) }}</span>
                     </div>
 
-                    @if ($documentRequests->isNotEmpty())
-                        @foreach ($documentRequests as $document)
-                            @php $documentStage = $stageOf[$document->status] ?? 0; @endphp
-                            <div class="dr-request-details">
-                                <strong>{{ $document->document_label }} × {{ $document->copies }}</strong>
-                                <span class="u-text-secondary-sm">₱{{ number_format($document->fee, 2) }} · {{ ucfirst($document->status) }}</span>
-                                @if ($document->released_at)<p>Physically released {{ $document->released_at->timezone('Asia/Manila')->format('M d, Y g:i A') }} by {{ $document->releaser?->name ?? 'Recorded staff' }}.</p>@endif
-                                <ol class="dr-track" aria-label="Progress: step {{ $documentStage + 1 }} of 4">
-                                    @foreach ($stageName as $i => $name)
-                                        <li class="{{ $i < $documentStage || ($i === $documentStage && $document->status === 'released') ? 'is-done' : '' }} {{ $i === $documentStage ? 'is-current' : '' }}"
-                                            @if ($i === $documentStage) aria-current="step" @endif>{{ $name }}</li>
-                                    @endforeach
-                                </ol>
-                            </div>
-                        @endforeach
+                    @if ($slot)
+                        <p class="dr-req-purpose"><strong>Scheduled for:</strong> {{ \Carbon\Carbon::parse($slot->date, 'Asia/Manila')->format('D, M j, Y') }} · {{ \Carbon\Carbon::parse($slot->start_time)->format('g:i A') }}–{{ \Carbon\Carbon::parse($slot->end_time)->format('g:i A') }}</p>
+                    @else
+                        <p class="dr-req-purpose"><strong>Schedule:</strong> Not available</p>
                     @endif
-
-                    @if (!$cancelled && !$docRequest && !$schedulePassed && $appointment->status === 'pending')
-                        <p class="dr-step-note">Awaiting appointment confirmation</p>
-                    @elseif ($cancelled && $documentRequests->contains(fn ($document) => $document->status !== 'cancelled'))
-                        <p class="dr-step-note">The pickup appointment was cancelled, but your document request remains active. Contact the Registrar about the next pickup step.</p>
+                    @if ($appointment->purpose)<p class="dr-req-purpose"><strong>Purpose:</strong> {{ $appointment->purpose }}</p>@endif
+                    @if ($documents->isNotEmpty())
+                        <p class="dr-req-purpose"><strong>Linked documents:</strong> {{ $documents->implode(', ') }}. View their current status in <a href="{{ route('portal.documents.index') }}">Document Requests</a>.</p>
                     @endif
-
-                    <div class="dr-pickup-summary" aria-label="Pickup appointment">
-                        <i data-lucide="calendar-days" aria-hidden="true"></i>
-                        <span>
-                            <strong>{{ $when->format('D, M j') }}</strong> · {{ $timeShort }}
-                            · {{ $schedulePassed ? 'Scheduled time passed' : ucfirst($badgeTextAppt[$appointment->status] ?? $appointment->status) }}
-                            @if ($cancelled && $appointment->remarks)<br>{{ $appointment->remarks }}@endif
-                        </span>
-                    </div>
-
-                    @if ($schedulePassed)
-                        <div class="dr-schedule-notice" role="status">
-                            <strong>{{ $appointment->status === 'pending' ? 'Schedule passed — choose a new time' : 'Scheduled time passed — contact the Registrar' }}</strong>
-                            <p>
-                                @if ($appointment->status === 'pending')
-                                    Use Edit booking to select an available future time. The Registrar will review your updated booking. Your document progress and payment records are preserved.
-                                @else
-                                    Your document progress and payment records are preserved.
-                                @endif
-                            </p>
-                        </div>
-                    @endif
-
-                    @if ($appointment->purpose || $documentRequests->isNotEmpty())
-                        <details class="dr-request-details">
-                            <summary>Request details</summary>
-                            @if ($appointment->purpose)<p class="dr-req-purpose">Purpose: {{ $appointment->purpose }}</p>@endif
-                            @foreach ($documentRequests as $document)
-                                <p class="dr-req-purpose">{{ $document->document_label }} — {{ $document->copies }} {{ $document->copies === 1 ? 'copy' : 'copies' }}, {{ ucfirst($document->status) }}, ₱{{ number_format($document->fee, 2) }}</p>
-                            @endforeach
-                        </details>
-                    @endif
-
-                    <div class="dr-pay">
-                        <div class="dr-pay-line"><span class="dtc-status-badge is-{{ $payTone }}">{{ $payLabel }}</span></div>
-                        @if ($hasPaymentAction)
-                            <div class="dr-actions">
-                                <a class="dr-btn dr-btn--primary dr-btn--sm" href="{{ $bundlePayment ? route('portal.payments.appointment', $appointment) : ($docRequest ? route('portal.payments.document', $docRequest) : route('portal.payments.appointment', $appointment)) }}">{{ $paymentActionLabel }}</a>
-                            </div>
-                        @endif
-                    </div>
-                    @php
-                        $canStudentCancel = $appointment->status === 'pending'
-                            && $documentRequests->every(fn ($document) => in_array($document->status, ['submitted', 'cancelled'], true));
-                    @endphp
-                    @if ($appointment->status === 'pending')
-                        <div class="dr-actions dr-actions--split">
-                            <button type="button" class="dr-btn dr-btn--ghost dr-btn--sm" data-toggle="modal" data-target="#editModal{{ $appointment->id }}">
-                                <i data-lucide="pencil" aria-hidden="true"></i> Edit booking
-                            </button>
-                            @if ($canStudentCancel)
-                            <form id="cancel-appt-{{ $appointment->id }}" method="POST" action="{{ route('portal.appointments.cancel', $appointment) }}">
-                                @csrf
-                                @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
-                                <button type="button" class="dr-btn dr-btn--danger dr-btn--sm"
-                                        data-dtc-confirm
-                                        data-dtc-confirm-title="Cancel appointment?"
-                                        data-dtc-confirm-message="{{ $docRequest && $docRequest->status === 'submitted' ? 'This also cancels your unstarted document request. Any payment record is kept; contact the Cashier before paying again.' : 'Cancel this booking? Any document request already being processed is kept. Contact the Registrar for another pickup time.' }}"
-                                        data-dtc-confirm-ok="Cancel"
-                                        data-dtc-confirm-cancel="Keep Appointment"
-                                        data-dtc-confirm-tone="danger"
-                                        data-dtc-confirm-form="#cancel-appt-{{ $appointment->id }}">
-                                    Cancel booking
-                                </button>
-                            </form>
-                            @endif
-                        </div>
-                    @elseif ($appointment->status === 'confirmed')
-                        <div class="dr-registrar-contact">
-                            <p><strong>{{ $schedulePassed ? 'Need to reschedule or cancel?' : 'Need to change or cancel?' }}</strong>{{ $schedulePassed ? 'Contact the Registrar to arrange the next pickup step.' : 'Contact the Registrar for help with this confirmed booking.' }}</p>
-                            <button type="button" class="dr-btn dr-btn--ghost dr-btn--sm" data-toggle="modal" data-target="#registrarContactModal" data-booking-reference="{{ $appointment->id }}">Contact Registrar</button>
-                        </div>
+                    @if ($appointment->status === 'cancelled' && $documentRequests->contains(fn ($document) => $document->status !== 'cancelled'))
+                        <p class="dr-step-note">This appointment was cancelled. Your linked document request remains separate; check Document Requests for its current status.</p>
                     @endif
                 </li>
             @endforeach
         </ul>
 
-        <div class="dr-empty dr-empty--filter" id="drFilterEmpty" role="status">
-            <p>Nothing here yet. Try another filter.</p>
-        </div>
-
-        <details class="dr-next dr-next--flat">
-            <summary>Who handles what</summary>
-            <ul class="dr-next-list">
-                <li><strong>The Registrar</strong>Manages appointment times and confirms bookings. Contact them about schedules.</li>
-                <li><strong>The Cashier</strong>Verifies GCash receipts or records walk-in payments. Contact them about payment records.</li>
-            </ul>
-        </details>
-
-        @if (method_exists($appointments, 'links'))
-            <div style="margin-top:20px;">{{ $appointments->links() }}</div>
-        @endif
-
-        {{-- Edit booking modals --}}
-        @foreach ($items as $appointment)
-
-
-        {{-- ── Edit Appointment Modal ─────────────────────────────────── --}}
-        @if($appointment->status === 'pending')
-        @php
-            $editDocuments = $appointment->documentRequests;
-            $documentTypeLocked = $editDocuments->count() > 1 || $editDocuments->contains(fn ($document) => $document->is_paid || in_array($document->payment_status, ['pending_verification', 'verified'], true));
-        @endphp
-        <div class="modal fade dr-edit-modal" id="editModal{{ $appointment->id }}" tabindex="-1" aria-labelledby="edit-title-{{ $appointment->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content">
-                    <form method="POST"
-                          action="{{ route('portal.appointments.update', $appointment) }}">
-                        @csrf
-                        @method('PUT')
-                        @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
-
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="edit-title-{{ $appointment->id }}" style="font-size:14px; font-weight:600;">
-                                <i data-lucide="pencil" style="width:16px;height:16px;margin-right:6px;"></i>
-                                Edit Appointment
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close edit appointment">&times;</button>
-                        </div>
-
-                        <div class="modal-body">
-
-                            {{-- Document Type --}}
-                            <div class="mb-4">
-                                <div class="font-weight-bold d-block mb-2" style="font-size:13px; color:var(--dtc-text);">
-                                    Document Type <span style="color:var(--dtc-danger,#dc3545);">*</span>
-                                </div>
-                                @if($documentTypeLocked)
-                                    <input type="hidden" name="document_type" value="{{ $appointment->document_type }}">
-                                    <div class="dr-edit-documents">
-                                        @foreach($editDocuments as $document)
-                                            <div><strong>{{ $document->document_label }}</strong><span>{{ $document->copies }} {{ $document->copies == 1 ? 'copy' : 'copies' }}</span></div>
-                                        @endforeach
-                                    </div>
-                                    <p class="dr-edit-hint">You can update the schedule and purpose. To change these documents, contact the Registrar.</p>
-                                @else
-                                <div class="row">
-                                    @foreach([
-                                        ['value' => 'transcript',    'label' => 'Transcript of Records', 'icon' => 'file-text'],
-                                        ['value' => 'diploma',       'label' => 'Diploma',               'icon' => 'graduation-cap'],
-                                        ['value' => 'certification', 'label' => 'Certification',          'icon' => 'award'],
-                                        ['value' => 'tor',           'label' => 'True Copy of Records',  'icon' => 'copy'],
-                                    ] as $doc)
-                                    <div class="col-6 col-sm-3 mb-2">
-                                        <label class="dtc-doc-card" style="cursor:pointer; display:block;">
-                                            <input type="radio"
-                                                   name="document_type"
-                                                   value="{{ $doc['value'] }}"
-                                                   class="edit-doc-radio-{{ $appointment->id }}"
-                                                   required
-                                                   {{ $appointment->document_type === $doc['value'] ? 'checked' : '' }}>
-                                            <div class="dtc-doc-option" style="padding:10px 6px;">
-                                                <div class="dtc-doc-icon">
-                                                    <i data-lucide="{{ $doc['icon'] }}"></i>
-                                                </div>
-                                                <div class="dtc-doc-label" style="font-size:12px;">{{ $doc['label'] }}</div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    @endforeach
-                                </div>
-                                <p class="dr-edit-hint">Changing the document recalculates its fee. Switching between free and payable documents requires a new request.</p>
-                                @endif
-                            </div>
-
-                            {{-- Schedule --}}
-                            <div class="mb-4">
-                                <div class="font-weight-bold d-block mb-2" style="font-size:13px; color:var(--dtc-text);">
-                                    Schedule <span style="color:var(--dtc-danger,#dc3545);">*</span>
-                                </div>
-                                <div class="dr-edit-schedule">
-                                    {{-- Current slot always shown first --}}
-                                    <label class="dtc-slot-card mb-2" style="cursor:pointer; display:block;">
-                                        <input type="radio"
-                                               name="appointment_slot_id"
-                                               value="{{ $appointment->appointment_slot_id }}"
-                                               data-reschedule-current
-                                               style="position:absolute; opacity:0; width:0; height:0;"
-                                               checked>
-                                        <div class="dtc-slot-option">
-                                            <div class="dtc-date-chip">
-                                                <span class="dtc-date-chip-month">{{ \Carbon\Carbon::parse($appointment->slot->date)->format('M') }}</span>
-                                                <span class="dtc-date-chip-day">{{ \Carbon\Carbon::parse($appointment->slot->date)->format('d') }}</span>
-                                            </div>
-                                            <div class="dtc-slot-info">
-                                                <div class="dtc-slot-date">
-                                                    {{ \Carbon\Carbon::parse($appointment->slot->date)->format('l, F d, Y') }}
-                                                    <span style="font-size:12px; color:var(--dtc-primary); font-weight:600; margin-left:6px;">Current</span>
-                                                </div>
-                                                <div class="dtc-slot-time">
-                                                    <i data-lucide="clock" style="width:12px;height:12px;"></i>
-                                                    {{ \Carbon\Carbon::parse($appointment->slot->start_time)->format('h:i A') }}
-                                                    &mdash;
-                                                    {{ \Carbon\Carbon::parse($appointment->slot->end_time)->format('h:i A') }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </label>
-
-                                    @php
-                                        $otherSlotGroups = $slots->where('id', '!=', $appointment->appointment_slot_id)
-                                            ->groupBy(fn ($slot) => \Carbon\Carbon::parse($slot->date)->format('Y-m-d'));
-                                    @endphp
-                                    @if ($otherSlotGroups->isNotEmpty())
-                                        <label class="dr-label d-block mt-3" for="reschedule-date-{{ $appointment->id }}">Choose a different date</label>
-                                        <select id="reschedule-date-{{ $appointment->id }}" class="dr-select mb-3" data-reschedule-date-select="{{ $appointment->id }}">
-                                            <option value="">Keep current schedule</option>
-                                            @foreach ($otherSlotGroups as $date => $dateSlots)
-                                                <option value="{{ $date }}">{{ \Carbon\Carbon::parse($date)->format('D, M j') }} · {{ $dateSlots->count() }} available {{ $dateSlots->count() === 1 ? 'time slot' : 'time slots' }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="dr-reschedule-time-grid" data-reschedule-slot-list="{{ $appointment->id }}" hidden>
-                                    {{-- Other available slots --}}
-                                    @foreach($otherSlotGroups as $date => $dateSlots)
-                                        @foreach($dateSlots as $slot)
-                                    @php $left = $slot->availableSlots(); @endphp
-                                    <label class="dtc-slot-card mb-2 dr-reschedule-slot" data-reschedule-date="{{ $date }}" hidden style="cursor:pointer; display:block;">
-                                        <input type="radio"
-                                               name="appointment_slot_id"
-                                               value="{{ $slot->id }}"
-                                               style="position:absolute; opacity:0; width:0; height:0;">
-                                        <div class="dtc-slot-option">
-                                            <div class="dtc-date-chip">
-                                                <span class="dtc-date-chip-month">{{ \Carbon\Carbon::parse($slot->date)->format('M') }}</span>
-                                                <span class="dtc-date-chip-day">{{ \Carbon\Carbon::parse($slot->date)->format('d') }}</span>
-                                            </div>
-                                            <div class="dtc-slot-info">
-                                                <div class="dtc-slot-date">{{ \Carbon\Carbon::parse($slot->date)->format('l, F d, Y') }}</div>
-                                                <div class="dtc-slot-time">
-                                                    <i data-lucide="clock" style="width:12px;height:12px;"></i>
-                                                    {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
-                                                    &mdash;
-                                                    {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
-                                                </div>
-                                            </div>
-                                            <div class="dtc-slot-badge {{ $left <= 2 ? 'is-warning' : 'is-ok' }}">
-                                                <i data-lucide="{{ $left <= 2 ? 'alert-circle' : 'users' }}" style="width:12px;height:12px;"></i>
-                                                {{ $left }} left
-                                            </div>
-                                        </div>
-                                    </label>
-                                        @endforeach
-                                    @endforeach
-                                        </div>
-                                    @endif
-
-                                    @if($otherSlotGroups->isEmpty())
-                                    <div class="text-center py-2" style="font-size:12px; color:var(--dtc-text-muted);">
-                                        No other slots available — keeping current schedule.
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-
-                            {{-- Purpose --}}
-                            <div class="mb-1">
-                                <label for="edit-purpose-{{ $appointment->id }}" class="font-weight-bold d-block mb-1" style="font-size:13px; color:var(--dtc-text);">
-                                    Purpose <span style="color:var(--dtc-danger,#dc3545);">*</span>
-                                </label>
-                                <textarea name="purpose"
-                                          id="edit-purpose-{{ $appointment->id }}"
-                                          maxlength="500"
-                                          class="form-control"
-                                          rows="2"
-                                          placeholder="e.g. For employment application, scholarship, board exam..."
-                                          style="border-radius:10px; font-size:13px; resize:none;"
-                                          required>{{ $appointment->purpose }}</textarea>
-                            </div>
-
-                        </div>
-
-                        <div class="modal-footer dtc-action-footer dtc-action-footer-with-note">
-                            <p class="dtc-action-footer-note">
-                                The Registrar will be notified of your changes.
-                            </p>
-                            <div class="dtc-action-footer-buttons">
-                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    Save changes
-                                </button>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-        </div>
-        @endif
-
-        @endforeach
+        <div class="dr-empty dr-empty--filter" id="drFilterEmpty" role="status"><p>No document appointments match this filter.</p></div>
     @endif
 </div>
-@include('portal.partials.registrar-contact')
 @endsection
 
 @section('css')
@@ -500,6 +98,5 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('js/appointments-index.js') }}"></script>
     <script src="{{ asset('js/document-request.js') }}" defer></script>
 @endsection

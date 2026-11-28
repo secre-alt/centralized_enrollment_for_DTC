@@ -6,13 +6,14 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h4 class="mb-0 font-weight-bold u-text">Appointment Requests</h4>
-            <p class="mb-0 u-text-secondary-sm">Review scheduled visits separately from document preparation and payment.</p>
+            <h4 class="mb-0 font-weight-bold u-text">{{ $kind === 'historical' ? 'Historical document appointments' : 'Registrar service appointments' }}</h4>
+            <p class="mb-0 u-text-secondary-sm">{{ $kind === 'historical' ? 'Read-only appointment history; continue document and payment actions in their own workspaces.' : 'Manage in-person consultation requests and lifecycle.' }}</p>
         </div>
         <a href="{{ route('registrar.appointments.slots') }}" class="btn btn-primary dtc-header-btn rg-manage-slots">
             <i data-lucide="clock" class="mr-1"></i>
             <span class="dtc-header-btn-label">Manage Slots</span>
         </a>
+        <a href="{{ route('registrar.appointments.services.index') }}" class="btn btn-outline-primary ml-2">Manage services</a>
     </div>
 @endsection
 
@@ -23,10 +24,29 @@
 @section('content')
 <div class="registrar-workspace rg-appointments">
 <div class="card card-body mb-3">
-    <strong>Scheduled visits</strong>
-    <p class="mb-2">Confirm or manage existing visits here. A visit does not approve a document request or verify payment. New document requests and walk-in collection need no appointment.</p>
-    <a href="{{ route('registrar.documents.index') }}">Open document requests</a>
+    <strong>{{ $kind === 'historical' ? 'Legacy records' : 'Consultation appointments' }}</strong>
+    <p class="mb-2">{{ $kind === 'historical' ? 'Historical document-related appointments remain readable here. Do not modify their appointment or financial history.' : 'Consultations are free. Document requests and walk-in collection are managed separately and do not need an appointment.' }}</p>
+    <a href="{{ route('registrar.appointments.index', ['kind' => $kind === 'historical' ? 'consultation' : 'historical']) }}">{{ $kind === 'historical' ? 'Open consultation appointments' : 'View historical document appointments' }}</a>
+    · <a href="{{ route('registrar.documents.index') }}">Open document requests</a>
 </div>
+@if($kind === 'consultation')
+<section class="card card-body mb-3" aria-labelledby="appointmentReportHeading">
+    <h5 id="appointmentReportHeading">Consultation summary</h5>
+    <form method="GET" action="{{ route('registrar.appointments.index') }}" class="form-inline mb-2">
+        <input type="hidden" name="kind" value="consultation">
+        <label class="mr-2" for="appointmentReportFrom">From</label><input id="appointmentReportFrom" class="form-control mr-2" type="date" name="from" value="{{ request('from') }}">
+        <label class="mr-2" for="appointmentReportTo">To</label><input id="appointmentReportTo" class="form-control mr-2" type="date" name="to" value="{{ request('to') }}">
+        <button class="btn btn-outline-primary" type="submit">Apply range</button>
+    </form>
+    <div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Service</th><th>Status</th><th>Appointments</th></tr></thead><tbody>
+    @forelse($report as $row)
+        <tr><td>{{ $row->service?->name ?? 'Unavailable service' }}</td><td>{{ str_replace('_', ' ', ucfirst($row->status)) }}</td><td>{{ $row->total }}</td></tr>
+    @empty
+        <tr><td colspan="3">No appointments in this range.</td></tr>
+    @endforelse
+    </tbody></table></div>
+</section>
+@endif
 @hasanyrole('registrar|admin')
 <p><a class="btn btn-outline-secondary" href="{{ route('registrar.claiming-appointments.index') }}">Historical claiming visits</a></p>
 @endhasanyrole
@@ -48,7 +68,7 @@
             @include('partials.table-rows', ['tableRecords' => $appointments, 'tableId' => 'registrar-table-2', 'fixedRows' => true])
             <div class="dtc-fl-actions">
                 <button type="submit" class="btn btn-primary">Apply</button>
-                <a href="{{ route('registrar.appointments.index', ['status' => $status]) }}" class="dtc-fl-clear">Reset</a>
+                <a href="{{ route('registrar.appointments.index', ['kind' => $kind, 'status' => $status]) }}" class="dtc-fl-clear">Reset</a>
             </div>
         </div>
     </div>
@@ -179,10 +199,10 @@
                                                     </div>
                                                 </div>
                                                 <div class="form-group mb-0">
-                                                    <label for="registrar-appointments-index-rejection-reason-1" style="font-size:13px;font-weight:600;color:var(--dtc-text);">
+                                                    <label for="registrar-appointments-index-rejection-reason-{{ $payment->id }}" style="font-size:13px;font-weight:600;color:var(--dtc-text);">
                                                         Rejection Reason <span style="color:var(--dtc-danger);">*</span>
                                                     </label>
-                                                    <textarea id="registrar-appointments-index-rejection-reason-1" name="rejection_reason"
+                                                    <textarea id="registrar-appointments-index-rejection-reason-{{ $payment->id }}" name="rejection_reason"
                                                               class="form-control" rows="3" required
                                                               placeholder="e.g. Reference number does not match our records..."></textarea>
                                                 </div>
@@ -213,10 +233,14 @@
             @foreach([
                 ['key' => 'pending',   'label' => 'Pending'],
                 ['key' => 'confirmed', 'label' => 'Confirmed'],
+                ['key' => 'checked_in', 'label' => 'Checked in'],
+                ['key' => 'completed', 'label' => 'Completed'],
                 ['key' => 'cancelled', 'label' => 'Cancelled'],
+                ['key' => 'rejected', 'label' => 'Rejected'],
+                ['key' => 'no_show', 'label' => 'No-show'],
                 ['key' => 'all',       'label' => 'All'],
             ] as $tab)
-            <a href="{{ route('registrar.appointments.index', array_merge(request()->only(['search', 'per_page']), ['status' => $tab['key']])) }}"
+            <a href="{{ route('registrar.appointments.index', array_merge(request()->only(['search', 'per_page']), ['status' => $tab['key'], 'kind' => $kind])) }}"
                aria-current="{{ $status === $tab['key'] ? 'page' : 'false' }}"
                class="rg-appointment-tab {{ $status === $tab['key'] ? 'is-active' : '' }}"
                >
@@ -273,8 +297,8 @@
                             </div>
                         </td>
                         <td data-reg-label="Document / service">
-                            @if ($appointment->visit_type === 'advising')
-                                <span class="dtc-status-badge is-info rg-document-name">Enrollment advising</span>
+                            @if ($appointment->appointment_service_id)
+                                <span class="dtc-status-badge is-info rg-document-name">{{ $appointment->service?->name }}</span>
                             @else
                             @if ($appointment->documentRequests->isNotEmpty())
                                 @foreach ($appointment->documentRequests as $documentRequest)
@@ -297,10 +321,14 @@
                             </div>
                         </td>
                         <td data-reg-label="Purpose" class="rg-appointment-purpose">
+                            @if($appointment->appointment_service_id)<small>Reference: {{ $appointment->reference_number }}</small><br>@endif
                             {{ $appointment->purpose ?? '—' }}
+                            @if($appointment->rejection_reason)<div class="text-danger">Reason: {{ $appointment->rejection_reason }}</div>@endif
+                            @if($appointment->cancellation_reason)<div class="text-muted">Reason: {{ $appointment->cancellation_reason }}</div>@endif
+                            @if($appointment->staff_remarks)<div class="text-muted"><strong>Staff-only:</strong> {{ $appointment->staff_remarks }}</div>@endif
                         </td>
                         <td data-reg-label="Payment">
-                            @if ($appointment->visit_type === 'advising')
+                            @if ($appointment->appointment_service_id)
                                 <span class="dtc-status-badge is-info rg-payment-status">No fee</span>
                             @else
                             @if($appointment->paymentNotRequired())
@@ -338,49 +366,57 @@
                         </td>
                         <td data-reg-label="Actions">
                             <div class="u-actions-gap">
-                                @if($appointment->visit_type === 'claiming')
+                                @if($appointment->appointment_service_id)
+                                    @if($appointment->status === 'pending')
+                                        <form method="POST" action="{{ route('registrar.appointments.confirm', $appointment) }}">
+                                            @csrf @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
+                                            <button class="btn btn-sm btn-success" type="submit">Confirm</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('registrar.appointments.reject', $appointment) }}" class="d-flex" style="gap:4px">
+                                            @csrf @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
+                                            <label class="sr-only" for="reject-reason-{{ $appointment->id }}">Rejection reason</label>
+                                            <input class="form-control form-control-sm" id="reject-reason-{{ $appointment->id }}" name="rejection_reason" maxlength="500" placeholder="Reason to reject" required>
+                                            <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button>
+                                        </form>
+                                    @elseif($appointment->status === 'confirmed')
+                                        <form method="POST" action="{{ route('registrar.appointments.check-in', $appointment) }}">
+                                            @csrf @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
+                                            <button class="btn btn-sm btn-outline-primary" type="submit">Check in</button>
+                                        </form>
+                                        @if($appointment->scheduleHasPassed())
+                                            <form method="POST" action="{{ route('registrar.appointments.no-show', $appointment) }}">
+                                                @csrf @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
+                                                <button class="btn btn-sm btn-outline-warning" type="submit">No-show</button>
+                                            </form>
+                                        @endif
+                                    @elseif($appointment->status === 'checked_in')
+                                        <form method="POST" action="{{ route('registrar.appointments.complete', $appointment) }}">
+                                            @csrf @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
+                                            <button class="btn btn-sm btn-success" type="submit">Complete</button>
+                                        </form>
+                                    @endif
+                                    @if(in_array($appointment->status, ['pending', 'confirmed'], true))
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#cancelModal{{ $appointment->id }}">Cancel</button>
+                                    @endif
+                                    @if(in_array($appointment->status, ['pending', 'confirmed', 'checked_in', 'completed'], true))
+                                        <form method="POST" action="{{ route('registrar.appointments.remarks', $appointment) }}" class="mt-2">
+                                            @csrf @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
+                                            <label for="staff-remarks-{{ $appointment->id }}">Staff-only remarks</label>
+                                            <textarea class="form-control form-control-sm" id="staff-remarks-{{ $appointment->id }}" name="staff_remarks" maxlength="4000" rows="2">{{ $appointment->staff_remarks }}</textarea>
+                                            <button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Save remarks</button>
+                                        </form>
+                                    @endif
+                                @elseif($appointment->visit_type === 'claiming')
                                     @hasanyrole('registrar|admin')
                                     <a href="{{ route('registrar.claiming-appointments.index') }}" class="btn btn-sm btn-outline-primary">View handover</a>
                                     @endhasanyrole
-                                @elseif($appointment->status === 'pending')
-                                    @if($appointment->canBeConfirmed())
-                                        {{-- Confirm --}}
-                                        <form id="confirm-appt-{{ $appointment->id }}"
-                                              method="POST"
-                                              action="{{ route('registrar.appointments.confirm', $appointment) }}">
-                                            @csrf
-                                            @include('partials.appointment-command', ['lifecycleAppointment' => $appointment])
-                                            <button type="button"
-                                                    class="dtc-icon-btn success rg-booking-confirm"
-                                                    title="Confirm appointment"
-                                                    data-dtc-confirm
-                                                    data-dtc-confirm-title="Confirm appointment?"
-                                                    data-dtc-confirm-message="The appointment for {subject} will be confirmed."
-                                                    data-dtc-confirm-subject="{{ $appointment->user->name }}"
-                                                    data-dtc-confirm-ok="Confirm"
-                                                    data-dtc-confirm-tone="success"
-                                                    data-dtc-confirm-form="#confirm-appt-{{ $appointment->id }}">
-                                                <i data-lucide="check"></i><span class="rg-appointment-action-label">Confirm</span>
-                                            </button>
-                                        </form>
-                                    @else
-                                        <span class="dtc-status-badge is-secondary" style="font-size:12px;">Unavailable</span>
-                                    @endif
-
-                                    {{-- Cancel --}}
-                                    <button type="button"
-                                            class="dtc-icon-btn danger rg-booking-cancel"
-                                            title="Cancel appointment"
-                                            data-toggle="modal"
-                                            data-target="#cancelModal{{ $appointment->id }}">
-                                        <i data-lucide="x"></i><span class="rg-appointment-action-label">Cancel</span>
-                                    </button>
                                 @else
                                     <span style="font-size:12px;color:var(--dtc-text-muted);">—</span>
                                 @endif
                             </div>
 
                             {{-- Cancel Modal --}}
+                            @if($appointment->appointment_service_id && in_array($appointment->status, ['pending', 'confirmed'], true))
                             <div class="modal fade" id="cancelModal{{ $appointment->id }}" tabindex="-1">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -398,8 +434,8 @@
                                                     <strong>{{ $appointment->user->name }}</strong>'s appointment.
                                                 </p>
                                                 <div class="form-group">
-                                                    <label for="registrar-appointments-index-remarks-2">Reason / Remarks</label>
-                                                    <textarea id="registrar-appointments-index-remarks-2" name="remarks" class="form-control" rows="3"
+                                                    <label for="registrar-appointments-index-remarks-{{ $appointment->id }}">Reason / Remarks</label>
+                                                    <textarea id="registrar-appointments-index-remarks-{{ $appointment->id }}" name="remarks" class="form-control" rows="3"
                                                               required
                                                               placeholder="e.g. Slot unavailable, rescheduling required..."></textarea>
                                                 </div>
@@ -415,6 +451,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                         </td>
                     </tr>
                     @empty

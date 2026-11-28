@@ -16,7 +16,7 @@ class DashboardController extends Controller
             ->where(fn ($review) => $review->where('requires_section_assignment', true)
                 ->orWhere(fn ($paid) => $paid->where('is_paid', true)->whereHas('payment', fn ($query) => $query->where('status', 'verified'))))
             ->count();
-        $pendingAppointments = Appointment::where('status', 'pending')->count();
+        $pendingAppointments = Appointment::whereNotNull('appointment_service_id')->where('status', 'pending')->count();
         $pendingApplications = Application::whereIn('status', ['submitted', 'under_review'])->count();
         $approvedToday       = Enrollment::where('status', 'approved')
                                 ->whereDate('updated_at', today())->count();

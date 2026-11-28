@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentPayment;
 use App\Models\AppointmentSlot;
+use App\Models\AppointmentService;
 use App\Models\AuditLog;
 use App\Models\DocumentRequest;
 use App\Models\DocumentPaymentProof;
@@ -24,24 +25,32 @@ class AppointmentController extends Controller
 {
     public function advising()
     {
-        abort_unless(Auth::user()->hasAnyRole(['student', 'alumni']), 403);
-        $appointments = Appointment::with('slot')->where('user_id', Auth::id())->where('visit_type', 'advising')->latest()->get();
+        abort_unless(Auth::user()->hasAnyRole(['student', 'alumni', 'new_applicant']), 403);
+        $appointments = Appointment::with(['slot', 'service'])->where('user_id', Auth::id())->whereNotNull('appointment_service_id')->latest()->get();
+        $services = AppointmentService::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get()
+            ->filter(fn ($service) => collect($service->eligible_roles)->intersect(Auth::user()->getRoleNames())->isNotEmpty())->values();
         $slots = AppointmentSlot::where('date', '>=', today())->orderBy('date')->orderBy('start_time')->get()
             ->filter(fn ($slot) => $slot->isAvailable() && ! app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time)
                 && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s')))->values();
-        return view('student.appointments.advising', compact('appointments', 'slots'));
+        return view('student.appointments.advising', compact('appointments', 'services', 'slots'));
     }
 
     public function bookAdvising(Request $request)
     {
-        abort_unless($request->user()->hasAnyRole(['student', 'alumni']), 403);
+        abort_unless($request->user()->hasAnyRole(['student', 'alumni', 'new_applicant']), 403);
         $data = $request->validate([
+            'appointment_service_id' => ['required', 'integer', 'exists:appointment_services,id'],
             'appointment_slot_id' => ['required', 'integer', 'exists:appointment_slots,id'],
-            'consultation_type' => ['required', 'in:enrollment_guidance,transfer_credit,returning_student,other'],
             'purpose' => ['required', 'string', 'max:500'],
         ]);
+        $service = AppointmentService::whereKey($data['appointment_service_id'])->where('is_active', true)->firstOrFail();
+        abort_unless(collect($service->eligible_roles)->intersect($request->user()->getRoleNames())->isNotEmpty(), 403);
         $appointment = app(\App\Services\AppointmentLifecycle::class)->run($request, 'advising.booked', null,
-            [(int) $data['appointment_slot_id']], [], function () use ($request, $data) {
+            [(int) $data['appointment_slot_id']], [], function () use ($request, $data, $service) {
+                $service = AppointmentService::whereKey($service->id)->lockForUpdate()->firstOrFail();
+                if (! $service->is_active || collect($service->eligible_roles)->intersect($request->user()->getRoleNames())->isEmpty()) {
+                    throw ValidationException::withMessages(['appointment_service_id' => 'This appointment service is no longer available to your account.']);
+                }
                 $slot = AppointmentSlot::whereKey($data['appointment_slot_id'])->lockForUpdate()->firstOrFail();
                 $active = Appointment::where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get();
                 if (($slot->status ?? 'open') !== 'open' || $active->count() >= $slot->max_bookings || $active->contains('user_id', $request->user()->id)
@@ -50,38 +59,35 @@ class AppointmentController extends Controller
                     || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
                     throw ValidationException::withMessages(['appointment_slot_id' => 'This time is no longer available. Choose another open time.']);
                 }
-                return Appointment::create(['user_id' => $request->user()->id, 'appointment_slot_id' => $slot->id,
-                    'document_type' => 'advising', 'visit_type' => 'advising',
-                    'purpose' => ucfirst(str_replace('_', ' ', $data['consultation_type'])).': '.$data['purpose'], 'status' => 'pending']);
+                return Appointment::create(['user_id' => $request->user()->id, 'appointment_service_id' => $service->id,
+                    'appointment_slot_id' => $slot->id, 'document_type' => 'consultation', 'visit_type' => 'consultation',
+                    'purpose' => $data['purpose'], 'status' => $service->requires_approval ? 'pending' : 'confirmed',
+                    'confirmed_at' => $service->requires_approval ? null : now()]);
             }, $data);
-        if (! $request->attributes->get('lifecycle_replayed')) {
+        if (! $request->attributes->get('lifecycle_replayed') && $appointment->status === 'pending') {
             foreach (User::role(['registrar', 'admin'])->get() as $staff) {
-                NotificationService::sendSafely($staff, 'Advising appointment request', $request->user()->name.' requested an advising consultation.', 'info', route('registrar.appointments.index'));
+                NotificationService::sendSafely($staff, 'Appointment request', $request->user()->name.' requested '.$service->name.'.', 'info', route('registrar.appointments.index'));
             }
+        } elseif (! $request->attributes->get('lifecycle_replayed')) {
+            NotificationService::sendUserUpdateSafely($request->user(), 'appointment-confirmed:'.$appointment->id,
+                'Appointment confirmed', 'Your '.$service->name.' is confirmed. Reference: '.$appointment->reference_number.'.',
+                'success', route('portal.advising.index'), 'View appointment');
         }
-        return redirect()->route('portal.advising.index')->with('success', 'Advising request submitted. It will appear here after staff confirm it.');
+        return redirect()->route('portal.advising.index')->with('success', $appointment->status === 'pending'
+            ? 'Appointment request submitted. It will appear here after Registrar confirmation.'
+            : 'Appointment confirmed. Your reference is '.$appointment->reference_number.'.');
     }
 
     public function index()
     {
-        $appointments = Appointment::with(['slot', 'latestPayment', 'documentRequest', 'documentRequests.releaser'])
+        $appointments = Appointment::with(['slot', 'documentRequests'])
             ->where('user_id', Auth::id())
+            ->whereNull('appointment_service_id')
             ->whereNotIn('visit_type', ['claiming', 'advising'])
             ->latest()
             ->get();
 
-        $slots = AppointmentSlot::where('date', '>=', today())
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get()
-            ->filter(fn($slot) => $slot->isAvailable() && !app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s')))
-            ->values();
-
-        $gcashQrPath = Setting::get('gcash_qr_path');
-        $gcashQrReady = $gcashQrPath && Storage::disk('local')->exists($gcashQrPath);
-        $appointmentProcessingFee = (float) Setting::get('appointment_processing_fee', 0);
-
-        return view('student.appointments.index', compact('appointments', 'slots', 'gcashQrReady', 'appointmentProcessingFee'));
+        return view('student.appointments.index', compact('appointments'));
     }
 
     public function create()
@@ -97,136 +103,76 @@ class AppointmentController extends Controller
     public function edit(Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
-        abort_if($appointment->visit_type === 'advising', 422, 'Advising requests cannot be edited here. Cancel and submit a new request.');
-        abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointment changes are not available through submission editing.');
+        abort_unless($appointment->appointment_service_id, 410, 'Historical document appointments are read-only. Manage the request in Document Requests.');
+        abort_unless(in_array($appointment->status, ['pending', 'confirmed'], true), 422, 'This appointment can no longer be rescheduled.');
+        $slots = AppointmentSlot::where('date', '>=', today())->orderBy('date')->orderBy('start_time')->get()
+            ->filter(fn ($slot) => $slot->id === $appointment->appointment_slot_id || ($slot->isAvailable()
+                && ! app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time)
+                && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s'))))->values();
 
-        if ($appointment->status !== 'pending') {
-            return redirect()->route('portal.appointments.index')
-                ->with('error', 'Only pending appointments can be edited.');
-        }
-
-        $slots = AppointmentSlot::where('date', '>=', today())
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get()
-            ->filter(fn($slot) => $slot->id === $appointment->appointment_slot_id || ($slot->isAvailable() && !app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s'))))
-            ->values();
-
-        return view('student.appointments.edit', compact('appointment', 'slots'));
+        return view('student.appointments.reschedule', compact('appointment', 'slots'));
     }
 
     public function update(Request $request, Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
-        abort_if($appointment->visit_type === 'advising', 422, 'Advising requests cannot be edited here. Cancel and submit a new request.');
-        abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointment changes are not available through submission editing.');
-
+        abort_unless($appointment->appointment_service_id, 410, 'Historical document appointments are read-only. Manage the request in Document Requests.');
         $validated = $request->validate([
-            'appointment_slot_id' => ['required', 'exists:appointment_slots,id'],
-            'document_type'       => ['required', 'in:transcript,diploma,certification,tor'],
-            'purpose'             => ['required', 'string', 'max:500'],
+            'appointment_slot_id' => ['required', 'integer', 'exists:appointment_slots,id'],
+            'purpose' => ['required', 'string', 'max:500'],
         ]);
-
-        $original = $appointment->getOriginal();
-        $changes = [];
-        if ($original['document_type'] !== $validated['document_type']) $changes[] = 'document type changed to ' . ucfirst($validated['document_type']);
-        if ($original['appointment_slot_id'] != $validated['appointment_slot_id']) {
-            $newSlot = AppointmentSlot::findOrFail($validated['appointment_slot_id']);
-            $changes[] = 'schedule changed to ' . \Carbon\Carbon::parse($newSlot->date)->format('M d, Y') . ' at ' . \Carbon\Carbon::parse($newSlot->start_time)->format('h:i A');
-        }
-        if ($original['purpose'] !== $validated['purpose']) $changes[] = 'purpose updated';
-
-        app(\App\Services\AppointmentLifecycle::class)->run($request, 'appointment.updated', $appointment,
-            [(int) $validated['appointment_slot_id']], [], function () use ($validated, $appointment) {
-            $appointment = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
-            if ($appointment->status !== 'pending') {
-                throw ValidationException::withMessages(['appointment' => 'This booking has changed. Only pending appointments can be edited.']);
-            }
-            $linkedRequests = DocumentRequest::where('appointment_id', $appointment->id)->orderBy('id')->lockForUpdate()->get();
-            $linkedRequest = $linkedRequests->first();
-            $immutableRequests = $linkedRequests->whereIn('status', ['processing', 'ready', 'released']);
-            $requestType = match ($validated['document_type']) {
-                'transcript' => 'tor',
-                'tor' => 'true_copy',
-                default => $validated['document_type'],
-            };
-            $typeChanged = $linkedRequest && $linkedRequest->document_type !== $requestType;
-            if ($linkedRequests->count() > 1 && $appointment->document_type !== $validated['document_type']) {
-                throw ValidationException::withMessages(['document_type' => 'Change document types through a new request when an appointment contains multiple documents.']);
-            }
-            if ($typeChanged && $immutableRequests->isNotEmpty()) {
-                throw ValidationException::withMessages(['document_type' => 'A document type cannot be changed after processing has started. Submit a new request instead.']);
-            }
-            if ($typeChanged && ($linkedRequest->is_paid || in_array($linkedRequest->payment_status, ['pending_verification', 'verified'], true))) {
-                throw ValidationException::withMessages(['document_type' => 'The document type cannot be changed after payment has been submitted. Contact the Registrar for help.']);
-            }
-            if ($validated['appointment_slot_id'] != $appointment->appointment_slot_id) {
-                $slot = AppointmentSlot::whereKey($validated['appointment_slot_id'])->lockForUpdate()->firstOrFail();
-                $active = Appointment::where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get();
-                if (($slot->status ?? 'open') !== 'open' || $active->count() >= $slot->max_bookings || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time) || $slot->date < today()->toDateString() || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
-                    throw ValidationException::withMessages(['appointment_slot_id' => 'This slot is no longer available. Please select another.']);
+        $oldSlotId = (int) $appointment->appointment_slot_id;
+        $newSlotId = (int) $validated['appointment_slot_id'];
+        $appointment = app(\App\Services\AppointmentLifecycle::class)->run($request, 'appointment.updated', $appointment,
+            [$newSlotId], [], function () use ($appointment, $validated, $newSlotId) {
+                $locked = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+                if (! in_array($locked->status, ['pending', 'confirmed'], true) || ! $locked->appointment_service_id) {
+                    throw ValidationException::withMessages(['appointment' => 'This appointment can no longer be rescheduled.']);
                 }
-                if ($active->contains('user_id', Auth::id())) {
-                    throw ValidationException::withMessages(['appointment_slot_id' => 'You already have a booking for this slot.']);
-                }
-            }
-
-            $appointment->update($validated);
-            foreach ($linkedRequests as $item) {
-                if (in_array($item->status, ['processing', 'ready', 'released'], true)) {
-                    continue;
-                }
-                $updates = ['purpose' => $validated['purpose']];
-                if ($item->id === $linkedRequest?->id && $typeChanged) {
-                    $updates['document_type'] = $requestType;
-                    $newFee = app(\App\Services\DocumentRequestPricing::class)->quote([['document_type' => $requestType, 'copies' => $item->copies]])['total'];
-                    if (((float) $item->fee === 0.0) !== ($newFee == 0)) {
-                        throw ValidationException::withMessages(['document_type' => 'Submit a new request when changing between a free and a payable document.']);
+                if ($newSlotId !== (int) $locked->appointment_slot_id) {
+                    $slot = AppointmentSlot::whereKey($newSlotId)->lockForUpdate()->firstOrFail();
+                    $active = Appointment::where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get();
+                    if (($slot->status ?? 'open') !== 'open' || $active->count() >= $slot->max_bookings
+                        || $active->contains('user_id', $locked->user_id)
+                        || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time)
+                        || $slot->date < today()->toDateString()
+                        || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
+                        throw ValidationException::withMessages(['appointment_slot_id' => 'This time is no longer available. Choose another open time.']);
                     }
-                    $updates['fee'] = $newFee;
                 }
-                $item->update($updates);
-            }
-            if ($typeChanged && $linkedRequests->isNotEmpty()) {
-                $bundlePayment = AppointmentPayment::where('appointment_id', $appointment->id)->where('is_document_bundle', true)->first();
-                if ($bundlePayment && $bundlePayment->status !== 'verified') {
-                    $bundlePayment->update(['amount' => $linkedRequests->sum(fn ($item) => (float) $item->fresh()->fee)]);
+                $service = $locked->service;
+                $updates = $validated;
+                if ($newSlotId !== (int) $locked->appointment_slot_id) {
+                    $updates['status'] = $service->requires_approval ? 'pending' : 'confirmed';
+                    $updates['confirmed_by'] = null;
+                    $updates['confirmed_at'] = $service->requires_approval ? null : now();
+                }
+                $locked->update($updates);
+                return $locked;
+            }, $validated);
+        if (! $request->attributes->get('lifecycle_replayed')) {
+            if ($appointment->status === 'pending') {
+                foreach (User::role(['registrar', 'admin'])->get() as $staff) {
+                    NotificationService::sendSafely($staff, 'Appointment rescheduled', Auth::user()->name.' rescheduled appointment '.$appointment->reference_number.'.', 'info', route('registrar.appointments.index'));
                 }
             }
-        }, $validated);
-
-        if ($request->attributes->get('lifecycle_replayed')) return redirect()->route('portal.appointments.index')->with('success', 'Appointment updated.');
-
-        // Notify registrars of the update
-        $slot = AppointmentSlot::find($appointment->appointment_slot_id);
-        $summary = count($changes)
-            ? implode('; ', $changes)
-            : 'details updated';
-
-        $notifyUsers = User::role(['registrar', 'admin'])->get();
-        foreach ($notifyUsers as $staff) {
-            NotificationService::send(
-                $staff,
-                'Appointment Updated',
-                Auth::user()->name . ' has updated their appointment booking (' . $summary . ').',
-                'warning',
-                route('registrar.appointments.index')
-            );
+            NotificationService::sendUserUpdateSafely(Auth::user(), 'appointment-rescheduled:'.$appointment->id.':'.$appointment->lifecycle_version,
+                'Appointment rescheduled', 'Your appointment is now scheduled for '.\Carbon\Carbon::parse($appointment->slot->date)->format('M d, Y').' at '.\Carbon\Carbon::parse($appointment->slot->start_time)->format('g:i A').'.'.($appointment->status === 'pending' ? ' Registrar confirmation is required.' : ''),
+                'info', route('portal.advising.index'), 'View appointment');
         }
 
-        return redirect()->route('portal.appointments.index')
-            ->with('success', 'Appointment updated. The Registrar has been notified.');
+        return redirect()->route('portal.advising.index')->with('success', 'Appointment rescheduled. Your reference remains '.$appointment->reference_number.'.');
     }
 
     public function cancel(Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
-        $isAdvising = $appointment->visit_type === 'advising';
+        abort_unless($appointment->appointment_service_id, 410, 'Historical document appointments are read-only. Manage document requests in Document Requests.');
         $result = app(\App\Services\AppointmentCancellationService::class)
             ->cancel($appointment, Auth::user(), request());
 
-        if ($isAdvising && $result['result'] === 'cancelled') {
-            return redirect()->route('portal.advising.index')->with('success', 'Advising appointment cancelled.');
+        if ($result['result'] === 'cancelled') {
+            return redirect()->route('portal.advising.index')->with('success', 'Appointment cancelled.');
         }
 
         return match ($result['result']) {
@@ -241,7 +187,7 @@ class AppointmentController extends Controller
     public function submitGcash(Request $request, Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
-        abort_if($appointment->visit_type === 'advising', 422, 'Advising appointments do not require payment.');
+        abort_if($appointment->appointment_service_id, 422, 'Consultation appointments do not require payment.');
         abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointments do not create another payment.');
         if ($appointment->documentRequests()->exists()) {
             return redirect()->route('portal.payments.appointment', $appointment)->with('error', 'Use the document payment page for this booking.');
@@ -316,7 +262,7 @@ class AppointmentController extends Controller
     public function submitBundleGcash(Request $request, Appointment $appointment)
     {
         abort_unless($appointment->user_id === Auth::id(), 403);
-        abort_if($appointment->visit_type === 'advising', 422, 'Advising appointments do not require payment.');
+        abort_if($appointment->appointment_service_id, 422, 'Consultation appointments do not require payment.');
         $validated = $request->validate([
             'reference_number' => ['required', 'string', 'max:100'],
             'proof_of_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'mimetypes:image/jpeg,image/png,application/pdf', 'max:5120'],

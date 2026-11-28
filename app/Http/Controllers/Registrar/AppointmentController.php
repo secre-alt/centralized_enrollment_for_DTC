@@ -144,11 +144,23 @@ class AppointmentController extends Controller
 
     public function index(Request $request)
     {
+        $range = $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);
         $status = $request->get('status', 'pending');
-        $allowed = ['pending', 'confirmed', 'cancelled', 'all'];
+        $kind = $request->get('kind', 'consultation');
+        if (! in_array($kind, ['consultation', 'historical'], true)) $kind = 'consultation';
+        $allowed = ['pending', 'confirmed', 'checked_in', 'completed', 'cancelled', 'rejected', 'no_show', 'all'];
         if (! in_array($status, $allowed)) $status = 'pending';
 
-        $query = Appointment::with(['user', 'slot', 'latestPayment', 'documentRequests'])
+        $countsQuery = Appointment::when($kind === 'consultation', fn ($appointments) => $appointments->whereNotNull('appointment_service_id'),
+            fn ($appointments) => $appointments->whereNull('appointment_service_id'));
+        $report = Appointment::query()->whereNotNull('appointment_service_id')
+            ->when($range['from'] ?? null, fn ($appointments, $from) => $appointments->whereHas('slot', fn ($slots) => $slots->whereDate('date', '>=', $from)))
+            ->when($range['to'] ?? null, fn ($appointments, $to) => $appointments->whereHas('slot', fn ($slots) => $slots->whereDate('date', '<=', $to)))
+            ->selectRaw('appointment_service_id, status, count(*) as total')
+            ->groupBy('appointment_service_id', 'status')->with('service')->get();
+        $query = Appointment::with(['user', 'slot', 'latestPayment', 'documentRequests', 'service'])
+            ->when($kind === 'consultation', fn ($appointments) => $appointments->whereNotNull('appointment_service_id'),
+                fn ($appointments) => $appointments->whereNull('appointment_service_id'))
             ->latest();
 
         if ($status !== 'all') {
@@ -168,28 +180,30 @@ class AppointmentController extends Controller
 
         $appointments = $query->paginate(\App\Support\TablePagination::perPage(15))->withQueryString();
 
-        // Pending GCash payments needing attention (across all appointments)
+        // Only the labeled legacy workspace exposes historical appointment payment records.
         $pendingPayments = AppointmentPayment::with(['appointment.user', 'appointment.slot', 'appointment.documentRequests'])
             ->where('status', 'pending')
             ->where('payment_method', 'gcash')
             ->where('is_document_bundle', false)
-            ->whereHas('appointment', fn ($query) => $query->where('status', '!=', 'cancelled')->where('visit_type', '!=', 'advising'))
+            ->whereHas('appointment', fn ($query) => $query->whereNull('appointment_service_id')->where('status', '!=', 'cancelled'))
+            ->when($kind !== 'historical', fn ($payments) => $payments->whereRaw('1 = 0'))
             ->latest()
             ->get();
 
         $counts = [
-            'pending'   => Appointment::where('status', 'pending')->count(),
-            'confirmed' => Appointment::where('status', 'confirmed')->count(),
-            'cancelled' => Appointment::where('status', 'cancelled')->count(),
+            'pending' => (clone $countsQuery)->where('status', 'pending')->count(),
+            'confirmed' => (clone $countsQuery)->where('status', 'confirmed')->count(),
+            'cancelled' => (clone $countsQuery)->where('status', 'cancelled')->count(),
         ];
 
         return view('registrar.appointments.index', compact(
-            'appointments', 'pendingPayments', 'status', 'counts'
+            'appointments', 'pendingPayments', 'status', 'counts', 'kind', 'report'
         ));
     }
 
     public function confirm(Appointment $appointment)
     {
+        abort_unless($appointment->appointment_service_id, 410, 'Historical document appointments are read-only. Use Document Requests for processing and release.');
         $result = app(\App\Services\AppointmentLifecycle::class)->run(request(), 'appointment.confirmed', $appointment, [], [], function () use ($appointment) {
             $slotId = $appointment->appointment_slot_id;
             $slot = AppointmentSlot::whereKey($slotId)->lockForUpdate()->firstOrFail();
@@ -197,7 +211,7 @@ class AppointmentController extends Controller
 
             abort_if($locked->visit_type === 'claiming', 422, 'Claiming confirmation is not available through the legacy submission workflow.');
 
-            if ($locked->visit_type === 'advising') {
+            if ($locked->appointment_service_id) {
                 $slot = AppointmentSlot::whereKey($locked->appointment_slot_id)->firstOrFail();
                 $active = $slot->appointments()->whereIn('status', ['pending', 'confirmed'])->count();
                 if ($locked->status !== 'pending' || $active > $slot->max_bookings || $slot->date < today()->toDateString()
@@ -205,7 +219,7 @@ class AppointmentController extends Controller
                     || ($slot->status ?? 'open') !== 'open' || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time)) {
                     return 'slot_unavailable';
                 }
-                $locked->update(['status' => 'confirmed']);
+                $locked->update(['status' => 'confirmed', 'confirmed_by' => Auth::id(), 'confirmed_at' => now()]);
                 return 'confirmed';
             }
 
@@ -306,13 +320,13 @@ class AppointmentController extends Controller
         }
 
         $appointment->refresh()->load(['slot', 'user']);
-        if ($appointment->visit_type === 'advising') {
+        if ($appointment->appointment_service_id) {
             $date = \Carbon\Carbon::parse($appointment->slot->date)->format('M d, Y');
             $time = \Carbon\Carbon::parse($appointment->slot->start_time)->format('h:i A');
             $notified = NotificationService::sendUserUpdateSafely($appointment->user, 'appointment-confirmed:'.$appointment->id,
-                'Advising appointment confirmed', 'Your advising consultation is confirmed for '.$date.' at '.$time.'. Bring any records relevant to your question; evaluations are preliminary until official documents and Registrar rules are verified.',
+                'Appointment confirmed', 'Your '.$appointment->service?->name.' is confirmed for '.$date.' at '.$time.'. Reference: '.$appointment->reference_number.'. '.$appointment->service?->instructions,
                 'success', route('portal.advising.index'), 'View appointment');
-            return redirect()->route('registrar.appointments.index')->with('success', 'Advising appointment confirmed.'.($notified ? ' The student was notified.' : ' Notification delivery failed.'));
+            return redirect()->route('registrar.appointments.index')->with('success', 'Appointment confirmed.'.($notified ? ' The user was notified.' : ' Notification delivery failed.'));
         }
         $confirmedRequests = DocumentRequest::where('appointment_id', $appointment->id)->get();
         $linkedRequest = $confirmedRequests->first();
@@ -356,8 +370,87 @@ class AppointmentController extends Controller
             ->with('success', 'Appointment confirmed.' . $nextStep . ($notified ? ' The applicant was notified.' : ' The applicant notification could not be delivered; the failure was logged.'));
     }
 
+    public function reject(Request $request, Appointment $appointment)
+    {
+        $data = $request->validate(['rejection_reason' => ['required', 'string', 'max:500']]);
+        $updated = $this->transitionConsultation($request, $appointment, 'appointment.rejected', ['pending'], [
+            'status' => 'rejected', 'rejection_reason' => $data['rejection_reason'],
+        ], $data);
+        $this->notifyConsultation($updated, 'Appointment request rejected', 'Your appointment request was rejected. Reason: '.$data['rejection_reason'], 'danger');
+
+        return back()->with('success', 'Appointment request rejected.');
+    }
+
+    public function checkIn(Request $request, Appointment $appointment)
+    {
+        $updated = $this->transitionConsultation($request, $appointment, 'appointment.checked_in', ['confirmed'], [
+            'status' => 'checked_in', 'checked_in_at' => now(), 'checked_in_by' => Auth::id(),
+        ], ['appointment_id' => $appointment->id], function (Appointment $locked) {
+            $slot = AppointmentSlot::whereKey($locked->appointment_slot_id)->firstOrFail();
+            abort_if($slot->date !== today()->toDateString(), 422, 'Check-in is available on the scheduled appointment date.');
+        });
+        $this->notifyConsultation($updated, 'Appointment check-in recorded', 'The Registrar recorded your arrival for '.$updated->service?->name.'.', 'info');
+
+        return back()->with('success', 'Appointment check-in recorded.');
+    }
+
+    public function complete(Request $request, Appointment $appointment)
+    {
+        $updated = $this->transitionConsultation($request, $appointment, 'appointment.completed', ['checked_in'], [
+            'status' => 'completed', 'completed_at' => now(), 'completed_by' => Auth::id(),
+        ], ['appointment_id' => $appointment->id]);
+        $this->notifyConsultation($updated, 'Appointment completed', 'Your '.$updated->service?->name.' appointment has been marked complete.', 'success');
+
+        return back()->with('success', 'Appointment completed.');
+    }
+
+    public function markNoShow(Request $request, Appointment $appointment)
+    {
+        $updated = $this->transitionConsultation($request, $appointment, 'appointment.no_show', ['confirmed'], [
+            'status' => 'no_show',
+        ], ['appointment_id' => $appointment->id], function (Appointment $locked) {
+            $slot = AppointmentSlot::whereKey($locked->appointment_slot_id)->firstOrFail();
+            abort_if(\Carbon\Carbon::parse($slot->date.' '.$slot->end_time)->isFuture(), 422, 'An appointment cannot be marked no-show before its scheduled end.');
+        });
+        $this->notifyConsultation($updated, 'Appointment marked no-show', 'Your appointment was marked no-show after its scheduled time.', 'warning');
+
+        return back()->with('success', 'Appointment marked no-show.');
+    }
+
+    public function saveStaffRemarks(Request $request, Appointment $appointment)
+    {
+        $data = $request->validate(['staff_remarks' => ['nullable', 'string', 'max:4000']]);
+        $this->transitionConsultation($request, $appointment, 'appointment.remarks_updated',
+            ['pending', 'confirmed', 'checked_in', 'completed'], ['staff_remarks' => $data['staff_remarks']], $data);
+
+        return back()->with('success', 'Staff-only remarks saved.');
+    }
+
+    private function transitionConsultation(Request $request, Appointment $appointment, string $action, array $allowedStatuses,
+        array $updates, array $payload, ?callable $guard = null): Appointment
+    {
+        return app(\App\Services\AppointmentLifecycle::class)->run($request, $action, $appointment, [], [],
+            function () use ($appointment, $allowedStatuses, $updates, $guard) {
+                $locked = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+                abort_unless($locked->appointment_service_id, 404);
+                abort_unless(in_array($locked->status, $allowedStatuses, true), 422, 'This appointment state cannot be changed by that action.');
+                if ($guard) $guard($locked);
+                $locked->update($updates);
+
+                return $locked;
+            }, $payload);
+    }
+
+    private function notifyConsultation(Appointment $appointment, string $title, string $message, string $type): void
+    {
+        $appointment->loadMissing(['user', 'service']);
+        NotificationService::sendUserUpdateSafely($appointment->user, 'appointment-state:'.$appointment->id.':'.$appointment->lifecycle_version,
+            $title, $message, $type, route('portal.advising.index'), 'View appointment');
+    }
+
     public function cancel(Request $request, Appointment $appointment)
     {
+        abort_unless($appointment->appointment_service_id, 410, 'Historical document appointments are read-only. Use Document Requests for processing and release.');
         $validated = $request->validate([
             'remarks' => ['required', 'string', 'max:500'],
         ]);
@@ -376,6 +469,7 @@ class AppointmentController extends Controller
 
     public function verifyPayment(AppointmentPayment $payment)
     {
+        abort_if($payment->appointment?->appointment_service_id, 422, 'Consultation appointments do not have payments.');
         DB::transaction(function () use ($payment) {
             $appointment = Appointment::whereKey($payment->appointment_id)->lockForUpdate()->firstOrFail();
             $lockedPayment = AppointmentPayment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
@@ -419,6 +513,7 @@ class AppointmentController extends Controller
 
     public function rejectPayment(Request $request, AppointmentPayment $payment)
     {
+        abort_if($payment->appointment?->appointment_service_id, 422, 'Consultation appointments do not have payments.');
         $validated = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
