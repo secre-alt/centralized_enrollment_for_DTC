@@ -6975,7 +6975,7 @@ body #dtcSignInModal .dtc-modal-input:focus:not(:-webkit-autofill):not(:autofill
     box-shadow: none !important;
 }
 
-#dtcSignInModal .dtc-modal-label {
+#dtcSignInModal.dtc-modal-overlay .dtc-modal-label {
     position: absolute;
     z-index: 2;
     top: 22px;
@@ -6997,6 +6997,9 @@ body #dtcSignInModal .dtc-modal-input:focus:not(:-webkit-autofill):not(:autofill
                 background-color 200ms cubic-bezier(.4, 0, .2, 1),
                 transform 200ms cubic-bezier(.4, 0, .2, 1);
 }
+
+html.dtc-dark #dtcSignInModal.dtc-modal-overlay .dtc-modal-label,
+body.dtc-dark #dtcSignInModal.dtc-modal-overlay .dtc-modal-label { color: #CBD5E1; }
 
 #dtcSignInModal .dtc-modal-input::placeholder {
     color: transparent;
@@ -7037,7 +7040,7 @@ body #dtcSignInModal .dtc-modal-input:focus:not(:-webkit-autofill):not(:autofill
 body.dtc-dark #dtcSignInModal .dtc-modal-label,
 html.dtc-dark #dtcSignInModal .dtc-modal-label {
     background: var(--dtc-surface, #111827);
-    color: var(--dtc-text-muted, #94a3b8);
+    color: #CBD5E1;
 }
 
 body.dtc-dark #dtcSignInModal .dtc-modal-field:has(.dtc-modal-input:focus) .dtc-modal-label,

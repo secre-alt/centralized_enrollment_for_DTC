@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CourseSubject;
 use App\Models\Setting;
 use App\Models\TimetableDraft;
 use App\Models\TimetableResource;
@@ -37,6 +38,32 @@ class TimetableController extends Controller
             }
             fclose($output);
         }, 'timetable-'.$draft->id.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'private, no-store']);
+    }
+
+    public function sample(Request $request)
+    {
+        $data = $request->validate([
+            'program_id' => ['required', 'integer', 'exists:programs,id'],
+            'year_level' => ['required', 'integer', 'between:1,4'],
+        ]);
+        $semester = ['1st' => 1, '2nd' => 2, 'Summer' => 3][Setting::get('current_semester', '')] ?? null;
+        if (! $semester) {
+            throw ValidationException::withMessages(['timetable' => 'Configure the current semester before downloading a timetable template.']);
+        }
+        $subjects = CourseSubject::where('program_id', $data['program_id'])->where('year_level', $data['year_level'])
+            ->where('semester', $semester)->orderBy('id')->get(['id']);
+        if ($subjects->isEmpty()) {
+            throw ValidationException::withMessages(['timetable' => 'This program and year have no curriculum subjects for the configured semester. Add the curriculum first.']);
+        }
+
+        return response()->streamDownload(function () use ($subjects) {
+            $output = fopen('php://output', 'w');
+            fputcsv($output, self::CSV_COLUMNS, escape: '\\');
+            foreach ($subjects as $subject) {
+                fputcsv($output, [$subject->id, '', '', '', '', '', '', ''], escape: '\\');
+            }
+            fclose($output);
+        }, 'timetable-sample.csv', ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'private, no-store']);
     }
 
     public function resource(Request $request, TimetableService $service)

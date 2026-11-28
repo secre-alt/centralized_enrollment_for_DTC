@@ -72,7 +72,7 @@ const viewports = [
                         return visible && control.type !== 'hidden' && !name;
                     }).length,
                 }));
-                results.push({ page: pageSpec.name, route: pageSpec.route, theme, viewport, status: response?.status(), consoleErrors, failedRequests, axeViolations: axe.violations.map(({ id, impact, description, help, nodes }) => ({ id, impact, description, help, targets: nodes.map(node => node.target), summary: nodes.map(node => node.failureSummary) })), ...layout });
+                results.push({ page: pageSpec.name, route: pageSpec.route, theme, viewport, status: response?.status(), consoleErrors, failedRequests, axeViolations: axe.violations.map(({ id, impact, description, help, nodes }) => ({ id, impact, description, help, nodes: nodes.map(({ target, html, failureSummary, any, all, none }) => ({ target, html, failureSummary, checks: [...any, ...all, ...none].map(({ message, data }) => ({ message, data })) })) })), ...layout });
                 console.log(`${pageSpec.name} ${theme} ${viewport.width}x${viewport.height}: HTTP ${response?.status()}, overflow=${layout.horizontalOverflow}`);
                 await context.close();
             }

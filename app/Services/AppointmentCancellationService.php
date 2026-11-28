@@ -46,6 +46,13 @@ class AppointmentCancellationService
                 ->orderBy('id')->lockForUpdate()
                 ->get();
 
+            if ($lockedAppointment->visit_type === 'advising') {
+                $lockedAppointment->update(['status' => 'cancelled', 'remarks' => $remarks ?? $lockedAppointment->remarks]);
+                AuditLog::create(['user_id' => $actor->id, 'action' => 'appointment.advising_cancelled',
+                    'description' => "Cancelled advising appointment #{$lockedAppointment->id}.", 'ip_address' => $request->ip(), 'user_agent' => $request->userAgent()]);
+                return ['result' => 'cancelled', 'user_message' => 'Advising appointment cancelled.'];
+            }
+
             if (! $isStaff && $documentRequests->contains(fn ($documentRequest) => in_array($documentRequest->status, ['processing', 'ready', 'released'], true))) {
                 return ['result' => 'resolved_request'];
             }

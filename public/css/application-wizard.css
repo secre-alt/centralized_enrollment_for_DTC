@@ -2520,7 +2520,11 @@ body.dtc-dark .admission-wizard .admission-progress-heading { color: #a7b4c8; }
 .admission-wizard .wiz-field > .wiz-err-msg,
 .admission-wizard .wiz-field > .wiz-hint { margin-top: 6px; }
 body.dtc-dark .admission-wizard .wiz-field { --wiz-label-surface: #152034; }
-body.dtc-dark .admission-wizard .wiz-field > label { color: #a7b4c8; }
+body.dtc-dark .admission-wizard .wiz-field > label { color: #cbd5e1; }
+body.dtc-dark .admission-wizard .wiz-field:has(> .wiz-input:focus) > label,
+body.dtc-dark .admission-wizard .wiz-field:has(> .wiz-input:not(:placeholder-shown)) > label,
+body.dtc-dark .admission-wizard .wiz-field:has(> select.wiz-input) > label,
+body.dtc-dark .admission-wizard .wiz-field:has(> input.wiz-input:not([placeholder])) > label { color: #cbd5e1; }
 @media (prefers-reduced-motion: reduce) {
     .admission-wizard .wiz-field > label { transition: none; }
 }

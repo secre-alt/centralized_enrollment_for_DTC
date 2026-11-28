@@ -17,11 +17,11 @@
     ],
     "failedRequests": [
       {
-        "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
@@ -136,40 +136,62 @@
       }
     ],
     "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".is-prev > h3"
-          ],
-          [
-            ".is-prev > p"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.45 (foreground color: #818892, background color: #fafbfc, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.37 (foreground color: #9ea6b1, background color: #fafbfc, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      },
       {
         "id": "target-size",
         "impact": "serious",
         "description": "Ensure touch targets have sufficient size and space",
         "help": "All touch targets must be 24px large, or leave sufficient space",
-        "targets": [
-          [
-            "#servicesPrev"
-          ],
-          [
-            "#servicesNext"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px.",
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px."
+        "nodes": [
+          {
+            "target": [
+              "#servicesPrev"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-prev\" id=\"servicesPrev\" aria-label=\"Previous service\">\n                        <i data-lucide=\"chevron-left\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.5,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          },
+          {
+            "target": [
+              "#servicesNext"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-next\" id=\"servicesNext\" aria-label=\"Next service\">\n                        <i data-lucide=\"chevron-right\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.5,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          }
         ]
       }
     ],
@@ -221,26 +243,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".is-prev > h3"
-          ],
-          [
-            ".is-prev > p"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.45 (foreground color: #818892, background color: #fafbfc, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.37 (foreground color: #9ea6b1, background color: #fafbfc, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -289,26 +292,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".is-prev > h3"
-          ],
-          [
-            ".is-prev > p"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.45 (foreground color: #818892, background color: #fafbfc, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.37 (foreground color: #9ea6b1, background color: #fafbfc, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1920,
     "documentWidth": 1920,
@@ -357,34 +341,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            "#services > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 360,
     "documentWidth": 360,
@@ -433,34 +390,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            "#services > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 390,
     "documentWidth": 390,
@@ -510,52 +440,62 @@
       }
     ],
     "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            ".revealed > .eyebrow"
-          ],
-          [
-            ".is-prev > p"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #77808e, background color: #101729, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      },
       {
         "id": "target-size",
         "impact": "serious",
         "description": "Ensure touch targets have sufficient size and space",
         "help": "All touch targets must be 24px large, or leave sufficient space",
-        "targets": [
-          [
-            "#servicesPrev"
-          ],
-          [
-            "#servicesNext"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px.",
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px."
+        "nodes": [
+          {
+            "target": [
+              "#servicesPrev"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-prev\" id=\"servicesPrev\" aria-label=\"Previous service\">\n                        <i data-lucide=\"chevron-left\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.5,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          },
+          {
+            "target": [
+              "#servicesNext"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-next\" id=\"servicesNext\" aria-label=\"Next service\">\n                        <i data-lucide=\"chevron-right\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.5,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          }
         ]
       }
     ],
@@ -607,42 +547,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active.nav-link[href=\"http://127.0.0.1:8011\"]"
-          ],
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            "#services > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            ".is-prev > p"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #77808e, background color: #101729, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -691,42 +596,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active.nav-link[href=\"http://127.0.0.1:8011\"]"
-          ],
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            ".revealed > .eyebrow"
-          ],
-          [
-            ".is-prev > p"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #77808e, background color: #101729, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1920,
     "documentWidth": 1920,
@@ -755,11 +625,11 @@
     ],
     "failedRequests": [
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
@@ -874,40 +744,62 @@
       }
     ],
     "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".is-prev > h3"
-          ],
-          [
-            ".is-prev > p"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.47 (foreground color: #818792, background color: #f9fbfc, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.37 (foreground color: #9da6b1, background color: #f9fbfc, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      },
       {
         "id": "target-size",
         "impact": "serious",
         "description": "Ensure touch targets have sufficient size and space",
         "help": "All touch targets must be 24px large, or leave sufficient space",
-        "targets": [
-          [
-            "#servicesPrev"
-          ],
-          [
-            "#servicesNext"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px.",
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px."
+        "nodes": [
+          {
+            "target": [
+              "#servicesPrev"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-prev\" id=\"servicesPrev\" aria-label=\"Previous service\">\n                        <i data-lucide=\"chevron-left\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.5,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          },
+          {
+            "target": [
+              "#servicesNext"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-next\" id=\"servicesNext\" aria-label=\"Next service\">\n                        <i data-lucide=\"chevron-right\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.5px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.5,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          }
         ]
       }
     ],
@@ -959,26 +851,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".is-prev > h3"
-          ],
-          [
-            ".is-prev > p"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.45 (foreground color: #818892, background color: #fafbfc, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.37 (foreground color: #9ea6b1, background color: #fafbfc, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -1007,46 +880,27 @@
     ],
     "failedRequests": [
       {
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
+      },
+      {
         "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      }
-    ],
-    "axeViolations": [
+      },
       {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".is-prev > h3"
-          ],
-          [
-            ".is-prev > p"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.45 (foreground color: #818892, background color: #fafbfc, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.37 (foreground color: #9ea6b1, background color: #fafbfc, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1920,
     "documentWidth": 1920,
@@ -1087,58 +941,15 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            "#services > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            ".dtc-modal-form-sub"
-          ],
-          [
-            "label[for=\"modal_email\"]"
-          ],
-          [
-            "label[for=\"modal_password\"]"
-          ],
-          [
-            ".dtc-modal-check-label"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 360,
     "documentWidth": 360,
@@ -1167,70 +978,27 @@
     ],
     "failedRequests": [
       {
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
+      },
+      {
         "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      }
-    ],
-    "axeViolations": [
+      },
       {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            "#services > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            ".dtc-modal-form-sub"
-          ],
-          [
-            "label[for=\"modal_email\"]"
-          ],
-          [
-            "label[for=\"modal_password\"]"
-          ],
-          [
-            ".dtc-modal-check-label"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 390,
     "documentWidth": 390,
@@ -1280,68 +1048,62 @@
       }
     ],
     "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            ".revealed > .eyebrow"
-          ],
-          [
-            ".is-prev > p"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            ".dtc-modal-form-sub"
-          ],
-          [
-            "label[for=\"modal_email\"]"
-          ],
-          [
-            "label[for=\"modal_password\"]"
-          ],
-          [
-            ".dtc-modal-check-label"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #77808e, background color: #101729, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      },
       {
         "id": "target-size",
         "impact": "serious",
         "description": "Ensure touch targets have sufficient size and space",
         "help": "All touch targets must be 24px large, or leave sufficient space",
-        "targets": [
-          [
-            "#servicesPrev"
-          ],
-          [
-            "#servicesNext"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px.",
-          "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.5px by 44px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.4px instead of at least 24px."
+        "nodes": [
+          {
+            "target": [
+              "#servicesPrev"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-prev\" id=\"servicesPrev\" aria-label=\"Previous service\">\n                        <i data-lucide=\"chevron-left\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.6px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.6px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.6,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          },
+          {
+            "target": [
+              "#servicesNext"
+            ],
+            "html": "<button type=\"button\" class=\"carousel-arrow carousel-arrow-next\" id=\"servicesNext\" aria-label=\"Next service\">\n                        <i data-lucide=\"chevron-right\"></i>\n                    </button>",
+            "failureSummary": "Fix any of the following:\n  Target has insufficient size because it is partially obscured (smallest space is 18.6px by 48px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+            "checks": [
+              {
+                "message": "Target has insufficient size because it is partially obscured (smallest space is 18.6px by 48px, should be at least 24px by 24px)",
+                "data": {
+                  "messageKey": "partiallyObscured",
+                  "minSize": 24,
+                  "width": 18.6,
+                  "height": 48
+                }
+              },
+              {
+                "message": "Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18.6px instead of at least 24px.",
+                "data": {
+                  "closestOffset": 18.6,
+                  "minOffset": 24
+                }
+              }
+            ]
+          }
         ]
       }
     ],
@@ -1385,66 +1147,15 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active.nav-link[href=\"http://127.0.0.1:8011\"]"
-          ],
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            "#services > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            ".is-prev > p"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            ".dtc-modal-form-sub"
-          ],
-          [
-            "label[for=\"modal_email\"]"
-          ],
-          [
-            "label[for=\"modal_password\"]"
-          ],
-          [
-            ".dtc-modal-check-label"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #77808e, background color: #101729, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -1485,66 +1196,15 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active.nav-link[href=\"http://127.0.0.1:8011\"]"
-          ],
-          [
-            ".btn-primary-cta"
-          ],
-          [
-            ".revealed > .eyebrow"
-          ],
-          [
-            ".is-prev > p"
-          ],
-          [
-            "#process > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            "#faqs > .container > .section-heading.reveal > .eyebrow"
-          ],
-          [
-            ".dtc-modal-form-sub"
-          ],
-          [
-            "label[for=\"modal_email\"]"
-          ],
-          [
-            "label[for=\"modal_password\"]"
-          ],
-          [
-            ".dtc-modal-check-label"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #f8fafc, background color: #ffc72c, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #77808e, background color: #101729, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.61 (foreground color: #0f4cdb, background color: #0f172a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 10.1pt (13.5px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #66758a, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "DTC EMS — Danao Technological College",
     "viewportWidth": 1920,
     "documentWidth": 1920,
@@ -1575,15 +1235,15 @@
     ],
     "failedRequests": [
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
         "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
@@ -1898,26 +1558,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            "label[for=\"academic_status\"]"
-          ],
-          [
-            "label[for=\"program_id\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Online Admission Application",
     "viewportWidth": 360,
     "documentWidth": 360,
@@ -1976,26 +1617,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            "label[for=\"academic_status\"]"
-          ],
-          [
-            "label[for=\"program_id\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Online Admission Application",
     "viewportWidth": 390,
     "documentWidth": 390,
@@ -2054,26 +1676,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            "label[for=\"academic_status\"]"
-          ],
-          [
-            "label[for=\"program_id\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Online Admission Application",
     "viewportWidth": 768,
     "documentWidth": 768,
@@ -2132,30 +1735,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active[href$=\"apply\"]"
-          ],
-          [
-            "label[for=\"academic_status\"]"
-          ],
-          [
-            "label[for=\"program_id\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Online Admission Application",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -2206,38 +1786,15 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active[href$=\"apply\"]"
-          ],
-          [
-            "label[for=\"academic_status\"]"
-          ],
-          [
-            "label[for=\"program_id\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Online Admission Application",
     "viewportWidth": 1920,
     "documentWidth": 1920,
@@ -2591,22 +2148,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            "label[for=\"reference_no\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Check Application Status",
     "viewportWidth": 360,
     "documentWidth": 360,
@@ -2665,22 +2207,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            "label[for=\"reference_no\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Check Application Status",
     "viewportWidth": 390,
     "documentWidth": 390,
@@ -2731,30 +2258,15 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
+        "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            "label[for=\"reference_no\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Check Application Status",
     "viewportWidth": 768,
     "documentWidth": 768,
@@ -2813,26 +2325,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active"
-          ],
-          [
-            "label[for=\"reference_no\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Check Application Status",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -2891,26 +2384,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".public-nav-links > .active"
-          ],
-          [
-            "label[for=\"reference_no\"]"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #0f4cdb, background color: #111827, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1",
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #64748b, background color: #152034, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Check Application Status",
     "viewportWidth": 1920,
     "documentWidth": 1920,
@@ -3093,11 +2567,11 @@
     ],
     "failedRequests": [
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
-        "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
@@ -3132,34 +2606,19 @@
     ],
     "failedRequests": [
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
         "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      }
-    ],
-    "axeViolations": [
+      },
       {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
+    "axeViolations": [],
     "title": "Forgot password? — DTC EMS",
     "viewportWidth": 360,
     "documentWidth": 360,
@@ -3198,22 +2657,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Forgot password? — DTC EMS",
     "viewportWidth": 390,
     "documentWidth": 390,
@@ -3252,22 +2696,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Forgot password? — DTC EMS",
     "viewportWidth": 768,
     "documentWidth": 768,
@@ -3294,34 +2723,19 @@
     ],
     "failedRequests": [
       {
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
+      },
+      {
         "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Forgot password? — DTC EMS",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -3360,22 +2774,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Forgot password? — DTC EMS",
     "viewportWidth": 1920,
     "documentWidth": 1920,
@@ -3609,22 +3008,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Activate your account — DTC EMS",
     "viewportWidth": 360,
     "documentWidth": 360,
@@ -3651,34 +3035,19 @@
     ],
     "failedRequests": [
       {
-        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
-        "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      },
-      {
         "url": "https://unpkg.com/lucide@latest/dist/umd/lucide.min.js",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       },
       {
         "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
-      }
-    ],
-    "axeViolations": [
+      },
       {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
+        "url": "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
+    "axeViolations": [],
     "title": "Activate your account — DTC EMS",
     "viewportWidth": 390,
     "documentWidth": 390,
@@ -3717,22 +3086,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Activate your account — DTC EMS",
     "viewportWidth": 768,
     "documentWidth": 768,
@@ -3771,22 +3125,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Activate your account — DTC EMS",
     "viewportWidth": 1366,
     "documentWidth": 1366,
@@ -3825,22 +3164,7 @@
         "error": "net::ERR_NETWORK_ACCESS_DENIED"
       }
     ],
-    "axeViolations": [
-      {
-        "id": "color-contrast",
-        "impact": "serious",
-        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
-        "help": "Elements must meet minimum color contrast ratio thresholds",
-        "targets": [
-          [
-            ".auth-card-copyright"
-          ]
-        ],
-        "summary": [
-          "Fix any of the following:\n  Element has insufficient color contrast of 3.72 (foreground color: #64748b, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        ]
-      }
-    ],
+    "axeViolations": [],
     "title": "Activate your account — DTC EMS",
     "viewportWidth": 1920,
     "documentWidth": 1920,

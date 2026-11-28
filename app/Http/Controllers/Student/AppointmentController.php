@@ -22,11 +22,51 @@ use App\Support\PrivateFilePreview;
 
 class AppointmentController extends Controller
 {
+    public function advising()
+    {
+        abort_unless(Auth::user()->hasAnyRole(['student', 'alumni']), 403);
+        $appointments = Appointment::with('slot')->where('user_id', Auth::id())->where('visit_type', 'advising')->latest()->get();
+        $slots = AppointmentSlot::where('date', '>=', today())->orderBy('date')->orderBy('start_time')->get()
+            ->filter(fn ($slot) => $slot->isAvailable() && ! app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time)
+                && ($slot->date !== today()->toDateString() || $slot->start_time > now()->format('H:i:s')))->values();
+        return view('student.appointments.advising', compact('appointments', 'slots'));
+    }
+
+    public function bookAdvising(Request $request)
+    {
+        abort_unless($request->user()->hasAnyRole(['student', 'alumni']), 403);
+        $data = $request->validate([
+            'appointment_slot_id' => ['required', 'integer', 'exists:appointment_slots,id'],
+            'consultation_type' => ['required', 'in:enrollment_guidance,transfer_credit,returning_student,other'],
+            'purpose' => ['required', 'string', 'max:500'],
+        ]);
+        $appointment = app(\App\Services\AppointmentLifecycle::class)->run($request, 'advising.booked', null,
+            [(int) $data['appointment_slot_id']], [], function () use ($request, $data) {
+                $slot = AppointmentSlot::whereKey($data['appointment_slot_id'])->lockForUpdate()->firstOrFail();
+                $active = Appointment::where('appointment_slot_id', $slot->id)->whereIn('status', ['pending', 'confirmed'])->orderBy('id')->lockForUpdate()->get();
+                if (($slot->status ?? 'open') !== 'open' || $active->count() >= $slot->max_bookings || $active->contains('user_id', $request->user()->id)
+                    || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time)
+                    || $slot->date < today()->toDateString()
+                    || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))) {
+                    throw ValidationException::withMessages(['appointment_slot_id' => 'This time is no longer available. Choose another open time.']);
+                }
+                return Appointment::create(['user_id' => $request->user()->id, 'appointment_slot_id' => $slot->id,
+                    'document_type' => 'advising', 'visit_type' => 'advising',
+                    'purpose' => ucfirst(str_replace('_', ' ', $data['consultation_type'])).': '.$data['purpose'], 'status' => 'pending']);
+            }, $data);
+        if (! $request->attributes->get('lifecycle_replayed')) {
+            foreach (User::role(['registrar', 'admin'])->get() as $staff) {
+                NotificationService::sendSafely($staff, 'Advising appointment request', $request->user()->name.' requested an advising consultation.', 'info', route('registrar.appointments.index'));
+            }
+        }
+        return redirect()->route('portal.advising.index')->with('success', 'Advising request submitted. It will appear here after staff confirm it.');
+    }
+
     public function index()
     {
         $appointments = Appointment::with(['slot', 'latestPayment', 'documentRequest', 'documentRequests.releaser'])
             ->where('user_id', Auth::id())
-            ->where('visit_type', '!=', 'claiming')
+            ->whereNotIn('visit_type', ['claiming', 'advising'])
             ->latest()
             ->get();
 
@@ -57,6 +97,7 @@ class AppointmentController extends Controller
     public function edit(Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
+        abort_if($appointment->visit_type === 'advising', 422, 'Advising requests cannot be edited here. Cancel and submit a new request.');
         abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointment changes are not available through submission editing.');
 
         if ($appointment->status !== 'pending') {
@@ -77,6 +118,7 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
+        abort_if($appointment->visit_type === 'advising', 422, 'Advising requests cannot be edited here. Cancel and submit a new request.');
         abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointment changes are not available through submission editing.');
 
         $validated = $request->validate([
@@ -179,8 +221,13 @@ class AppointmentController extends Controller
     public function cancel(Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
+        $isAdvising = $appointment->visit_type === 'advising';
         $result = app(\App\Services\AppointmentCancellationService::class)
             ->cancel($appointment, Auth::user(), request());
+
+        if ($isAdvising && $result['result'] === 'cancelled') {
+            return redirect()->route('portal.advising.index')->with('success', 'Advising appointment cancelled.');
+        }
 
         return match ($result['result']) {
             'already_cancelled' => back()->with('error', 'Appointment is already cancelled.'),
@@ -194,6 +241,7 @@ class AppointmentController extends Controller
     public function submitGcash(Request $request, Appointment $appointment)
     {
         abort_if($appointment->user_id !== Auth::id(), 403);
+        abort_if($appointment->visit_type === 'advising', 422, 'Advising appointments do not require payment.');
         abort_if($appointment->visit_type === 'claiming', 422, 'Claiming appointments do not create another payment.');
         if ($appointment->documentRequests()->exists()) {
             return redirect()->route('portal.payments.appointment', $appointment)->with('error', 'Use the document payment page for this booking.');
@@ -268,6 +316,7 @@ class AppointmentController extends Controller
     public function submitBundleGcash(Request $request, Appointment $appointment)
     {
         abort_unless($appointment->user_id === Auth::id(), 403);
+        abort_if($appointment->visit_type === 'advising', 422, 'Advising appointments do not require payment.');
         $validated = $request->validate([
             'reference_number' => ['required', 'string', 'max:100'],
             'proof_of_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'mimetypes:image/jpeg,image/png,application/pdf', 'max:5120'],

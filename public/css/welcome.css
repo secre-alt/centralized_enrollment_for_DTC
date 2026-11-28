@@ -293,6 +293,8 @@ body.dtc-dark .hero::after {
         box-shadow 0.25s ease;
 }
 
+body.dtc-dark .btn-primary-cta { color: #1e293b; }
+
 .btn-primary-cta:hover {
     background: var(--yellow-dark);
     color: var(--text-900);
@@ -439,6 +441,10 @@ body.dtc-dark .feature-pill {
     margin-bottom: 10px;
 }
 
+body.dtc-dark .section-heading .eyebrow { color: #93BBFD; }
+
+body.dtc-dark .public-nav-links a.active { color: #93c5fd; }
+
 .section-heading h2 {
     font-size: 32px;
 
@@ -460,6 +466,10 @@ body.dtc-dark .feature-pill {
     align-items: center;
 
     gap: 16px;
+}
+
+@media (max-width: 991.98px) {
+    .services-carousel { gap: 36px; }
 }
 
 .carousel-viewport {
@@ -489,10 +499,13 @@ body.dtc-dark .feature-pill {
 }
 
 .carousel-arrow {
+    position: relative;
+    z-index: 6;
     flex-shrink: 0;
 
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
 
     display: flex;
     align-items: center;
@@ -614,7 +627,7 @@ body.dtc-dark .feature-pill {
 .carousel-track .service-card.is-prev {
     z-index: 3;
 
-    opacity: 0.55;
+    opacity: 1;
 
     transform: translateX(-62%) translateZ(-180px) rotateY(28deg) scale(0.82);
 }
@@ -622,10 +635,16 @@ body.dtc-dark .feature-pill {
 .carousel-track .service-card.is-next {
     z-index: 3;
 
-    opacity: 0.55;
+    opacity: 1;
 
     transform: translateX(62%) translateZ(-180px) rotateY(-28deg) scale(0.82);
 }
+
+.carousel-track .service-card.is-prev > *,
+.carousel-track .service-card.is-next > * { color: var(--text-700); }
+
+body.dtc-dark .carousel-track .service-card.is-prev > *,
+body.dtc-dark .carousel-track .service-card.is-next > * { color: #cbd5e1; }
 
 .carousel-track .service-card.is-far {
     z-index: 1;
@@ -1651,12 +1670,12 @@ body.dtc-dark .feature-pill {
 
     .carousel-track .service-card.is-prev {
     transform: translateX(-38%) translateZ(-120px) rotateY(22deg) scale(0.78);
-    opacity: 0.5;
+    opacity: 1;
     }
 
     .carousel-track .service-card.is-next {
         transform: translateX(38%) translateZ(-120px) rotateY(-22deg) scale(0.78);
-        opacity: 0.5;
+        opacity: 1;
     }
 
     .carousel-viewport {
@@ -1684,8 +1703,9 @@ body.dtc-dark .feature-pill {
     }
 
     .carousel-arrow {
-        /* hide side arrows; dots alone handle navigation */
-        display: none;
+        width: 48px;
+        min-width: 48px;
+        height: 48px;
     }
 
     .back-to-top {
@@ -1774,6 +1794,10 @@ body.dtc-dark .feature-pill {
     .login-panel {
         padding: 28px 20px;
     }
+}
+
+@media (max-width: 991.98px) {
+    .services-carousel .carousel-arrow { display: flex; }
 }
 
 

@@ -58,6 +58,7 @@
             <label for="tt-import-mode">Mode<select id="tt-import-mode" aria-describedby="tt-import-mode-help" name="is_demo" class="form-control"><option value="0" @selected((string)old('is_demo', '0') === '0')>Normal draft</option><option value="1" @selected((string)old('is_demo') === '1')>Demonstration - cannot publish</option></select></label>
             <p id="tt-import-mode-help" class="tt-help">For sample CSVs with demo-room and demo-instructor IDs, choose Demonstration. Normal drafts match instructor and room IDs or names to configured resources.</p>
             <label class="mt-3" for="tt-start-csv">CSV file<input id="tt-start-csv" class="form-control" type="file" name="csv" accept=".csv,text/csv" required></label>
+            <p class="tt-help mt-2"><a id="tt-sample-csv" data-url="{{ route('admin.timetables.sample') }}" href="{{ route('admin.timetables.sample', ['program_id' => old('program_id', $selectedProgram?->id), 'year_level' => old('year_level', 1)]) }}">Download a CSV template for this program and year</a>. Subject IDs are filled in; add instructor, room, and schedule details.</p>
             <details class="tt-resource mt-3">
                 <summary>Teaching hours</summary>
                 <div class="tt-grid">

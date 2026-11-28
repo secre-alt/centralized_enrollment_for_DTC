@@ -26,8 +26,11 @@ class AppointmentLifecycleCommand
             'lifecycle_version' => $appointment ? ['required', 'integer', 'min:0'] : ['nullable', 'integer', 'min:0']]);
         $lifecycle = app(AppointmentLifecycle::class);
         if ($lifecycle->replay($request, $action, $lifecycle->fingerprint($request, $action))) {
-            $destination = match ($action) {
+            $destination = $action === 'appointment.confirmed' && $appointment?->visit_type === 'advising'
+                ? 'registrar.appointments.index'
+                : match ($action) {
                 'claim.booked' => 'portal.claiming-appointments.index',
+                'advising.booked' => 'portal.advising.index',
                 'claim.released' => 'registrar.claiming-appointments.index',
                 'appointment.confirmed' => 'registrar.documents.index',
                 'legacy.pickup_booked' => 'portal.documents.index',

@@ -1,12 +1,24 @@
 document.addEventListener('DOMContentLoaded', function () {
     const programFields = document.querySelectorAll('[data-timetable-program]');
+    const sampleLink = document.getElementById('tt-sample-csv');
+    const sampleProgram = document.getElementById('tt-import-program');
+    const sampleYear = document.getElementById('tt-import-year');
+    function updateSampleLink() {
+        if (!sampleLink || !sampleProgram?.value || !sampleYear?.value) return;
+        const params = new URLSearchParams({ program_id: sampleProgram.value, year_level: sampleYear.value });
+        sampleLink.href = sampleLink.dataset.url + '?' + params.toString();
+    }
+    [sampleProgram, sampleYear].forEach(field => field?.addEventListener('change', updateSampleLink));
+    updateSampleLink();
     programFields.forEach(field => field.addEventListener('change', function () {
         field.dataset.timetableEdited = '1';
+        if (field === sampleProgram) updateSampleLink();
     }));
     document.addEventListener('dtc:program-selected', function (event) {
         programFields.forEach(field => {
             if (!field.dataset.timetableEdited) field.value = event.detail || field.options[0]?.value || '';
         });
+        updateSampleLink();
         checkImportPreview();
     });
     const importForm = document.getElementById('tt-import-form');

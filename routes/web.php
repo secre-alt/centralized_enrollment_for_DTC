@@ -186,6 +186,7 @@ if (app()->environment('ui-testing')) {
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
     Route::post('/timetables/resources', [\App\Http\Controllers\Admin\TimetableController::class, 'resource'])->name('timetables.resources');
     Route::post('/timetables', [\App\Http\Controllers\Admin\TimetableController::class, 'store'])->name('timetables.store');
+    Route::get('/timetables/sample.csv', [\App\Http\Controllers\Admin\TimetableController::class, 'sample'])->name('timetables.sample');
     Route::get('/timetables/{draft}/csv', [\App\Http\Controllers\Admin\TimetableController::class, 'export'])->name('timetables.export');
     Route::put('/timetables/{draft}', [\App\Http\Controllers\Admin\TimetableController::class, 'update'])->name('timetables.update');
     Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
@@ -343,6 +344,8 @@ if (app()->environment('ui-testing')) {
 
     Route::middleware('role:student|alumni')->group(function () {
     Route::get('/appointments/create', [StudentAppointmentController::class, 'create'])->name('appointments.create');
+    Route::get('/advising', [StudentAppointmentController::class, 'advising'])->name('advising.index');
+    Route::post('/advising', [StudentAppointmentController::class, 'bookAdvising'])->middleware('appointment.lifecycle:advising.booked')->name('advising.store');
     Route::post('/appointments', [StudentAppointmentController::class, 'store'])->middleware('document.submission')->name('appointments.store');
     Route::get('/appointments', [StudentAppointmentController::class, 'index'])->name('appointments.index');
     Route::post('/appointments/{appointment}/cancel', [StudentAppointmentController::class, 'cancel'])->middleware('appointment.lifecycle:appointment.cancelled')->name('appointments.cancel');

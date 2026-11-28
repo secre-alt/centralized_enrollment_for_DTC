@@ -153,9 +153,14 @@ body.dtc-dark .public-nav-links a {
   color: var(--dtc-text-secondary);
 }
 
+html.dtc-dark .public-nav-links a,
+body.dtc-dark .public-nav-links a { color: #cbd5e1; }
+
+html.dtc-dark .public-nav-links a:hover,
+html.dtc-dark .public-nav-links a.active,
 body.dtc-dark .public-nav-links a:hover,
 body.dtc-dark .public-nav-links a.active {
-  color: var(--dtc-blue);
+  color: #93c5fd;
 }
 
 /* Active navigation */

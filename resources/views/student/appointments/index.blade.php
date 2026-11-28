@@ -6,6 +6,7 @@
 @section('content_header')
     <x-dtc.page-header title="My appointments" subtitle="View your scheduled visits and past appointments.">
         <x-slot name="actions">
+        <a href="{{ route('portal.advising.index') }}" class="dtc-btn dtc-btn-primary">Enrollment advising</a>
         <a href="{{ route('portal.claiming-appointments.index') }}" class="dtc-btn dtc-btn-secondary">Claiming history</a>
         <a href="{{ route('portal.documents.index') }}" class="dtc-btn dtc-btn-secondary">Document requests</a>
         </x-slot>

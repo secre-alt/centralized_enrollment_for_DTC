@@ -140,6 +140,7 @@ class ViewServiceProvider extends ServiceProvider
                         ['text' => 'My Requests', 'url' => route('portal.documents.index'), 'icon' => 'list', 'active' => ['portal/documents']],
                     ]],
                     ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
+                    ['text' => 'Enrollment advising', 'url' => route('portal.advising.index'), 'icon' => 'calendar-plus', 'active' => ['portal/advising']],
                     ['text' => 'Certificate of Registration', 'url' => route('portal.cor.show'), 'icon' => 'file-badge'],
                     ['header' => 'SYSTEM'],
                     $notifItem,
@@ -173,6 +174,7 @@ class ViewServiceProvider extends ServiceProvider
                     ]],
                     ['text' => 'Payment History', 'url' => route('portal.transactions.index'), 'icon' => 'receipt', 'active' => ['regex:#^portal/transactions(?:/|$)#']],
                     ['text' => 'Appointments', 'url' => route('portal.appointments.index'), 'icon' => 'calendar', 'active' => ['regex:#^portal/appointments(?:/|$)#']],
+                    ['text' => 'Enrollment advising', 'url' => route('portal.advising.index'), 'icon' => 'calendar-plus', 'active' => ['portal/advising']],
                     ['header' => 'SYSTEM'],
                     $notifItem,
                 ];

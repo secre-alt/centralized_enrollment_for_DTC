@@ -169,6 +169,7 @@ class PortalPaymentController extends Controller
     public function appointment(Request $request, Appointment $appointment)
     {
         abort_unless($appointment->user_id === $request->user()->id, 403);
+        abort_if($appointment->visit_type === 'advising', 422, 'Advising appointments do not require payment.');
         if ($appointment->visit_type === 'claiming') {
             return redirect()->route('portal.claiming-appointments.index');
         }

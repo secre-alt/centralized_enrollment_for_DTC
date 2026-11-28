@@ -1,23 +1,25 @@
-# UI/UX remediation plan
+# UI/UX remediation record
 
-## Current status
+## Completed public-page changes
 
-No product UI remediation has been performed. The six-page public baseline now has 60 viewport/theme renders and 60 axe scans; axe found a critical unnamed wizard control and serious contrast/target-size/label-name violations. Role pages, stateful flows, keyboard/manual accessibility checks, and connected CDN rendering remain untested. MySQL system-table corruption prevents creating least-privilege test credentials, so stateful testing is not safe yet.
+Changes were based on six public routes rendered at five viewport sizes and both theme preferences. No role pages, stateful workflow pages, or business logic were changed.
 
-## Blockers to resolve before implementation
+- Added accessible names to the seven application wizard step buttons (`resources/views/public/application/create.blade.php`).
+- Raised contrast for wizard hints, authentication copyright, sign-in modal footer/labels, dark theme CTA/navigation accents, and dark modal form labels (`public/css/application-wizard.css`, `public/css/auth-pages.css`, `public/css/signin-modal.css`, `public/css/dtc-theme.css`, `public/css/public-navbar.css`, `public/css/welcome.css`).
+- Enlarged carousel dots to a 24px hit area and enlarged arrow controls; corrected tablet spacing between arrows and carousel content (`public/css/welcome.css`).
+- Kept accessible names of carousel cards inclusive of visible text (`public/js/welcome-interactive.js`).
+- Expanded Playwright evidence to capture axe node targets and check data; output directory can be selected through `UI_AUDIT_EVIDENCE_DIR` (`tests/browser/ui-ux-baseline.cjs`).
 
-1. Have a DBA diagnose/recover the corrupt Aria privilege tables. `CHECK TABLE` reports `mysql.global_priv` and `mysql.db` corrupt; logs show Aria log mismatch/missing log. No repair was run. Windows denied disk-space inspection. Then create an account restricted to `dtc_ui_testing`; current ignored test environment file uses root.
-2. Provision deterministic disposable Admin, Registrar, Cashier, Student, Alumni, and Applicant fixtures in that isolated schema. No existing production records were copied or modified.
-3. `@axe-core/playwright` 4.14.1 is installed and scanned the public baseline. Rerun scans for all role pages when fixtures are safely available and add manual keyboard/focus/modal checks.
-4. Restore external asset access or mirror approved dependencies locally, then recapture font/icon-dependent pages.
-5. Capture reproducible defects with route, role, screenshot, actual/expected behavior, severity, and a test before choosing targeted fixes.
+## Browser regression result
 
-## Candidate architecture checks (not approved fixes)
+Baseline: 60/60 renders returned HTTP 200 with no horizontal overflow and correct requested theme state; axe recorded 94 instances (button-name 6, contrast 48, label-name mismatch 20, target-size 20). The first after pass recorded 4 repeated target-size records for the arrows at 768 x 1024. Raising the arrows above the transformed carousel cards resolved these. Final: 60/60 renders returned HTTP 200 with no overflow and correct theme; 60 axe scans, 0 violations. Arrow hit areas measure 48 x 48px, with z-index above transformed cards. The seven wizard control naming failures, carousel label-name findings, and all contrast findings resolved in the tested public matrix.
 
-- Compare Poppins in DTC styles with Source Sans Pro enabled by AdminLTE; standardize only if browser evidence confirms unintended divergence and the change can be scoped safely.
-- Check actual Lucide and Font Awesome usage before removing either icon source.
-- Measure duplicate page CSS and token adoption before consolidating styles.
+Baseline and intermediate screenshots remain in `docs/ui-ux-evidence/baseline/` and `docs/ui-ux-evidence/after-final/`; the latest full matrix is `docs/ui-ux-evidence/final/`. Each set contains 60 PNGs and a `results.json`; the latest total retained evidence is 180 screenshots across baseline, intermediate, and final sets. External resources were denied in both runs (300 blocked requests each), affecting exact fonts/icons/framework rendering.
 
-## Regression gate after remediation
+## Remaining blockers and regression scope
 
-Run the same browser matrix and compare screenshots; run axe; verify each affected state and role; run the full PHPUnit suite against `dtc_testing` sequentially; preserve business logic and authorization. Record actual counts and all unresolved findings. No product-code remediation or regression gate has run as part of this audit.
+- Manual keyboard/focus and assistive technology checks remain outstanding. External assets were blocked in the test environment. The previously requested server cleanup remains unverified because PID executable/command-line inspection was denied.
+- MariaDB Aria privilege metadata is corrupt. The UI test environment uses unrestricted root despite a separate test schema. Therefore no test accounts or fixtures were created and no state-changing browser actions were run.
+- Admin, Registrar, Cashier, Student, Alumni, and authenticated Applicant routes/states remain untested. PHPUnit was not run because no backend code changed and the test database safety prerequisite could not be established.
+- Browser keyboard/focus/manual assistive technology checks, validation/error/success/rejection/disabled/confirmation states, full visual comparison, and authenticated role coverage remain outstanding.
+- Final scope remains the six unauthenticated pages; no system-wide release certification is implied.

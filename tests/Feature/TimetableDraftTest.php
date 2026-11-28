@@ -170,6 +170,24 @@ class TimetableDraftTest extends TestCase
         $this->get($response->headers->get('Location'))->assertOk()->assertSee('Test instructor')->assertSee('1T');
     }
 
+    public function test_sample_csv_export_uses_current_program_year_curriculum(): void
+    {
+        $program = Program::factory()->create();
+        $subjects = collect([1, 2])->map(fn () => CourseSubject::factory()->create([
+            'program_id' => $program->id, 'year_level' => 2, 'semester' => 1,
+        ]));
+        CourseSubject::factory()->create(['program_id' => $program->id, 'year_level' => 2, 'semester' => 2]);
+
+        $csv = $this->get(route('admin.timetables.sample', ['program_id' => $program->id, 'year_level' => 2]))
+            ->assertOk()->assertDownload('timetable-sample.csv')->streamedContent();
+        $rows = array_map('str_getcsv', explode("\n", trim($csv)));
+
+        $this->assertSame(['subject_id', 'instructor_id', 'room_id', 'pattern', 'minutes', 'facility', 'start', 'end'], $rows[0]);
+        $this->assertSame($subjects->pluck('id')->map(fn ($id) => (string) $id)->all(), array_column(array_slice($rows, 1), 0));
+        $this->assertSame(8, count($rows[1]));
+        $this->assertSame(array_fill(0, 7, ''), array_slice($rows[1], 1));
+    }
+
     public function test_csv_import_flags_unknown_resource_names_instead_of_guessing(): void
     {
         [$room] = $this->resources();

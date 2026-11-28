@@ -173,7 +173,7 @@ class AppointmentController extends Controller
             ->where('status', 'pending')
             ->where('payment_method', 'gcash')
             ->where('is_document_bundle', false)
-            ->whereHas('appointment', fn ($query) => $query->where('status', '!=', 'cancelled'))
+            ->whereHas('appointment', fn ($query) => $query->where('status', '!=', 'cancelled')->where('visit_type', '!=', 'advising'))
             ->latest()
             ->get();
 
@@ -196,6 +196,18 @@ class AppointmentController extends Controller
             $locked = Appointment::whereKey($appointment->id)->lockForUpdate()->firstOrFail();
 
             abort_if($locked->visit_type === 'claiming', 422, 'Claiming confirmation is not available through the legacy submission workflow.');
+
+            if ($locked->visit_type === 'advising') {
+                $slot = AppointmentSlot::whereKey($locked->appointment_slot_id)->firstOrFail();
+                $active = $slot->appointments()->whereIn('status', ['pending', 'confirmed'])->count();
+                if ($locked->status !== 'pending' || $active > $slot->max_bookings || $slot->date < today()->toDateString()
+                    || ($slot->date === today()->toDateString() && $slot->start_time <= now()->format('H:i:s'))
+                    || ($slot->status ?? 'open') !== 'open' || app(AppointmentScheduleService::class)->isClosed($slot->date, $slot->start_time, $slot->end_time)) {
+                    return 'slot_unavailable';
+                }
+                $locked->update(['status' => 'confirmed']);
+                return 'confirmed';
+            }
 
             if ((int) $locked->appointment_slot_id !== (int) $slot->id) {
                 return 'slot_unavailable';
@@ -281,7 +293,7 @@ class AppointmentController extends Controller
             return 'confirmed';
         }, ['appointment_id' => $appointment->id]);
 
-        if (request()->attributes->get('lifecycle_replayed')) return redirect()->route('registrar.documents.index')->with('success', 'Appointment confirmed.');
+        if (request()->attributes->get('lifecycle_replayed')) return redirect()->route('registrar.appointments.index')->with('success', 'Appointment confirmed.');
 
         if ($result !== 'confirmed') {
             $message = [
@@ -294,6 +306,14 @@ class AppointmentController extends Controller
         }
 
         $appointment->refresh()->load(['slot', 'user']);
+        if ($appointment->visit_type === 'advising') {
+            $date = \Carbon\Carbon::parse($appointment->slot->date)->format('M d, Y');
+            $time = \Carbon\Carbon::parse($appointment->slot->start_time)->format('h:i A');
+            $notified = NotificationService::sendUserUpdateSafely($appointment->user, 'appointment-confirmed:'.$appointment->id,
+                'Advising appointment confirmed', 'Your advising consultation is confirmed for '.$date.' at '.$time.'. Bring any records relevant to your question; evaluations are preliminary until official documents and Registrar rules are verified.',
+                'success', route('portal.advising.index'), 'View appointment');
+            return redirect()->route('registrar.appointments.index')->with('success', 'Advising appointment confirmed.'.($notified ? ' The student was notified.' : ' Notification delivery failed.'));
+        }
         $confirmedRequests = DocumentRequest::where('appointment_id', $appointment->id)->get();
         $linkedRequest = $confirmedRequests->first();
         $documentSummary = $confirmedRequests->map(fn ($item) => $item->document_label . ' × ' . $item->copies)->implode(', ');

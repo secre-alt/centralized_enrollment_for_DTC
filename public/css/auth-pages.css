@@ -421,6 +421,8 @@ body {
     background: #111827;
     color: #94a3b8;
 }
+
+:is(html.dtc-dark body, body.dtc-dark) .auth-card-copyright { color: #cbd5e1; }
 :is(html.dtc-dark body, body.dtc-dark) .auth-field:has(.auth-input:focus) > .auth-label,
 :is(html.dtc-dark body, body.dtc-dark) .auth-field:has(.auth-input:not(:placeholder-shown)) > .auth-label,
 :is(html.dtc-dark body, body.dtc-dark) .auth-field:has(.auth-input:-webkit-autofill) > .auth-label,

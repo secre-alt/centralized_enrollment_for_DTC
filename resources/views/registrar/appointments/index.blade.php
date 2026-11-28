@@ -77,7 +77,7 @@
                 <thead>
                     <tr>
                         <th>Student</th>
-                        <th>Document</th>
+                        <th>Document / service</th>
                         <th>Date</th>
                         <th>Reference No.</th>
                         <th>Submitted</th>
@@ -272,7 +272,10 @@
                                 </div>
                             </div>
                         </td>
-                        <td data-reg-label="Document">
+                        <td data-reg-label="Document / service">
+                            @if ($appointment->visit_type === 'advising')
+                                <span class="dtc-status-badge is-info rg-document-name">Enrollment advising</span>
+                            @else
                             @if ($appointment->documentRequests->isNotEmpty())
                                 @foreach ($appointment->documentRequests as $documentRequest)
                                     <div class="rg-document-entry">
@@ -282,6 +285,7 @@
                                 @endforeach
                             @else
                                 <span class="dtc-status-badge is-info rg-document-name">{{ ucfirst($appointment->document_type) }}</span>
+                            @endif
                             @endif
                         </td>
                         <td data-reg-label="Date &amp; Time">
@@ -296,6 +300,9 @@
                             {{ $appointment->purpose ?? '—' }}
                         </td>
                         <td data-reg-label="Payment">
+                            @if ($appointment->visit_type === 'advising')
+                                <span class="dtc-status-badge is-info rg-payment-status">No fee</span>
+                            @else
                             @if($appointment->paymentNotRequired())
                                 <span class="dtc-status-badge is-info rg-payment-status">No Payment Required</span>
                             @elseif(!$pay)
@@ -323,6 +330,7 @@
                             @endif
                             @if($pay && $pay->is_document_bundle)
                                 <div class="rg-payment-total"><span>Total due</span><strong>₱{{ number_format($pay->amount, 2) }}</strong></div>
+                            @endif
                             @endif
                         </td>
                         <td data-reg-label="Status">

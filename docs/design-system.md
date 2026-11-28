@@ -1,6 +1,6 @@
 # DTC EMS design system inventory
 
-This is a source inventory, not a declaration that every screen follows the system. It was prepared during a partial baseline on 2026-11-28.
+This inventory describes the current source architecture and the measured public-page results. It does not certify all portal roles.
 
 ## Foundations found
 
@@ -13,25 +13,29 @@ This is a source inventory, not a declaration that every screen follows the syst
 | Text and borders | `--dtc-text: #1E293B`, secondary `#526174`, muted `#66758A`, border `#E2E8F0` |
 | Semantic colors | success `#16A34A`, warning `#D97706`, danger `#DC2626` |
 | Shape and effects | 8/10/12/16px radius tokens, two shadows, 160ms transition token |
-| Typography | Poppins in DTC stylesheet/public layout; AdminLTE config also permits Source Sans Pro |
+| Typography | Poppins in public DTC UI; AdminLTE configuration also permits Source Sans Pro |
 | Icons | Lucide `data-lucide`; Font Awesome assets remain installed with AdminLTE |
 | Authenticated shell | `resources/views/vendor/adminlte/master.blade.php`, `adminlte::page` |
-| Public shell | `resources/views/layouts/public.blade.php` |
-| Theme state | `public/js/auth-theme.js`, `dtc-ems-theme` local storage key, `dtc-dark` class |
+| Public shell | `resources/views/layouts/public.blade.php` and `resources/views/auth/welcome.blade.php` |
+| Theme state | `public/js/auth-theme.js`, `dtc-ems-theme` storage key, `dtc-dark` class |
 | Shared components | `resources/views/components/dtc/` (page header, stat card, status badge, empty state, toast, confirm modal, student welcome, avatar, password guidance) |
 
-## Dark theme
+## Theme and rendered evidence
 
-Dark overrides are defined in `public/css/dtc-theme.css` under `body.dtc-dark`; `public/js/auth-theme.js` reads the saved preference or system color scheme. Public layout also preloads the dark class to reduce first-paint flashing. Browser verification was incomplete, so page-by-page token parity and contrast remain unknown.
+The dark theme is primarily implemented in `public/css/dtc-theme.css`, with public-specific selectors in `welcome.css`, `public-navbar.css`, and `signin-modal.css`. The 60-render public matrix (six routes, five viewports, light/dark) verified expected theme state and zero horizontal overflow. Axe contrast findings decreased from 48 repeated instances at baseline to zero after targeted changes in the sampled public matrix. This does not measure role layouts.
 
-## Architecture limits
+Poppins and Lucide load remotely in the public shell; Bootstrap CSS also loads from jsDelivr. The browser environment denied those requests, so screenshots use font fallback and may lack icons/framework styles. AdminLTE Source Sans Pro and Font Awesome appearance were not browser verified.
 
-The audit found multiple page-specific CSS files and direct style declarations in Blade. The source also loads typography and icon assets from external CDNs. This is inventory only: do not consolidate selectors or declare duplication harmful without a completed rendered audit and ownership review. Token usage across every role has not been measured.
+## Adoption status and architecture limits
 
-## Adoption status
+Tokens/components exist, but source presence does not establish consistent use. Authenticated screens and role-specific theme overrides were not rendered, so cross-role token adoption and component consistency remain unmeasured. Page-specific styles remain in place; no broad consolidation was attempted without role coverage and ownership evidence.
 
-Unknown. A source token or reusable component being present does not establish that screens use it consistently. Review pages in the final audit and add examples and measured contrast values only after browser evidence is captured.
+## Evidence files
 
-## Browser baseline
+- Baseline: `docs/ui-ux-evidence/baseline/` (60 PNG screenshots and axe-enabled `results.json`).
+- After targeted public fixes: `docs/ui-ux-evidence/after-final/` (60 PNG screenshots and axe node-level evidence).
+- The carousel arrow stacking issue found at 768�1024 was corrected and the full matrix reports zero axe violations.
 
-Six unauthenticated pages were rendered in Chromium across five viewport sizes and two theme preferences. All returned HTTP 200 with no document-level horizontal overflow. Remote fonts/icons/framework resources were blocked by the environment, and no authenticated portal pages were checked. These observations do not certify design-system adoption or accessibility.
+## Latest evidence
+
+The 60 screenshots in docs/ui-ux-evidence/final/ reflect the corrected carousel stacking order. The 120 screenshots in baseline and intermediate evidence were retained.
