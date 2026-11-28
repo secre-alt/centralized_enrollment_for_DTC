@@ -20,38 +20,38 @@
 
     {{-- â”€â”€ Step Tracker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
     <nav class="app-wizard-tracker" id="wizardTracker" aria-label="Application steps">
-        <button type="button" class="wiz-step active" data-step="1" aria-controls="step-1" aria-current="step">
+        <button type="button" class="wiz-step active" data-step="1" aria-label="Admission" aria-controls="step-1" aria-current="step">
             <span class="wiz-step-dot"><i data-lucide="graduation-cap" aria-hidden="true"></i></span>
             <span class="wiz-step-label">Admission</span>
         </button>
         <div class="wiz-connector"></div>
-        <button type="button" class="wiz-step" data-step="2" aria-controls="step-2">
+        <button type="button" class="wiz-step" data-step="2" aria-label="Personal" aria-controls="step-2">
             <span class="wiz-step-dot"><i data-lucide="user" aria-hidden="true"></i></span>
             <span class="wiz-step-label">Personal</span>
         </button>
         <div class="wiz-connector"></div>
-        <button type="button" class="wiz-step" data-step="3" aria-controls="step-3">
+        <button type="button" class="wiz-step" data-step="3" aria-label="Contact" aria-controls="step-3">
             <span class="wiz-step-dot"><i data-lucide="phone" aria-hidden="true"></i></span>
             <span class="wiz-step-label">Contact</span>
         </button>
         <div class="wiz-connector"></div>
 <div class="wiz-connector"></div>
-        <button type="button" class="wiz-step" data-step="4" aria-controls="step-4">
+        <button type="button" class="wiz-step" data-step="4" aria-label="Education" aria-controls="step-4">
             <span class="wiz-step-dot"><i data-lucide="school" aria-hidden="true"></i></span>
             <span class="wiz-step-label">Education</span>
         </button>
         <div class="wiz-connector"></div>
-        <button type="button" class="wiz-step" data-step="5" aria-controls="step-5">
+        <button type="button" class="wiz-step" data-step="5" aria-label="Family" aria-controls="step-5">
             <span class="wiz-step-dot"><i data-lucide="users" aria-hidden="true"></i></span>
             <span class="wiz-step-label">Family</span>
         </button>
         <div class="wiz-connector"></div>
-        <button type="button" class="wiz-step" data-step="6" aria-controls="step-6">
+        <button type="button" class="wiz-step" data-step="6" aria-label="Documents" aria-controls="step-6">
             <span class="wiz-step-dot"><i data-lucide="file-up" aria-hidden="true"></i></span>
             <span class="wiz-step-label">Documents</span>
         </button>
         <div class="wiz-connector"></div>
-        <button type="button" class="wiz-step" data-step="7" aria-controls="step-7">
+        <button type="button" class="wiz-step" data-step="7" aria-label="Review" aria-controls="step-7">
             <span class="wiz-step-dot"><i data-lucide="clipboard-check" aria-hidden="true"></i></span>
             <span class="wiz-step-label">Review</span>
         </button>

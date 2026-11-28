@@ -37,6 +37,15 @@ use App\Http\Controllers\PaymentReportController;
 use App\Http\Controllers\PortalActivationController;
 use App\Http\Controllers\Registrar\PortalAccountProvisioningController;
 
+if (app()->environment('ui-testing')) {
+    Route::get('/__ui-test/database', function () {
+        return response()->json([
+            'environment' => app()->environment(),
+            'database' => DB::connection()->getDatabaseName(),
+        ]);
+    });
+}
+
     // ── AUTH ──────────────────────────────────────────────────────────────────────
     Route::get('/', [AuthController::class, 'showLanding'])->name('landing');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');

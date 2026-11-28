@@ -46,7 +46,7 @@
 
 @push('css')
 <link rel="stylesheet" href="{{ asset('css/registrar-workspace.css') }}">
-<link rel="stylesheet" href="{{ asset('css/application-review.css') }}">
+<link rel="stylesheet" href="{{ asset('css/application-review.css') }}?v={{ filemtime(public_path('css/application-review.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/physical-requirements.css') }}">
 @endpush
 @section('content')
@@ -56,22 +56,25 @@
 @if(session('error'))<div class="alert alert-warning" role="alert">{{ session('error') }}</div>@endif
 
 @if($possibleDuplicates->isNotEmpty() || $application->duplicate_review_outcome)
-    <div class="alert {{ $application->duplicate_review_outcome === 'confirmed_duplicate' ? 'alert-danger' : ($application->duplicate_review_outcome === 'not_duplicate' ? 'alert-info' : 'alert-warning') }}" role="status">
-        <h5 class="mb-2">
+    <div class="duplicate-review-panel {{ $application->duplicate_review_outcome ? 'is-reviewed' : '' }}" role="status">
+        <div class="duplicate-review-heading">
+        <h2 class="duplicate-review-title">
             @if($application->duplicate_review_outcome === 'confirmed_duplicate')
-                Staff marked this as a possible duplicate
+                Related application recorded
             @elseif($application->duplicate_review_outcome === 'not_duplicate')
                 Duplicate review completed: not a duplicate
             @else
-                Possible duplicate applications found
+                Possible duplicate match
             @endif
-        </h5>
-        <p class="mb-2">The match uses the same normalized name and birthdate plus at least one matching contact detail. This is a review aid only; applications remain separate and this flag does not affect admission decisions.</p>
+        </h2>
+        <span class="duplicate-review-state">{{ $application->duplicate_review_outcome === 'confirmed_duplicate' ? 'Related' : ($application->duplicate_review_outcome === 'not_duplicate' ? 'Not a duplicate' : 'Needs review') }}</span>
+        </div>
+        <p class="duplicate-review-description">Same normalized name and birthdate, plus at least one matching contact detail. This flag does not change admission status or combine records.</p>
         @if($application->duplicate_reviewed_at)
-            <p class="small mb-2">Reviewed by {{ $application->duplicateReviewer->name ?? 'Unavailable reviewer' }} on {{ $application->duplicate_reviewed_at->format('M d, Y h:i A') }}.</p>
+            <p class="duplicate-review-meta">Reviewed by {{ $application->duplicateReviewer->name ?? 'Unavailable reviewer' }} on {{ $application->duplicate_reviewed_at->format('M d, Y h:i A') }}.</p>
         @endif
         @if($possibleDuplicates->isNotEmpty())
-            <ul class="mb-3">
+            <ul class="duplicate-review-matches">
                 @foreach($possibleDuplicates as $possibleDuplicate)
                     <li>
                         <a href="{{ route('registrar.applications.show', $possibleDuplicate) }}">{{ $possibleDuplicate->reference_no }} — {{ $possibleDuplicate->full_name }}</a>
@@ -79,10 +82,10 @@
                     </li>
                 @endforeach
             </ul>
-            <form method="POST" action="{{ route('registrar.applications.duplicate-review', $application) }}" class="d-flex flex-wrap" style="gap:8px">
+            <form method="POST" action="{{ route('registrar.applications.duplicate-review', $application) }}" class="duplicate-review-actions">
                 @csrf
-                <button type="submit" name="outcome" value="confirmed_duplicate" class="btn btn-outline-danger">Confirm related application</button>
-                <button type="submit" name="outcome" value="not_duplicate" class="btn btn-outline-secondary">Mark not a duplicate</button>
+                <button type="submit" name="outcome" value="confirmed_duplicate" class="duplicate-review-button is-related">Mark as related</button>
+                <button type="submit" name="outcome" value="not_duplicate" class="duplicate-review-button is-not-duplicate">Mark as not a duplicate</button>
             </form>
         @endif
     </div>

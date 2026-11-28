@@ -31,3 +31,7 @@ The audit found multiple page-specific CSS files and direct style declarations i
 ## Adoption status
 
 Unknown. A source token or reusable component being present does not establish that screens use it consistently. Review pages in the final audit and add examples and measured contrast values only after browser evidence is captured.
+
+## Browser baseline
+
+Six unauthenticated pages were rendered in Chromium across five viewport sizes and two theme preferences. All returned HTTP 200 with no document-level horizontal overflow. Remote fonts/icons/framework resources were blocked by the environment, and no authenticated portal pages were checked. These observations do not certify design-system adoption or accessibility.

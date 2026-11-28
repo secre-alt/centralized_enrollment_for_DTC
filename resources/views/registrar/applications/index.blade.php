@@ -28,7 +28,7 @@
 
 {{-- Search & Filter --}}
 @php
-    $appFilterCount = collect(['type', 'program_id', 'status', 'date_from', 'date_to'])->filter(fn ($k) => filled(request($k)))->count();
+    $appFilterCount = collect(['type', 'program_id', 'status', 'duplicate_review', 'date_from', 'date_to'])->filter(fn ($k) => filled(request($k)))->count();
     $appHasFilters  = $appFilterCount > 0 || filled(request('search'));
 @endphp
 <form method="GET" action="{{ route('registrar.applications.index') }}" id="applications-filter-form" class="dtc-fl dtc-fl-expanded" data-dtc-filters aria-label="Filter applications">
@@ -91,6 +91,14 @@
                             {{ $label }}
                         </option>
                     @endforeach
+                </select>
+            </div>
+            <div class="dtc-fl-field">
+                <label for="filter-duplicate-review">Duplicate review</label>
+                <select name="duplicate_review" id="filter-duplicate-review" class="form-control" data-dtc-filter>
+                    <option value="">All review states</option>
+                    <option value="pending" {{ request('duplicate_review') === 'pending' ? 'selected' : '' }}>Needs review</option>
+                    <option value="reviewed" {{ request('duplicate_review') === 'reviewed' ? 'selected' : '' }}>Reviewed</option>
                 </select>
             </div>
 @include('partials.list-date-filters', ['datePrefix' => 'application', 'dateLabel' => 'Application submitted'])
@@ -172,7 +180,7 @@
                         @empty
                         <tr>
                             <td colspan="8" class="text-center text-muted py-4">
-                                @if(request()->anyFilled(['search','type','status','program_id']))
+                                @if(request()->anyFilled(['search','type','status','program_id','duplicate_review']))
                                     No applications match your filters.
                                 @else
                                     No applications found.
@@ -227,7 +235,7 @@
             </div>
             @empty
             <div class="text-center text-muted py-5">
-                @if(request()->anyFilled(['search','type','status','program_id']))
+                @if(request()->anyFilled(['search','type','status','program_id','duplicate_review']))
                     No applications match your filters.
                 @else
                     No applications found.
@@ -268,6 +276,7 @@
     var typeSelect   = document.querySelector('select[name="type"]');
     var statusSelect = document.querySelector('select[name="status"]');
     var programSelect = document.querySelector('select[name="program_id"]');
+    var duplicateReviewSelect = document.querySelector('select[name="duplicate_review"]');
     var wrapper      = document.getElementById('applications-table-wrapper');
     var countEl      = document.getElementById('applications-count');
     var baseUrl      = '{{ route("registrar.applications.index") }}';
@@ -315,6 +324,7 @@
         p.set('type',   typeSelect.value);
         p.set('status', statusSelect.value);
         p.set('program_id', programSelect.value);
+        p.set('duplicate_review', duplicateReviewSelect.value);
         p.set('per_page', document.querySelector('[data-table-rows-select]')?.value || new URLSearchParams(location.search).get('per_page') || '10');
         return baseUrl + '?' + p.toString();
     }
@@ -331,6 +341,7 @@
     typeSelect.addEventListener('change',   fetchResults);
     statusSelect.addEventListener('change', fetchResults);
     programSelect.addEventListener('change', fetchResults);
+    duplicateReviewSelect.addEventListener('change', fetchResults);
     document.querySelectorAll('#application-date_from, #application-date_to').forEach(function (field) { field.addEventListener('change', fetchResults); });
 
     // Form submit (Enter / Filter button)

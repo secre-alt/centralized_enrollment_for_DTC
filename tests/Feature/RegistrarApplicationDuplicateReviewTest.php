@@ -42,7 +42,16 @@ class RegistrarApplicationDuplicateReviewTest extends TestCase
         $this->actingAs($registrar)
             ->get(route('registrar.applications.index'))
             ->assertOk()
-            ->assertSee('Possible duplicate');
+            ->assertSee('Possible duplicate')
+            ->assertSee('name="duplicate_review"', false)
+            ->assertSee('Needs review');
+
+        $this->get(route('registrar.applications.index', ['duplicate_review' => 'pending']))
+            ->assertOk()
+            ->assertSee($application->reference_no)
+            ->assertSee($match->reference_no)
+            ->assertDontSee('APP-DUP-NAME-ONLY')
+            ->assertDontSee('APP-DUP-DATE-DIFF');
 
         $this->get(route('registrar.applications.show', $application))
             ->assertOk()
@@ -63,6 +72,15 @@ class RegistrarApplicationDuplicateReviewTest extends TestCase
             'duplicate_reviewed_by' => $registrar->id,
         ]);
         $this->assertNotNull($application->fresh()->duplicate_reviewed_at);
+
+        $this->get(route('registrar.applications.index', ['duplicate_review' => 'reviewed']))
+            ->assertOk()
+            ->assertSee($application->reference_no)
+            ->assertDontSee($match->reference_no);
+        $this->get(route('registrar.applications.index', ['duplicate_review' => 'pending']))
+            ->assertOk()
+            ->assertSee($match->reference_no)
+            ->assertDontSee($application->reference_no);
     }
 
     public function test_registrar_can_mark_pair_not_duplicate_and_other_roles_cannot_review_it(): void
@@ -90,6 +108,10 @@ class RegistrarApplicationDuplicateReviewTest extends TestCase
             'duplicate_reviewed_by' => $registrar->id,
         ]);
         $this->assertSame('submitted', $application->fresh()->status);
+        $this->actingAs($registrar)
+            ->get(route('registrar.applications.index', ['duplicate_review' => 'reviewed']))
+            ->assertOk()
+            ->assertSee($application->reference_no);
     }
 
     private function makeApplication(Program $program, string $reference, array $attributes = []): Application
